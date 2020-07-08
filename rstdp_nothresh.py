@@ -1,7 +1,7 @@
 import numpy as np
 from scipy import linalg
 import matplotlib.pyplot as plt
-from scipy.optimize import minimize
+from scipy.optimize import minimize, rosen
 
 
 def inp(n):
@@ -11,7 +11,10 @@ def inp(n):
 def out(n, inp):
     # return np.asarray([1. * np.sin(n * 0.08)])
     return np.asarray([.42])
-
+    # x = [np.cos(.1*n)-0.2*np.sin(n % 3), np.sin(.42*n)]
+    # x = f(rosen(x))
+    # print(x)
+    # return np.asarray([x])
 
 def f(x):
     return np.tanh(x)
@@ -33,8 +36,8 @@ def insert_2d_in_3d(M, a, val=1):
 class ESN():
     def __init__(self, N, dropout, alpha, K, L, show_plots=False):
         self.time = 0
-        self.plot_res = 20
-        self.plot_reach = 140
+        self.plot_res = 1
+        self.plot_reach = 300
         self.inp = inp
         self.out = out
         self.K = K
@@ -42,16 +45,17 @@ class ESN():
         self.L = L
 
         self.weight_scaling = alpha
-        self.noise_factor = 0.001
+        self.noise_factor = 0
         self.threshold = 0.1
         self.reset = -0.2
-        self.lr = 1
+        self.lr = .001
         self.leakage = 1
 
         self.M = []
         self.T = []
         self.D = []
         self.err = []
+        self.w1 = []
 
         max_axon_len = 12
         self.x = np.random.random(size=(N,)) * 2 - 1
@@ -116,12 +120,15 @@ class ESN():
         self.ax[2].set_title("y")
         self.ax[2].plot([t for (_, t) in self.D][-self.plot_reach:])
         self.ax[2].set_title("t")
+        self.ax[7].plot(self.w1[-self.plot_reach:])
+        self.ax[7].set_title("w1")
+        # self.ax[7].set_ylim(-1, 1)
 
         self.ax[3].imshow(squarify(self.W),
                           cmap='coolwarm',
-                          vmin=-1, vmax=1,
+                          vmin=np.min(self.W), vmax=np.max(self.W),
                           interpolation='nearest')
-        self.ax[3].set_title("W_out")
+        self.ax[3].set_title("W")
         self.ax[3].axis('tight')
 
         self.ax[4].imshow(squarify(self.firing),
@@ -143,13 +150,13 @@ class ESN():
             moving_average(a=self.err,
                            n=int(1 + self.time // 2)))
         self.ax[5].set_title("err")
-        self.ax[5].set_ylim(0, 4)
+        self.ax[5].set_ylim(0, .5)
         plt.draw()
         plt.savefig('plot.png')
         plt.pause(0.001)
 
     def proceed(self):
-
+        print("TIME ###############################################")
         # Update activations
         self.A = self.A[1:, :, :]
         self.A = np.pad(self.A, pad_width=((0, 1), (0, 0), (0, 0)))
@@ -171,26 +178,27 @@ class ESN():
                                           next_x))))
         # Find out which units fire, and insert it in back of dendrites
         x_rep = np.repeat(np.expand_dims(next_x, axis=0), next_x.size, axis=0)
-        firing_units = x_rep >= self.threshold
+        firing_units = x_rep
         self.A = insert_2d_in_3d(self.A, self.A_lens, val=firing_units)
-        next_x = np.where(next_x >= self.threshold, self.reset, next_x)
+        # next_x = np.where(next_x >= 0, self.reset, next_x)
 
         # R-STDP
         error = (self.y - self.out(self.time, self.inp(self.time))) ** 2
         self.err.append(error)
-        print("error", error)
-        almost_fire = (self.A[2, :, :] != 0)
-        just_fired = (self.A[1, :, :] != 0)
+        # almost_fire = np.zeros(shape=self.W.shape)
+        # just_fired = np.zeros(shape=self.W.shape)
+        # almost_fire[self.A[2, :, :] != 0] = 1.
+        # just_fired[self.A[1, :, :] != 0] = 1.
         rec_act = np.repeat(np.expand_dims(next_x, axis=0), self.N, axis=0).T
-        fired_factor = almost_fire + just_fired * -1
-        # print("error", error)
-        # print("fired_factor", np.min(fired_factor), np.max(fired_factor))
-        # print("rec_act", rec_act)
+        fired_factor = self.A[2, :, :] + self.A[0, :, :] * -1
+        print("A", self.A)
+        print("fired_factor", fired_factor)
+        print("error", error)
+        print("rec_act", rec_act)
         update = 1 - error * self.lr * fired_factor * np.abs(rec_act)
         print("update", update)
-        print("x", self.x)
-        print("W", self.W)
         self.update = update
+        self.w1.append(self.W[0, 1])
         # TODO: also include the absolute activation of the receiving neuron.
         # TODO: also increase the weight strength (note: ceil!)
         # * either: if the weight fired this(/previous) round and the receiver is now large absolute
@@ -200,6 +208,7 @@ class ESN():
         self.W += ((np.random.random(size=self.W.shape) * 2 - 1)
                     * self.noise_factor)
         self.W = np.clip(self.W * update, a_min=-1, a_max=1)
+        print("w", self.W)
 
         self.W[self.W > .9999] = 1
         self.W[self.W < -.9999] = -1
