@@ -158,7 +158,7 @@ class ESN():
 
         next_x = f(np.dot(self.W_in,
                           self.inp(self.time + 1))
-                   + np.dot(self.W * self.firing,
+                   + np.dot(self.firing,
                             self.x * self.leakage)
                    + np.dot(self.W_back,
                             self.out(self.time,
@@ -178,7 +178,7 @@ class ESN():
         # R-STDP
         error = (self.y - self.out(self.time, self.inp(self.time))) ** 2
         self.err.append(error)
-        print("error", error)
+        # print("error", error)
         almost_fire = (self.A[2, :, :] != 0)
         just_fired = (self.A[1, :, :] != 0)
         rec_act = np.repeat(np.expand_dims(next_x, axis=0), self.N, axis=0).T
@@ -187,9 +187,9 @@ class ESN():
         # print("fired_factor", np.min(fired_factor), np.max(fired_factor))
         # print("rec_act", rec_act)
         update = 1 - error * self.lr * fired_factor * np.abs(rec_act)
-        print("update", update)
-        print("x", self.x)
-        print("W", self.W)
+        # print("update", update)
+        # print("x", self.x)
+        # print("W", self.W)
         self.update = update
         # TODO: also include the absolute activation of the receiving neuron.
         # TODO: also increase the weight strength (note: ceil!)
@@ -223,7 +223,7 @@ class ESN():
         return f"{self.time}: {self.x}"
 
 
-esn = ESN(K=0, N=2, L=1, dropout=0, alpha=0.5, show_plots=True)
+esn = ESN(K=0, N=8, L=1, dropout=0, alpha=0.7, show_plots=True)
 esn.proceed_multiple(times=2000)
 print(esn.error())
 
