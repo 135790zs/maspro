@@ -9,11 +9,11 @@ def inp(n):
 
 
 def out(n, inp):
-    x = [np.cos(n), np.sin(n)]
-    x = f(rosen(x))
-    print(x)
-    return x
-    # return np.asarray([0.2 * np.sin(n * 0.5)])
+    # x = [np.cos(n), np.sin(n)]
+    # x = f(rosen(x))
+    # print(x)
+    # return x
+    return np.asarray([0.5 * np.sin(n * 0.08)])
     # return np.asarray([.42])
 
 
@@ -40,10 +40,10 @@ class ESN():
         self.training = True
 
         self.weight_scaling = alpha
-        self.noise_factor = 0.002
+        self.noise_factor = 0
         self.threshold = 0.1
         self.reset = -0.2
-        self.leakage = 0.998
+        self.leakage = 1
 
         self.M = []
         self.T = []
@@ -161,7 +161,7 @@ class ESN():
 
         x_rep = np.repeat(np.expand_dims(next_x, axis=0), next_x.size, axis=0)
         firing_units = x_rep >= self.threshold
-        self.A[-2, :, :] = firing_units
+        # self.A[-1, :, :] = firing_units
         self.A = insert_2d_in_3d(self.A, self.A_lens, val=firing_units)
         next_x = np.where(next_x >= self.threshold, self.reset, next_x)
 
@@ -196,10 +196,10 @@ class ESN():
         return f"{self.time}: {self.x}"
 
 
-esn = ESN(K=0, N=6, L=1, dropout=.8, alpha=0.2, show_plots=True)
-esn.proceed_multiple(times=20)
-esn.set_training(False)
+esn = ESN(K=0, N=20, L=1, dropout=.6, alpha=0.5, show_plots=False)
 esn.proceed_multiple(times=200)
+esn.set_training(False)
+esn.proceed_multiple(times=1000)
 print(esn.error())
 
 

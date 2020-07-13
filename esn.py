@@ -5,8 +5,9 @@ from scipy.optimize import minimize
 
 
 def inp(n):
+    return np.asarray([])
     if n < 100:
-        return np.asarray([.42])
+        return np.asarray([.08])
     if n < 200:
         return np.asarray([.67])
     if n < 300:
@@ -22,7 +23,7 @@ def inp(n):
 
 
 def out(n, freq):
-    return np.asarray([0.5 * np.sin(n * freq[0])])
+    return np.asarray([0.5 * np.sin(n * 0.08)])
     # return np.asarray([.42])
 
 
@@ -167,10 +168,10 @@ class ESN():
         return f"{self.time}: {self.x}"
 
 
-esn = ESN(K=1, N=200, L=1, dropout=.9, alpha=0.5, show_plots=True)
-esn.proceed_multiple(times=100)
+esn = ESN(K=0, N=20, L=1, dropout=.8, alpha=0.5, show_plots=False)
+esn.proceed_multiple(times=200)
 esn.set_training(False)
-esn.proceed_multiple(times=100)
+esn.proceed_multiple(times=1000)
 print(esn.error())
 
 
