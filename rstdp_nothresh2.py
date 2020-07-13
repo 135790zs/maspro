@@ -49,6 +49,7 @@ class ESN():
 
         self.M = []
         self.D = []
+        self.P = 0
         self.err = []
 
         max_axon_len = 12
@@ -150,7 +151,7 @@ class ESN():
         plt.pause(0.001)
 
     def proceed(self):
-        print(f"t={self.time}")
+        # print(f"t={self.time}")
         # Update activations
         # print(self.W)
         self.A = self.A[1:, :, :]
@@ -204,13 +205,15 @@ class ESN():
 
         update = Mdouter(self.F, self.Fnext)
 
+        self.P = ((1 - np.mean(np.abs(update))) + 9*self.P) / 10
+        print(self.P)
         logs = np.expand_dims(1 / (1 + np.arange(update.shape[0])), axis=0)
         update = (update.T * logs).T
-        update = np.sum(update, axis=0) * error * self.lr
+        update = np.sum(update, axis=0) * (4-error) * self.lr * self.P
 
         # print(update)
 
-        print(update)
+        # print(update)
         self.W += ((np.random.random(size=self.W.shape) * 2 - 1)
                     * self.noise_factor)
         self.W = np.clip(f(self.W + update), a_min=-1, a_max=1)
@@ -222,7 +225,7 @@ class ESN():
 
         self.time += 1
         self.x = next_x
-        print(self.x)
+        # print(self.x)
         self.F = self.Fnext
         self.update = update
         if self.show_plots:
