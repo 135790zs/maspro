@@ -1,11 +1,10 @@
 import numpy as np
-from scipy import linalg
 import matplotlib.pyplot as plt
 from scipy.optimize import minimize
 
 
 def inp(n):
-    val = .2 if n % 10 <= 3 else 0
+    val = 1 if n % 10 == 3 else 0
     return np.asarray([val])
     # return np.asarray([.2 + .2 * np.sin(n * 0.3)])
     # return np.asarray([])
@@ -32,6 +31,7 @@ def insert_2d_in_3d(M, a, val=1):
     M[a, R.T, R] = val
     return M
 
+
 class ESN():
     def __init__(self, inp, size, out, topo, dropout, weight_scaling, show_plots=False):
         np.random.seed()
@@ -44,20 +44,20 @@ class ESN():
         self.out_size = out(0).size
         self.size = size
 
-        self.threshold = 0.2
-        self.reset = -0.1
+        self.threshold = 0.3
+        self.reset = -.2
 
-        self.noise_factor_w = 0.
+        self.noise_factor_w = 0.001
         self.noise_factor_a = 0.
-        self.lr = 10
-        self.leakage_down = 1
+        self.lr = 2
+        self.leakage_down = .99
         self.leakage_up = 0.7
         self.P = 1
         self.P_current_weight = 1
 
         self.L = np.zeros(shape=(size, size))  # TODO: May be removed possibly
-        self.L_current_weight = 1
-        
+        self.L_current_weight = 10
+
         self.error = []
 
         # Initialize axons
@@ -168,7 +168,7 @@ class ESN():
 
         self.ax[8].plot(
             np.abs(self.x[-self.plot_reach:, -self.out_size:]
-                   - [self.out(n) for n in 
+                   - [self.out(n) for n in
                       range(self.time+2)][-self.plot_reach:]))
         self.ax[8].set_title("Error")
         if self.inp(0):
@@ -203,11 +203,20 @@ class ESN():
 
         # Reset firing units except input and output
         self.x[-1, self.inp_size:-self.out_size] = np.where(
-            firing_units[self.inp_size:-self.out_size], 
-            self.reset, 
+            firing_units[self.inp_size:-self.out_size],
+            self.reset,
             self.x[-1][self.inp_size:-self.out_size])
 
         self.R = np.where(firing_units, 1, self.R / np.e)
+        self.R[self.R < 1e-3] = 0
+
+        # TODO: Update recency from 2d to 3d array (through time).
+        """
+        When a neuron fires, use the axon length to find out when its
+        postsynaptic neurons are reached. Compute the STDP *now*, and delay
+        it in a delay update 3d matrix.
+
+        """
 
         # Update activations
         self.receiving = self.A[0, :, :] * self.W
@@ -223,43 +232,49 @@ class ESN():
         # R-STDP
         error = np.abs(self.x[-1, -self.out_size:] - self.out(self.time)) ** 2
 
-        r_rep = np.repeat(np.expand_dims(self.R, axis=0), 
+        r_rep = np.repeat(np.expand_dims(self.R, axis=0),
                           self.R.size, axis=0)
-        Z = r_rep.T - r_rep
-        # Z[Z == 0] = np.inf
-        # Z = 1 / Z
-        update = 1 - Z * self.lr * error
-        print(update)
+        Z = r_rep.T - (r_rep / np.e ** self.A_lens)  # PostR - preR [-1, 1]
+
+        update = 1 - Z * self.lr * error  # []
+
+        update[update < 1] = update[update < 1] / 2 + 0.5
+        print(self.W)
+        if np.max(Z) > 1 or np.min(Z) < -1:
+            exit()
+        # print("u", update)
+        # print("w", self.W)
 
         # Metaplasticity
-        self.P = ((self.P_current_weight * (1 - np.mean(update ** 2)) + self.P) 
+        self.P = ((self.P_current_weight * (1 - np.mean(update ** 2)) + self.P)
                   / (self.P_current_weight + 1))
 
         # Local plasticity
-        self.L = 1 - ((self.L_current_weight * (1 - np.abs(update)) + self.L) 
+        self.L = 1 - ((self.L_current_weight * (1 - np.abs(update)) + self.L)
                       / (self.L_current_weight + 1))
 
         update *= self.L
 
         W_zeros = np.where(self.W == 0)
-        self.W = self.W * update
-        self.W += ((np.random.random(size=self.W.shape) * 2 - 1) 
-                   * self.noise_factor_w)
+        self.W = (self.W
+                  * update
+                  + (np.random.random(size=self.W.shape) * 2 - 1)
+                  * self.noise_factor_w)
+        # self.W = np.clip(self.W, a_min=-1, a_max=1)
 
         # Synaptic scaling
-        m = np.sum(self.W) / np.asarray(np.nonzero(self.W)).size
-        self.W = (self.W - m) * .99
+        # m = np.sum(self.W) / np.asarray(np.nonzero(self.W)).size
+        # self.W = (self.W - m)
         self.W[W_zeros] = 0
         self.receiving[W_zeros] = 0
         self.L[W_zeros] = 0
         self.update = update
         self.update[W_zeros] = 0
 
-
         self.x = np.append(self.x, np.expand_dims(self.x[-1], axis=0), axis=0)
         if self.show_plots:
             self.plot()
-        
+
         self.time += 1
 
     def proceed_multiple(self, times):
@@ -272,11 +287,11 @@ class ESN():
         return sum(errs) / len(errs)
 
 
-esn = ESN(inp=inp, 
-          size=12, 
+esn = ESN(inp=inp,
+          size=12,
           out=out,
           topo='full',
-          dropout=0.4, 
+          dropout=0,
           weight_scaling=1,
           show_plots=True)
 esn.proceed_multiple(times=-1)
