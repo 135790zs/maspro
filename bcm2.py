@@ -11,8 +11,8 @@ def inp(n):
 
 
 def out(n):
-    # return np.asarray([.1 + .1 * np.sin(n * 0.3)])
-    return np.asarray([.6])
+    return np.asarray([.1 + .1 * np.sin(n * np.pi *0.1)])
+    # return np.asarray([.6])
 
 
 def f(x):
@@ -32,13 +32,19 @@ def insert_2d_in_3d(M, a, val=1):
     return M
 
 
+def get_2d_from_3d(M, a):
+    N = M.shape[-1]
+    R = np.repeat(np.expand_dims(np.arange(N), axis=0), N, axis=0)
+    return M[a, R.T, R]
+
+
 class ESN():
     def __init__(self, inp, size, out, topo, dropout, weight_scaling, show_plots=False):
         np.random.seed()
         self.time = 0
-        self.plot_res = 1
+        self.plot_res = 50
         self.spiking = False
-        self.plot_reach = int(1e3)
+        self.plot_reach = int(50)
         self.inp = inp
         self.inp_size = inp(0).size
         self.out = out
@@ -49,10 +55,10 @@ class ESN():
         self.reset = -.2
 
         self.noise_factor_w = 0.001
-        self.noise_factor_a = 0.
-        self.lr = 2
-        self.leakage_down = .99
-        self.leakage_up = 0.7
+        self.noise_factor_a = 0.001
+        self.lr = 0.5
+        self.leakage_down = .98
+        self.leakage_up = 0.5
         self.P = 1
         self.P_current_weight = 1
 
@@ -155,7 +161,7 @@ class ESN():
 
         self.ax[5].imshow(squarify(self.update),
                           cmap='coolwarm',
-                          vmin=-1, vmax=1,
+                          vmin=np.min(self.update[self.update > 0]), vmax=np.max(self.update),
                           interpolation='nearest')
         self.ax[5].set_title("Update")
         self.ax[5].axis('tight')
@@ -189,7 +195,7 @@ class ESN():
         plt.pause(0.001)
 
     def proceed(self):
-
+        print(self.time)
         # Force input
         self.x[-1][self.x[-1] < 0] *= self.leakage_up
         self.x[-1][self.x[-1] > 0] *= self.leakage_down
@@ -245,23 +251,19 @@ class ESN():
                 update N by G*N*P[-L] if T >(=) L
 
             """
-        presyns = self.x[-np.where(self.A_lens <= self.time, self.A_lens, 0)]
+        capped_lens = np.where(self.A_lens <= self.time, self.A_lens, 0)
 
-        presyns = np.repeat(
-            np.expand_dims(presyns, axis=0), presyns.size, axis=0)
+        xs = np.repeat(np.expand_dims(self.x, axis=1), self.x.shape[-1], axis=1)
+        presyns = get_2d_from_3d(M=xs, a=capped_lens)
+
         postsyns = np.repeat(
             np.expand_dims(self.x[-1], axis=0), self.x[-1].size, axis=0).T
-        print(postsyns * presyns)
-        exit()
 
-        update = 1 - Z * self.lr * error  # []
+        Z = postsyns * presyns
+        update = 1 - Z * self.lr * error
 
         # Scale sub-1 to [.5, 1)
         update[update < 1] = update[update < 1] / 2 + 0.5
-
-
-        if np.max(Z) > 1 or np.min(Z) < -1:
-            exit()
 
         # Metaplasticity
         self.P = ((self.P_current_weight * (1 - np.mean(update ** 2)) + self.P)
@@ -281,8 +283,8 @@ class ESN():
         # self.W = np.clip(self.W, a_min=-1, a_max=1)
 
         # Synaptic scaling
-        # m = np.sum(self.W) / np.asarray(np.nonzero(self.W)).size
-        # self.W = (self.W - m)
+        m = np.sum(self.W) / np.asarray(np.nonzero(self.W)).size
+        self.W = (self.W - m)
         self.W[W_zeros] = 0
         self.receiving[W_zeros] = 0
         self.L[W_zeros] = 0
@@ -306,7 +308,7 @@ class ESN():
 
 
 esn = ESN(inp=inp,
-          size=12,
+          size=16,
           out=out,
           topo='full',
           dropout=0,
