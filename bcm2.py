@@ -4,15 +4,15 @@ from scipy.optimize import minimize
 
 
 def inp(n):
-    val = 1 if n % 10 == 3 else 0
-    return np.asarray([val])
-    # return np.asarray([.2 + .2 * np.sin(n * 0.3)])
+    # val = 1 if n % 10 == 3 else 0
+    # return np.asarray([val])
+    return np.asarray([.4 + .2 * np.sin(n * 0.3)])
     # return np.asarray([])
 
 
 def out(n):
-    return np.asarray([.1 + .1 * np.sin(n * np.pi *0.1)])
-    # return np.asarray([.6])
+    # return np.asarray([.3 + .1 * np.sin(n * np.pi *0.1)])
+    return np.asarray([.6])
 
 
 def f(x):
@@ -40,7 +40,7 @@ def get_2d_from_3d(M, a):
 
 class ESN():
     def __init__(self, inp, size, out, topo, dropout, weight_scaling, show_plots=False):
-        np.random.seed()
+        np.random.seed(0)
         self.time = 0
         self.plot_res = 50
         self.spiking = False
@@ -56,16 +56,18 @@ class ESN():
 
         self.noise_factor_w = 0.001
         self.noise_factor_a = 0.001
-        self.lr = 0.5
-        self.leakage_down = .98
-        self.leakage_up = 0.5
+        self.lr = 0.1
+        self.leakage_down = 1
+        self.leakage_up = 1
         self.P = 1
         self.P_current_weight = 1
 
         self.L = np.zeros(shape=(size, size))  # TODO: May be removed possibly
-        self.L_current_weight = 10
+        self.L_current_weight = 1
 
         self.error = []
+        self.dopa = 0
+        self.dopa_current_weight = 1
 
         # Initialize axons
         max_axon_len = 8
@@ -220,14 +222,6 @@ class ESN():
         self.R = np.where(firing_units, 1, self.R / np.e)
         self.R[self.R < 1e-3] = 0
 
-        # TODO: Update recency from 2d to 3d array (through time).
-        """
-        When a neuron fires, use the axon length to find out when its
-        postsynaptic neurons are reached. Compute the STDP *now*, and delay
-        it in a delay update 3d matrix.
-
-        """
-
         # Update activations
         self.receiving = self.A[0, :, :] * self.W
         self.x[-1] = f(self.x[-1]
@@ -246,21 +240,20 @@ class ESN():
                               self.R.size, axis=0)
             Z = r_rep.T - (r_rep / np.e ** self.A_lens)  # PostR - preR [-1, 1]
         else:
-            """
-            for all presynaptics P:
-                update N by G*N*P[-L] if T >(=) L
+            capped_lens = np.where(self.A_lens <= self.time, self.A_lens, 0)
 
-            """
-        capped_lens = np.where(self.A_lens <= self.time, self.A_lens, 0)
+            xs = np.repeat(np.expand_dims(self.x, axis=1), self.x.shape[-1], axis=1)
+            presyns = get_2d_from_3d(M=xs, a=capped_lens)
 
-        xs = np.repeat(np.expand_dims(self.x, axis=1), self.x.shape[-1], axis=1)
-        presyns = get_2d_from_3d(M=xs, a=capped_lens)
+            postsyns = np.repeat(
+                np.expand_dims(self.x[-1], axis=0), self.x[-1].size, axis=0).T
 
-        postsyns = np.repeat(
-            np.expand_dims(self.x[-1], axis=0), self.x[-1].size, axis=0).T
+            Z = postsyns * presyns
+            # print(Z)
 
-        Z = postsyns * presyns
-        update = 1 - Z * self.lr * error
+        self.dopa = ((self.dopa_current_weight * (4 - error) + self.dopa)
+                     / (self.dopa_current_weight + 1))
+        update = 1 - Z * self.lr * (4-self.dopa)
 
         # Scale sub-1 to [.5, 1)
         update[update < 1] = update[update < 1] / 2 + 0.5
@@ -270,10 +263,11 @@ class ESN():
                   / (self.P_current_weight + 1))
 
         # Local plasticity
-        self.L = 1 - ((self.L_current_weight * (1 - np.abs(update)) + self.L)
-                      / (self.L_current_weight + 1))
+        # self.L = 1 - ((self.L_current_weight * (1 - np.abs(update)) + self.L)
+        #               / (self.L_current_weight + 1))
 
-        update *= self.L
+        # update *= self.L
+        # print(self.L)
 
         W_zeros = np.where(self.W == 0)
         self.W = (self.W
@@ -319,11 +313,7 @@ print(esn.mean_error())
 
 
 """
-Last note:
-apparently weakening the weights doesn't mean decreasing them;
-it means multiplying them by a sub-one number.
-This was the reason the weights from the input were all negative:
-because I subtracted the update, rather than factored it.
-Now I'm working on rewriting the update step.
+Get N-MNIST or something as input
+Proper tau-timing
 
 """

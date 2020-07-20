@@ -1,0 +1,56 @@
+Idea: Try using spike rates to approximate STDP (Sboev20)
+
+=====================
+
+Idea:
+* Implement Hao19 (scaling & DA-STDP) in a dynamic reservoir, and evaluate with temporal dataset.
+* Formalize dynamics (with help of Legenstein20)
+* Test/compare variety of plasticity rules.
+* Test/compare robustness of various neuron models (LIF, HH, etc).
+* Test bio-plausible ranges, but also attempt to abstract away without losing accuracy.
+* Try spike rates instead of spike time. Will require adaptation of STDP.
+* Convert temporal data to Poisson-distributed spikes (why?), then feed to reservoir of excitatory and inhibitory neurons. Output is converted back.
+* Examine role of visual attention. Makes it truly dynamical. Output for selecting input frame, 2/4 extra outputs but much fewer inputs.
+* Try max/avgpooling the input.
+
+* Think of methods to prune or expand the network by pruning unused connections/units, inserting units near strong connections, etc. (Elbez20)
+* Think of ways to visualize a reservoir clustering. Some way to process the topology to give insight in dynamics w.r.t. input-output pairs.
+* More on the side: research in what type of neuromorphic chip this can be implemented.
+* Examine initial weights (Kim20) or topologies (Iranmehr19, Roy16a).
+
+--------------------------------------
+
+* Implement Hao2019 in a dynamic reservoir, and evaluate multiple temporal datasets (visual, 1D, problem solving, etc).
+* Test metaplasticity in addition to, or instead of, dynamic thresholding.
+* Formalize the dynamics.
+* Test variety of plasticity rules.
+* Test variety of neuron models.
+* Test initial weights & topology
+* Try SRDP.
+* Try reducing input size through pooling or visual attention.
+* Examine pruning.
+* Examine full network binarization.
+* Examine ways to gather insight into internal clustering.
+* Research neuromorphology options w.r.t. this system.
+* Reformalize the dynamics based on what (combinations of) improvements work.
+* Research biological plausibility for discussion, analysis for future research.
+
+-------------------------------------
+
+Hao et al. proposed a feedforward SNN with a reinforcement-based symmetric plasticity rule DA-STDP, observed in the hippocampus and prefrontal cortex. They create homeostaticity through synaptic scaling and dynamic thresholding. They achieve good accuracy and well-clustered results. However, feedforward can only deal with static data.
+
+I propose to implement DA-STDP, synaptic scaling, and dynamic thresholding in a fully-recurrent network, and evaluate it on various types of temporal data, including classifying and predicting visual and abstract data, but also situational problem solving.
+
+When I have the infrastructure of this code present and achieve a good performance, I can start doing some more experimental work:
+- Testing metaplasticity, which is also well-founded in neuroscientific research.
+- Testing a variety of plasticity rules, including R-STDP (Mozafari18, Legenstein20) but also different curves.
+- Testing different types of neuron models, including (L)IF, HH, etc.
+- Testing different types of topology and weight initialization (Kim20).
+- Testing methods to prune or expand the network by pruning unused connections/units, inserting units near strong connections, etc. (Elbez20).
+- Try rate-based plasticity.
+- Try reducing the network input through pooling or visual attention.
+- Examine full network & state binarization.
+- Examine ways to gether insight into internal clustering
+- Research neuromorphology options w.r.t. this system.
+- Reformalize the dynamics based on what (combinations of) improvements work.
+- Research biological plausibility for discussion, analysis for future research.

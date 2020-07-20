@@ -1,0 +1,6 @@
+2020
+Aenugu:     Reparametrization of spikes to enable backprop.
+Athalye:    Propose two reinforcement methods: dynamics re-entrance and refinement. (NEUROBIO)
+Bing:       Transfer learning from DQN policy to R-STDP SNN for lane keeping.
+Elbez:      Progressive network pruning in SNN.
+Legenstein: Analytical review of R-STDP. Various complex implementations.
