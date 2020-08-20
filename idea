@@ -54,3 +54,57 @@ When I have the infrastructure of this code present and achieve a good performan
 - Research neuromorphology options w.r.t. this system.
 - Reformalize the dynamics based on what (combinations of) improvements work.
 - Research biological plausibility for discussion, analysis for future research.
+- Research ways to undiscretize spike trains.
+
+
+--------------------------------------
+
+Topics to get global overview:
+- STDP variants (how they work and perform)
+- STDP vs. SRDP (and how the latter compares to BCM)
+- Other local methods
+- Inter-neuron and intra-neuron stability methods
+- Reinforcement mechanisms
+- Neuron models
+- Topology types (and concepts)
+
+-------------------------------------
+
+My topic:
+
+Motivation:
+- Neuromorphology chips
+- Lack of conceptual breakthroughs in DL but industry maintains narrow focus
+- DL too costly and data hungry, and in essence just patched complex regression
+- Increasing understanding of brain functions
+- Higher-level programming languages/kits for easier programming
+
+
+-------------------------------------
+
+SNN
+- Local learning rules
+  - STDP
+    - R-STDP
+    - DA-STDP
+    - sym-STDP
+    - C-STDP
+    - M-STDP
+    - P-STDP
+- Topology
+  - Pruning
+
+-----------------------------------
+
+Concrete:
+1. The input to the network consists of a temporally changing array of spike trains, converted from real values through a Poisson function.
+2. The network consists of a fully recurrent network of LIF neurons.
+3. The input neurons to the network have no neuronal input sources, and the output neurons have no outgoing connections.
+4. Synapse weights are encoded in a real-valued 2D matrix.
+5. Spike rails are encoded in a binary 3D matrix.
+6. Eligibility traces are encoded in a real-valued 2D matrix.
+   When a spike hits a neuron, that neuron's ET
+7. Learning takes place through DA-STDP, reinforcing more is prediction is better. Slight stochasm to prevent global damping.
+
+
+The network is coded flexibly -- topologies and neuron types are softcoded.

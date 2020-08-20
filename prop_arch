@@ -1,0 +1,42 @@
+General:
+
+Class-based object, with modules for:
+- Visualization
+- Updating
+  - Decouple local update, decouple all STDP functions.
+- Regularization
+  - Metaplasticity
+  - Synaptic scaling
+- Adding or pruning neurons by shrinking/growing neuron matrix.
+- Set of modulators
+
+---
+Spike rails are:
+- Variable length
+  - Modifiable, possibly altered by update
+- Matrix-based lengths (2D)
+- Matrix-based rails (3D)
+
+---
+Set of neurons is:
+- Collection of matrices
+  - Activation
+  - Local threshold
+  - Synaptic strength
+    - Initialization decoupled to test topologies/weights
+
+---
+IO:
+- Predefined set of input neurons
+  - Can be grown or shrunk by using pruning module.
+  - Have no incoming neurons
+- Predefined set of output neurons
+  - Can be grown or shrunk by using pruning module.
+  - Have no outgoing neurons
+
+--------
+
+Design order
+- Tracer bullet approach:
+  - Demo with input-output
+  - Placeholder update function
