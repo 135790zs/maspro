@@ -103,7 +103,6 @@ Concrete:
 4. Synapse weights are encoded in a real-valued 2D matrix.
 5. Spike rails are encoded in a binary 3D matrix.
 6. Eligibility traces are encoded in a real-valued 2D matrix.
-   When a spike hits a neuron, that neuron's ET
 7. Learning takes place through DA-STDP, reinforcing more is prediction is better. Slight stochasm to prevent global damping.
 
 
