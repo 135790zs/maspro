@@ -8,10 +8,6 @@ def insert_2d_in_3d(hyperdim, hypodim, values=1):
     return hyperdim
 
 
-def get_inputs(time, num):
-    return range(num)
-
-
 def ceiled_sqrt(value):
     return int(np.ceil(np.sqrt(value)))
 

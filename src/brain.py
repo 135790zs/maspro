@@ -2,6 +2,7 @@ import configparser
 import utils
 import numpy as np
 import matplotlib.pyplot as plt
+import io_functions
 
 
 class Brain(object):
@@ -39,8 +40,8 @@ class Brain(object):
 
             # Perceive inputs
             num_inputs = config.getint("inputs")
-            self.neurons["activation"][:num_inputs] = utils.get_inputs(
-                time=self.time, num=num_inputs)
+            self.neurons["activation"][:num_inputs] = io_functions.istream(
+                time=self.time)
 
             # Find out which units fire
             firing_units = self.neurons["activation"] \
@@ -84,23 +85,38 @@ class Brain(object):
 
         plt.suptitle(f"Time = {self.time}")
 
-        self.ax[ax_count].imshow(
-            utils.unflatten_to_square(self.rails["weights"]),
-            cmap='coolwarm',
-            vmin=-1, vmax=1,
-            interpolation='nearest')
-        self.ax[ax_count].set_title("Weights")
-        self.ax[ax_count].axis('tight')
-        ax_count += 1
+        def subplot(title, array, ax_count, vmin=0, vmax=1, hmap=None):
+            self.ax[ax_count].set_title(title)
+            self.ax[ax_count].axis('tight')
 
-        self.ax[ax_count].imshow(
-            utils.unflatten_to_square(self.neurons["activation"]),
-            cmap='gray',
-            vmin=0, vmax=1,
-            interpolation='nearest')
-        self.ax[ax_count].set_title("Activations")
-        self.ax[ax_count].axis('tight')
-        ax_count += 1
+            if len(array.shape) > 1 or hmap:
+                heatmap(array=array, ax_count=ax_count, vmin=vmin, vmax=vmax)
+            else:
+                lineplot(array=array, ax_count=ax_count, vmin=vmin, vmax=vmax)
+            return ax_count + 1
+
+        def heatmap(array, ax_count, vmin=0, vmax=1):
+            self.ax[ax_count].imshow(
+                utils.unflatten_to_square(array),
+                cmap='coolwarm' if abs(vmin) == abs(vmax) else 'gray',
+                vmin=vmin, vmax=vmax,
+                interpolation='nearest')
+
+        def lineplot(array, ax_count, vmin=0, vmax=1):
+            self.ax[ax_count].plot(array)
+            self.ax[ax_count].set_ylim(vmin, vmax)
+
+        ax_count = subplot(array=self.rails["weights"],
+                           title="Weights",
+                           ax_count=ax_count,
+                           vmin=-1,
+                           vmax=1)
+        ax_count = subplot(array=self.neurons["activation"],
+                           title="Activation",
+                           ax_count=ax_count,
+                           vmin=0,
+                           vmax=1,
+                           hmap=True)
 
         plt.draw()
         plt.savefig('plot.pdf')
@@ -116,7 +132,9 @@ if __name__ == '__main__':
 
     # Modify brain's config through config file or object calls.
     brain = Brain(config=config)
-    for _ in range(10):
+
+    n_epochs = -1
+    while brain.time != n_epochs:
         brain.evolve()
 
 # TODO:
