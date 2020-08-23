@@ -12,6 +12,22 @@ def get_inputs(time, num):
     return range(num)
 
 
+def ceiled_sqrt(value):
+    return int(np.ceil(np.sqrt(value)))
+
+
+def unflatten_to_square(arr):
+    size = arr.flatten().shape[0]
+    edge = ceiled_sqrt(size)
+    arr = np.concatenate((arr.flatten(), np.zeros(edge * edge - size)))
+    arr = np.reshape(arr, (edge, edge))
+    count = edge
+    while (edge * count - size) >= edge:
+        count -= 1
+        arr = arr[:-1, :]
+    return arr
+
+
 def normalize(array, lower=0, upper=1):
     # Normalize a [0,1] array to custom range. Does not necessarily include
     # upper and lower bounds.
@@ -21,6 +37,7 @@ def normalize(array, lower=0, upper=1):
 
 def mock_update(neurons, rails):
     return neurons, rails
+
 
 def initialize_neurons(config):
     neurons = dict()

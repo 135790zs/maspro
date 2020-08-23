@@ -1,6 +1,7 @@
 import configparser
 import utils
 import numpy as np
+import matplotlib.pyplot as plt
 
 
 class Brain(object):
@@ -17,6 +18,14 @@ class Brain(object):
         # Variables
         self.neurons = utils.initialize_neurons(config=config)
         self.rails = utils.initialize_rails(config=config)
+
+        # Visualization initialization
+        if config.getboolean("visualize"):
+            num_plots_edge = utils.ceiled_sqrt(value=10)
+            self.fig, self.axes = plt.subplots(num_plots_edge)
+            self.ax = self.axes.ravel()
+            plt.ion()
+            plt.show()
 
     def evolve(self):
         self.time += 1
@@ -36,7 +45,6 @@ class Brain(object):
             # Find out which units fire
             firing_units = self.neurons["activation"] \
                 >= self.neurons["threshold"]
-            print(firing_units)
 
             # Insert the spike into rails
             firing_units_exp = np.repeat(
@@ -65,11 +73,38 @@ class Brain(object):
                 neurons=self.neurons,
                 rails=self.rails)
 
-    def grow_neurons(self):
-        pass
+        self.plot()
 
-    def prune_neurons(self, idxs=None):
-        pass
+    def plot(self):
+
+        # Remove axes
+        for i in range(len(self.ax)):
+            self.ax[i].clear()
+        ax_count = 0
+
+        plt.suptitle(f"Time = {self.time}")
+
+        self.ax[ax_count].imshow(
+            utils.unflatten_to_square(self.rails["weights"]),
+            cmap='coolwarm',
+            vmin=-1, vmax=1,
+            interpolation='nearest')
+        self.ax[ax_count].set_title("Weights")
+        self.ax[ax_count].axis('tight')
+        ax_count += 1
+
+        self.ax[ax_count].imshow(
+            utils.unflatten_to_square(self.neurons["activation"]),
+            cmap='gray',
+            vmin=0, vmax=1,
+            interpolation='nearest')
+        self.ax[ax_count].set_title("Activations")
+        self.ax[ax_count].axis('tight')
+        ax_count += 1
+
+        plt.draw()
+        plt.savefig('plot.pdf')
+        plt.pause(0.001)
 
 
 if __name__ == '__main__':
@@ -80,13 +115,12 @@ if __name__ == '__main__':
     config = config["DEFAULT"]
 
     # Modify brain's config through config file or object calls.
-    brain = Brain(config)
+    brain = Brain(config=config)
     for _ in range(10):
         brain.evolve()
 
 # TODO:
 """
-v0.2. Add visualization
 v0.3.0. Add test input-output
 v0.3.1. Implement STDP
 """
