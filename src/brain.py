@@ -20,10 +20,13 @@ class Brain(object):
         self.neurons = utils.initialize_neurons(config=config)
         self.rails = utils.initialize_rails(config=config)
 
+        # Logging
+        self.log_input = np.zeros(shape=(self.inputs, 0))
+
         # Visualization initialization
         if config.getboolean("visualize"):
-            num_plots_edge = utils.ceiled_sqrt(value=10)
-            self.fig, self.axes = plt.subplots(num_plots_edge)
+            num_plots_edge = utils.ceiled_sqrt(value=4)
+            self.fig, self.axes = plt.subplots(num_plots_edge, num_plots_edge)
             self.ax = self.axes.ravel()
             plt.ion()
             plt.show()
@@ -40,8 +43,13 @@ class Brain(object):
 
             # Perceive inputs
             num_inputs = config.getint("inputs")
-            self.neurons["activation"][:num_inputs] = io_functions.istream(
-                time=self.time)
+            new_input = io_functions.istream(time=self.time)
+
+            self.log_input = np.append(self.log_input, new_input)
+
+            rng = np.random.default_rng()
+            self.neurons["activation"][:num_inputs] = \
+                [rng.binomial(n=1, p=inp) for inp in new_input]
 
             # Find out which units fire
             firing_units = self.neurons["activation"] \
@@ -117,6 +125,18 @@ class Brain(object):
                            vmin=0,
                            vmax=1,
                            hmap=True)
+        ax_count = subplot(array=self.log_input,
+                           title="Input",
+                           ax_count=ax_count)
+
+        ev = self.rails["rails"]
+        ev = np.reshape(ev, (ev.shape[0], ev.shape[1]*ev.shape[2]), order='F').T
+        for t in range(ev.shape[1]):
+            ev[:, t] *= t + 1
+        self.ax[ax_count].eventplot(ev)
+        self.ax[ax_count].set_xlim(0, ev.shape[1])
+        self.ax[ax_count].set_title("Spike train")
+        ax_count += 1
 
         plt.draw()
         plt.savefig('plot.pdf')

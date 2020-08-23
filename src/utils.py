@@ -14,6 +14,8 @@ def ceiled_sqrt(value):
 
 def unflatten_to_square(arr):
     size = arr.flatten().shape[0]
+    if size <= 0:
+        raise ValueError("Could not unflatten empty array.")
     edge = ceiled_sqrt(size)
     arr = np.concatenate((arr.flatten(), np.zeros(edge * edge - size)))
     arr = np.reshape(arr, (edge, edge))
