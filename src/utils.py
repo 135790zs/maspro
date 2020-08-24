@@ -1,4 +1,5 @@
 import numpy as np
+from graphviz import Digraph
 
 
 def insert_2d_in_3d(hyperdim, hypodim, values=1):
@@ -35,6 +36,36 @@ def normalize(array, lower=0, upper=1):
 
 def mock_update(neurons, rails):
     return neurons, rails
+
+
+def draw_graph(neurons, rails, fname, minvis=.2):
+    # n_nodes = 6
+    # neurons = np.random.random(size=(n_nodes,))
+    # weights = np.random.random(size=(n_nodes, n_nodes))
+    # # weights = np.asarray([[.1,.2,.5], [.7, .8,.5], [.1, 0, 0]])
+
+    # lengths = np.random.randint(low=2, high=8, size=(n_nodes, n_nodes))
+
+    dot = Digraph(format='png', engine='neato')
+    print(neurons["activation"])
+
+    for idx, node in enumerate(neurons["activation"]):
+        pos = str(hex(max(int(255*node), int(255*minvis))))[2:]
+        dot.node(name=str(idx), 
+                 label=f"{node:.2f}", 
+                 color=f"#000000{pos}")
+    # edges
+    for idx, start in enumerate(rails["weights"]):
+        for jdx, end in enumerate(start):
+            if end:# and idx != jdx:
+                end = end / 2 + 0.5
+                pos = str(hex(max(int(255*end), int(255*minvis))))[2:]
+                dot.edge(tail_name=str(idx), 
+                         head_name=str(jdx), 
+                         color=f"#000000{pos}",
+                         len=str(rails["lengths"][idx][jdx]/50))
+
+    dot.render(fname)
 
 
 def initialize_neurons(config):

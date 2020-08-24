@@ -2,7 +2,8 @@ import configparser
 import utils
 import numpy as np
 import matplotlib.pyplot as plt
-import io_functions
+import matplotlib.image as mpimg
+# import io_functions
 
 
 class Brain(object):
@@ -25,7 +26,7 @@ class Brain(object):
 
         # Visualization initialization
         if config.getboolean("visualize"):
-            num_plots_edge = utils.ceiled_sqrt(value=4)
+            num_plots_edge = utils.ceiled_sqrt(value=5)
             self.fig, self.axes = plt.subplots(num_plots_edge, num_plots_edge)
             self.ax = self.axes.ravel()
             plt.ion()
@@ -43,7 +44,8 @@ class Brain(object):
 
             # Perceive inputs
             num_inputs = config.getint("inputs")
-            new_input = io_functions.istream(time=self.time)
+            # new_input = io_functions.istream(time=self.time)
+            new_input = [np.sin(self.time/10)/5+0.5]
 
             self.log_input = np.append(self.log_input, new_input)
 
@@ -129,6 +131,7 @@ class Brain(object):
                            title="Input",
                            ax_count=ax_count)
 
+        # Spiketrains
         ev = self.rails["rails"]
         ev = np.reshape(ev, (ev.shape[0], ev.shape[1]*ev.shape[2]), order='F').T
         for t in range(ev.shape[1]):
@@ -136,6 +139,13 @@ class Brain(object):
         self.ax[ax_count].eventplot(ev)
         self.ax[ax_count].set_xlim(0, ev.shape[1])
         self.ax[ax_count].set_title("Spike train")
+        ax_count += 1
+
+        # Graph
+        fname = "graph"
+        utils.draw_graph(self.neurons, self.rails, fname=fname)
+        img1 = mpimg.imread(fname + ".png")
+        self.ax[ax_count].imshow(img1)
         ax_count += 1
 
         plt.draw()
@@ -157,8 +167,10 @@ if __name__ == '__main__':
     while brain.time != n_epochs:
         brain.evolve()
 
-# TODO:
 """
+v0.2.3: Add model graph in visualization.
+
+TODO:
 v0.3.0. Add test input-output
 v0.3.1. Implement STDP
 """
