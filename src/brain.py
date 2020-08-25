@@ -41,7 +41,11 @@ class Brain(object):
         self.time += 1
 
         if config["neurontype"] == "LIF":
-            # Leak, input, fire, integrate, update-rails
+            # Scale, Leak, input, fire, integrate, update-rails
+
+            # Synaptic scaling
+            over = np.abs(self.rails["weights"]) > 1
+            self.rails["weights"][over] *= config.getfloat("synscaling_softcap")
 
             # Leak some from the neurons
             self.neurons["activation"][self.neurons["activation"] < 0] \
@@ -49,7 +53,7 @@ class Brain(object):
             self.neurons["activation"][self.neurons["activation"] > 0] \
                 *= config.getfloat("leakage_pos")
 
-            self.neurons["trace"] /= 2
+            self.neurons["trace"] /= np.e
             # Add fire to eli trace
 
             # Find out which units fire
@@ -74,7 +78,7 @@ class Brain(object):
 
             # Update the activations
             self.neurons["activation"] = \
-                np.tanh(self.neurons["activation"]
+                (self.neurons["activation"]
                         + np.sum(self.rails["rails"][0, :, :]
                                  * self.rails["weights"],
                                  axis=1))
@@ -91,7 +95,6 @@ class Brain(object):
             rng = np.random.default_rng()
             self.neurons["activation"][:num_inputs] = \
                 [rng.binomial(n=1, p=inp) for inp in new_input]
-
 
             # Logging
             self.log_input = np.append(self.log_input, new_input)
@@ -121,8 +124,8 @@ class Brain(object):
             neurons=self.neurons,
             rails=self.rails,
             dopa=self.dopa)
-
-        self.plot()
+        if self.time % config.getint("plot_freq") == 0:
+            self.plot()
 
     def plot(self):
 
@@ -202,7 +205,7 @@ class Brain(object):
 
         # Graph
         fname = "graph"
-        utils.draw_graph(self.neurons, self.rails, fname=fname)
+        utils.draw_graph(self.neurons, self.rails, fname=fname, config=config)
         img1 = mpimg.imread(fname + ".png")
         self.ax[ax_count].imshow(img1)
         ax_count += 1
@@ -229,10 +232,13 @@ if __name__ == '__main__':
 """
 v0.2.3: Add model graph in visualization.
 v0.2.4: Improve edge and node color; nullify weights to input and from output.
-v0.3.0. Add test input-output; variable weight range; improve vis; change activation function from dot to sum.
-v0.3.1. Implement (R-)STDP; add target/error metric.
+v0.3.0: Add test input-output; variable weight range; improve vis; change activation function from dot to sum.
+v0.3.1: Implement (R-)STDP; add target/error metric.
+v0.4:   Add synaptic scaling; implement lattice topologies.
 
 TODO MAJOR:
+v0.5:   Metaplasticity, intrinsic plasticity (all settable). Get performance.
+
 
 TODO MINOR:
 * Export `evolve' and `plot' to function, try decouple

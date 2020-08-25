@@ -60,7 +60,7 @@ def update(neurons, rails, config, **kwargs):
         return stdp(neurons=neurons, rails=rails, dopa=kwargs["dopa"])
 
 
-def draw_graph(neurons, rails, fname, minvis=.2):
+def draw_graph(neurons, rails, fname, config, minvis=.2):
 
     dot = Digraph(format='png', engine='neato')
 
@@ -68,11 +68,20 @@ def draw_graph(neurons, rails, fname, minvis=.2):
     for idx, node in enumerate(neurons["activation"]):
         firing = node >= neurons["threshold"][idx]
         firing_red = 'aa' if firing else '00'
-        pos = str(hex(max(int(255 * node),
-                          int(255 * minvis))))[2:]
+
+        transparency = str(hex(max(int(255 * node),
+                                   int(255 * minvis))))[2:]
+
+        input_yel = 'ff' if idx < config.getint("inputs") else 'bb'
+        output_cyan = 'ff' if idx >= config.getint("size") - \
+            config.getint("outputs") else 'bb'
+
         dot.node(name=str(idx),
                  label=f"{node:.2f}",
-                 color=f"#{firing_red}0000{pos}")
+                 style='filled',
+                 fixedsize='false',
+                 fillcolor=f"#{input_yel}ff{output_cyan}",
+                 color=f"#{firing_red}0000{transparency}")
 
     # edges
     for idx_end, end in enumerate(rails["weights"]):
@@ -87,16 +96,26 @@ def draw_graph(neurons, rails, fname, minvis=.2):
                                           int(255 * minvis))))[2:]
 
                 # Choose the redness for edges, determined by num of spikes
-                has_spike_sum = np.sum(rails["rails"][:, idx_end, idx_start])
-                has_spike = has_spike_sum / rails["lengths"][idx_end, idx_start]
-                spike_red = str(hex(int(255 * has_spike)))[2:]
-                spike_red = '00' if spike_red == '0' else spike_red
+                # has_spike_sum = np.sum(rails["rails"][:, idx_end, idx_start])
+                # has_spike = has_spike_sum / rails["lengths"][idx_end, idx_start]
+                # spike_red = str(hex(int(255 * has_spike)))[2:]
+                # spike_red = '00' if spike_red == '0' else spike_red
 
+                collist = str()
+                this_rail_len = rails["lengths"][idx_end, idx_start]
+                floored = int(1/this_rail_len*100)/100
+                for rail in range(this_rail_len):
+                    if rails["rails"][rail, idx_end, idx_start]:
+                        collist = f"#ff3333{weight_alph};{floored:.2f}:" + collist
+                    else:
+                        collist = f"#333333{weight_alph};{floored:.2f}:" + collist
                 dot.edge(tail_name=str(idx_start),
                          head_name=str(idx_end),
                          label=f"{weight:.2f}",
-                         color=f"#{spike_red}0000{weight_alph}",
-                         len=str(max(1, rails["lengths"][idx_end, idx_start] / 50)))
+                         penwidth='3',
+                         color=collist,
+                         # color=f"#{spike_red}0000{weight_alph}",
+                         len=str(max(1, rails["lengths"][idx_end, idx_start] / 10)))
 
     dot.render(fname)
 
@@ -126,16 +145,49 @@ def initialize_neurons(config):
 def initialize_rails(config):
     rails = dict()
     rng = np.random.default_rng()
-
+    n_nodes = config.getint("size")
     # Initialize connections. Zero-weights = unconnected.
     # Inner = from, outer = to.
-    if config["topology"] == "full":
-        rails["weights"] = rng.random(
-            size=(config.getint("size"), ) * 2)
+    rails["weights"] = rng.random(
+        size=(n_nodes, ) * 2)
 
-        rails["weights"] = normalize(rails["weights"],
-                                     lower=config.getfloat("minweight"),
-                                     upper=config.getfloat("maxweight"))
+    rails["weights"] = normalize(rails["weights"],
+                                 lower=config.getfloat("minweight"),
+                                 upper=config.getfloat("maxweight"))
+
+    if config["topology"] == "lattice":
+
+        assert n_nodes % 2 == 0, "When using a lattice topology, use an even" \
+                                 " number of neurons. "
+
+        adjacency = np.zeros(shape=rails["weights"].shape, dtype=bool)
+        sqt = int(np.sqrt(n_nodes))
+        for v in range(n_nodes):
+            print("v =", v)
+            if (v+1) % sqt:
+                print("right")
+                adjacency[v, v + 1] = True
+                adjacency[v + 1, v] = True
+            if v % sqt:
+                print("left")
+                adjacency[v, v - 1] = True
+                adjacency[v - 1, v] = True
+            if v + 1 + sqt <= n_nodes:
+                print("down")
+                adjacency[v + sqt, v] = True
+                adjacency[v, v + sqt] = True
+            if v + 1 - sqt > 0:
+                print("up")
+                adjacency[v - sqt, v] = True
+                adjacency[v, v - sqt] = True
+        rails["weights"][adjacency == False] = 0
+    print(rails["weights"])
+
+    indices = np.random.choice(np.arange(rails["weights"].size),
+                               replace=False,
+                               size=int(rails["weights"].size
+                                        * config.getfloat('dropout')))
+    rails["weights"][np.unravel_index(indices, rails["weights"].shape)] = 0
 
     # Nullify weights to input neurons
     rails["weights"][:config.getint("inputs"), :] = 0
