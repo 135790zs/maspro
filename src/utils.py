@@ -34,8 +34,30 @@ def normalize(array, lower=0, upper=1):
     return array + lower
 
 
-def mock_update(neurons, rails):
+def stdp(neurons, rails, dopa=None):
+    """ Presyn before postsyn = presyn.trace < postsyn.trace = increase"""
+    # for all traces 1, update with all other if weight != 0.
+    for idx_neuron, trace in enumerate(neurons["trace"]):
+        if trace == 1:  # just fired
+            for idx_other, weight in enumerate(
+                    rails["weights"][:, idx_neuron]):
+                trace_other = neurons["trace"][idx_other]
+                if weight != 0 and trace_other > 0 and trace_other < 1:
+                    factor = 1 / (1 - trace_other)
+                    if dopa:
+                        factor *= dopa
+                    rails["weights"][idx_other, idx_neuron] /= factor  # pre to post
+                    rails["weights"][idx_neuron, idx_other] *= factor  # post to pre
+
     return neurons, rails
+
+
+def update(neurons, rails, config, **kwargs):
+    update_rule = config["update_rule"]
+    if update_rule == "none":
+        return neurons, rails
+    elif update_rule == "stdp":
+        return stdp(neurons=neurons, rails=rails, dopa=kwargs["dopa"])
 
 
 def draw_graph(neurons, rails, fname, minvis=.2):

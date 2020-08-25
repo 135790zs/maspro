@@ -20,15 +20,18 @@ class Brain(object):
         # Variables
         self.neurons = utils.initialize_neurons(config=config)
         self.rails = utils.initialize_rails(config=config)
+        self.dopa = 0
 
         # Logging
         self.log_input = np.zeros(shape=(self.inputs, 0))
         self.log_input_poisson = np.zeros(shape=self.log_input.shape)
         self.log_output = np.zeros(shape=(self.outputs, 0))
+        self.log_target = np.zeros(shape=(self.log_output.shape))
+        self.log_error = np.zeros(shape=(self.log_output.shape))
 
         # Visualization initialization
         if config.getboolean("visualize"):
-            num_plots_edge = utils.ceiled_sqrt(value=6)
+            num_plots_edge = utils.ceiled_sqrt(value=config.getint("num_plots"))
             self.fig, self.axes = plt.subplots(num_plots_edge, num_plots_edge)
             self.ax = self.axes.ravel()
             plt.ion()
@@ -89,19 +92,35 @@ class Brain(object):
             self.neurons["activation"][:num_inputs] = \
                 [rng.binomial(n=1, p=inp) for inp in new_input]
 
+
             # Logging
             self.log_input = np.append(self.log_input, new_input)
             self.log_input_poisson = np.append(
                 self.log_input_poisson,
                 self.neurons["activation"][:num_inputs])
+
+            output = self.neurons["activation"][-config.getint("outputs"):]
             self.log_output = np.append(
                 self.log_output,
-                self.neurons["activation"][config.getint("outputs"):])
+                output)
 
-        if config["updaterule"] == "mock update":
-            self.neurons, self.rails = utils.mock_update(
-                neurons=self.neurons,
-                rails=self.rails)
+            target = io_functions.tstream(time=self.time)
+            self.log_target = np.append(self.log_target, target)
+
+            error = np.mean(np.abs(self.log_output[:config.getint("lookback")]
+                                   - self.log_target[:config.getint("lookback")]),
+                            axis=0)
+
+            self.log_error = np.append(self.log_error, error)
+
+            # Error calculation
+            self.dopa = max(0, min(1, 1 - error))
+
+        self.neurons, self.rails = utils.update(
+            config=config,
+            neurons=self.neurons,
+            rails=self.rails,
+            dopa=self.dopa)
 
         self.plot()
 
@@ -152,8 +171,14 @@ class Brain(object):
         ax_count = subplot(array=self.log_input_poisson,
                            title="Input spikes",
                            ax_count=ax_count)
-        ax_count = subplot(array=self.log_output,
+        subplot(array=self.log_output,
+                title="Output",
+                ax_count=ax_count)
+        ax_count = subplot(array=self.log_target,
                            title="Output",
+                           ax_count=ax_count)
+        ax_count = subplot(array=self.log_error,
+                           title="Error",
                            ax_count=ax_count)
 
         # Spiketrains
@@ -205,9 +230,9 @@ if __name__ == '__main__':
 v0.2.3: Add model graph in visualization.
 v0.2.4: Improve edge and node color; nullify weights to input and from output.
 v0.3.0. Add test input-output; variable weight range; improve vis; change activation function from dot to sum.
+v0.3.1. Implement (R-)STDP; add target/error metric.
 
 TODO MAJOR:
-v0.3.1. Implement STDP
 
 TODO MINOR:
 * Export `evolve' and `plot' to function, try decouple
