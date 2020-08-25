@@ -39,31 +39,39 @@ def mock_update(neurons, rails):
 
 
 def draw_graph(neurons, rails, fname, minvis=.2):
-    # n_nodes = 6
-    # neurons = np.random.random(size=(n_nodes,))
-    # weights = np.random.random(size=(n_nodes, n_nodes))
-    # # weights = np.asarray([[.1,.2,.5], [.7, .8,.5], [.1, 0, 0]])
-
-    # lengths = np.random.randint(low=2, high=8, size=(n_nodes, n_nodes))
 
     dot = Digraph(format='png', engine='neato')
-    print(neurons["activation"])
 
+    # nodes
     for idx, node in enumerate(neurons["activation"]):
-        pos = str(hex(max(int(255*node), int(255*minvis))))[2:]
-        dot.node(name=str(idx), 
-                 label=f"{node:.2f}", 
-                 color=f"#000000{pos}")
+        firing = node >= neurons["threshold"][idx]
+        firing_red = 'aa' if firing else '00'
+        pos = str(hex(max(int(255 * node),
+                          int(255 * minvis))))[2:]
+        dot.node(name=str(idx),
+                 label=f"{node:.2f}",
+                 color=f"#{firing_red}0000{pos}")
+
     # edges
-    for idx, start in enumerate(rails["weights"]):
-        for jdx, end in enumerate(start):
-            if end:# and idx != jdx:
-                end = end / 2 + 0.5
-                pos = str(hex(max(int(255*end), int(255*minvis))))[2:]
-                dot.edge(tail_name=str(idx), 
-                         head_name=str(jdx), 
-                         color=f"#000000{pos}",
-                         len=str(rails["lengths"][idx][jdx]/50))
+    for idx_end, end in enumerate(rails["weights"]):
+        for idx_start, weight in enumerate(end):
+            if weight:
+
+                # Rail weight determines edge transparency
+                weight_alph = weight / 2 + 0.5
+                weight_alph = str(hex(max(int(255 * weight_alph),
+                                          int(255 * minvis))))[2:]
+
+                # Choose the redness for edges, determined by num of spikes
+                has_spike_sum = np.sum(rails["rails"][:, idx_end, idx_start])
+                has_spike = has_spike_sum / rails["lengths"][idx_end, idx_start]
+                spike_red = str(hex(int(255 * has_spike)))[2:]
+                spike_red = '00' if spike_red == '0' else spike_red
+
+                dot.edge(tail_name=str(idx_start),
+                         head_name=str(idx_end),
+                         color=f"#{spike_red}0000{weight_alph}",
+                         len=str(max(1, rails["lengths"][idx_end, idx_start] / 50)))
 
     dot.render(fname)
 
@@ -93,10 +101,19 @@ def initialize_rails(config):
     rails = dict()
     rng = np.random.default_rng()
 
+    # Initialize connections. Zero-weights = unconnected.
+    # Inner = from, outer = to.
     if config["topology"] == "full":
         rails["weights"] = rng.random(
             size=(config.getint("size"), ) * 2)
 
+    # Nullify weights to input neurons
+    rails["weights"][:config.getint("inputs"), :] = 0
+
+    # Nullify weights from output neurons
+    rails["weights"][:, -config.getint("outputs"):] = 0
+
+    # Initialize rail lengths
     rails["lengths"] = rng.integers(low=config.getint("min_rails_length"),
                                     high=config.getint("max_rails_length"),
                                     size=rails["weights"].shape, )

@@ -3,7 +3,7 @@ import utils
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
-# import io_functions
+import io_functions
 
 
 class Brain(object):
@@ -36,22 +36,13 @@ class Brain(object):
         self.time += 1
 
         if config["neurontype"] == "LIF":
+            # Leak, input, fire, integrate, update-rails
+
             # Leak some from the neurons
             self.neurons["activation"][self.neurons["activation"] < 0] \
                 *= config.getfloat("leakage_neg")
             self.neurons["activation"][self.neurons["activation"] > 0] \
                 *= config.getfloat("leakage_pos")
-
-            # Perceive inputs
-            num_inputs = config.getint("inputs")
-            # new_input = io_functions.istream(time=self.time)
-            new_input = [np.sin(self.time/10)/5+0.5]
-
-            self.log_input = np.append(self.log_input, new_input)
-
-            rng = np.random.default_rng()
-            self.neurons["activation"][:num_inputs] = \
-                [rng.binomial(n=1, p=inp) for inp in new_input]
 
             # Find out which units fire
             firing_units = self.neurons["activation"] \
@@ -67,6 +58,9 @@ class Brain(object):
                 hypodim=self.rails["lengths"],
                 values=firing_units_exp)
 
+            # Reset firing units
+            self.neurons["activation"][firing_units] = config.getfloat("reset")
+
             # Update the activations
             self.neurons["activation"] = \
                 np.tanh(self.neurons["activation"]
@@ -78,6 +72,16 @@ class Brain(object):
             self.rails["rails"] = self.rails["rails"][1:, :, :]
             self.rails["rails"] = np.pad(array=self.rails["rails"],
                                          pad_width=((0, 1), (0, 0), (0, 0)))
+
+            # Perceive inputs
+            num_inputs = config.getint("inputs")
+            new_input = io_functions.istream(time=self.time)
+
+            self.log_input = np.append(self.log_input, new_input)
+
+            rng = np.random.default_rng()
+            self.neurons["activation"][:num_inputs] = \
+                [rng.binomial(n=1, p=inp) for inp in new_input]
 
         if config["updaterule"] == "mock update":
             self.neurons, self.rails = utils.mock_update(
@@ -169,8 +173,13 @@ if __name__ == '__main__':
 
 """
 v0.2.3: Add model graph in visualization.
+v0.2.4: Improve edge and node color; nullify weights to input and from output.
 
-TODO:
+TODO MAJOR:
 v0.3.0. Add test input-output
 v0.3.1. Implement STDP
+
+TODO MINOR:
+* Export `evolve' and `plot' to function, try decouple
+
 """
