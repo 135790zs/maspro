@@ -23,10 +23,12 @@ class Brain(object):
 
         # Logging
         self.log_input = np.zeros(shape=(self.inputs, 0))
+        self.log_input_poisson = np.zeros(shape=self.log_input.shape)
+        self.log_output = np.zeros(shape=(self.outputs, 0))
 
         # Visualization initialization
         if config.getboolean("visualize"):
-            num_plots_edge = utils.ceiled_sqrt(value=5)
+            num_plots_edge = utils.ceiled_sqrt(value=6)
             self.fig, self.axes = plt.subplots(num_plots_edge, num_plots_edge)
             self.ax = self.axes.ravel()
             plt.ion()
@@ -44,6 +46,9 @@ class Brain(object):
             self.neurons["activation"][self.neurons["activation"] > 0] \
                 *= config.getfloat("leakage_pos")
 
+            self.neurons["trace"] /= 2
+            # Add fire to eli trace
+
             # Find out which units fire
             firing_units = self.neurons["activation"] \
                 >= self.neurons["threshold"]
@@ -53,6 +58,9 @@ class Brain(object):
                 a=np.expand_dims(firing_units, axis=0),
                 repeats=self.neurons["activation"].size,
                 axis=0)
+
+            self.neurons["trace"][firing_units] = 1
+
             self.rails["rails"] = utils.insert_2d_in_3d(
                 hyperdim=self.rails["rails"],
                 hypodim=self.rails["lengths"],
@@ -64,9 +72,9 @@ class Brain(object):
             # Update the activations
             self.neurons["activation"] = \
                 np.tanh(self.neurons["activation"]
-                        + (np.dot(self.rails["rails"][0, :, :]
-                           * self.rails["weights"],
-                           self.neurons["activation"])))
+                        + np.sum(self.rails["rails"][0, :, :]
+                                 * self.rails["weights"],
+                                 axis=1))
 
             # Evolve trains
             self.rails["rails"] = self.rails["rails"][1:, :, :]
@@ -77,11 +85,18 @@ class Brain(object):
             num_inputs = config.getint("inputs")
             new_input = io_functions.istream(time=self.time)
 
-            self.log_input = np.append(self.log_input, new_input)
-
             rng = np.random.default_rng()
             self.neurons["activation"][:num_inputs] = \
                 [rng.binomial(n=1, p=inp) for inp in new_input]
+
+            # Logging
+            self.log_input = np.append(self.log_input, new_input)
+            self.log_input_poisson = np.append(
+                self.log_input_poisson,
+                self.neurons["activation"][:num_inputs])
+            self.log_output = np.append(
+                self.log_output,
+                self.neurons["activation"][config.getint("outputs"):])
 
         if config["updaterule"] == "mock update":
             self.neurons, self.rails = utils.mock_update(
@@ -132,7 +147,13 @@ class Brain(object):
                            vmax=1,
                            hmap=True)
         ax_count = subplot(array=self.log_input,
-                           title="Input",
+                           title="Input source",
+                           ax_count=ax_count)
+        ax_count = subplot(array=self.log_input_poisson,
+                           title="Input spikes",
+                           ax_count=ax_count)
+        ax_count = subplot(array=self.log_output,
+                           title="Output",
                            ax_count=ax_count)
 
         # Spiketrains
@@ -140,9 +161,18 @@ class Brain(object):
         ev = np.reshape(ev, (ev.shape[0], ev.shape[1]*ev.shape[2]), order='F').T
         for t in range(ev.shape[1]):
             ev[:, t] *= t + 1
-        self.ax[ax_count].eventplot(ev)
+        self.ax[ax_count].eventplot(ev, linelengths=0.3, alpha=0.5)
         self.ax[ax_count].set_xlim(0, ev.shape[1])
         self.ax[ax_count].set_title("Spike train")
+
+        # also show entry points
+        lens = np.zeros(shape=ev.shape)
+        all_lengths = self.rails["lengths"].flatten(order='F')
+        for idx, L in enumerate(lens):
+            lens[idx, all_lengths[idx]] = 1
+        for ln in range(lens.shape[1]):
+            lens[:, ln] *= ln + 1
+        self.ax[ax_count].eventplot(lens, color='red', alpha=0.5)
         ax_count += 1
 
         # Graph
@@ -174,9 +204,9 @@ if __name__ == '__main__':
 """
 v0.2.3: Add model graph in visualization.
 v0.2.4: Improve edge and node color; nullify weights to input and from output.
+v0.3.0. Add test input-output; variable weight range; improve vis; change activation function from dot to sum.
 
 TODO MAJOR:
-v0.3.0. Add test input-output
 v0.3.1. Implement STDP
 
 TODO MINOR:

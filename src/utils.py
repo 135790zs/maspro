@@ -58,7 +58,9 @@ def draw_graph(neurons, rails, fname, minvis=.2):
             if weight:
 
                 # Rail weight determines edge transparency
-                weight_alph = weight / 2 + 0.5
+                weight_alph = weight - np.min(rails["weights"])
+                weight_alph = weight_alph / np.max(rails["weights"])
+                # weight *= np.max(rails["weights"]) /
                 weight_alph = str(hex(max(int(255 * weight_alph),
                                           int(255 * minvis))))[2:]
 
@@ -70,6 +72,7 @@ def draw_graph(neurons, rails, fname, minvis=.2):
 
                 dot.edge(tail_name=str(idx_start),
                          head_name=str(idx_end),
+                         label=f"{weight:.2f}",
                          color=f"#{spike_red}0000{weight_alph}",
                          len=str(max(1, rails["lengths"][idx_end, idx_start] / 50)))
 
@@ -93,6 +96,7 @@ def initialize_neurons(config):
             array=neurons["threshold"],
             lower=config.getfloat("min_initial_threshold"),
             upper=config.getfloat("max_initial_threshold"))
+        neurons["trace"] = np.zeros(shape=neurons["activation"].shape)
 
     return neurons
 
@@ -106,6 +110,10 @@ def initialize_rails(config):
     if config["topology"] == "full":
         rails["weights"] = rng.random(
             size=(config.getint("size"), ) * 2)
+
+        rails["weights"] = normalize(rails["weights"],
+                                     lower=config.getfloat("minweight"),
+                                     upper=config.getfloat("maxweight"))
 
     # Nullify weights to input neurons
     rails["weights"][:config.getint("inputs"), :] = 0
@@ -121,4 +129,3 @@ def initialize_rails(config):
     rails["rails"] = np.zeros(shape=(config.getint("max_rails_length"),
                                      *rails["weights"].shape, ))
     return rails
-
