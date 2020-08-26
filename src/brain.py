@@ -21,6 +21,7 @@ class Brain(object):
         self.neurons = utils.initialize_neurons(config=config)
         self.rails = utils.initialize_rails(config=config)
         self.dopa = 0
+        self.metaplas = 0
 
         # Logging
         self.log_input = np.zeros(shape=(self.inputs, 0))
@@ -28,6 +29,7 @@ class Brain(object):
         self.log_output = np.zeros(shape=(self.outputs, 0))
         self.log_target = np.zeros(shape=(self.log_output.shape))
         self.log_error = np.zeros(shape=(self.log_output.shape))
+        self.log_out_recon = np.zeros(shape=(self.log_output.shape))
 
         # Visualization initialization
         if config.getboolean("visualize"):
@@ -109,21 +111,22 @@ class Brain(object):
 
             target = io_functions.tstream(time=self.time)
             self.log_target = np.append(self.log_target, target)
+            out_recon = np.mean(self.log_output[-config.getint("lookback"):])
+            self.log_out_recon = np.append(self.log_out_recon, out_recon)
 
-            error = np.mean(np.abs(self.log_output[:config.getint("lookback")]
-                                   - self.log_target[:config.getint("lookback")]),
-                            axis=0)
+            error = np.mean(np.abs(target - out_recon), axis=0)
 
             self.log_error = np.append(self.log_error, error)
 
             # Error calculation
             self.dopa = max(0, min(1, 1 - error))
 
-        self.neurons, self.rails = utils.update(
+        self.neurons, self.rails, self.metaplas = utils.update(
             config=config,
             neurons=self.neurons,
             rails=self.rails,
-            dopa=self.dopa)
+            dopa=self.dopa,
+            metaplas=self.metaplas)
         if self.time % config.getint("plot_freq") == 0:
             self.plot()
 
@@ -134,7 +137,8 @@ class Brain(object):
             self.ax[i].clear()
         ax_count = 0
 
-        plt.suptitle(f"Time = {self.time}")
+        plt.suptitle(f"Time = {self.time} \n D={self.dopa:.2f}, "
+                     f"M={self.metaplas:.2f}")
 
         def subplot(title, array, ax_count, vmin=0, vmax=1, hmap=None):
             self.ax[ax_count].set_title(title)
@@ -168,47 +172,55 @@ class Brain(object):
                            vmin=0,
                            vmax=1,
                            hmap=True)
-        ax_count = subplot(array=self.log_input,
-                           title="Input source",
-                           ax_count=ax_count)
+        subplot(array=self.log_input,
+                title="Input",
+                ax_count=ax_count)
         ax_count = subplot(array=self.log_input_poisson,
-                           title="Input spikes",
+                           title="Input",
                            ax_count=ax_count)
         subplot(array=self.log_output,
                 title="Output",
                 ax_count=ax_count)
+        ax_count = subplot(array=self.log_out_recon,
+                title="Output",
+                ax_count=ax_count)
+        subplot(array=self.log_out_recon,
+                title="Target",
+                ax_count=ax_count)
         ax_count = subplot(array=self.log_target,
-                           title="Output",
+                           title="Target",
                            ax_count=ax_count)
         ax_count = subplot(array=self.log_error,
                            title="Error",
                            ax_count=ax_count)
 
         # Spiketrains
-        ev = self.rails["rails"]
-        ev = np.reshape(ev, (ev.shape[0], ev.shape[1]*ev.shape[2]), order='F').T
-        for t in range(ev.shape[1]):
-            ev[:, t] *= t + 1
-        self.ax[ax_count].eventplot(ev, linelengths=0.3, alpha=0.5)
-        self.ax[ax_count].set_xlim(0, ev.shape[1])
-        self.ax[ax_count].set_title("Spike train")
+        if config.getboolean("show_train"):
+            ev = self.rails["rails"]
+            ev = np.reshape(ev, (ev.shape[0], ev.shape[1]*ev.shape[2]), order='F').T
+            for t in range(ev.shape[1]):
+                ev[:, t] *= t + 1
+            self.ax[ax_count].eventplot(ev, linelengths=0.3, alpha=0.5)
+            self.ax[ax_count].set_xlim(0, ev.shape[1])
+            self.ax[ax_count].set_title("Spike train")
 
-        # also show entry points
-        lens = np.zeros(shape=ev.shape)
-        all_lengths = self.rails["lengths"].flatten(order='F')
-        for idx, L in enumerate(lens):
-            lens[idx, all_lengths[idx]] = 1
-        for ln in range(lens.shape[1]):
-            lens[:, ln] *= ln + 1
-        self.ax[ax_count].eventplot(lens, color='red', alpha=0.5)
-        ax_count += 1
+            # also show entry points
+            lens = np.zeros(shape=ev.shape)
+            all_lengths = self.rails["lengths"].flatten(order='F')
+            for idx, L in enumerate(lens):
+                lens[idx, all_lengths[idx]] = 1
+            for ln in range(lens.shape[1]):
+                lens[:, ln] *= ln + 1
+            self.ax[ax_count].eventplot(lens, color='red', alpha=0.5)
+            ax_count += 1
 
         # Graph
-        fname = "graph"
-        utils.draw_graph(self.neurons, self.rails, fname=fname, config=config)
-        img1 = mpimg.imread(fname + ".png")
-        self.ax[ax_count].imshow(img1)
-        ax_count += 1
+        if config.getboolean("show_graph"):
+            fname = "graph"
+            utils.draw_graph(self.neurons, self.rails, fname=fname, config=config)
+            img1 = mpimg.imread(fname + ".png")
+            self.ax[ax_count].imshow(img1)
+            ax_count += 1
 
         plt.draw()
         plt.savefig('plot.pdf')
@@ -237,7 +249,7 @@ v0.3.1: Implement (R-)STDP; add target/error metric.
 v0.4:   Add synaptic scaling; implement lattice topologies.
 
 TODO MAJOR:
-v0.5:   Metaplasticity, intrinsic plasticity (all settable). Get performance.
+v0.5:   Add metaplasticity.
 
 
 TODO MINOR:

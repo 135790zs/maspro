@@ -34,22 +34,31 @@ def normalize(array, lower=0, upper=1):
     return array + lower
 
 
-def stdp(neurons, rails, dopa=None):
+def stdp(neurons, rails, dopa=None, metaplas=None):
     """ Presyn before postsyn = presyn.trace < postsyn.trace = increase"""
     # for all traces 1, update with all other if weight != 0.
+    plasticity = list()
     for idx_neuron, trace in enumerate(neurons["trace"]):
         if trace == 1:  # just fired
             for idx_other, weight in enumerate(
                     rails["weights"][:, idx_neuron]):
                 trace_other = neurons["trace"][idx_other]
                 if weight != 0 and trace_other > 0 and trace_other < 1:
-                    factor = 1 / (1 - trace_other)
+
                     if dopa:
-                        factor *= dopa
+                        trace_other *= dopa
+
+                    if metaplas:
+                        trace_other *= metaplas
+
+                    factor = 1 / (1 - trace_other)
+
+                    plasticity.append(factor)
+
                     rails["weights"][idx_other, idx_neuron] /= factor  # pre to post
                     rails["weights"][idx_neuron, idx_other] *= factor  # post to pre
-
-    return neurons, rails
+    plasticity = 1 / np.mean(plasticity) if plasticity else 1
+    return neurons, rails, plasticity
 
 
 def update(neurons, rails, config, **kwargs):
@@ -67,7 +76,7 @@ def draw_graph(neurons, rails, fname, config, minvis=.2):
     # nodes
     for idx, node in enumerate(neurons["activation"]):
         firing = node >= neurons["threshold"][idx]
-        firing_red = 'aa' if firing else '00'
+        firing_red = 'ff' if firing else '00'
 
         transparency = str(hex(max(int(255 * node),
                                    int(255 * minvis))))[2:]
@@ -77,7 +86,6 @@ def draw_graph(neurons, rails, fname, config, minvis=.2):
             config.getint("outputs") else 'bb'
 
         dot.node(name=str(idx),
-                 label=f"{node:.2f}",
                  style='filled',
                  fixedsize='false',
                  fillcolor=f"#{input_yel}ff{output_cyan}",
@@ -111,7 +119,6 @@ def draw_graph(neurons, rails, fname, config, minvis=.2):
                         collist = f"#333333{weight_alph};{floored:.2f}:" + collist
                 dot.edge(tail_name=str(idx_start),
                          head_name=str(idx_end),
-                         label=f"{weight:.2f}",
                          penwidth='3',
                          color=collist,
                          # color=f"#{spike_red}0000{weight_alph}",
@@ -163,25 +170,19 @@ def initialize_rails(config):
         adjacency = np.zeros(shape=rails["weights"].shape, dtype=bool)
         sqt = int(np.sqrt(n_nodes))
         for v in range(n_nodes):
-            print("v =", v)
             if (v+1) % sqt:
-                print("right")
                 adjacency[v, v + 1] = True
                 adjacency[v + 1, v] = True
             if v % sqt:
-                print("left")
                 adjacency[v, v - 1] = True
                 adjacency[v - 1, v] = True
             if v + 1 + sqt <= n_nodes:
-                print("down")
                 adjacency[v + sqt, v] = True
                 adjacency[v, v + sqt] = True
             if v + 1 - sqt > 0:
-                print("up")
                 adjacency[v - sqt, v] = True
                 adjacency[v, v - sqt] = True
         rails["weights"][adjacency == False] = 0
-    print(rails["weights"])
 
     indices = np.random.choice(np.arange(rails["weights"].size),
                                replace=False,
