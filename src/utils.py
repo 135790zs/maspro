@@ -13,6 +13,16 @@ def ceiled_sqrt(value):
     return int(np.ceil(np.sqrt(value)))
 
 
+def synaptic_scaling(weights, factor):
+    """ Weight is weight times the scaled average of the in-syns."""
+    for neuron_idx, in_syn in enumerate(weights):
+        n_nonzero = np.count_nonzero(in_syn)
+        if n_nonzero:
+            weights[neuron_idx] = in_syn * factor * n_nonzero / np.sum(in_syn)
+
+    return weights
+
+
 def unflatten_to_square(arr):
     size = arr.flatten().shape[0]
     if size <= 0:

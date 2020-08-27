@@ -30,6 +30,8 @@ class Brain(object):
         self.log_target = np.zeros(shape=(self.log_output.shape))
         self.log_error = np.zeros(shape=(self.log_output.shape))
         self.log_out_recon = np.zeros(shape=(self.log_output.shape))
+        self.log_neuron1 = np.zeros(shape=(1, 0))
+        self.log_weight1 = np.zeros(shape=(1, 0))
 
         # Visualization initialization
         if config.getboolean("visualize"):
@@ -45,9 +47,13 @@ class Brain(object):
         if config["neurontype"] == "LIF":
             # Scale, Leak, input, fire, integrate, update-rails
 
-            # Synaptic scaling
-            over = np.abs(self.rails["weights"]) > 1
-            self.rails["weights"][over] *= config.getfloat("synscaling_softcap")
+            # over = np.abs(self.rails["weights"]) > 1
+            # self.rails["weights"][over] *= config.getfloat("synscaling_softcap")
+
+            # Synaptic scaling, according to Hao et al. (2019)
+            self.rails["weights"] = utils.synaptic_scaling(
+                weights=self.rails["weights"],
+                factor=config.getfloat("synaptic_scaling_factor"))
 
             # Leak some from the neurons
             self.neurons["activation"][self.neurons["activation"] < 0] \
@@ -105,9 +111,7 @@ class Brain(object):
                 self.neurons["activation"][:num_inputs])
 
             output = self.neurons["activation"][-config.getint("outputs"):]
-            self.log_output = np.append(
-                self.log_output,
-                output)
+            self.log_output = np.append(self.log_output, output)
 
             target = io_functions.tstream(time=self.time)
             self.log_target = np.append(self.log_target, target)
@@ -117,6 +121,10 @@ class Brain(object):
             error = np.mean(np.abs(target - out_recon), axis=0)
 
             self.log_error = np.append(self.log_error, error)
+            self.log_neuron1 = np.append(self.log_neuron1,
+                                         self.neurons["activation"][1])
+            self.log_weight1 = np.append(self.log_weight1,
+                                         self.rails["weights"][1][1])
 
             # Error calculation
             self.dopa = max(0, min(1, 1 - error))
@@ -193,6 +201,12 @@ class Brain(object):
         ax_count = subplot(array=self.log_error,
                            title="Error",
                            ax_count=ax_count)
+        ax_count = subplot(array=self.log_neuron1,
+                           title="Neuron1",
+                           ax_count=ax_count)
+        ax_count = subplot(array=self.log_weight1,
+                           title="Weight1",
+                           ax_count=ax_count)
 
         # Spiketrains
         if config.getboolean("show_train"):
@@ -247,9 +261,16 @@ v0.2.4: Improve edge and node color; nullify weights to input and from output.
 v0.3.0: Add test input-output; variable weight range; improve vis; change activation function from dot to sum.
 v0.3.1: Implement (R-)STDP; add target/error metric.
 v0.4:   Add synaptic scaling; implement lattice topologies.
+v0.5:   Add metaplasticity.
+v0.5.1: Add single neuron and weight assessment plot.
 
 TODO MAJOR:
-v0.5:   Add metaplasticity.
+v0.6.0: Add Izhekevich neurons
+v0.6.1: Add DA-STDP
+v0.6.2: Add intrinsic plasiticity.
+v0.6.3: Add feedforward topology.
+v0.6.F: Identify computational identify bottlenecks, improve complexity.
+v0.7:   Critical analysis and refactor.
 
 
 TODO MINOR:
