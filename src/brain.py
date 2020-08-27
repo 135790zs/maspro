@@ -75,6 +75,9 @@ class Brain(object):
                 axis=0)
 
             self.neurons["trace"][firing_units] = 1
+            dt_factor = config.getfloat("dt_factor")
+            self.neurons["threshold"][firing_units] *= dt_factor
+            self.neurons["threshold"][firing_units==False] /= dt_factor
 
             self.rails["rails"] = utils.insert_2d_in_3d(
                 hyperdim=self.rails["rails"],
@@ -87,9 +90,9 @@ class Brain(object):
             # Update the activations
             self.neurons["activation"] = \
                 (self.neurons["activation"]
-                        + np.sum(self.rails["rails"][0, :, :]
-                                 * self.rails["weights"],
-                                 axis=1))
+                    + np.tanh(np.sum(self.rails["rails"][0, :, :]
+                                     * self.rails["weights"],
+                                     axis=1)))
 
             # Evolve trains
             self.rails["rails"] = self.rails["rails"][1:, :, :]
@@ -124,7 +127,7 @@ class Brain(object):
             self.log_neuron1 = np.append(self.log_neuron1,
                                          self.neurons["activation"][1])
             self.log_weight1 = np.append(self.log_weight1,
-                                         self.rails["weights"][1][1])
+                                         self.rails["weights"][1][0])
 
             # Error calculation
             self.dopa = max(0, min(1, 1 - error))
@@ -265,8 +268,8 @@ v0.5:   Add metaplasticity.
 v0.5.1: Add single neuron and weight assessment plot.
 
 TODO MAJOR:
-v0.6.0: Add Izhekevich neurons
-v0.6.1: Add DA-STDP
+v0.6.0: Add DA-STDP
+v0.6.1: Substitute linear kernel by Gaussian
 v0.6.2: Add intrinsic plasiticity.
 v0.6.3: Add feedforward topology.
 v0.6.F: Identify computational identify bottlenecks, improve complexity.

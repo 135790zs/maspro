@@ -44,7 +44,7 @@ def normalize(array, lower=0, upper=1):
     return array + lower
 
 
-def stdp(neurons, rails, dopa=None, metaplas=None):
+def stdp(neurons, rails, config, dopa=None, metaplas=None):
     """ Presyn before postsyn = presyn.trace < postsyn.trace = increase"""
     # for all traces 1, update with all other if weight != 0.
     plasticity = list()
@@ -64,8 +64,11 @@ def stdp(neurons, rails, dopa=None, metaplas=None):
                     factor = 1 / (1 - trace_other)
 
                     plasticity.append(factor)
+                    if config["update_rule"] == "da-stdp":
+                        rails["weights"][idx_other, idx_neuron] *= factor  # pre to post
+                    else:
+                        rails["weights"][idx_other, idx_neuron] /= factor  # pre to post
 
-                    rails["weights"][idx_other, idx_neuron] /= factor  # pre to post
                     rails["weights"][idx_neuron, idx_other] *= factor  # post to pre
     plasticity = 1 / np.mean(plasticity) if plasticity else 1
     return neurons, rails, plasticity
@@ -75,8 +78,11 @@ def update(neurons, rails, config, **kwargs):
     update_rule = config["update_rule"]
     if update_rule == "none":
         return neurons, rails
-    elif update_rule == "stdp":
-        return stdp(neurons=neurons, rails=rails, dopa=kwargs["dopa"])
+    elif update_rule in ["r-stdp", "da-stdp"]:
+        return stdp(neurons=neurons,
+                    rails=rails,
+                    config=config,
+                    dopa=kwargs["dopa"])
 
 
 def draw_graph(neurons, rails, fname, config, minvis=.2):
