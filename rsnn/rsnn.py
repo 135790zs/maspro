@@ -25,7 +25,7 @@ t = 0
 
 while t < config["N_E"]:
     x = io_fns.random_input()
-        
+    s[]
 
 
 
