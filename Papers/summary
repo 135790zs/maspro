@@ -1,0 +1,107 @@
+Only consider 2008+ and relevant (update 20-09-09):
+
+BCM
+
+Izhikevich03:       BCM, STDP
+Wang20b:            BCM, triplet-STDP, memristors
+Pfister06:          BCM, triplet-STDP
+
+STDP
+
+Wang20b:            BCM, triplet-STDP, memristors
+Amirshahi19:        R-STDP, memristors, edge computing
+Bing20:             R-STDP, eligibility traces
+CamunasMesa19:      Review, SNNs, memristors, STDP
+Cantley11:          Memristors, triplet-STDP
+Ebong11:            Memristors, STDP
+Lapkin18:           Memristors, STDP
+Prezioso18:         Memristors, STDP
+Xiang20:            Memristors, STDP
+Wang20a:            Memristors, STDP
+LinaresBarranco09:  Memristors, STDP
+Stoliar19:          Memristors, STDP
+Effenberger15:      STDP, synaptic scaling, emergent dynamics
+Falez19:            STDP, review
+Taherkhani20:       STDP, review
+Vigneron20:         STDP, review
+Wang08:             STDP, implementation
+Wang14:             STDP, implementation
+Hao19:              Dynamic thresholds, synaptic scaling, sym-STDP
+Izhikevich03:       BCM, STDP
+Pfister06:          BCM, triplet-STDP
+Lazar07:            Dynamic thresholds, STDP
+Zhang19:            Dynamic thresholds, STDP
+Legenstein08:       Review, eligibility traces, R-STDP
+Pokorny20:          STDP, memory associations
+Roy17a:             Synaptic decay, STDP
+SerranoG13:         Review, memristors, STDP
+
+Memristors:
+
+Wang20b:            BCM, triplet-STDP, memristors
+Amirshahi19:        R-STDP, memristors, edge computing
+CamunasMesa19:      Review, SNNs, memristors, STDP
+Cantley11:          Memristors, triplet-STDP
+Ebong11:            Memristors, STDP
+Lapkin18:           Memristors, STDP
+LinaresBarranco09:  Memristors, STDP
+Stoliar19:          Memristors, STDP
+Prezioso18:         Memristors, STDP
+Xiang20:            Memristors, STDP
+Wang20a:            Memristors, STDP
+Elsayed20:          Memristors, fault modeling
+SerranoG13:         Review, memristors, STDP
+Furber16:           Review, memristors
+Rahimi20:           Review, memristors
+Markovic20:         Review, memristors
+Yu20:               Review, memristors
+
+Reviews:
+
+Abraham08:          Metaplasticity, review
+CamunasMesa19:      Review, SNNs, memristors, STDP
+Falez19:            STDP, review
+Vigneron20:         STDP, review
+Taherkhani20:       STDP, review
+Galtier13:          Review, neuron models
+Legenstein08:       Review, eligibility traces, R-STDP
+SerranoG13:         Review, memristors, STDP
+Markovic20:         Review, memristors
+Furber16:           Review, memristors
+Rahimi20:           Review, memristors
+Yu20:               Review, memristors
+
+Regularization:
+
+Abraham08:          Metaplasticity, review
+Effenberger15:      STDP, synaptic scaling, emergent dynamics
+Turrigiano08:       Synaptic scaling
+Elbez20:            Dynamic thresholds, dynamic topology
+Hao19:              Dynamic thresholds, synaptic scaling, sym-STDP
+Lazar07:            Dynamic thresholds, STDP
+Zhang19:            Dynamic thresholds, STDP
+Roy17:              Synaptic decay, STDP
+
+Neurodynamics:
+
+Athalye20:          RL re-entering dynamics
+Cejnar19:           Oscillators
+Wyffels14:          Oscillators, frequency modulation
+Effenberger15:      STDP, synaptic scaling, emergent dynamics
+Elbez20:            Dynamic thresholds, dynamic topology
+Galtier13:          Review, neuron models
+Jaeger17:           Conceptors
+Limbacher20:        Synaptic clustering
+Ororbia20:          Predictive coding
+Pokorny20:          STDP, memory associations
+Roy16a:             Dynamic topology
+Roy16b:             Dynamic topology
+Wojcik12:           Dynamics of HH neurons
+
+Eligibility traces:
+
+Bellec19:           Eligibility traces, e-prop, implementation
+Bing20:             R-STDP, eligibility traces
+Legenstein08:       Review, eligibility traces, R-STDP
+Traub20:            Eligibility traces, e-prop, refractory fix
+
