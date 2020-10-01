@@ -23,10 +23,23 @@ def vnext(v, u, z, I):
 def unext(u, v, z):
     util = utilde(u=u, z=z)
     return (util
-            + config["dt"]*((config["IzhU2"] * vtilde(v=v, z=z))
+            + config["dt"]*(config["IzhU2"] * vtilde(v=v, z=z)
                             - config["IzhU3"] * util))
 
 
 def h(v):
     return config["gamma"] * np.exp((min(v, config["H1"]) - config["H1"])
                                     / config["H1"])
+
+
+def evvnext(zi, zj, vj, evv, evu):
+    return ((1 + config["EVV1"] * vj + config["EVV2"])
+            * evv * (1 - zj) * config["dt"]  # switch evu evv?
+            - evu * config["dt"]
+            + zi * config["dt"])
+
+
+def evunext(zi, zj, evv, evu):
+    return (config["EVU1"] * config["dt"] * (1 - zj) * evv
+            + evu
+            - evu * config["EVU2"] * config["dt"])
