@@ -1,6 +1,7 @@
 from config import config
 import numpy as np
 import utils as ut
+import utils2 as uts
 import matplotlib.pyplot as plt
 
 # Traub alg 2
@@ -46,75 +47,33 @@ def traub_izh_np():
     ET = np.zeros(shape=W.shape)
     G = np.zeros(shape=W.shape)
 
-    T = 500
-    A = 5/2
-    B = 10/2
-    C = 15/2
-    D = 10
+    T = 5000
+    A = 15/2
+    B = 5/2
+    C = 10
 
     for t in range(0, T):
-        # if t < T * 0.33:
-        #     I[0] = A
-        #     I[1] = B
-        #     I[2] = C
-        #     if TZ[0] >= TZ[1]:
-        #         I[1] = D
-        # elif t < T * 0.67:
-        #     I[0] = B
-        #     I[1] = C
-        #     I[2] = A
-        #     if TZ[1] >= TZ[2]:
-        #         I[2] = D
-
-        # else:
-        #     I[0] = C
-        #     I[1] = A
-        #     I[2] = B
-        #     if TZ[1] >= TZ[2]:
-        #         I[2] = D
         if t < T * 0.5:
-            I[0] = C
-            I[1] = A
-            if TZ[0] >= TZ[1]:
-                I[1] = D
-        else:
             I[0] = A
-            I[1] = C
+            I[1] = B
+            if TZ[0] >= TZ[1]:
+                I[1] = C
+        else:
+            I[0] = B
+            I[1] = A
             if TZ[1] >= TZ[0]:
-                I[0] = D
+                I[0] = C
+        Nvp = uts.V_next(Nv=Nv, Nu=Nu, Nz=Nz, I=I)
 
-        Nvp = (Nv - (Nv + 65) * Nz) + config["dt"] * (0.04 * (Nv - (Nv + 65) * Nz)**2
-                                                      + 5 * (Nv - (Nv + 65) * Nz)
-                                                      + 140
-                                                      - (Nu + 2 * Nz)
-                                                      + I)
-
-        Nz = np.where(Nvp >= config["H1"], 1, 0)
-        TZ = np.where(Nvp >= config["H1"], TZ, t)
+        Nz = np.where(Nvp >= config["H1"], 1., 0.)
+        TZ = np.where(Nvp >= config["H1"], t, TZ)
 
         # Should this operate on pseudo?
-        Nun = (Nu + 2 * Nz) + config["dt"] * (0.004 * Nvp - 0.02 * (Nu + 2 * Nz))
-        Nvn = (Nvp - (Nvp + 65) * Nz) + config["dt"] * (0.04 * (Nvp - (Nvp + 65) * Nz)**2
-                                                        + 5 * (Nvp - (Nvp + 65) * Nz)
-                                                        + 140
-                                                        - (Nu + 2 * Nz)
-                                                        + I)
+        Nun = uts.U_next(Nu=Nu, Nz=Nz, Nv=Nvp)
+        Nvn = uts.V_next(Nu=Nu, Nz=Nz, Nv=Nvp, I=I)
 
-        EVvn = (EVv * (1 - Nz
-                       + 0.08 * config["dt"] * Nvp
-                       - 0.08 * config["dt"] * Nvp * Nz  # not sure about Nvp here
-                       + 5 * config["dt"]
-                       - 5 * config["dt"] * Nz)
-                - EVu * config["dt"]
-                + Nz[np.newaxis].T * config["dt"])
-
-        EVun = (EVv * (0.004 * config["dt"]
-                       - 0.004 * config["dt"] * Nz)
-                + EVu * (1
-                         - 0.02 * config["dt"]))
-
-        H = config["gamma"] * np.exp((np.clip(Nvp, a_min=None, a_max=config["H1"]) - config["H1"])
-                                     / config["H1"])
+        EVvn = uts.EVv_next(EVv=EVv, EVu=EVu, Nz=Nz, Nv=Nvp)
+        EVun = uts.EVu_next(EVv=EVv, EVu=EVu, Nz=Nz)
 
         EVv = EVvn
         EVu = EVun
@@ -122,6 +81,7 @@ def traub_izh_np():
         Nv = Nvn
         Nu = Nun
 
+        H = uts.H_next(Nv=Nv)
         ET = H * EVv
 
         G = G + ET
@@ -168,6 +128,7 @@ def traub_izh_np():
 
     plt.show()
 
+
 def traub_izh():
     fig, axs = plt.subplots(8, 1)
 
@@ -194,10 +155,12 @@ def traub_izh():
     h2 = 0
     et = 0
     grad = 0
-
-    T = 5000
     tzi = 0
     tzo = 0
+    I_i = 0
+    I_o = 0
+
+    T = 5000
     A = 15/2
     B = 5/2
     C = 10
@@ -485,4 +448,4 @@ def bellec_alif_stdp():  # WORKING
     plt.show()
 
 
-traub_izh()
+traub_izh_np()

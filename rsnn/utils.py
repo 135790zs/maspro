@@ -42,15 +42,12 @@ def evvnext(zi, zj, vi, vj, evv, evu):
              - 5*config["dt"]*zj) * evv
     term2 = - config["dt"] * evu
     term3 = zi * config["dt"]
-    print("zi =,", zi, "zj =,", zj, "vj =,", vj)
-    print("Evv", evv, '\t', term1, term2, term3)
     return term1 + term2 + term3
 
 
 def evunext(zi, zj, evv, evu):
     term1 = 0.004 * config["dt"] * (1 - zj) * evv
     term2 = (1 - 0.02 * config["dt"]) * evu
-    print("Evu", evu, '\t', term1, term2, '\n')
     return term1 + term2
 
 
