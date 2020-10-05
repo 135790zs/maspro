@@ -45,6 +45,7 @@ def EVu_next(EVv, EVu, Nz):
             + EVu * (1
                      - cfg["refr3"] * cfg["dt"]))
 
+
 def H_next(Nv):
     return cfg["gamma"] * np.exp((np.clip(Nv, a_min=None, a_max=cfg["H1"]) - cfg["H1"])
                                  / cfg["H1"])
