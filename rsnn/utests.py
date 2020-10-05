@@ -27,87 +27,88 @@ def traub_izh():
     log_z1 = []
     log_z2 = []
 
-    s1 = np.asarray([-config["IzhV1"], -10.])
-    s2 = np.asarray([-config["IzhV1"], -10.])
+    v1 = -config["IzhV1"]
+    v2 = -config["IzhV1"]
+    u1 = 0
+    u2 = 0
     z1 = 0
     z2 = 0
-    ev = np.zeros(shape=(2,))
+    evv = 0
+    evu = 0
     h2 = 0
     et = 0
     grad = 0
 
-    T = 5000
+    T = 500
     tzi = 0
     tzo = 0
-    A = 15
-    B = 5
-    # C = 15
+    A = 15/2
+    B = 5/2
+    C = 10
 
     for t in range(0, T):
         if t < T * 0.3:
-            I_i = U(1, A)
-            I_o = U(1, B)
-            if tzi > tzo:
-                I_o = U(0, 1)*(t-tzi)
+            I_i = A
+            I_o = B
+            if tzi >= tzo:
+                I_o = C
         else:
-            I_i = U(1, B)
-            I_o = U(1, A)
-            if tzo > tzi:
-                I_i = U(0, 1)*(t-tzo)
+            I_i = B
+            I_o = A
+            if tzo >= tzi:
+                I_i = C
 
-        if s1[0] > config["H1"]:
+        v1_pseudo = ut.vnext(v=v1, u=u1, z=z1, I=I_i)
+        v2_pseudo = ut.vnext(v=v2, u=u2, z=z2, I=I_o)
+
+        if v1_pseudo >= config["H1"]:
             z1 = 1
             tzi = t
         else:
             z1 = 0
 
-        if s2[0] > config["H1"]:
+        if v2_pseudo >= config["H1"]:
             z2 = 1
             tzo = t
         else:
             z2 = 0
 
+        v1n = ut.vnext(v=v1_pseudo, u=u1, z=z1, I=I_i)
+        u1n = ut.unext(v=v1_pseudo, u=u1, z=z1)
+        v2n = ut.vnext(v=v2_pseudo, u=u2, z=z2, I=I_o)
+        u2n = ut.unext(v=v2_pseudo, u=u2, z=z2)
 
-        s1vn = ut.vnext(v=s1[0], u=s1[1], z=z1, I=I_i)
-        s1un = ut.unext(v=s1[0], u=s1[1], z=z1)
-        s2vn = ut.vnext(v=s2[0], u=s2[1], z=z2, I=I_o)
-        s2un = ut.unext(v=s2[0], u=s2[1], z=z2)
+        evvn = ut.evvnext(zi=z1, zj=z2, vi=v1, vj=v2, evv=evv, evu=evu)
+        evun = ut.evunext(zi=z1, zj=z2, evv=evv, evu=evu)
 
-        evvn = ut.evvnext(zi=z1, zj=z2, vi=s1[0], vj=s2[0], evv=ev[0], evu=ev[1]) \
-             # + ut.evvnext(zi=z2, zj=z1, vi=s2[0], vj=s1[0], evv=ev[0], evu=ev[1])
-        evun = ut.evunext(zi=z1, zj=z1, evv=ev[0], evu=ev[1]) \
-            # + ut.evunext(zi=z2, zj=z1, evv=ev[0], evu=ev[1])
-        ev[0] = evvn
-        ev[1] = evun
-        s1[0] = s1vn
-        s1[1] = s1un
-        s2[0] = s2vn
-        s2[1] = s2un
+        evv = evvn
+        evu = evun
 
+        v1 = v1n
+        u1 = u1n
+        v2 = v2n
+        u2 = u2n
+        h2 = ut.h(v=v2_pseudo)
 
-        h2 = ut.h(v=s2[0])
-        et = h2 * ev[1]
+        et = h2 * evv
 
         grad = grad + et
 
-        log_v1.append(s1[0])
-        log_v2.append(s2[0])
-        log_evec_v.append(ev[0])
-        log_evec_u.append(ev[1])
+        log_v1.append(v1)
+        log_v2.append(v2)
+        log_evec_v.append(evv)
+        log_evec_u.append(evu)
         log_etrace.append(et)
         log_grad.append(grad)
         log_h2.append(h2)
-        log_u1.append(s1[1])
-        log_u2.append(s2[1])
+        log_u1.append(u1)
+        log_u2.append(u2)
         log_z1.append(z1)
         log_z2.append(z2)
 
     axs[0].plot(log_v1)
     axs[0].plot(log_v2)
-    axs[0].axhline(y=117, c='black', alpha=0.3, linestyle='--', linewidth=1)
-    axs[0].axhline(y=-80, c='black', alpha=0.3, linestyle='--', linewidth=1)
     axs[0].set_title("Voltage")
-    # axs[0].set_ylim((-100, 130))
     axs[1].plot(log_u1)
     axs[1].plot(log_u2)
     axs[1].set_title("Refractory")
@@ -116,35 +117,20 @@ def traub_izh():
     axs[2].set_title("Spikes")
     axs[3].plot(log_evec_v)
     axs[3].set_title("Voltage eligibility")
-    # axs[1].axhline(y=3, c='black', alpha=0.3, linestyle='--', linewidth=1)
-    # axs[1].axhline(y=-3.7, c='black', alpha=0.3, linestyle='--', linewidth=1)
-    # axs[1].set_ylim((-4, 3.3))
     axs[4].plot(log_evec_u)
     axs[4].set_title("Refractory eligibility")
-    # axs[4].axhline(y=0.005, c='black', alpha=0.3, linestyle='--', linewidth=1)
-    # axs[4].axhline(y=-0.002, c='black', alpha=0.3, linestyle='--', linewidth=1)
-    # axs[2].set_ylim((-0.0023, 0.0053))
     axs[5].plot(log_h2)
     axs[5].set_title("Pseudo-derivative")
-    # axs[5].axhline(y=.3, c='black', alpha=0.3, linestyle='--', linewidth=1)
-    # axs[5].axhline(y=0, c='black', alpha=0.3, linestyle='--', linewidth=1)
-
     axs[6].plot(log_etrace)
     axs[6].set_title("Eligibility trace")
-    # axs[6].axhline(y=.88, c='black', alpha=0.3, linestyle='--', linewidth=1)
-    # axs[6].axhline(y=-.65, c='black', alpha=0.3, linestyle='--', linewidth=1)
-    # axs[3].set_ylim((-.7, .93))
     axs[7].plot(log_grad)
     axs[7].set_title("Gradient")
-    # axs[4].axhline(y=245, c='black', alpha=0.3, linestyle='--', linewidth=1)
-    # axs[4].axhline(y=183, c='black', alpha=0.3, linestyle='--', linewidth=1)
-    # axs[4].set_ylim((180, 248))
 
     plt.show()
 
 
-def traub_lif():
-    fig, axs = plt.subplots(13, 1)
+def traub_lif():  # WORKING
+    fig, axs = plt.subplots(8, 1)
 
     log_v1 = []
     log_v2 = []
@@ -159,64 +145,50 @@ def traub_lif():
     v2 = 0
     z1 = 0
     z2 = 0
-    z1_min_thr = 0
-    z2_min_thr = 0
     ev = 0
     h2 = 0
     et = 0
     grad = 0
 
-    T = 500
+    alpha = 0.9
+    dt_ref = 3
+
+    T = 250
     tzi = 0
     tzo = 0
-    dt_ref = 5
-    alpha = 0.9
-    v_thr = 15
-    A = 2
-    B = 3
-    C = 8
-
+    A = 5
+    B = 5
+    C = 15
 
     for t in range(0, T):
-        z1_min_thr -= 1
-        z2_min_thr -= 1
         if t < T * 0.5:
-            I_i = U(1, A)
-            I_o = U(1, B)
-            if tzi > tzo:
-                I_o = U(1, C)
+            I_i = A
+            I_o = B
+            if tzi >= tzo:
+                I_o = C
         else:
-            I_i = U(1, B)
-            I_o = U(1, A)
-            if tzo > tzi:
-                I_i = U(1, C)
+            I_i = B
+            I_o = A
+            if tzo >= tzi:
+                I_i = C
 
-        print(t, "z1", z1)
-        print(t, "z1mt", z1_min_thr)
-        print(t, "z1bool", int(z1_min_thr == 0))
-        if t - tzi < dt_ref:
-            v1 = 0
-        if t - tzi >= dt_ref and v1 > v_thr:
+        if v1 >= config["H1"] and t - tzi >= dt_ref:
             z1 = 1
             tzi = t
-            z1_min_thr = dt_ref
         else:
             z1 = 0
-        if t - tzo < dt_ref:
-            v2 = 0
-        if t - tzo >= dt_ref and v2 > v_thr:
+
+        if v2 >= config["H1"] and t - tzo >= dt_ref:
             z2 = 1
             tzo = t
-            z2_min_thr = dt_ref
         else:
             z2 = 0
 
-        v1 = alpha*v1 + I_i - z1*alpha*v1 - int(z1_min_thr == 0)*alpha*v1
-        v2 = alpha*v2 + I_o - z2*alpha*v2 - int(z2_min_thr == 0)*alpha*v2
+        v1 = alpha*v1 + I_i - z1*alpha*v1 - int((t-tzi) == dt_ref)*alpha*v1
+        v2 = alpha*v2 + I_o - z2*alpha*v2 - int((t-tzo) == dt_ref)*alpha*v2
 
-        ev = alpha * (1 - z2 - int(z2_min_thr == 0))*ev + z1
-
-        h2 = -config["gamma"] if t-tzo < dt_ref else config["gamma"] * max(0, 1-abs((v2-v_thr) / v_thr))
+        ev = alpha*(1-z2-int((t-tzo) == dt_ref)) * ev + z1
+        h2 = -config["gamma"] if t-tzo < dt_ref else config["gamma"] * max(0, 1 - abs((v2 - config["H1"]) / config["H1"]))
         et = h2 * ev
 
         grad = grad + et
@@ -232,132 +204,129 @@ def traub_lif():
 
     axs[0].plot(log_v1)
     axs[0].plot(log_v2)
-    # axs[0].axhline(y=117, c='black', alpha=0.3, linestyle='--', linewidth=1)
-    # axs[0].axhline(y=-80, c='black', alpha=0.3, linestyle='--', linewidth=1)
     axs[0].set_title("Voltage")
-    # axs[0].set_ylim((-100, 130))
     axs[2].plot(log_z1)
     axs[2].plot(log_z2)
     axs[2].set_title("Spikes")
     axs[3].plot(log_evec)
     axs[3].set_title("Voltage eligibility")
-    # axs[1].axhline(y=3, c='black', alpha=0.3, linestyle='--', linewidth=1)
-    # axs[1].axhline(y=-3.7, c='black', alpha=0.3, linestyle='--', linewidth=1)
-    # axs[1].set_ylim((-4, 3.3))
-    # axs[4].axhline(y=0.005, c='black', alpha=0.3, linestyle='--', linewidth=1)
-    # axs[4].axhline(y=-0.002, c='black', alpha=0.3, linestyle='--', linewidth=1)
-    # axs[2].set_ylim((-0.0023, 0.0053))
     axs[5].plot(log_h2)
     axs[5].set_title("Pseudo-derivative")
-    # axs[5].axhline(y=.3, c='black', alpha=0.3, linestyle='--', linewidth=1)
-    # axs[5].axhline(y=0, c='black', alpha=0.3, linestyle='--', linewidth=1)
-
     axs[6].plot(log_etrace)
     axs[6].set_title("Eligibility trace")
-    # axs[6].axhline(y=.88, c='black', alpha=0.3, linestyle='--', linewidth=1)
-    # axs[6].axhline(y=-.65, c='black', alpha=0.3, linestyle='--', linewidth=1)
-    # axs[3].set_ylim((-.7, .93))
     axs[7].plot(log_grad)
     axs[7].set_title("Gradient")
-    # axs[4].axhline(y=245, c='black', alpha=0.3, linestyle='--', linewidth=1)
-    # axs[4].axhline(y=183, c='black', alpha=0.3, linestyle='--', linewidth=1)
-    # axs[4].set_ylim((180, 248))
-
     plt.show()
 
+
+def bellec_alif_stdp():  # WORKING
+    fig, axs = plt.subplots(8, 1)
+
+    log_v1 = []
+    log_v2 = []
+    log_u1 = []
+    log_u2 = []
+    log_evec_v = []
+    log_evec_u = []
+    log_h2 = []
+    log_etrace = []
+    log_grad = []
+    log_z1 = []
+    log_z2 = []
+
+    v1 = 0
+    v2 = 0
+    u1 = config["H1"]
+    u2 = config["H1"]
+    z1 = 0
+    z2 = 0
+    evv = 0
+    evu = 0
+    h2 = 0
+    et = 0
+    grad = 0
+
+    alpha = 0.9
+    beta = 0.07
+    rho = np.e**(-1/200)
+    dt_ref = 3
+
+    T = 250
+    tzi = 0
+    tzo = 0
+    A = 2
+    B = 2
+    C = 15
+
+    for t in range(0, T):
+        if t < T * 0.5:
+            I_i = A
+            I_o = B
+            if tzi >= tzo:
+                I_o = C
+        else:
+            I_i = B
+            I_o = A
+            if tzo >= tzi:
+                I_i = C
+
+        if v1 >= u1 and t - tzi >= dt_ref:
+            z1 = 1
+            tzi = t
+        else:
+            z1 = 0
+
+        if v2 >= u2 and t - tzo >= dt_ref:
+            z2 = 1
+            tzo = t
+        else:
+            z2 = 0
+
+        v1 = alpha*v1 + I_i - z1*alpha*v1 - int((t-tzi) == dt_ref)*alpha*v1
+        v2 = alpha*v2 + I_o - z2*alpha*v2 - int((t-tzo) == dt_ref)*alpha*v2
+        u1 = rho * u1 + z1
+        u2 = rho * u2 + z2
+
+        h2 = -config["gamma"] if t-tzo < dt_ref else config["gamma"] * max(0, 1 - abs((v2 - config["H1"]) / config["H1"]))
+        evvn = alpha*(1-z2-int((t-tzo) == dt_ref)) * evv + z1
+        evu = h2*evv + (rho - h2*beta)*evu
+        evv = evvn
+        et = h2 * evv
+
+        grad = grad + et
+
+        log_v1.append(v1)
+        log_v2.append(v2)
+        log_u1.append(u1)
+        log_u2.append(u2)
+        log_evec_v.append(evv)
+        log_evec_u.append(evu)
+        log_etrace.append(et)
+        log_grad.append(grad)
+        log_h2.append(h2)
+        log_z1.append(z1)
+        log_z2.append(z2)
+
+    axs[0].plot(log_v1)
+    axs[0].plot(log_v2)
+    axs[0].set_title("Voltage")
+    axs[1].plot(log_u1)
+    axs[1].plot(log_u2)
+    axs[1].set_title("Adaptive threshold")
+    axs[2].plot(log_z1)
+    axs[2].plot(log_z2)
+    axs[2].set_title("Spikes")
+    axs[3].plot(log_evec_v)
+    axs[3].set_title("Voltage eligibility")
+    axs[4].plot(log_evec_u)
+    axs[4].set_title("Threshold eligibility")
+    axs[5].plot(log_h2)
+    axs[5].set_title("Pseudo-derivative")
+    axs[6].plot(log_etrace)
+    axs[6].set_title("Eligibility trace")
+    axs[7].plot(log_grad)
+    axs[7].set_title("Gradient")
+    plt.show()
+
+
 traub_izh()
-
-# def traub_lif():
-#     fig, axs = plt.subplots(6, 1)
-
-#     log_v1 = []
-#     log_v2 = []
-#     log_evec = []
-#     log_h2 = []
-#     log_etrace = []
-#     log_grad = []
-
-#     s1 = 0
-#     s2 = 0
-#     z1 = 0
-#     z2 = 0
-#     ev = 0
-#     et = 0
-#     grad = 0
-
-#     T = 1000
-#     tzi = 0
-#     tzo = 0
-#     vthr = 30
-#     alpha = 0.9
-#     gamma = 0.3
-#     refr = 2
-
-#     A = 4
-#     B = 10
-#     C = 20
-#     for t in range(0, T):
-#         if t < T * 0.45:
-#             I_i = U(1, B)
-#             I_o = U(1, A)
-#             if tzi > tzo:
-#                 I_o = U(1, C)
-#         else:
-#             I_i = U(1, A)
-#             I_o = U(1, B)
-#             if tzo > tzi:
-#                 I_i = U(1, C)
-
-#         s1 = alpha * s1 + I_i - z1*alpha*s1 - int(bool(t-tzi == refr))*alpha*s1
-#         s2 = alpha * s2 + I_i - z2*alpha*s2 - int(bool(t-tzo == refr))*alpha*s2
-
-#         ev = alpha*(1-z2-int(bool(t-tzo == refr))) * ev + z1
-
-#         h2 = -gamma if t-tzo < refr else gamma * max(0, 1-abs((s2-vthr)/vthr))
-
-#         et = h2*ev
-
-
-
-
-#         log_v1.append(s1)
-#         log_v2.append(s2)
-#         log_evec.append(ev)
-#         log_etrace.append(et)
-#         log_grad.append(grad)
-#         log_h2.append(h2)
-
-#     axs[0].plot(log_v1)
-#     axs[0].plot(log_v2)
-#     axs[0].axhline(y=117, c='black', alpha=0.3, linestyle='--', linewidth=1)
-#     axs[0].axhline(y=-80, c='black', alpha=0.3, linestyle='--', linewidth=1)
-#     axs[0].set_title("Voltage")
-#     # axs[0].set_ylim((-100, 130))
-#     axs[1].plot(log_evec)
-#     axs[1].set_title("Voltage eligibility")
-#     axs[1].axhline(y=3, c='black', alpha=0.3, linestyle='--', linewidth=1)
-#     axs[1].axhline(y=-3.7, c='black', alpha=0.3, linestyle='--', linewidth=1)
-#     # axs[1].set_ylim((-4, 3.3))
-#     # axs[2].plot(log_evec_u)
-#     # axs[2].set_title("Refractory eligibility")
-#     # axs[2].axhline(y=0.005, c='black', alpha=0.3, linestyle='--', linewidth=1)
-#     # axs[2].axhline(y=-0.002, c='black', alpha=0.3, linestyle='--', linewidth=1)
-#     # axs[2].set_ylim((-0.0023, 0.0053))
-#     axs[3].plot(log_h2)
-#     axs[2].set_title("Pseudo-derivative")
-#     axs[3].axhline(y=.3, c='black', alpha=0.3, linestyle='--', linewidth=1)
-#     axs[3].axhline(y=0, c='black', alpha=0.3, linestyle='--', linewidth=1)
-
-#     axs[4].plot(log_etrace)
-#     axs[4].set_title("Eligibility trace")
-#     axs[4].axhline(y=.88, c='black', alpha=0.3, linestyle='--', linewidth=1)
-#     axs[4].axhline(y=-.65, c='black', alpha=0.3, linestyle='--', linewidth=1)
-#     # axs[3].set_ylim((-.7, .93))
-#     axs[5].plot(log_grad)
-#     axs[5].set_title("Gradient")
-#     # axs[4].axhline(y=245, c='black', alpha=0.3, linestyle='--', linewidth=1)
-#     # axs[4].axhline(y=183, c='black', alpha=0.3, linestyle='--', linewidth=1)
-#     # axs[4].set_ylim((180, 248))
-#     plt.show()
-
-# traub_lif()
