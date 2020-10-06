@@ -12,21 +12,13 @@ np.set_printoptions(threshold=sys.maxsize)
 
 def traub_lif(T=1000, num=2):  # WORKING
 
-    # Custom input feed. Fixed for num=2.
-    dur = 18
-    diff = 5
-    interval = 100
-    val = 3.55
-    X = np.zeros(shape=(T, num))
-    for t in range(0, T):
-        if t < 0.5 * T:
-            X[t, 0] = val if t % interval <= dur else 0
-            X[t, 1] = val if (t % interval <= diff+dur and t % interval > diff) \
-                else 0
-        else:
-            X[t, 0] = val if (t % interval <= diff+dur and t % interval > diff) \
-                else 0
-            X[t, 1] = val if t % interval <= dur else 0
+    X = ut.get_artificial_input(T=T,
+                                num=num,
+                                dur=18,
+                                diff=5,
+                                interval=100,
+                                val=3.55,
+                                switch_interval=500)
 
     # Logging arrays
     log = {
@@ -201,21 +193,13 @@ def bellec_alif_stdp():  # WORKING
 
 def traub_izh(T=1000, num=2, uses_weights=False):  #
 
-    # Custom input feed. Fixed for num=2.
-    dur = 20
-    diff = 5
-    interval = 100
-    val = 25
-    X = np.zeros(shape=(T, num))
-    for t in range(0, T):
-        if t < 0.25 * T or t > 0.75 * T:
-            X[t, 0] = val if t % interval <= dur else 0
-            X[t, 1] = val if (t % interval <= diff+dur and t % interval > diff) \
-                else 0
-        else:
-            X[t, 0] = val if (t % interval <= diff+dur and t % interval > diff) \
-                else 0
-            X[t, 1] = val if t % interval <= dur else 0
+    X = ut.get_artificial_input(T=T,
+                                num=num,
+                                dur=20,
+                                diff=5,
+                                interval=100,
+                                val=25,
+                                switch_interval=500)
 
     # Logging arrays
     log = {

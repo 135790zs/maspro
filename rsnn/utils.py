@@ -129,3 +129,17 @@ def plot_logs(log, title=None):
     axs[-1].set_xlabel("$t$", fontsize=fontsize)
 
     plt.show()
+
+
+def get_artificial_input(T, num, dur, diff, interval, val, switch_interval):
+    X = np.zeros(shape=(T, num))
+    for t in range(0, T):
+        if t % (switch_interval*2) < switch_interval:
+            X[t, 0] = val if t % interval <= dur else 0
+            X[t, 1] = val if (t % interval <= diff+dur and t % interval > diff) \
+                else 0
+        else:
+            X[t, 0] = val if (t % interval <= diff+dur and t % interval > diff) \
+                else 0
+            X[t, 1] = val if t % interval <= dur else 0
+    return X
