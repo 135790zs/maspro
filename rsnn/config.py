@@ -1,4 +1,4 @@
-config = {
+cfg = {
     "eqb": -65,
     "thr": 30,
     "refr1": 2,
@@ -13,3 +13,15 @@ config = {
     "gamma": 0.3
 
 }
+
+"""
+NOTES
+
+
+1) Remove duplicate code, clean
+2) Construct unit test file
+3) Make single-layer DRSNN
+
+
+
+"""
