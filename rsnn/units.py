@@ -10,6 +10,85 @@ rc['font.family'] = 'STIXGeneral'
 np.set_printoptions(threshold=sys.maxsize)
 
 
+def new_traub_lif(T=1000, num=2):
+
+    # Custom input feed. Fixed for num=2.
+    dur = 18
+    diff = 5
+    interval = 100
+    val = 3.55
+    X = np.zeros(shape=(T, num))
+    for t in range(0, T):
+        if t < 0.5 * T:
+            X[t, 0] = val if t % interval <= dur else 0
+            X[t, 1] = val if (t % interval <= diff+dur and t % interval > diff) \
+                else 0
+        else:
+            X[t, 0] = val if (t % interval <= diff+dur and t % interval > diff) \
+                else 0
+            X[t, 1] = val if t % interval <= dur else 0
+
+    # Logging arrays
+    log = {
+        "Nv": np.zeros(shape=(T, num,)),
+        "X": X,
+        "Nz": np.zeros(shape=(T, num,)),
+        "H": np.zeros(shape=(T, num,)),
+        "EVv": np.zeros(shape=(T, num, num,)),
+        "ET": np.zeros(shape=(T, num, num,)),
+        "W": np.zeros(shape=(T, num, num,)),
+    }
+
+    # Variable arrays
+    Nv = np.ones(shape=(num,))
+    Nz = np.zeros(shape=(num,))
+    H = np.zeros(shape=(num,))
+    TZ = np.zeros(shape=(num,))
+
+    rng = np.random.default_rng()
+    W = rng.random(size=(num, num,))
+    np.fill_diagonal(W, 0.)
+
+    EVv = np.zeros(shape=(num, num,))
+    ET = np.zeros(shape=(num, num,))
+
+    for t in range(0, T):
+
+        I = X[t, :]
+
+        Nz = np.where(np.logical_and(t - TZ > cfg["dt_refr"],
+                                     Nv >= cfg["thr"]),
+                      1,
+                      0)
+        TZ = np.where(Nz, t, TZ)
+
+        R = (t - TZ <= cfg["dt_refr"]).astype(int)
+
+        Nv = cfg["alpha"] * Nv + I - Nz * cfg["alpha"] * Nv - R * cfg["alpha"] * Nv
+
+        EVv = cfg["alpha"] * (1 - Nz - R) * EVv + Nz[np.newaxis].T
+
+        H = np.where(t - TZ < cfg["dt_refr"],
+                     -cfg["gamma"],
+                     cfg["gamma"] * np.clip(a=1 - (abs(Nv - cfg["thr"])
+                                                   / cfg["thr"]),
+                                            a_min=0,
+                                            a_max=None))
+
+        ET = H * EVv
+
+        W = W + ET
+
+        log["Nv"][t, :] = Nv
+        log["Nz"][t, :] = Nz
+        log["H"][t, :] = H
+        log["EVv"][t, :, :] = EVv
+        log["ET"][t, :, :] = ET
+        log["W"][t, :, :] = W
+
+    ut.plot_logs(log, title="STDP-LIF")
+
+
 def traub_lif():  # WORKING
     fig, axs = plt.subplots(8, 1)
 
@@ -210,7 +289,7 @@ def bellec_alif_stdp():  # WORKING
     plt.show()
 
 
-def traub_izh_conn(T=5000, num=2, uses_weights=False):  # WORKING
+def traub_izh(T=5000, num=2, uses_weights=False):  # WORKING
 
     # Custom input feed. Fixed for num=2.
     dur = 20
@@ -227,18 +306,17 @@ def traub_izh_conn(T=5000, num=2, uses_weights=False):  # WORKING
                 else 0
             X[t, 1] = val if t % interval <= dur else 0
 
-
     # Logging arrays
     log = {
         "Nv": np.zeros(shape=(T, num,)),
+        "X": X,
         "Nu": np.zeros(shape=(T, num,)),
         "Nz": np.zeros(shape=(T, num,)),
         "H": np.zeros(shape=(T, num,)),
-        "W": np.zeros(shape=(T, num, num,)),
         "EVv": np.zeros(shape=(T, num, num,)),
         "EVu": np.zeros(shape=(T, num, num,)),
         "ET": np.zeros(shape=(T, num, num,)),
-        "X": X,
+        "W": np.zeros(shape=(T, num, num,)),
     }
 
     # Variable arrays
@@ -297,4 +375,5 @@ def traub_izh_conn(T=5000, num=2, uses_weights=False):  # WORKING
     ut.plot_logs(log)
 
 
-traub_izh_conn(T=5000, uses_weights=False)
+new_traub_lif()
+# traub_izh()
