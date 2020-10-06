@@ -124,6 +124,7 @@ def plot_logs(log, title=None):
         axs[-1].legend(fontsize=fontsize_legend,
                        loc="upper right",
                        ncol=2)
+        axs[-1].grid(linestyle='--')
 
     axs[-1].set_xlabel("$t$", fontsize=fontsize)
 
