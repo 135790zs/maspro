@@ -36,7 +36,7 @@ def U_next(Nu, Nz, Nv):
 def EVv_next(EVv, EVu, Nz, Nv):
     return (EVv * (1 - Nz
                    + 2 * cfg["volt1"] * cfg["dt"] * Nv
-                   - 2 * cfg["volt1"] * cfg["dt"] * Nv * Nz  # not sure about Nvp here
+                   - 2 * cfg["volt1"] * cfg["dt"] * Nv * Nz
                    + cfg["volt2"] * cfg["dt"]
                    - cfg["volt2"] * cfg["dt"] * Nz)
             - EVu * cfg["dt"]
@@ -143,3 +143,49 @@ def get_artificial_input(T, num, dur, diff, interval, val, switch_interval):
                 else 0
             X[t, 1] = val if t % interval <= dur else 0
     return X
+
+
+def izh_eprop(Nv, Nu, Nz, X, EVv, EVu, H, W, ET, TZ, t, rnd_factor=False,
+              uses_weights=True):
+
+    I = np.dot(W, Nz) if uses_weights else np.zeros(shape=Nz.shape)
+    I += X
+    if rnd_factor:
+        rng = np.random.default_rng()
+        I += rng.random(size=I.shape[0]) * rnd_factor
+
+    Nvn = V_next(Nu=Nu, Nz=Nz, Nv=Nv, I=I)
+    Nun = U_next(Nu=Nu, Nz=Nz, Nv=Nv)
+
+    # Should this operate on pseudo?
+    EVvn = EVv_next(EVv=EVv, EVu=EVu, Nz=Nz, Nv=Nv)
+    EVun = EVu_next(EVv=EVv, EVu=EVu, Nz=Nz)
+
+    H = H_next(Nv=Nv)
+
+    Nz = np.where(Nv >= cfg["thr"], 1., 0.)
+    TZ = np.where(Nv >= cfg["thr"], t, TZ)
+
+    ET = H * EVvn
+
+    W = W + ET
+    np.fill_diagonal(W, 0)
+
+    EVv = EVvn
+    EVu = EVun
+    Nv = Nvn
+    Nu = Nun
+
+    return Nv, Nu, Nz, EVv, EVu, H, W, ET, TZ
+
+
+def drop_weights(W, recur_lay1=True):
+    N = W.shape[0]//2
+    if recur_lay1:
+        np.fill_diagonal(W[:N//2, :N//2], 0)
+    else:
+        W[:N//2, :N//2] = 0
+    W[:N//2, N//2:] = 0
+    np.fill_diagonal(W[N//2:, :N//2], 0)
+    np.fill_diagonal(W[N//2:, N//2:], 0)
+    return W
