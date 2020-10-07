@@ -1,6 +1,10 @@
 from config import cfg
 import numpy as np
 import utils as ut
+import matplotlib.pyplot as plt
+
+plot_interval = 1
+
 
 # Variable arrays
 Nv = np.ones(shape=(cfg["N_Rec"]+2, cfg["N_R"],)) * cfg["eqb"]
@@ -10,30 +14,37 @@ H = np.zeros(shape=(cfg["N_Rec"]+2, cfg["N_R"],))
 TZ = np.zeros(shape=(cfg["N_Rec"]+2, cfg["N_R"],))
 
 rng = np.random.default_rng()
-W = rng.random(size=(cfg["N_Rec"]+1, cfg["N_R"]*2, cfg["N_R"]*2,))
+W = rng.random(size=(cfg["N_Rec"]+1, cfg["N_R"]*2, cfg["N_R"]*2,)) * 2 - 1
+
+for r in range(cfg["N_Rec"]+1):
+    W[r, :, :] = ut.drop_weights(W=W[r, :, :], recur_lay1=(r > 0))
 
 EVv = np.zeros(shape=(cfg["N_Rec"]+1, cfg["N_R"]*2, cfg["N_R"]*2,))
 EVu = np.zeros(shape=(cfg["N_Rec"]+1, cfg["N_R"]*2, cfg["N_R"]*2,))
 ET = np.zeros(shape=(cfg["N_Rec"]+1, cfg["N_R"]*2, cfg["N_R"]*2,))
 
+log = {
+    "Nv": np.zeros(shape=(cfg["Epochs"],) + Nv.shape),
+    "Nu": np.zeros(shape=(cfg["Epochs"],) + Nu.shape),
+    "Nz": np.zeros(shape=(cfg["Epochs"],) + Nz.shape),
+    "H": np.zeros(shape=(cfg["Epochs"],) + H.shape),
+    "EVv": np.zeros(shape=(cfg["Epochs"],) + EVv.shape),
+    "EVu": np.zeros(shape=(cfg["Epochs"],) + EVu.shape),
+    "ET": np.zeros(shape=(cfg["Epochs"],) + ET.shape),
+    "W": np.zeros(shape=(cfg["Epochs"],) + W.shape)
+}
 
-# R <- F(X, W_in)
+fig = plt.figure(constrained_layout=False)
+gsc = fig.add_gridspec(nrows=8, ncols=cfg["N_Rec"]+3, hspace=0.2)
 
+plt.ion()
 
-# R <- G(R)
-
-
-# Y = F(R, W_out)
-
-for ep in range(0, 100):
+for ep in range(0, cfg["Epochs"]):
 
     X = rng.random(size=(cfg["N_R"],))  # input is nonzero for first layer
-    print("INPUT", X)
 
-    for r in range(0, cfg["N_Rec"]-1):
+    for r in range(0, cfg["N_Rec"]):
 
-        W[r, :, :] = ut.drop_weights(W=W[r, :, :],
-                                     recur_lay1=(r > 0))
         Nvr, Nur, Nzr, EVv[r, :, :], EVu[r, :, :], Hr, W[r, :, :], \
             ET[r, :, :], TZr = ut.izh_eprop(
                 Nv=np.concatenate((Nv[r, :], Nv[r+1, :])),
@@ -54,12 +65,26 @@ for ep in range(0, 100):
         Nz[r, :] = Nzr[:cfg["N_R"]]
         TZ[r, :] = TZr[:cfg["N_R"]]
         H[r, :] = Hr[:cfg["N_R"]]
+
         Nv[r+1, :] = Nvr[cfg["N_R"]:]
         Nu[r+1, :] = Nur[cfg["N_R"]:]
         Nz[r+1, :] = Nzr[cfg["N_R"]:]
         TZ[r+1, :] = TZr[cfg["N_R"]:]
         H[r+1, :] = Hr[cfg["N_R"]:]
 
+        log["Nv"][ep, :, :] = Nv
+        log["Nu"][ep, :, :] = Nu
+        log["Nz"][ep, :, :] = Nz
+        log["H"][ep, :, :] = H
+        log["ET"][ep, :, :, :] = ET
+        log["EVv"][ep, :, :, :] = EVv
+        log["EVu"][ep, :, :, :] = EVu
+        log["W"][ep, :, :, :] = W
+
+        if plot_interval and (ep % plot_interval == 0 or ep == 0):
+            print(log)
+            fig, gsc = ut.plot_drsnn(fig, gsc, Nv, Nz, W, ET, log, ep)
+
         X = np.zeros(shape=(cfg["N_R"],))  # First layer passed, set input to 0
 
-    print("OUTPUT", Nv[-1, :])
+# Weights aren't dropped correctly according to plot. Fix!

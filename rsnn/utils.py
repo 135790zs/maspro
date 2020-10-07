@@ -1,6 +1,7 @@
 from config import cfg
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.gridspec as gridspec
 from matplotlib import rcParams as rc
 rc['mathtext.fontset'] = 'stix'
 rc['font.family'] = 'STIXGeneral'
@@ -64,6 +65,7 @@ def plot_logs(log, title=None):
     labelpad = 15
     fontsize = 14
     fontsize_legend = 12
+
     if title:
         fig.suptitle(title, fontsize=20)
 
@@ -149,7 +151,8 @@ def izh_eprop(Nv, Nu, Nz, X, EVv, EVu, H, W, ET, TZ, t, rnd_factor=False,
               uses_weights=True):
 
     I = np.dot(W, Nz) if uses_weights else np.zeros(shape=Nz.shape)
-    I += X
+    I += X[t, :] if X.ndim == 2 else X
+
     if rnd_factor:
         rng = np.random.default_rng()
         I += rng.random(size=I.shape[0]) * rnd_factor
@@ -157,10 +160,11 @@ def izh_eprop(Nv, Nu, Nz, X, EVv, EVu, H, W, ET, TZ, t, rnd_factor=False,
     Nvn = V_next(Nu=Nu, Nz=Nz, Nv=Nv, I=I)
     Nun = U_next(Nu=Nu, Nz=Nz, Nv=Nv)
 
-    # Should this operate on pseudo?
+    # Should this operate on Nvn instead? Probably not..?
     EVvn = EVv_next(EVv=EVv, EVu=EVu, Nz=Nz, Nv=Nv)
     EVun = EVu_next(EVv=EVv, EVu=EVu, Nz=Nz)
 
+    # What about this one? Probably both or neither.
     H = H_next(Nv=Nv)
 
     Nz = np.where(Nv >= cfg["thr"], 1., 0.)
@@ -168,8 +172,7 @@ def izh_eprop(Nv, Nu, Nz, X, EVv, EVu, H, W, ET, TZ, t, rnd_factor=False,
 
     ET = H * EVvn
 
-    W = W + ET
-    np.fill_diagonal(W, 0)
+    W = W + np.where(W, ET, 0)
 
     EVv = EVvn
     EVu = EVun
@@ -181,11 +184,124 @@ def izh_eprop(Nv, Nu, Nz, X, EVv, EVu, H, W, ET, TZ, t, rnd_factor=False,
 
 def drop_weights(W, recur_lay1=True):
     N = W.shape[0]//2
+
     if recur_lay1:
-        np.fill_diagonal(W[:N//2, :N//2], 0)
+        np.fill_diagonal(W[:N, :N], 0)  # Zero diag NW: no self-connections
     else:
-        W[:N//2, :N//2] = 0
-    W[:N//2, N//2:] = 0
-    np.fill_diagonal(W[N//2:, :N//2], 0)
-    np.fill_diagonal(W[N//2:, N//2:], 0)
+        W[:N, :N] = 0  # Zero full NW: don't recur input layer
+
+    W[:, N:] = 0  # Zero full E: can't go back, nor recur next layer
+
     return W
+
+
+def unflatten(arr):
+    a = arr.flatten().shape[0]
+    b = int(np.ceil(np.sqrt(a)))
+    arr = np.concatenate((arr.flatten(), np.zeros(b*b-a)))
+    arr = np.reshape(arr, (b, b))
+    c = b
+    while (b*c-a) >= b:
+        c -= 1
+        arr = arr[:-1, :]
+    return arr
+
+
+def normalize(arr):
+    return np.interp(arr, (arr.min(), arr.max()), (-1, 1))
+
+
+def plot_drsnn(fig, gsc, Nv, Nz, W, ET, log, ep):
+    fig.suptitle(f"Epoch {ep}/{cfg['Epochs']}", fontsize=20)
+
+    for r in range(0, cfg["N_Rec"]+2):
+
+        num = cfg["N_I"] if r == 0 \
+            else cfg["N_O"] if r == cfg["N_Rec"]+2 \
+            else cfg["N_R"]
+        axs = fig.add_subplot(gsc[0, r])
+        axs.set_title(f"$v_{{{r}, i, j}}$")
+        axs.imshow(unflatten(normalize(Nv[r, :num])),
+                   cmap='coolwarm',
+                   vmin=0, vmax=1,
+                   interpolation='nearest')
+
+    for r in range(0, cfg["N_Rec"]+1):
+        axs = fig.add_subplot(gsc[1, r])
+        axs.set_title(f"$W_{{{r}, i, j}}$")
+        axs.imshow(W[r, :, :],
+                   cmap='coolwarm',
+                   vmin=-1, vmax=1,
+                   interpolation='nearest')
+
+    lookup = {
+        "Nv":  {"label": "v^t"},
+        "Nu":  {"label": "u^t"},
+        "Nz":  {"label": "z^t"},
+        "X":   {"label": "x^t"},
+        "EVv": {"label": "\\epsilon^t"},
+        "EVu": {"label": "\\epsilon^t"},
+        "W":   {"label": "W^t"},
+        "H":   {"label": "h^t"},
+        "ET":  {"label": "e^t"},
+    }
+
+    labelpad = 15
+    fontsize = 14
+    fontsize_legend = 12
+    keyidx = 0
+    for key, arr in log.items():
+        axs = fig.add_subplot(gsc[keyidx, 3])
+        keyidx += 1
+
+        if key == "X":
+            h = 0.5  # height of vlines
+            rng = np.random.default_rng()
+            inp_ys = rng.random(size=log["X"].shape[0])
+            for n_idx in [0, 1]:
+                axs.vlines(x=[idx for idx, val in
+                              enumerate(log["X"][:ep, n_idx]) if val],
+                           ymin=n_idx+inp_ys/(1+h),
+                           ymax=n_idx+(inp_ys+h)/(1+h),
+                           colors=f'C{n_idx}',
+                           linewidths=0.25,
+                           label=f"$x_{n_idx}$")
+            axs.set_ylabel("$x^t_j$",
+                           rotation=0,
+                           labelpad=labelpad,
+                           fontsize=fontsize)
+
+        elif arr.ndim == 2:
+            axs.plot(arr[:ep, 0],
+                     label=f"${lookup[key]['label']}_0$")
+            axs.plot(arr[:ep, 1],
+                     label=f"${lookup[key]['label']}_1$")
+            axs.set_ylabel(f"${lookup[key]['label']}_j$",
+                           rotation=0,
+                           labelpad=labelpad,
+                           fontsize=fontsize)
+
+        elif arr.ndim == 3:
+            EVtype = key[2:]+',' if key[:2] == "EV" else ""
+            axs.plot(arr[:ep, 0, 1],
+                     label=f"${lookup[key]['label']}_{{{EVtype}0,1}}$")
+            axs.plot(arr[:ep, 1, 0],
+                     label=f"${lookup[key]['label']}_{{{EVtype}1,0}}$")
+            axs.set_ylabel(f"${lookup[key]['label']}_{{{EVtype}i,j}}$",
+                           rotation=0,
+                           labelpad=labelpad,
+                           fontsize=fontsize)
+
+        axs.legend(fontsize=fontsize_legend,
+                   loc="upper right",
+                   ncol=2)
+        axs.grid(linestyle='--')
+    # axs[axidx].plot(logs["Nv"][:ep, 1, 0])
+    # axs[axidx].plot(logs["Nv"][:ep, 2, 0])
+
+    plt.draw()
+    plt.pause(0.0001)
+
+    fig.clf()
+
+    return fig, gsc

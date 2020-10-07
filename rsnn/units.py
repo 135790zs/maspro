@@ -210,5 +210,5 @@ def traub_izh(T=1000, num=2, uses_weights=False, rnd_factor=0):  #
 
 
 # traub_lif()
-# traub_izh(rnd_factor=20)
+traub_izh(rnd_factor=20)
 # new_bellec_alif_stdp()
