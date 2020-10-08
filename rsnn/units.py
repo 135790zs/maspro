@@ -1,9 +1,8 @@
-from config import cfg
-import matplotlib.pyplot as plt
-import numpy as np
-import utils as ut
 import sys
+import numpy as np
 from matplotlib import rcParams as rc
+from config import cfg
+import utils as ut
 
 rc['mathtext.fontset'] = 'stix'
 rc['font.family'] = 'STIXGeneral'
@@ -152,7 +151,7 @@ def bellec_alif_stdp(T=1000, num=2):  # WORKING
     ut.plot_logs(log, title="STDP-LIF e-prop")
 
 
-def traub_izh(T=1000, num=2, uses_weights=False, rnd_factor=0):  #
+def traub_izh(T=1000, num=2, uses_weights=False):  #
 
     X = ut.get_artificial_input(T=T,
                                 num=num,
@@ -194,7 +193,7 @@ def traub_izh(T=1000, num=2, uses_weights=False, rnd_factor=0):  #
 
         Nv, Nu, Nz, EVv, EVu, H, W, ET, TZ = ut.izh_eprop(
             Nv=Nv, Nu=Nu, Nz=Nz, X=X, EVv=EVv, EVu=EVu, H=H, W=W, ET=ET, TZ=TZ,
-            t=t, rnd_factor=rnd_factor, uses_weights=uses_weights)
+            t=t, uses_weights=uses_weights)
 
         log["Nv"][t, :] = Nv
         log["Nu"][t, :] = Nu
@@ -210,5 +209,5 @@ def traub_izh(T=1000, num=2, uses_weights=False, rnd_factor=0):  #
 
 
 # traub_lif()
-traub_izh(rnd_factor=20)
+traub_izh()
 # new_bellec_alif_stdp()

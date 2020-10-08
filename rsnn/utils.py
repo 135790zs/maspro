@@ -1,8 +1,8 @@
-from config import cfg
-import numpy as np
 import matplotlib.pyplot as plt
-import matplotlib.gridspec as gridspec
 from matplotlib import rcParams as rc
+import time
+import numpy as np
+from config import cfg
 rc['mathtext.fontset'] = 'stix'
 rc['font.family'] = 'STIXGeneral'
 
@@ -147,15 +147,10 @@ def get_artificial_input(T, num, dur, diff, interval, val, switch_interval):
     return X
 
 
-def izh_eprop(Nv, Nu, Nz, X, EVv, EVu, H, W, ET, TZ, t, rnd_factor=False,
-              uses_weights=True):
+def izh_eprop(Nv, Nu, Nz, X, EVv, EVu, H, W, ET, TZ, t, uses_weights=True):
 
     I = np.dot(W, Nz) if uses_weights else np.zeros(shape=Nz.shape)
     I += X[t, :] if X.ndim == 2 else X
-
-    if rnd_factor:
-        rng = np.random.default_rng()
-        I += rng.random(size=I.shape[0]) * rnd_factor
 
     Nvn = V_next(Nu=Nu, Nz=Nz, Nv=Nv, I=I)
     Nun = U_next(Nu=Nu, Nz=Nz, Nv=Nv)
@@ -211,12 +206,16 @@ def normalize(arr):
     return np.interp(arr, (arr.min(), arr.max()), (-1, 1))
 
 
-def plot_drsnn(fig, gsc, Nv, Nz, W, ET, log, ep, layers=(0, 0), neurons=(0, 1)):
+def plot_drsnn(fig, gsc, Nv, W, log, ep, layers=(0, 0), neurons=(0, 1)):
+
+    start = time.time()
+    assert layers[1] - layers[0] == 0 or layers[0] - layers[1] == -1
+    n1 = neurons[1] + (cfg["N_R"] if layers[0] != layers[1] else 0)
     fig.suptitle(f"Epoch {ep}/{cfg['Epochs']}, "
                  f"$N_{{({layers[0]}), {neurons[0]}}}$ and "
-                 f"$N_{{({layers[0]}), {neurons[1]}}}$; "
-                 f"$W_{{({layers[0]}), {neurons[0]}, {neurons[1]}}}$ and"
-                 f"$W_{{({layers[0]}), {neurons[1]}, {neurons[0]}}}$", fontsize=20)
+                 f"$N_{{({layers[1]}), {neurons[1]}}}$; "
+                 f"$W_{{({layers[0]}), {neurons[0]}, {n1}}}$ and"
+                 f"$W_{{({layers[0]}), {n1}, {neurons[0]}}}$", fontsize=20)
 
     for r in range(0, cfg["N_Rec"]+2):
 
@@ -224,7 +223,7 @@ def plot_drsnn(fig, gsc, Nv, Nz, W, ET, log, ep, layers=(0, 0), neurons=(0, 1)):
             else cfg["N_O"] if r == cfg["N_Rec"]+2 \
             else cfg["N_R"]
         axs = fig.add_subplot(gsc[0, r])
-        axs.set_title(f"$v_{{{r}, i, j}}$")
+        axs.set_title(f"$v_{{{r}, i}}$")
         axs.imshow(unflatten(normalize(Nv[r, :num])),
                    cmap='coolwarm',
                    vmin=0, vmax=1,
@@ -254,7 +253,9 @@ def plot_drsnn(fig, gsc, Nv, Nz, W, ET, log, ep, layers=(0, 0), neurons=(0, 1)):
     fontsize = 14
     fontsize_legend = 12
     keyidx = 1
+
     for key, arr in log.items():
+        print(f"Took {time.time()-start:.3f}s to plot in epoch {ep} {key}")
         if arr.ndim != lookup[key]["dim"]:
             arr1 = arr[:ep, layers[0], ...]
             arr2 = arr[:ep, layers[1], ...]
@@ -293,10 +294,10 @@ def plot_drsnn(fig, gsc, Nv, Nz, W, ET, log, ep, layers=(0, 0), neurons=(0, 1)):
 
         elif arr1.ndim == 3:  # Weights etc
             EVtype = key[2:]+',' if key[:2] == "EV" else ""
-            axs.plot(arr1[:ep, neurons[0], neurons[1]],
-                     label=f"${lookup[key]['label']}_{{{EVtype}0,1}}$")
-            axs.plot(arr2[:ep, neurons[1], neurons[0]],
-                     label=f"${lookup[key]['label']}_{{{EVtype}1,0}}$")
+            axs.plot(arr1[:ep, neurons[0], n1],
+                     label=f"${lookup[key]['label']}_{{{EVtype}{neurons[0]}{n1}}}$")
+            axs.plot(arr2[:ep, n1, neurons[0]],
+                     label=f"${lookup[key]['label']}_{{{EVtype}{n1}{neurons[0]}}}$")
             axs.set_ylabel(f"${lookup[key]['label']}_{{{EVtype}i,j}}$",
                            rotation=0,
                            labelpad=labelpad,
@@ -313,6 +314,8 @@ def plot_drsnn(fig, gsc, Nv, Nz, W, ET, log, ep, layers=(0, 0), neurons=(0, 1)):
     plt.pause(0.0001)
 
     fig.clf()
+
+    print(f"Took {time.time()-start:.3f}s to plot in epoch {ep} C")
 
     return fig, gsc
 

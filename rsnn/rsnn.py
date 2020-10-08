@@ -1,9 +1,11 @@
-from config import cfg
-import numpy as np
-import utils as ut
 import matplotlib.pyplot as plt
+import numpy as np
+from config import cfg
+import utils as ut
+from scipy.stats import poisson
+import time
 
-plot_interval = 25
+plot_interval = 1
 
 # Variable arrays
 Nv = np.ones(shape=(cfg["N_Rec"]+2, cfg["N_R"],)) * cfg["eqb"]
@@ -40,7 +42,10 @@ plt.ion()
 
 for ep in range(0, cfg["Epochs"]):
 
-    X = rng.random(size=(cfg["N_R"],)) * 20  # input is nonzero for first layer
+    dat = rng.random(size=(cfg["N_I"],)) * 0.1  # input is nonzero for first layer
+    dp = np.random.binomial(n=1, p=dat)
+
+    Nv[0, :cfg["N_I"]] = np.where(dp, cfg["thr"], Nv[0, :cfg["N_I"]])
 
     for r in range(0, cfg["N_Rec"]):
 
@@ -55,9 +60,8 @@ for ep in range(0, cfg["Epochs"]):
                 EVu=EVu[r, :, :],
                 ET=ET[r, :, :],
                 W=W[r, :, :],
-                X=np.pad(array=X, pad_width=(0, cfg["N_R"])),
-                t=ep,
-                rnd_factor=0)
+                X=np.pad(array=dp, pad_width=(0, 2*cfg["N_R"]-dp.shape[0])),
+                t=ep)
 
         Nv[r, :] = Nvr[:cfg["N_R"]]
         Nu[r, :] = Nur[:cfg["N_R"]]
@@ -81,7 +85,19 @@ for ep in range(0, cfg["Epochs"]):
         log["W"][ep, :, :, :] = W
 
         if plot_interval and (ep % plot_interval == 0 or ep == 0):
-            fig, gsc = ut.plot_drsnn(fig, gsc, Nv, Nz, W, ET, log, ep,
-                                     layers=(0, 1))
+            fig, gsc = ut.plot_drsnn(fig=fig,
+                                     gsc=gsc,
+                                     Nv=Nv,
+                                     W=W,
+                                     log=log,
+                                     ep=ep,
+                                     layers=(0, 0),
+                                     neurons=(0, 1))
 
         X = np.zeros(shape=(cfg["N_R"],))  # First layer passed, set input to 0
+
+# TODO: Add Poisson
+# TODO: Refactor ALIF
+# TODO: Implement L
+# TODO: Find out if Bellec uses synscaling
+# TODO: Implement Bellec TIMIT with ALIF
