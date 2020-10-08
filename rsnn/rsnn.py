@@ -3,8 +3,7 @@ import numpy as np
 import utils as ut
 import matplotlib.pyplot as plt
 
-plot_interval = 1
-
+plot_interval = 25
 
 # Variable arrays
 Nv = np.ones(shape=(cfg["N_Rec"]+2, cfg["N_R"],)) * cfg["eqb"]
@@ -35,13 +34,13 @@ log = {
 }
 
 fig = plt.figure(constrained_layout=False)
-gsc = fig.add_gridspec(nrows=8, ncols=cfg["N_Rec"]+3, hspace=0.2)
+gsc = fig.add_gridspec(nrows=10, ncols=cfg["N_Rec"]+2, hspace=0.2)
 
 plt.ion()
 
 for ep in range(0, cfg["Epochs"]):
 
-    X = rng.random(size=(cfg["N_R"],))  # input is nonzero for first layer
+    X = rng.random(size=(cfg["N_R"],)) * 20  # input is nonzero for first layer
 
     for r in range(0, cfg["N_Rec"]):
 
@@ -82,9 +81,7 @@ for ep in range(0, cfg["Epochs"]):
         log["W"][ep, :, :, :] = W
 
         if plot_interval and (ep % plot_interval == 0 or ep == 0):
-            print(log)
-            fig, gsc = ut.plot_drsnn(fig, gsc, Nv, Nz, W, ET, log, ep)
+            fig, gsc = ut.plot_drsnn(fig, gsc, Nv, Nz, W, ET, log, ep,
+                                     layers=(0, 1))
 
         X = np.zeros(shape=(cfg["N_R"],))  # First layer passed, set input to 0
-
-# Weights aren't dropped correctly according to plot. Fix!

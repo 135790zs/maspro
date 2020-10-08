@@ -17,9 +17,9 @@ cfg = {
     "N_I": 2,
     "N_R": 2,
     "N_O": 2,
-    "N_Rec": 1,
+    "N_Rec": 2,
 
-    "Epochs": 100,
+    "Epochs": 2000,
 
 
 }

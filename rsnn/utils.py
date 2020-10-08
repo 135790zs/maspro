@@ -211,8 +211,12 @@ def normalize(arr):
     return np.interp(arr, (arr.min(), arr.max()), (-1, 1))
 
 
-def plot_drsnn(fig, gsc, Nv, Nz, W, ET, log, ep):
-    fig.suptitle(f"Epoch {ep}/{cfg['Epochs']}", fontsize=20)
+def plot_drsnn(fig, gsc, Nv, Nz, W, ET, log, ep, layers=(0, 0), neurons=(0, 1)):
+    fig.suptitle(f"Epoch {ep}/{cfg['Epochs']}, "
+                 f"$N_{{({layers[0]}), {neurons[0]}}}$ and "
+                 f"$N_{{({layers[0]}), {neurons[1]}}}$; "
+                 f"$W_{{({layers[0]}), {neurons[0]}, {neurons[1]}}}$ and"
+                 f"$W_{{({layers[0]}), {neurons[1]}, {neurons[0]}}}$", fontsize=20)
 
     for r in range(0, cfg["N_Rec"]+2):
 
@@ -235,23 +239,29 @@ def plot_drsnn(fig, gsc, Nv, Nz, W, ET, log, ep):
                    interpolation='nearest')
 
     lookup = {
-        "Nv":  {"label": "v^t"},
-        "Nu":  {"label": "u^t"},
-        "Nz":  {"label": "z^t"},
-        "X":   {"label": "x^t"},
-        "EVv": {"label": "\\epsilon^t"},
-        "EVu": {"label": "\\epsilon^t"},
-        "W":   {"label": "W^t"},
-        "H":   {"label": "h^t"},
-        "ET":  {"label": "e^t"},
+        "Nv":  {"dim": 2, "label": "v^t"},
+        "Nu":  {"dim": 2, "label": "u^t"},
+        "Nz":  {"dim": 2, "label": "z^t"},
+        "X":   {"dim": 2, "label": "x^t"},
+        "EVv": {"dim": 3, "label": "\\epsilon^t"},
+        "EVu": {"dim": 3, "label": "\\epsilon^t"},
+        "W":   {"dim": 3, "label": "W^t"},
+        "H":   {"dim": 2, "label": "h^t"},
+        "ET":  {"dim": 3, "label": "e^t"},
     }
 
     labelpad = 15
     fontsize = 14
     fontsize_legend = 12
-    keyidx = 0
+    keyidx = 1
     for key, arr in log.items():
-        axs = fig.add_subplot(gsc[keyidx, 3])
+        if arr.ndim != lookup[key]["dim"]:
+            arr1 = arr[:ep, layers[0], ...]
+            arr2 = arr[:ep, layers[1], ...]
+        else:  # If singlelayer
+            arr1 = arr
+
+        axs = fig.add_subplot(gsc[keyidx, -1])
         keyidx += 1
 
         if key == "X":
@@ -271,30 +281,30 @@ def plot_drsnn(fig, gsc, Nv, Nz, W, ET, log, ep):
                            labelpad=labelpad,
                            fontsize=fontsize)
 
-        elif arr.ndim == 2:
-            axs.plot(arr[:ep, 0],
+        elif arr1.ndim == 2:  # Voltage etc
+            axs.plot(arr1[:ep, neurons[0]],
                      label=f"${lookup[key]['label']}_0$")
-            axs.plot(arr[:ep, 1],
+            axs.plot(arr2[:ep, neurons[0]],
                      label=f"${lookup[key]['label']}_1$")
             axs.set_ylabel(f"${lookup[key]['label']}_j$",
                            rotation=0,
                            labelpad=labelpad,
                            fontsize=fontsize)
 
-        elif arr.ndim == 3:
+        elif arr1.ndim == 3:  # Weights etc
             EVtype = key[2:]+',' if key[:2] == "EV" else ""
-            axs.plot(arr[:ep, 0, 1],
+            axs.plot(arr1[:ep, neurons[0], neurons[1]],
                      label=f"${lookup[key]['label']}_{{{EVtype}0,1}}$")
-            axs.plot(arr[:ep, 1, 0],
+            axs.plot(arr2[:ep, neurons[1], neurons[0]],
                      label=f"${lookup[key]['label']}_{{{EVtype}1,0}}$")
             axs.set_ylabel(f"${lookup[key]['label']}_{{{EVtype}i,j}}$",
                            rotation=0,
                            labelpad=labelpad,
                            fontsize=fontsize)
-
-        axs.legend(fontsize=fontsize_legend,
-                   loc="upper right",
-                   ncol=2)
+        if arr.ndim == lookup[key]["dim"]:
+            axs.legend(fontsize=fontsize_legend,
+                       loc="upper right",
+                       ncol=2)
         axs.grid(linestyle='--')
     # axs[axidx].plot(logs["Nv"][:ep, 1, 0])
     # axs[axidx].plot(logs["Nv"][:ep, 2, 0])
@@ -305,3 +315,6 @@ def plot_drsnn(fig, gsc, Nv, Nz, W, ET, log, ep):
     fig.clf()
 
     return fig, gsc
+
+
+# TODO: Combine drsnn plot and plot_logs
