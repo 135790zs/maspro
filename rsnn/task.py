@@ -5,8 +5,8 @@ from config import cfg
 def task1(io_type, t):
     """ After every N inputs, system must spike once. N_I = N_O = 1."""
 
-    interval = 100
-    duration = 10
+    interval = 10
+    duration = 4
     strength_in = .5
     strength_out = 1.
     assert cfg["N_I"] == 1

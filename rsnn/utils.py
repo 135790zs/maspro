@@ -145,8 +145,15 @@ def get_artificial_input(T, num, dur, diff, interval, val, switch_interval):
     return X
 
 
-def izh_eprop(Nv, Nu, Nz, X, EVv, EVu, H, W, ET, TZ, t, uses_weights=True,
-              L=None):
+def lif_eprop():
+    pass
+
+
+def alif_eprop(Nv, Nz, TZ, t, X, EVv, W, ET):
+    pass
+
+
+def izh_eprop(Nv, Nu, Nz, X, EVv, EVu, H, W, ET, TZ, t, uses_weights=True, L=None):
 
     I = np.dot(W, Nz) if uses_weights else np.zeros(shape=Nz.shape)
     I += X[t, :] if X.ndim == 2 else X
@@ -209,14 +216,14 @@ def normalize(arr):
 
 
 def errfn(a1, a2):
-    return np.sum(np.abs(a1 - a2), axis=0)
+    return np.sum(np.abs(a1 - a2), axis=1)
 
 
-def plot_drsnn(fig, gsc, Nv, W, Nz, log, ep, layers=(0, 0), neurons=(0, 1)):
+def plot_drsnn(fig, gsc, Nv, W, Nz, log, ep, layers=(0, 1), neurons=(0, 0)):
 
-    print_plots = False
     assert layers[1] - layers[0] == 0 or layers[0] - layers[1] == -1
 
+    # If to next layer, weight matrix is appended after recurrent.
     n1 = neurons[1] + (cfg["N_R"] if layers[0] != layers[1] else 0)
 
     fig.suptitle(f"Epoch {ep}/{cfg['Epochs']}, "
@@ -225,26 +232,26 @@ def plot_drsnn(fig, gsc, Nv, W, Nz, log, ep, layers=(0, 0), neurons=(0, 1)):
                  f"$W_{{({layers[0]}), {neurons[0]}, {n1}}}$ and"
                  f"$W_{{({layers[0]}), {n1}, {neurons[0]}}}$", fontsize=20)
 
-    # PRINT LINE PLOT OF NEURON/SYNAPSE PAIR
+    if cfg["plot_pair"]:
+        lookup = {
+            "Nv":  {"dim": 2, "label": "v^t"},
+            "Nu":  {"dim": 2, "label": "u^t"},
+            "Nz":  {"dim": 2, "label": "z^t"},
+            "X":   {"dim": 2, "label": "x^t"},
+            "EVv": {"dim": 3, "label": "\\epsilon^t"},
+            "EVu": {"dim": 3, "label": "\\epsilon^t"},
+            "W":   {"dim": 3, "label": "W^t"},
+            "H":   {"dim": 2, "label": "h^t"},
+            "ET":  {"dim": 3, "label": "e^t"},
+        }
 
-    lookup = {
-        "Nv":  {"dim": 2, "label": "v^t"},
-        "Nu":  {"dim": 2, "label": "u^t"},
-        "Nz":  {"dim": 2, "label": "z^t"},
-        "X":   {"dim": 2, "label": "x^t"},
-        "EVv": {"dim": 3, "label": "\\epsilon^t"},
-        "EVu": {"dim": 3, "label": "\\epsilon^t"},
-        "W":   {"dim": 3, "label": "W^t"},
-        "H":   {"dim": 2, "label": "h^t"},
-        "ET":  {"dim": 3, "label": "e^t"},
-    }
-
-    labelpad = 15
-    fontsize = 14
-    fontsize_legend = 12
-    keyidx = 0
-    if print_plots:
+        labelpad = 15
+        fontsize = 14
+        fontsize_legend = 12
+        keyidx = 0
         for key, arr in log.items():
+            if key not in lookup.keys():
+                continue
             if arr.ndim != lookup[key]["dim"]:
                 arr1 = arr[:ep+1, layers[0], ...]
                 arr2 = arr[:ep+1, layers[1], ...]
@@ -297,55 +304,58 @@ def plot_drsnn(fig, gsc, Nv, W, Nz, log, ep, layers=(0, 0), neurons=(0, 1)):
                            ncol=2)
             axs.grid(linestyle='--')
 
-    # Neuron heatmaps
-    # for r in range(0, cfg["N_Rec"]):
-    #     num = cfg["N_I"] if r == 0 \
-    #         else cfg["N_O"] if r == cfg["N_Rec"] \
-    #         else cfg["N_R"]
-    #     axs = fig.add_subplot(gsc[r, 1])
-    #     axs.set_title(f"$v_{{{r}, i}}$")
-    #     axs.imshow(unflatten(normalize(Nv[r, :num])),
-    #                cmap='coolwarm',
-    #                vmin=0, vmax=1,
-    #                interpolation='nearest')
+    if cfg["plot_heatmaps"]:
+        # Neuron heatmaps
+        for r in range(0, cfg["N_Rec"]):
+            num = cfg["N_I"] if r == 0 \
+                else cfg["N_O"] if r == cfg["N_Rec"] \
+                else cfg["N_R"]
+            axs = fig.add_subplot(gsc[r, 1])
+            axs.set_title(f"$v_{{{r}, i}}$")
+            axs.imshow(unflatten(normalize(Nv[r, :num])),
+                       cmap='coolwarm',
+                       vmin=0, vmax=1,
+                       interpolation='nearest')
 
-    # Weight heatmaps
-    # for r in range(0, cfg["N_Rec"]-1):
-    #     axs = fig.add_subplot(gsc[r+cfg["N_Rec"], 1])
-    #     axs.set_title(f"$W_{{{r}, i, j}}$")
-    #     axs.imshow(W[r, :, :cfg["N_R"]],
-    #                cmap='coolwarm',
-    #                vmin=-1, vmax=1,
-    #                interpolation='nearest')
+        # Weight heatmaps
+        for r in range(0, cfg["N_Rec"]-1):
+            axs = fig.add_subplot(gsc[r+cfg["N_Rec"], 1])
+            axs.set_title(f"$W_{{{r}, i, j}}$")
+            axs.imshow(W[r, :, :cfg["N_R"]],
+                       cmap='coolwarm',
+                       vmin=-1, vmax=1,
+                       interpolation='nearest')
 
-    for r in range(0, cfg["N_Rec"]):
-        num = cfg["N_I"] if r == 0 \
-            else cfg["N_O"] if r == cfg["N_Rec"] \
-            else cfg["N_R"]
-        axs = fig.add_subplot(gsc[r, 2])
-        axs.set_title(f"$z_{{{r}, i}}$")
-        axs.imshow(unflatten(Nz[r, :num]),
-                   cmap='gray',
-                   vmin=0, vmax=1,
-                   interpolation='nearest')
+        # Neuron spikes
+        for r in range(0, cfg["N_Rec"]):
+            num = cfg["N_I"] if r == 0 \
+                else cfg["N_O"] if r == cfg["N_Rec"] \
+                else cfg["N_R"]
+            axs = fig.add_subplot(gsc[r, 2])
+            axs.set_title(f"$z_{{{r}, i}}$")
+            axs.imshow(unflatten(Nz[r, :num]),
+                       cmap='gray',
+                       vmin=0, vmax=1,
+                       interpolation='nearest')
 
-    # Output, target, error
-    axs = fig.add_subplot(gsc[0, 3])
-    axs.set_title(f"Input + spike")
-    axs.plot(log["input"][:ep+1, :])
-    axs.plot(log["input_spike"][:ep+1, :])
-    axs = fig.add_subplot(gsc[1, 3])
-    axs.set_title(f"Output + EMA")
-    axs.plot(log["output"][:ep+1, :])
-    axs.plot(log["output_EMA"][:ep+1, :])
-    axs = fig.add_subplot(gsc[2, 3])
-    axs.set_title(f"Target + EMA")
-    axs.plot(log["target"][:ep+1, :])
-    axs.plot(log["target_EMA"][:ep+1, :])
-    axs = fig.add_subplot(gsc[3, 3])
-    axs.set_title(f"Error + EMA")
-    axs.plot(errfn(log["target"][:ep+1, :], log["output"][:ep+1, :]))
-    axs.plot(errfn(log["target_EMA"][:ep+1, :], log["output_EMA"][:ep+1, :]))
+    if cfg["plot_io"]:
+        # Output, target, error
+        axs = fig.add_subplot(gsc[0, 3])
+        axs.set_title(f"Input + spike")
+        axs.plot(log["input"][:ep+1, :])
+        axs.plot(log["input_spike"][:ep+1, :])
+        axs = fig.add_subplot(gsc[1, 3])
+        axs.set_title(f"Output + EMA")
+        axs.plot(log["output"][:ep+1, :])
+        axs.plot(log["output_EMA"][:ep+1, :])
+        axs = fig.add_subplot(gsc[2, 3])
+        axs.set_title(f"Target + EMA")
+        axs.plot(log["target"][:ep+1, :])
+        axs.plot(log["target_EMA"][:ep+1, :])
+        axs = fig.add_subplot(gsc[3, 3])
+        axs.set_title(f"Error + EMA")
+        axs.plot(errfn(log["target"][:ep+1, :], log["output"][:ep+1, :]))
+        axs.plot(errfn(log["target_EMA"][:ep+1, :], log["output_EMA"][:ep+1, :]))
 
     plt.draw()
     plt.pause(0.0001)
@@ -353,3 +363,12 @@ def plot_drsnn(fig, gsc, Nv, W, Nz, log, ep, layers=(0, 0), neurons=(0, 1)):
     fig.clf()
 
     return fig, gsc
+
+
+def eprop(neuron_type, **kwargs):
+    if neuron_type == "Izhikevich":
+        return izh_eprop(**kwargs)
+    elif neuron_type == "Traub-LIF":
+        return traub_lif_eprop(**kwargs)
+    elif neuron_type == "Bellec-ALIF":
+        return bellec_alif_eprop(**kwargs)

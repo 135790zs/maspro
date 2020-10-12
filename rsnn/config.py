@@ -15,12 +15,18 @@ cfg = {
     "dt": 0.1,
 
     "N_I": 1,
-    "N_R": 10,
+    "N_R": 2,
     "N_O": 1,
-    "N_Rec": 4,
+    "N_Rec": 3,
 
     "Epochs": 1000,
     "EMA": 0.6321,
+
+    # "synscale": 1.5,  # 1 = no effect
+
+    "plot_io": True,
+    "plot_pair": True,
+    "plot_heatmaps": True,
 
 
 }

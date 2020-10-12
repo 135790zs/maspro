@@ -15,11 +15,12 @@ TZ = np.zeros(shape=(cfg["N_Rec"], cfg["N_R"],))
 
 rng = np.random.default_rng()
 W = rng.random(size=(cfg["N_Rec"]-1, cfg["N_R"]*2, cfg["N_R"]*2,)) * 2 - 1
+W *= 2
 
 for r in range(cfg["N_Rec"]-1):
     W[r, :, :] = ut.drop_weights(W=W[r, :, :], recur_lay1=(r > 0))
 
-B = rng.random(size=(cfg["N_Rec"]-2, cfg["N_R"],)) * 2 - 1
+B = rng.random(size=(cfg["N_Rec"]-2, cfg["N_R"],))
 
 L = np.zeros(shape=(cfg["N_Rec"]-2, cfg["N_R"],))
 
@@ -64,7 +65,8 @@ for ep in range(0, cfg["Epochs"]):
     for r in range(0, cfg["N_Rec"] - 1):
 
         Nvr, Nur, Nzr, EVv[r, :, :], EVu[r, :, :], Hr, W[r, :, :], \
-            ET[r, :, :], TZr = ut.izh_eprop(
+            ET[r, :, :], TZr = ut.eprop(
+                neuron_type="Izhikevich",
                 Nv=np.concatenate((Nv[r, :], Nv[r+1, :])),
                 Nu=np.concatenate((Nu[r, :], Nu[r+1, :])),
                 Nz=np.concatenate((Nz[r, :], Nz[r+1, :])),
@@ -102,6 +104,8 @@ for ep in range(0, cfg["Epochs"]):
 
         X = np.zeros(shape=(cfg["N_R"],))  # First layer passed, set input to 0
 
+    # W = W / np.real(np.max(np.linalg.eigvals(W))) * cfg["synscale"]
+
     log["output"][ep, :] = Nz[-1, :cfg["N_O"]]
 
     log["target"][ep, :] = task1(io_type="O", t=ep)
@@ -120,13 +124,9 @@ for ep in range(0, cfg["Epochs"]):
     error = np.mean(ut.errfn(log["output_EMA"][:ep+1, :],
                              log["target_EMA"][:ep+1, :]),
                     axis=0)
-    print("err", error)
-    # print(L.shape)
-    # print("B shape", B.shape)
     L = error * B
-    print(L.shape)
 
-    if plot_interval and (ep % plot_interval == 0 or ep == 0):
+    if plot_interval and (ep % plot_interval == 0):
         fig, gsc = ut.plot_drsnn(fig=fig,
                                  gsc=gsc,
                                  Nv=Nv,
@@ -134,7 +134,7 @@ for ep in range(0, cfg["Epochs"]):
                                  Nz=Nz,
                                  log=log,
                                  ep=ep,
-                                 layers=(0, 0),
+                                 layers=(0, 1),
                                  neurons=(0, 1))
 
 
