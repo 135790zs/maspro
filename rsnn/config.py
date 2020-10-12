@@ -20,19 +20,7 @@ cfg = {
     "N_Rec": 4,
 
     "Epochs": 1000,
-    "EMA": 0.1,
+    "EMA": 0.6321,
 
 
 }
-
-"""
-NOTES
-
-
-1) Remove duplicate code, clean
-2) Construct unit test file
-3) Make single-layer DRSNN
-
-
-
-"""

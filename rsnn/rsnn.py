@@ -19,6 +19,10 @@ W = rng.random(size=(cfg["N_Rec"]-1, cfg["N_R"]*2, cfg["N_R"]*2,)) * 2 - 1
 for r in range(cfg["N_Rec"]-1):
     W[r, :, :] = ut.drop_weights(W=W[r, :, :], recur_lay1=(r > 0))
 
+B = rng.random(size=(cfg["N_Rec"]-2, cfg["N_R"],)) * 2 - 1
+
+L = np.zeros(shape=(cfg["N_Rec"]-2, cfg["N_R"],))
+
 EVv = np.zeros(shape=(cfg["N_Rec"]-1, cfg["N_R"]*2, cfg["N_R"]*2,))
 EVu = np.zeros(shape=(cfg["N_Rec"]-1, cfg["N_R"]*2, cfg["N_R"]*2,))
 ET = np.zeros(shape=(cfg["N_Rec"]-1, cfg["N_R"]*2, cfg["N_R"]*2,))
@@ -32,6 +36,8 @@ log = {
     "EVu": np.zeros(shape=(cfg["Epochs"],) + EVu.shape),
     "ET": np.zeros(shape=(cfg["Epochs"],) + ET.shape),
     "W": np.zeros(shape=(cfg["Epochs"],) + W.shape),
+    "input": np.zeros(shape=(cfg["Epochs"], cfg["N_I"])),
+    "input_spike": np.zeros(shape=(cfg["Epochs"], cfg["N_I"])),
     "output": np.zeros(shape=(cfg["Epochs"], cfg["N_O"])),
     "output_EMA": np.zeros(shape=(cfg["Epochs"], cfg["N_O"])),
     "target": np.zeros(shape=(cfg["Epochs"], cfg["N_O"])),
@@ -45,11 +51,15 @@ plt.ion()
 
 for ep in range(0, cfg["Epochs"]):
 
-    dat = task1(io_type="I", t=ep)  # input is nonzero for first layer
-    dp = np.random.binomial(n=1, p=dat)  # Bernoulli distribution
+    # input is nonzero for first layer
+    log["input"][ep, :] = task1(io_type="I", t=ep)
+    # Bernoulli distribtion
+    log["input_spike"][ep, :] = rng.binomial(n=1, p=log["input"][ep, :])
 
     # Feed to input layer R0
-    Nv[0, :cfg["N_I"]] = np.where(dp, cfg["thr"], Nv[0, :cfg["N_I"]])
+    Nv[0, :cfg["N_I"]] = np.where(log["input_spike"][ep, :],
+                                  cfg["thr"],
+                                  Nv[0, :cfg["N_I"]])
 
     for r in range(0, cfg["N_Rec"] - 1):
 
@@ -64,7 +74,9 @@ for ep in range(0, cfg["Epochs"]):
                 EVu=EVu[r, :, :],
                 ET=ET[r, :, :],
                 W=W[r, :, :],
-                X=np.pad(array=dp, pad_width=(0, 2*cfg["N_R"]-dp.shape[0])),
+                L=L[r-1, :] if r > 0 else np.zeros(shape=cfg["N_R"]),
+                X=np.pad(array=log["input_spike"][ep, :],
+                         pad_width=(0, 2*cfg["N_R"]-cfg["N_I"])),
                 t=ep)
 
         Nv[r, :] = Nvr[:cfg["N_R"]]
@@ -91,7 +103,6 @@ for ep in range(0, cfg["Epochs"]):
         X = np.zeros(shape=(cfg["N_R"],))  # First layer passed, set input to 0
 
     log["output"][ep, :] = Nz[-1, :cfg["N_O"]]
-    log["output"][ep, :] = Nz[0, :cfg["N_O"]]
 
     log["target"][ep, :] = task1(io_type="O", t=ep)
 
@@ -106,8 +117,14 @@ for ep in range(0, cfg["Epochs"]):
             cfg["EMA"] * log["target"][ep, :]
             + (1 - cfg["EMA"]) * log["target_EMA"][ep-1, :])
 
-    error = np.abs(log["output_EMA"][:ep, :] - log["target_EMA"][:ep, :])
-    print(error)
+    error = np.mean(ut.errfn(log["output_EMA"][:ep+1, :],
+                             log["target_EMA"][:ep+1, :]),
+                    axis=0)
+    print("err", error)
+    # print(L.shape)
+    # print("B shape", B.shape)
+    L = error * B
+    print(L.shape)
 
     if plot_interval and (ep % plot_interval == 0 or ep == 0):
         fig, gsc = ut.plot_drsnn(fig=fig,
@@ -121,7 +138,7 @@ for ep in range(0, cfg["Epochs"]):
                                  neurons=(0, 1))
 
 
-# TODO: Implement L
+# TODO: Implement adaptive e-prop
 # TODO: Combine drsnn plot and plot_logs
 # TODO: Find out if Bellec uses synscaling
 # TODO: Implement Bellec TIMIT with ALIF

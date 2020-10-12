@@ -145,7 +145,8 @@ def get_artificial_input(T, num, dur, diff, interval, val, switch_interval):
     return X
 
 
-def izh_eprop(Nv, Nu, Nz, X, EVv, EVu, H, W, ET, TZ, t, uses_weights=True):
+def izh_eprop(Nv, Nu, Nz, X, EVv, EVu, H, W, ET, TZ, t, uses_weights=True,
+              L=None):
 
     I = np.dot(W, Nz) if uses_weights else np.zeros(shape=Nz.shape)
     I += X[t, :] if X.ndim == 2 else X
@@ -164,6 +165,9 @@ def izh_eprop(Nv, Nu, Nz, X, EVv, EVu, H, W, ET, TZ, t, uses_weights=True):
     H = H_next(Nv=Nvn)
 
     ET = H * EVvn
+
+    if L is not None:
+        ET = ET * np.repeat(a=L, repeats=2)
 
     W = W + np.where(W, ET, 0)  # only update nonzero weights
 
@@ -205,7 +209,7 @@ def normalize(arr):
 
 
 def errfn(a1, a2):
-    return np.abs(a1 - a2)
+    return np.sum(np.abs(a1 - a2), axis=0)
 
 
 def plot_drsnn(fig, gsc, Nv, W, Nz, log, ep, layers=(0, 0), neurons=(0, 1)):
@@ -242,8 +246,8 @@ def plot_drsnn(fig, gsc, Nv, W, Nz, log, ep, layers=(0, 0), neurons=(0, 1)):
     if print_plots:
         for key, arr in log.items():
             if arr.ndim != lookup[key]["dim"]:
-                arr1 = arr[:ep, layers[0], ...]
-                arr2 = arr[:ep, layers[1], ...]
+                arr1 = arr[:ep+1, layers[0], ...]
+                arr2 = arr[:ep+1, layers[1], ...]
             else:  # If singlelayer
                 arr1 = arr
 
@@ -256,7 +260,7 @@ def plot_drsnn(fig, gsc, Nv, W, Nz, log, ep, layers=(0, 0), neurons=(0, 1)):
                 inp_ys = rng.random(size=log["X"].shape[0])
                 for n_idx in [0, 1]:
                     axs.vlines(x=[idx for idx, val in
-                                  enumerate(log["X"][:ep, n_idx]) if val],
+                                  enumerate(log["X"][:ep+1, n_idx]) if val],
                                ymin=n_idx+inp_ys/(1+h),
                                ymax=n_idx+(inp_ys+h)/(1+h),
                                colors=f'C{n_idx}',
@@ -268,9 +272,9 @@ def plot_drsnn(fig, gsc, Nv, W, Nz, log, ep, layers=(0, 0), neurons=(0, 1)):
                                fontsize=fontsize)
 
             elif arr1.ndim == 2:  # Voltage etc
-                axs.plot(arr1[:ep, neurons[0]],
+                axs.plot(arr1[:ep+1, neurons[0]],
                          label=f"${lookup[key]['label']}_0$")
-                axs.plot(arr2[:ep, neurons[0]],
+                axs.plot(arr2[:ep+1, neurons[0]],
                          label=f"${lookup[key]['label']}_1$")
                 axs.set_ylabel(f"${lookup[key]['label']}_j$",
                                rotation=0,
@@ -279,9 +283,9 @@ def plot_drsnn(fig, gsc, Nv, W, Nz, log, ep, layers=(0, 0), neurons=(0, 1)):
 
             elif arr1.ndim == 3:  # Weights etc
                 EVtype = key[2:]+',' if key[:2] == "EV" else ""
-                axs.plot(arr1[:ep, neurons[0], n1],
+                axs.plot(arr1[:ep+1, neurons[0], n1],
                          label=f"${lookup[key]['label']}_{{{EVtype}{neurons[0]}{n1}}}$")
-                axs.plot(arr2[:ep, n1, neurons[0]],
+                axs.plot(arr2[:ep+1, n1, neurons[0]],
                          label=f"${lookup[key]['label']}_{{{EVtype}{n1}{neurons[0]}}}$")
                 axs.set_ylabel(f"${lookup[key]['label']}_{{{EVtype}i,j}}$",
                                rotation=0,
@@ -327,17 +331,21 @@ def plot_drsnn(fig, gsc, Nv, W, Nz, log, ep, layers=(0, 0), neurons=(0, 1)):
 
     # Output, target, error
     axs = fig.add_subplot(gsc[0, 3])
-    axs.set_title(f"Output + EMA")
-    axs.plot(log["output"][:ep, :])
-    axs.plot(log["output_EMA"][:ep, :])
+    axs.set_title(f"Input + spike")
+    axs.plot(log["input"][:ep+1, :])
+    axs.plot(log["input_spike"][:ep+1, :])
     axs = fig.add_subplot(gsc[1, 3])
-    axs.set_title(f"Target + EMA")
-    axs.plot(log["target"][:ep, :])
-    axs.plot(log["target_EMA"][:ep, :])
+    axs.set_title(f"Output + EMA")
+    axs.plot(log["output"][:ep+1, :])
+    axs.plot(log["output_EMA"][:ep+1, :])
     axs = fig.add_subplot(gsc[2, 3])
+    axs.set_title(f"Target + EMA")
+    axs.plot(log["target"][:ep+1, :])
+    axs.plot(log["target_EMA"][:ep+1, :])
+    axs = fig.add_subplot(gsc[3, 3])
     axs.set_title(f"Error + EMA")
-    axs.plot(errfn(log["target"][:ep, :], log["output"][:ep, :]))
-    axs.plot(errfn(log["target_EMA"][:ep, :], log["output_EMA"][:ep, :]))
+    axs.plot(errfn(log["target"][:ep+1, :], log["output"][:ep+1, :]))
+    axs.plot(errfn(log["target_EMA"][:ep+1, :], log["output_EMA"][:ep+1, :]))
 
     plt.draw()
     plt.pause(0.0001)
@@ -345,12 +353,3 @@ def plot_drsnn(fig, gsc, Nv, W, Nz, log, ep, layers=(0, 0), neurons=(0, 1)):
     fig.clf()
 
     return fig, gsc
-
-
-def EMA(arr, alpha=cfg["EMA"]):
-    ret = np.zeros(shape=arr.shape)
-    for ix in arr:
-        if ix == 0:
-            ret[ix, ...] = arr[ix, ...]
-        else:
-            ret[ix, ...] = alpha * arr[ix, ...] + (1 - alpha) * ret[ix-1, ...]
