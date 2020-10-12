@@ -96,7 +96,6 @@ for ep in range(0, cfg["Epochs"]):
 
         X = np.zeros(shape=(cfg["N_R"],))  # First layer passed, set input to 0
 
-# TODO: Add Poisson
 # TODO: Refactor ALIF
 # TODO: Implement L
 # TODO: Find out if Bellec uses synscaling

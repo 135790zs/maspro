@@ -47,15 +47,17 @@ def traub_lif(T=1000, num=2):  # WORKING
 
         I = X[t, :]
 
-        Nz = np.where(np.logical_and(t - TZ > cfg["dt_refr"],
+        Nz = np.where(np.logical_and(t - TZ >= cfg["dt_refr"],
                                      Nv >= cfg["thr"]),
                       1,
                       0)
         TZ = np.where(Nz, t, TZ)
 
-        R = (t - TZ <= cfg["dt_refr"]).astype(int)
+        R = (t - TZ == cfg["dt_refr"]).astype(int)
 
-        Nv = cfg["alpha"] * Nv + I - Nz * cfg["alpha"] * Nv - R * cfg["alpha"] * Nv
+        Nv = (cfg["alpha"] * Nv
+              + I - Nz * cfg["alpha"] * Nv
+              - R * cfg["alpha"] * Nv)
 
         EVv = cfg["alpha"] * (1 - Nz - R) * EVv + Nz[np.newaxis].T
 
@@ -64,7 +66,7 @@ def traub_lif(T=1000, num=2):  # WORKING
                      cfg["gamma"] * np.clip(a=1 - (abs(Nv - cfg["thr"])
                                                    / cfg["thr"]),
                                             a_min=0,
-                                            a_max=None))
+                                            a_max=1))
 
         ET = H * EVv
 
@@ -124,13 +126,15 @@ def bellec_alif_stdp(T=1000, num=2):  # WORKING
                       0)
         TZ = np.where(Nz, t, TZ)
 
-        R = (t - TZ <= cfg["dt_refr"]).astype(int)
+        R = (t - TZ == cfg["dt_refr"]).astype(int)
 
-        Nv = cfg["alpha"] * Nv + I - Nz * cfg["alpha"] * Nv - R * cfg["alpha"] * Nv
+        Nv = (cfg["alpha"] * Nv
+              + I - Nz * cfg["alpha"] * Nv
+              - R * cfg["alpha"] * Nv)
 
         EVv = cfg["alpha"] * (1 - Nz - R) * EVv + Nz[np.newaxis].T
 
-        H = np.where(t - TZ < cfg["dt_refr"],
+        H = np.where(t - TZ <= cfg["dt_refr"],
                      -cfg["gamma"],
                      cfg["gamma"] * np.clip(a=1 - (abs(Nv - cfg["thr"])
                                                    / cfg["thr"]),
@@ -151,14 +155,14 @@ def bellec_alif_stdp(T=1000, num=2):  # WORKING
     ut.plot_logs(log, title="STDP-LIF e-prop")
 
 
-def traub_izh(T=1000, num=2, uses_weights=False):  #
+def traub_izh(T=3000, num=2, uses_weights=False):  # WORKING
 
     X = ut.get_artificial_input(T=T,
                                 num=num,
                                 dur=30,
                                 diff=8,
                                 interval=100,
-                                val=30,
+                                val=32,
                                 switch_interval=500)
 
     # Logging arrays
@@ -207,7 +211,6 @@ def traub_izh(T=1000, num=2, uses_weights=False):  #
     ut.plot_logs(log, title="Izhikevich e-prop")
 
 
-
 # traub_lif()
+# bellec_alif_stdp()
 traub_izh()
-# new_bellec_alif_stdp()

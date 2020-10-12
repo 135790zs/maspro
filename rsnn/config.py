@@ -5,7 +5,7 @@ cfg = {
     "beta": 0.07,
     "gamma": 0.3,
     "rho": 0.995,
-    "dt_refr": 10,
+    "dt_refr": 20,
     "refr1": 2,
     "refr2": 0.004,
     "refr3": 0.02,
