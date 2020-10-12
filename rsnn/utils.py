@@ -40,15 +40,13 @@ def EVv_next(EVv, EVu, Nz, Nv):
                    - 2 * cfg["volt1"] * cfg["dt"] * Nv * Nz
                    + cfg["volt2"] * cfg["dt"]
                    - cfg["volt2"] * cfg["dt"] * Nz)
-            - EVu * cfg["dt"]
+            - EVu  # Traub: "* cfg["dt"]" may have to be appended
             + Nz[np.newaxis].T * cfg["dt"])
 
 
 def EVu_next(EVv, EVu, Nz):
-    return (EVv * (cfg["refr2"] * cfg["dt"]
-                   - cfg["refr2"] * cfg["dt"] * Nz)
-            + EVu * (1
-                     - cfg["refr3"] * cfg["dt"]))
+    return (cfg["refr2"] * cfg["dt"] * EVv * (1 - Nz)
+            + EVu * (1 - cfg["refr3"] * cfg["dt"]))
 
 
 def H_next(Nv):
@@ -152,6 +150,9 @@ def izh_eprop(Nv, Nu, Nz, X, EVv, EVu, H, W, ET, TZ, t, uses_weights=True):
     I = np.dot(W, Nz) if uses_weights else np.zeros(shape=Nz.shape)
     I += X[t, :] if X.ndim == 2 else X
 
+    Nz = np.where(Nv >= cfg["thr"], 1., 0.)
+    TZ = np.where(Nv >= cfg["thr"], t, TZ)
+
     Nvn = V_next(Nu=Nu, Nz=Nz, Nv=Nv, I=I)
     Nun = U_next(Nu=Nu, Nz=Nz, Nv=Nv)
 
@@ -160,14 +161,11 @@ def izh_eprop(Nv, Nu, Nz, X, EVv, EVu, H, W, ET, TZ, t, uses_weights=True):
     EVun = EVu_next(EVv=EVv, EVu=EVu, Nz=Nz)
 
     # What about this one? Probably both or neither.
-    H = H_next(Nv=Nv)
-
-    Nz = np.where(Nv >= cfg["thr"], 1., 0.)
-    TZ = np.where(Nv >= cfg["thr"], t, TZ)
+    H = H_next(Nv=Nvn)
 
     ET = H * EVvn
 
-    W = W + np.where(W, ET, 0)
+    W = W + np.where(W, ET, 0)  # only update nonzero weights
 
     EVv = EVvn
     EVu = EVun
