@@ -204,36 +204,20 @@ def normalize(arr):
     return np.interp(arr, (arr.min(), arr.max()), (-1, 1))
 
 
-def plot_drsnn(fig, gsc, Nv, W, log, ep, layers=(0, 0), neurons=(0, 1)):
+def plot_drsnn(fig, gsc, Nv, W, Nz, log, ep, layers=(0, 0), neurons=(0, 1)):
 
-    start = time.time()
+    print_plots = False
     assert layers[1] - layers[0] == 0 or layers[0] - layers[1] == -1
+
     n1 = neurons[1] + (cfg["N_R"] if layers[0] != layers[1] else 0)
+
     fig.suptitle(f"Epoch {ep}/{cfg['Epochs']}, "
                  f"$N_{{({layers[0]}), {neurons[0]}}}$ and "
                  f"$N_{{({layers[1]}), {neurons[1]}}}$; "
                  f"$W_{{({layers[0]}), {neurons[0]}, {n1}}}$ and"
                  f"$W_{{({layers[0]}), {n1}, {neurons[0]}}}$", fontsize=20)
 
-    for r in range(0, cfg["N_Rec"]+2):
-
-        num = cfg["N_I"] if r == 0 \
-            else cfg["N_O"] if r == cfg["N_Rec"]+2 \
-            else cfg["N_R"]
-        axs = fig.add_subplot(gsc[0, r])
-        axs.set_title(f"$v_{{{r}, i}}$")
-        axs.imshow(unflatten(normalize(Nv[r, :num])),
-                   cmap='coolwarm',
-                   vmin=0, vmax=1,
-                   interpolation='nearest')
-
-    for r in range(0, cfg["N_Rec"]+1):
-        axs = fig.add_subplot(gsc[1, r])
-        axs.set_title(f"$W_{{{r}, i, j}}$")
-        axs.imshow(W[r, :, :],
-                   cmap='coolwarm',
-                   vmin=-1, vmax=1,
-                   interpolation='nearest')
+    # PRINT LINE PLOT OF NEURON/SYNAPSE PAIR
 
     lookup = {
         "Nv":  {"dim": 2, "label": "v^t"},
@@ -250,72 +234,99 @@ def plot_drsnn(fig, gsc, Nv, W, log, ep, layers=(0, 0), neurons=(0, 1)):
     labelpad = 15
     fontsize = 14
     fontsize_legend = 12
-    keyidx = 1
+    keyidx = 0
+    if print_plots:
+        for key, arr in log.items():
+            if arr.ndim != lookup[key]["dim"]:
+                arr1 = arr[:ep, layers[0], ...]
+                arr2 = arr[:ep, layers[1], ...]
+            else:  # If singlelayer
+                arr1 = arr
 
-    for key, arr in log.items():
-        print(f"Took {time.time()-start:.3f}s to plot in epoch {ep} {key}")
-        if arr.ndim != lookup[key]["dim"]:
-            arr1 = arr[:ep, layers[0], ...]
-            arr2 = arr[:ep, layers[1], ...]
-        else:  # If singlelayer
-            arr1 = arr
+            axs = fig.add_subplot(gsc[keyidx, 0])
+            keyidx += 1
 
-        axs = fig.add_subplot(gsc[keyidx, -1])
-        keyidx += 1
+            if key == "X":
+                h = 0.5  # height of vlines
+                rng = np.random.default_rng()
+                inp_ys = rng.random(size=log["X"].shape[0])
+                for n_idx in [0, 1]:
+                    axs.vlines(x=[idx for idx, val in
+                                  enumerate(log["X"][:ep, n_idx]) if val],
+                               ymin=n_idx+inp_ys/(1+h),
+                               ymax=n_idx+(inp_ys+h)/(1+h),
+                               colors=f'C{n_idx}',
+                               linewidths=0.25,
+                               label=f"$x_{n_idx}$")
+                axs.set_ylabel("$x^t_j$",
+                               rotation=0,
+                               labelpad=labelpad,
+                               fontsize=fontsize)
 
-        if key == "X":
-            h = 0.5  # height of vlines
-            rng = np.random.default_rng()
-            inp_ys = rng.random(size=log["X"].shape[0])
-            for n_idx in [0, 1]:
-                axs.vlines(x=[idx for idx, val in
-                              enumerate(log["X"][:ep, n_idx]) if val],
-                           ymin=n_idx+inp_ys/(1+h),
-                           ymax=n_idx+(inp_ys+h)/(1+h),
-                           colors=f'C{n_idx}',
-                           linewidths=0.25,
-                           label=f"$x_{n_idx}$")
-            axs.set_ylabel("$x^t_j$",
-                           rotation=0,
-                           labelpad=labelpad,
-                           fontsize=fontsize)
+            elif arr1.ndim == 2:  # Voltage etc
+                axs.plot(arr1[:ep, neurons[0]],
+                         label=f"${lookup[key]['label']}_0$")
+                axs.plot(arr2[:ep, neurons[0]],
+                         label=f"${lookup[key]['label']}_1$")
+                axs.set_ylabel(f"${lookup[key]['label']}_j$",
+                               rotation=0,
+                               labelpad=labelpad,
+                               fontsize=fontsize)
 
-        elif arr1.ndim == 2:  # Voltage etc
-            axs.plot(arr1[:ep, neurons[0]],
-                     label=f"${lookup[key]['label']}_0$")
-            axs.plot(arr2[:ep, neurons[0]],
-                     label=f"${lookup[key]['label']}_1$")
-            axs.set_ylabel(f"${lookup[key]['label']}_j$",
-                           rotation=0,
-                           labelpad=labelpad,
-                           fontsize=fontsize)
+            elif arr1.ndim == 3:  # Weights etc
+                EVtype = key[2:]+',' if key[:2] == "EV" else ""
+                axs.plot(arr1[:ep, neurons[0], n1],
+                         label=f"${lookup[key]['label']}_{{{EVtype}{neurons[0]}{n1}}}$")
+                axs.plot(arr2[:ep, n1, neurons[0]],
+                         label=f"${lookup[key]['label']}_{{{EVtype}{n1}{neurons[0]}}}$")
+                axs.set_ylabel(f"${lookup[key]['label']}_{{{EVtype}i,j}}$",
+                               rotation=0,
+                               labelpad=labelpad,
+                               fontsize=fontsize)
+            if arr.ndim == lookup[key]["dim"]:
+                axs.legend(fontsize=fontsize_legend,
+                           loc="upper right",
+                           ncol=2)
+            axs.grid(linestyle='--')
 
-        elif arr1.ndim == 3:  # Weights etc
-            EVtype = key[2:]+',' if key[:2] == "EV" else ""
-            axs.plot(arr1[:ep, neurons[0], n1],
-                     label=f"${lookup[key]['label']}_{{{EVtype}{neurons[0]}{n1}}}$")
-            axs.plot(arr2[:ep, n1, neurons[0]],
-                     label=f"${lookup[key]['label']}_{{{EVtype}{n1}{neurons[0]}}}$")
-            axs.set_ylabel(f"${lookup[key]['label']}_{{{EVtype}i,j}}$",
-                           rotation=0,
-                           labelpad=labelpad,
-                           fontsize=fontsize)
-        if arr.ndim == lookup[key]["dim"]:
-            axs.legend(fontsize=fontsize_legend,
-                       loc="upper right",
-                       ncol=2)
-        axs.grid(linestyle='--')
-    # axs[axidx].plot(logs["Nv"][:ep, 1, 0])
-    # axs[axidx].plot(logs["Nv"][:ep, 2, 0])
+    # Neuron heatmaps
+    for r in range(0, cfg["N_Rec"]):
+        num = cfg["N_I"] if r == 0 \
+            else cfg["N_O"] if r == cfg["N_Rec"] \
+            else cfg["N_R"]
+        axs = fig.add_subplot(gsc[r, 1])
+        axs.set_title(f"$v_{{{r}, i}}$")
+        axs.imshow(unflatten(normalize(Nv[r, :num])),
+                   cmap='coolwarm',
+                   vmin=0, vmax=1,
+                   interpolation='nearest')
+
+    # Weight heatmaps
+    # for r in range(0, cfg["N_Rec"]-1):
+    #     axs = fig.add_subplot(gsc[r+cfg["N_Rec"], 1])
+    #     axs.set_title(f"$W_{{{r}, i, j}}$")
+    #     axs.imshow(W[r, :, :cfg["N_R"]],
+    #                cmap='coolwarm',
+    #                vmin=-1, vmax=1,
+    #                interpolation='nearest')
+
+    for r in range(0, cfg["N_Rec"]):
+        num = cfg["N_I"] if r == 0 \
+            else cfg["N_O"] if r == cfg["N_Rec"] \
+            else cfg["N_R"]
+        axs = fig.add_subplot(gsc[r, 2])
+        axs.set_title(f"$z_{{{r}, i}}$")
+        axs.imshow(unflatten(Nz[r, :num]),
+                   cmap='gray',
+                   vmin=0, vmax=1,
+                   interpolation='nearest')
 
     plt.draw()
     plt.pause(0.0001)
 
     fig.clf()
 
-    print(f"Took {time.time()-start:.3f}s to plot in epoch {ep} C")
 
     return fig, gsc
 
 
-# TODO: Combine drsnn plot and plot_logs

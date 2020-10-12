@@ -2,27 +2,26 @@ import matplotlib.pyplot as plt
 import numpy as np
 from config import cfg
 import utils as ut
-from scipy.stats import poisson
-import time
+from task import task1
 
 plot_interval = 1
 
 # Variable arrays
-Nv = np.ones(shape=(cfg["N_Rec"]+2, cfg["N_R"],)) * cfg["eqb"]
-Nu = np.zeros(shape=(cfg["N_Rec"]+2, cfg["N_R"],))
-Nz = np.zeros(shape=(cfg["N_Rec"]+2, cfg["N_R"],))
-H = np.zeros(shape=(cfg["N_Rec"]+2, cfg["N_R"],))
-TZ = np.zeros(shape=(cfg["N_Rec"]+2, cfg["N_R"],))
+Nv = np.ones(shape=(cfg["N_Rec"], cfg["N_R"],)) * cfg["eqb"]
+Nu = np.zeros(shape=(cfg["N_Rec"], cfg["N_R"],))
+Nz = np.zeros(shape=(cfg["N_Rec"], cfg["N_R"],))
+H = np.zeros(shape=(cfg["N_Rec"], cfg["N_R"],))
+TZ = np.zeros(shape=(cfg["N_Rec"], cfg["N_R"],))
 
 rng = np.random.default_rng()
-W = rng.random(size=(cfg["N_Rec"]+1, cfg["N_R"]*2, cfg["N_R"]*2,)) * 2 - 1
+W = rng.random(size=(cfg["N_Rec"]-1, cfg["N_R"]*2, cfg["N_R"]*2,)) * 2 - 1
 
-for r in range(cfg["N_Rec"]+1):
+for r in range(cfg["N_Rec"]-1):
     W[r, :, :] = ut.drop_weights(W=W[r, :, :], recur_lay1=(r > 0))
 
-EVv = np.zeros(shape=(cfg["N_Rec"]+1, cfg["N_R"]*2, cfg["N_R"]*2,))
-EVu = np.zeros(shape=(cfg["N_Rec"]+1, cfg["N_R"]*2, cfg["N_R"]*2,))
-ET = np.zeros(shape=(cfg["N_Rec"]+1, cfg["N_R"]*2, cfg["N_R"]*2,))
+EVv = np.zeros(shape=(cfg["N_Rec"]-1, cfg["N_R"]*2, cfg["N_R"]*2,))
+EVu = np.zeros(shape=(cfg["N_Rec"]-1, cfg["N_R"]*2, cfg["N_R"]*2,))
+ET = np.zeros(shape=(cfg["N_Rec"]-1, cfg["N_R"]*2, cfg["N_R"]*2,))
 
 log = {
     "Nv": np.zeros(shape=(cfg["Epochs"],) + Nv.shape),
@@ -36,18 +35,19 @@ log = {
 }
 
 fig = plt.figure(constrained_layout=False)
-gsc = fig.add_gridspec(nrows=10, ncols=cfg["N_Rec"]+2, hspace=0.2)
+gsc = fig.add_gridspec(nrows=max(8, 2 * cfg["N_Rec"] - 1), ncols=3, hspace=0.2)
 
 plt.ion()
 
 for ep in range(0, cfg["Epochs"]):
 
-    dat = rng.random(size=(cfg["N_I"],)) * 0.1  # input is nonzero for first layer
+    dat = task1(io_type="I", t=ep)  # input is nonzero for first layer
     dp = np.random.binomial(n=1, p=dat)
 
+    # Feed to input layer R0
     Nv[0, :cfg["N_I"]] = np.where(dp, cfg["thr"], Nv[0, :cfg["N_I"]])
 
-    for r in range(0, cfg["N_Rec"]):
+    for r in range(0, cfg["N_Rec"] - 1):
 
         Nvr, Nur, Nzr, EVv[r, :, :], EVu[r, :, :], Hr, W[r, :, :], \
             ET[r, :, :], TZr = ut.izh_eprop(
@@ -84,19 +84,21 @@ for ep in range(0, cfg["Epochs"]):
         log["EVu"][ep, :, :, :] = EVu
         log["W"][ep, :, :, :] = W
 
-        if plot_interval and (ep % plot_interval == 0 or ep == 0):
-            fig, gsc = ut.plot_drsnn(fig=fig,
-                                     gsc=gsc,
-                                     Nv=Nv,
-                                     W=W,
-                                     log=log,
-                                     ep=ep,
-                                     layers=(0, 0),
-                                     neurons=(0, 1))
+    X = np.zeros(shape=(cfg["N_R"],))  # First layer passed, set input to 0
 
-        X = np.zeros(shape=(cfg["N_R"],))  # First layer passed, set input to 0
+    if plot_interval and (ep % plot_interval == 0 or ep == 0):
+        fig, gsc = ut.plot_drsnn(fig=fig,
+                                 gsc=gsc,
+                                 Nv=Nv,
+                                 W=W,
+                                 Nz=Nz,
+                                 log=log,
+                                 ep=ep,
+                                 layers=(0, 0),
+                                 neurons=(0, 1))
 
-# TODO: Refactor ALIF
+
+# TODO: Combine drsnn plot and plot_logs
 # TODO: Implement L
 # TODO: Find out if Bellec uses synscaling
 # TODO: Implement Bellec TIMIT with ALIF
