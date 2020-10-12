@@ -45,8 +45,8 @@ def traub_lif(T=1000, num=2):  # WORKING
 
     for t in range(0, T):
 
-        TZ, Nv, Nz, EVv, W, ET, H = ut.lif_eprop(
-            X=X, t=t, Nv=Nv, TZ=TZ, Nz=Nz, EVv=EVv, W=W)
+        Nv, Nz, EVv, H, W, ET, TZ = ut.lif_eprop(
+            X=X, t=t, Nv=Nv, TZ=TZ, Nz=Nz, EVv=EVv, W=W, L=None)
 
         log["Nv"][t, :] = Nv
         log["Nz"][t, :] = Nz
@@ -98,8 +98,8 @@ def bellec_alif_stdp(T=1000, num=2):  # WORKING
 
     for t in range(0, T):
 
-        Nv, Nu, Nz, H, EVv, EVu, ET, W, TZ = ut.alif_eprop(
-            Nv=Nv, Nu=Nu, Nz=Nz, TZ=TZ, t=t, X=X, EVv=EVv, EVu=EVu, W=W)
+        Nv, Nu, Nz, EVv, EVu, H, W, ET, TZ = ut.alif_eprop(
+            Nv=Nv, Nu=Nu, Nz=Nz, TZ=TZ, t=t, X=X, EVv=EVv, EVu=EVu, W=W, L=None)
 
         log["Nv"][t, :] = Nv
         log["Nu"][t, :] = Nu
@@ -154,8 +154,8 @@ def traub_izh(T=3000, num=2, uses_weights=False):  # WORKING
     for t in range(0, T):
 
         Nv, Nu, Nz, EVv, EVu, H, W, ET, TZ = ut.izh_eprop(
-            Nv=Nv, Nu=Nu, Nz=Nz, X=X, EVv=EVv, EVu=EVu, H=H, W=W, ET=ET, TZ=TZ,
-            t=t, uses_weights=uses_weights)
+            Nv=Nv, Nu=Nu, Nz=Nz, X=X, EVv=EVv, EVu=EVu, W=W, TZ=TZ,
+            t=t, uses_weights=uses_weights, L=None)
 
         log["Nv"][t, :] = Nv
         log["Nu"][t, :] = Nu
@@ -169,6 +169,6 @@ def traub_izh(T=3000, num=2, uses_weights=False):  # WORKING
     ut.plot_logs(log, title="Izhikevich e-prop")
 
 
-traub_lif()
+# traub_lif()
 # bellec_alif_stdp()
-# traub_izh()
+traub_izh()

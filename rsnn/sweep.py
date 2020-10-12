@@ -20,7 +20,7 @@ def rsnn_aux(x, y):
     cfg0["N_R"] = y[0]
     # cfg0["N_Rec"] = y[1]
     error = run_rsnn(cfg=cfg0)
-    print(error, end='\r')
+    print(f"{error} with \tx={x}, \ty={y}", end='\r')
     return error
 
 

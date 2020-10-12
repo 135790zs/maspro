@@ -6,7 +6,7 @@ from task import task1
 
 
 def run_rsnn(cfg):
-    plot_interval = 0
+    plot_interval = 1
 
     # Variable arrays
     Nv = np.ones(shape=(cfg["N_Rec"], cfg["N_R"],)) * cfg["eqb"]
@@ -19,8 +19,9 @@ def run_rsnn(cfg):
     Nz = np.zeros(shape=(cfg["N_Rec"], cfg["N_R"],))
     H = np.zeros(shape=(cfg["N_Rec"], cfg["N_R"],))
     TZ = np.zeros(shape=(cfg["N_Rec"], cfg["N_R"],))
+
     rng = np.random.default_rng()
-    W = rng.random(size=(cfg["N_Rec"]-1, cfg["N_R"]*2, cfg["N_R"]*2,))# * 2 - 1
+    W = rng.random(size=(cfg["N_Rec"]-1, cfg["N_R"]*2, cfg["N_R"]*2,)) # * 2 - 1
     W *= cfg["W_mp"]
 
     for r in range(cfg["N_Rec"]-1):
@@ -175,6 +176,7 @@ if __name__ == "__main__":
     print(run_rsnn(cfg))
 
 # TODO: Merge e-prop--functions
+# TODO: Why are the thresholds different in the rsnn and the units? RSNN seems to spike at negative 65, but not unit?
 # TODO: use PLT Animation class
 # TODO: Implement adaptive e-prop
 # TODO: Combine drsnn plot and plot_logs

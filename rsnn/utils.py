@@ -287,7 +287,6 @@ def errfn(a1, a2):
 
 def plot_drsnn(fig, gsc, Nv, W, Nz, log, ep, layers=(0, 1), neurons=(0, 0)):
 
-    start = time.time()
     assert layers[1] - layers[0] == 0 or layers[0] - layers[1] == -1
 
     # If to next layer, weight matrix is appended after recurrent.
@@ -299,6 +298,9 @@ def plot_drsnn(fig, gsc, Nv, W, Nz, log, ep, layers=(0, 1), neurons=(0, 0)):
                  f"$W_{{({layers[0]}), {neurons[0]}, {n1}}}$ and"
                  f"$W_{{({layers[0]}), {n1}, {neurons[0]}}}$", fontsize=20)
 
+    labelpad = 15
+    fontsize = 14
+    fontsize_legend = 12
     if cfg["plot_pair"]:
 
         lookup = {
@@ -313,9 +315,6 @@ def plot_drsnn(fig, gsc, Nv, W, Nz, log, ep, layers=(0, 1), neurons=(0, 0)):
             "ET":  {"dim": 3, "label": "e^t"},
         }
 
-        labelpad = 15
-        fontsize = 14
-        fontsize_legend = 12
         keyidx = 0
         for key, arr in log.items():
             if key not in lookup.keys():
@@ -379,19 +378,25 @@ def plot_drsnn(fig, gsc, Nv, W, Nz, log, ep, layers=(0, 1), neurons=(0, 0)):
                 else cfg["N_O"] if r == cfg["N_Rec"] \
                 else cfg["N_R"]
             axs = fig.add_subplot(gsc[r, 1])
-            axs.set_title(f"$v_{{{r}, i}}$")
-            axs.imshow(unflatten(normalize(Nv[r, :num])),
+            axs.set_ylabel(f"$v_{{{r}, i}}$",
+                           rotation=0,
+                           labelpad=labelpad,
+                           fontsize=fontsize)
+            axs.imshow(unflatten(Nv[r, :num]),
                        cmap='coolwarm',
-                       vmin=0, vmax=1,
+                       vmin=-85, vmax=-85 + cfg["volt3"],
                        interpolation='nearest')
 
         # Weight heatmaps
         for r in range(0, cfg["N_Rec"]-1):
-            axs = fig.add_subplot(gsc[r+cfg["N_Rec"], 1])
-            axs.set_title(f"$W_{{{r}, i, j}}$")
+            axs = fig.add_subplot(gsc[2*r+cfg["N_Rec"]:2*r+2+cfg["N_Rec"], 1])
+            axs.set_ylabel(f"$W_{{{r}, i, j}}$",
+                           rotation=0,
+                           labelpad=labelpad,
+                           fontsize=fontsize)
             axs.imshow(W[r, :, :cfg["N_R"]],
                        cmap='coolwarm',
-                       vmin=-1, vmax=1,
+                       vmin=-cfg["W_mp"], vmax=cfg["W_mp"],
                        interpolation='nearest')
 
         # Neuron spikes
@@ -400,7 +405,10 @@ def plot_drsnn(fig, gsc, Nv, W, Nz, log, ep, layers=(0, 1), neurons=(0, 0)):
                 else cfg["N_O"] if r == cfg["N_Rec"] \
                 else cfg["N_R"]
             axs = fig.add_subplot(gsc[r, 2])
-            axs.set_title(f"$z_{{{r}, i}}$")
+            axs.set_ylabel(f"$z_{{{r}, i}}$",
+                           rotation=0,
+                           labelpad=labelpad,
+                           fontsize=fontsize)
             axs.imshow(unflatten(Nz[r, :num]),
                        cmap='gray',
                        vmin=0, vmax=1,
