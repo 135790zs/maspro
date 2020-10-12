@@ -287,6 +287,7 @@ def errfn(a1, a2):
 
 def plot_drsnn(fig, gsc, Nv, W, Nz, log, ep, layers=(0, 1), neurons=(0, 0)):
 
+    start = time.time()
     assert layers[1] - layers[0] == 0 or layers[0] - layers[1] == -1
 
     # If to next layer, weight matrix is appended after recurrent.
@@ -299,6 +300,7 @@ def plot_drsnn(fig, gsc, Nv, W, Nz, log, ep, layers=(0, 1), neurons=(0, 0)):
                  f"$W_{{({layers[0]}), {n1}, {neurons[0]}}}$", fontsize=20)
 
     if cfg["plot_pair"]:
+
         lookup = {
             "Nv":  {"dim": 2, "label": "v^t"},
             "Nu":  {"dim": 2, "label": "u^t"},
@@ -424,8 +426,8 @@ def plot_drsnn(fig, gsc, Nv, W, Nz, log, ep, layers=(0, 1), neurons=(0, 0)):
         axs.plot(errfn(log["target_EMA"][:ep+1, :], log["output_EMA"][:ep+1, :]))
 
     plt.draw()
-    plt.pause(0.0001)
 
+    plt.pause((0.8 if ep == 1 else 0.01))
     fig.clf()
 
     return fig, gsc

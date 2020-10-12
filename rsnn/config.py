@@ -1,6 +1,7 @@
 cfg = {
     "neuron": "Izhikevich",
     "eqb": -65,
+    "W_mp": 1,
     "thr": 30,
     "alpha": 0.9,
     "beta": 0.07,
@@ -16,7 +17,7 @@ cfg = {
     "dt": 0.1,
 
     "N_I": 1,
-    "N_R": 2,
+    "N_R": 32,
     "N_O": 1,
     "N_Rec": 3,
 
