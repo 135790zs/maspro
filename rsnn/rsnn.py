@@ -31,18 +31,22 @@ log = {
     "EVv": np.zeros(shape=(cfg["Epochs"],) + EVv.shape),
     "EVu": np.zeros(shape=(cfg["Epochs"],) + EVu.shape),
     "ET": np.zeros(shape=(cfg["Epochs"],) + ET.shape),
-    "W": np.zeros(shape=(cfg["Epochs"],) + W.shape)
+    "W": np.zeros(shape=(cfg["Epochs"],) + W.shape),
+    "output": np.zeros(shape=(cfg["Epochs"], cfg["N_O"])),
+    "output_EMA": np.zeros(shape=(cfg["Epochs"], cfg["N_O"])),
+    "target": np.zeros(shape=(cfg["Epochs"], cfg["N_O"])),
+    "target_EMA": np.zeros(shape=(cfg["Epochs"], cfg["N_O"]))
 }
 
 fig = plt.figure(constrained_layout=False)
-gsc = fig.add_gridspec(nrows=max(8, 2 * cfg["N_Rec"] - 1), ncols=3, hspace=0.2)
+gsc = fig.add_gridspec(nrows=max(8, 2 * cfg["N_Rec"] - 1), ncols=4, hspace=0.2)
 
 plt.ion()
 
 for ep in range(0, cfg["Epochs"]):
 
     dat = task1(io_type="I", t=ep)  # input is nonzero for first layer
-    dp = np.random.binomial(n=1, p=dat)
+    dp = np.random.binomial(n=1, p=dat)  # Bernoulli distribution
 
     # Feed to input layer R0
     Nv[0, :cfg["N_I"]] = np.where(dp, cfg["thr"], Nv[0, :cfg["N_I"]])
@@ -84,7 +88,26 @@ for ep in range(0, cfg["Epochs"]):
         log["EVu"][ep, :, :, :] = EVu
         log["W"][ep, :, :, :] = W
 
-    X = np.zeros(shape=(cfg["N_R"],))  # First layer passed, set input to 0
+        X = np.zeros(shape=(cfg["N_R"],))  # First layer passed, set input to 0
+
+    log["output"][ep, :] = Nz[-1, :cfg["N_O"]]
+    log["output"][ep, :] = Nz[0, :cfg["N_O"]]
+
+    log["target"][ep, :] = task1(io_type="O", t=ep)
+
+    if ep == 0:
+        log["output_EMA"][ep, :] = log["output"][ep, :]
+        log["target_EMA"][ep, :] = log["target"][ep, :]
+    else:
+        log["output_EMA"][ep, :] = (
+            cfg["EMA"] * log["output"][ep, :]
+            + (1 - cfg["EMA"]) * log["output_EMA"][ep-1, :])
+        log["target_EMA"][ep, :] = (
+            cfg["EMA"] * log["target"][ep, :]
+            + (1 - cfg["EMA"]) * log["target_EMA"][ep-1, :])
+
+    error = np.abs(log["output_EMA"][:ep, :] - log["target_EMA"][:ep, :])
+    print(error)
 
     if plot_interval and (ep % plot_interval == 0 or ep == 0):
         fig, gsc = ut.plot_drsnn(fig=fig,
@@ -98,7 +121,7 @@ for ep in range(0, cfg["Epochs"]):
                                  neurons=(0, 1))
 
 
-# TODO: Combine drsnn plot and plot_logs
 # TODO: Implement L
+# TODO: Combine drsnn plot and plot_logs
 # TODO: Find out if Bellec uses synscaling
 # TODO: Implement Bellec TIMIT with ALIF

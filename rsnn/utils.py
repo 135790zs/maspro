@@ -204,6 +204,10 @@ def normalize(arr):
     return np.interp(arr, (arr.min(), arr.max()), (-1, 1))
 
 
+def errfn(a1, a2):
+    return np.abs(a1 - a2)
+
+
 def plot_drsnn(fig, gsc, Nv, W, Nz, log, ep, layers=(0, 0), neurons=(0, 1)):
 
     print_plots = False
@@ -290,16 +294,16 @@ def plot_drsnn(fig, gsc, Nv, W, Nz, log, ep, layers=(0, 0), neurons=(0, 1)):
             axs.grid(linestyle='--')
 
     # Neuron heatmaps
-    for r in range(0, cfg["N_Rec"]):
-        num = cfg["N_I"] if r == 0 \
-            else cfg["N_O"] if r == cfg["N_Rec"] \
-            else cfg["N_R"]
-        axs = fig.add_subplot(gsc[r, 1])
-        axs.set_title(f"$v_{{{r}, i}}$")
-        axs.imshow(unflatten(normalize(Nv[r, :num])),
-                   cmap='coolwarm',
-                   vmin=0, vmax=1,
-                   interpolation='nearest')
+    # for r in range(0, cfg["N_Rec"]):
+    #     num = cfg["N_I"] if r == 0 \
+    #         else cfg["N_O"] if r == cfg["N_Rec"] \
+    #         else cfg["N_R"]
+    #     axs = fig.add_subplot(gsc[r, 1])
+    #     axs.set_title(f"$v_{{{r}, i}}$")
+    #     axs.imshow(unflatten(normalize(Nv[r, :num])),
+    #                cmap='coolwarm',
+    #                vmin=0, vmax=1,
+    #                interpolation='nearest')
 
     # Weight heatmaps
     # for r in range(0, cfg["N_Rec"]-1):
@@ -321,12 +325,32 @@ def plot_drsnn(fig, gsc, Nv, W, Nz, log, ep, layers=(0, 0), neurons=(0, 1)):
                    vmin=0, vmax=1,
                    interpolation='nearest')
 
+    # Output, target, error
+    axs = fig.add_subplot(gsc[0, 3])
+    axs.set_title(f"Output + EMA")
+    axs.plot(log["output"][:ep, :])
+    axs.plot(log["output_EMA"][:ep, :])
+    axs = fig.add_subplot(gsc[1, 3])
+    axs.set_title(f"Target + EMA")
+    axs.plot(log["target"][:ep, :])
+    axs.plot(log["target_EMA"][:ep, :])
+    axs = fig.add_subplot(gsc[2, 3])
+    axs.set_title(f"Error + EMA")
+    axs.plot(errfn(log["target"][:ep, :], log["output"][:ep, :]))
+    axs.plot(errfn(log["target_EMA"][:ep, :], log["output_EMA"][:ep, :]))
+
     plt.draw()
     plt.pause(0.0001)
 
     fig.clf()
 
-
     return fig, gsc
 
 
+def EMA(arr, alpha=cfg["EMA"]):
+    ret = np.zeros(shape=arr.shape)
+    for ix in arr:
+        if ix == 0:
+            ret[ix, ...] = arr[ix, ...]
+        else:
+            ret[ix, ...] = alpha * arr[ix, ...] + (1 - alpha) * ret[ix-1, ...]
