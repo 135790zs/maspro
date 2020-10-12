@@ -145,15 +145,81 @@ def get_artificial_input(T, num, dur, diff, interval, val, switch_interval):
     return X
 
 
-def lif_eprop():
-    pass
+def lif_eprop(X, t, TZ, Nv, Nz, EVv, L, W, uses_weights=True):
+    I = np.dot(W, Nz) if uses_weights else np.zeros(shape=Nz.shape)
+    I += X[t, :] if X.ndim == 2 else X
+
+    Nz = np.where(np.logical_and(t - TZ >= cfg["dt_refr"],
+                                 Nv >= cfg["thr"]),
+                  1,
+                  0)
+    TZ = np.where(Nz, t, TZ)
+
+    R = (t - TZ == cfg["dt_refr"]).astype(int)
+
+    Nv = (cfg["alpha"] * Nv
+          + I - Nz * cfg["alpha"] * Nv
+          - R * cfg["alpha"] * Nv)
+
+    EVv = cfg["alpha"] * (1 - Nz - R) * EVv + Nz[np.newaxis].T
+
+    H = np.where(t - TZ < cfg["dt_refr"],
+                 -cfg["gamma"],
+                 cfg["gamma"] * np.clip(a=1 - (abs(Nv - cfg["thr"])
+                                               / cfg["thr"]),
+                                        a_min=0,
+                                        a_max=1))
+
+    ET = H * EVv
+
+    if L is not None:
+        ET = ET * np.repeat(a=L, repeats=2)
+
+    W = W + ET
+
+    return Nv, Nz, EVv, H, W, ET, TZ
 
 
-def alif_eprop(Nv, Nz, TZ, t, X, EVv, W, ET):
-    pass
+def alif_eprop(Nv, Nu, Nz, TZ, t, X, EVv, EVu, W, L, uses_weights=True):
+    I = np.dot(W, Nz) if uses_weights else np.zeros(shape=Nz.shape)
+    I += X[t, :] if X.ndim == 2 else X
+
+    Nz = np.where(np.logical_and(t - TZ >= cfg["dt_refr"],
+                                 Nv >= (cfg["thr"] + cfg["beta"] * Nu)),
+                  1,
+                  0)
+    TZ = np.where(Nz, t, TZ)
+
+    R = (t - TZ == cfg["dt_refr"]).astype(int)
+
+    Nv = (cfg["alpha"] * Nv
+          + I - Nz * cfg["alpha"] * Nv
+          - R * cfg["alpha"] * Nv)
+
+    Nu = cfg["rho"] * Nu + Nz
+
+    EVv = cfg["alpha"] * (1 - Nz - R) * EVv + Nz[np.newaxis].T
+
+    H = np.where(t - TZ < cfg["dt_refr"],
+                 -cfg["gamma"],
+                 cfg["gamma"] * np.clip(
+                    a=1 - (abs(Nv - (cfg["thr"] + cfg["beta"] * Nu))
+                           / cfg["thr"]),
+                    a_min=0,
+                    a_max=None))
+    EVu = H * EVv + (cfg["rho"] - H * cfg["beta"]) * EVu
+
+    ET = H * (EVv - cfg["beta"] * EVu)
+
+    if L is not None:
+        ET = ET * np.repeat(a=L, repeats=2)
+
+    W = W + ET
+
+    return Nv, Nu, Nz, EVv, EVu, H, W, ET, TZ
 
 
-def izh_eprop(Nv, Nu, Nz, X, EVv, EVu, H, W, ET, TZ, t, uses_weights=True, L=None):
+def izh_eprop(Nv, Nu, Nz, X, EVv, EVu, W, L, TZ, t, uses_weights=True):
 
     I = np.dot(W, Nz) if uses_weights else np.zeros(shape=Nz.shape)
     I += X[t, :] if X.ndim == 2 else X
@@ -363,12 +429,3 @@ def plot_drsnn(fig, gsc, Nv, W, Nz, log, ep, layers=(0, 1), neurons=(0, 0)):
     fig.clf()
 
     return fig, gsc
-
-
-def eprop(neuron_type, **kwargs):
-    if neuron_type == "Izhikevich":
-        return izh_eprop(**kwargs)
-    elif neuron_type == "Traub-LIF":
-        return traub_lif_eprop(**kwargs)
-    elif neuron_type == "Bellec-ALIF":
-        return bellec_alif_eprop(**kwargs)

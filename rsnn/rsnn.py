@@ -4,18 +4,23 @@ from config import cfg
 import utils as ut
 from task import task1
 
-plot_interval = 1
+plot_interval = 10
 
 # Variable arrays
 Nv = np.ones(shape=(cfg["N_Rec"], cfg["N_R"],)) * cfg["eqb"]
-Nu = np.zeros(shape=(cfg["N_Rec"], cfg["N_R"],))
+
+if cfg["neuron"] == "ALIF":
+    Nu = np.ones(shape=(cfg["N_Rec"], cfg["N_R"],)) * cfg["thr"]
+elif cfg["neuron"] in ["Izhikevich", "LIF"]:
+    Nu = np.zeros(shape=(cfg["N_Rec"], cfg["N_R"],))
+
 Nz = np.zeros(shape=(cfg["N_Rec"], cfg["N_R"],))
 H = np.zeros(shape=(cfg["N_Rec"], cfg["N_R"],))
 TZ = np.zeros(shape=(cfg["N_Rec"], cfg["N_R"],))
 
 rng = np.random.default_rng()
-W = rng.random(size=(cfg["N_Rec"]-1, cfg["N_R"]*2, cfg["N_R"]*2,)) * 2 - 1
-W *= 2
+W = rng.random(size=(cfg["N_Rec"]-1, cfg["N_R"]*2, cfg["N_R"]*2,))# * 2 - 1
+W *= 1
 
 for r in range(cfg["N_Rec"]-1):
     W[r, :, :] = ut.drop_weights(W=W[r, :, :], recur_lay1=(r > 0))
@@ -59,38 +64,62 @@ for ep in range(0, cfg["Epochs"]):
 
     # Feed to input layer R0
     Nv[0, :cfg["N_I"]] = np.where(log["input_spike"][ep, :],
-                                  cfg["thr"],
+                                  cfg["thr"] if cfg["neuron"] != "ALIF" else Nu[0, :cfg["N_I"]],
                                   Nv[0, :cfg["N_I"]])
 
     for r in range(0, cfg["N_Rec"] - 1):
 
-        Nvr, Nur, Nzr, EVv[r, :, :], EVu[r, :, :], Hr, W[r, :, :], \
-            ET[r, :, :], TZr = ut.eprop(
-                neuron_type="Izhikevich",
-                Nv=np.concatenate((Nv[r, :], Nv[r+1, :])),
-                Nu=np.concatenate((Nu[r, :], Nu[r+1, :])),
-                Nz=np.concatenate((Nz[r, :], Nz[r+1, :])),
-                TZ=np.concatenate((TZ[r, :], TZ[r+1, :])),
-                H=np.concatenate((H[r, :], H[r+1, :])),
-                EVv=EVv[r, :, :],
-                EVu=EVu[r, :, :],
-                ET=ET[r, :, :],
-                W=W[r, :, :],
-                L=L[r-1, :] if r > 0 else np.zeros(shape=cfg["N_R"]),
-                X=np.pad(array=log["input_spike"][ep, :],
-                         pad_width=(0, 2*cfg["N_R"]-cfg["N_I"])),
-                t=ep)
+        if cfg["neuron"] == "Izhikevich":
+            Nvr, Nur, Nzr, EVv[r, :, :], EVu[r, :, :], Hr, W[r, :, :], \
+                ET[r, :, :], TZr = ut.izh_eprop(
+                    Nv=np.concatenate((Nv[r, :], Nv[r+1, :])),
+                    Nu=np.concatenate((Nu[r, :], Nu[r+1, :])),
+                    Nz=np.concatenate((Nz[r, :], Nz[r+1, :])),
+                    TZ=np.concatenate((TZ[r, :], TZ[r+1, :])),
+                    EVv=EVv[r, :, :],
+                    EVu=EVu[r, :, :],
+                    W=W[r, :, :],
+                    L=L[r-1, :] if r > 0 else np.zeros(shape=cfg["N_R"]),
+                    X=np.pad(array=log["input_spike"][ep, :],
+                             pad_width=(0, 2*cfg["N_R"]-cfg["N_I"])),
+                    t=ep)
+        elif cfg["neuron"] == "ALIF":
+            Nvr, Nur, Nzr, EVv[r, :, :], EVu[r, :, :], Hr, W[r, :, :], \
+                ET[r, :, :], TZr = ut.alif_eprop(
+                    Nv=np.concatenate((Nv[r, :], Nv[r+1, :])),
+                    Nu=np.concatenate((Nu[r, :], Nu[r+1, :])),
+                    Nz=np.concatenate((Nz[r, :], Nz[r+1, :])),
+                    TZ=np.concatenate((TZ[r, :], TZ[r+1, :])),
+                    EVv=EVv[r, :, :],
+                    EVu=EVu[r, :, :],
+                    W=W[r, :, :],
+                    L=L[r-1, :] if r > 0 else np.zeros(shape=cfg["N_R"]),
+                    X=np.pad(array=log["input_spike"][ep, :],
+                             pad_width=(0, 2*cfg["N_R"]-cfg["N_I"])),
+                    t=ep)
+        elif cfg["neuron"] == "LIF":
+            Nvr, Nzr, EVv[r, :, :], Hr, W[r, :, :], ET[r, :, :], TZr \
+                = ut.lif_eprop(
+                    Nv=np.concatenate((Nv[r, :], Nv[r+1, :])),
+                    Nz=np.concatenate((Nz[r, :], Nz[r+1, :])),
+                    TZ=np.concatenate((TZ[r, :], TZ[r+1, :])),
+                    EVv=EVv[r, :, :],
+                    W=W[r, :, :],
+                    L=L[r-1, :] if r > 0 else np.zeros(shape=cfg["N_R"]),
+                    X=np.pad(array=log["input_spike"][ep, :],
+                             pad_width=(0, 2*cfg["N_R"]-cfg["N_I"])),
+                    t=ep)
 
         Nv[r, :] = Nvr[:cfg["N_R"]]
-        Nu[r, :] = Nur[:cfg["N_R"]]
-        Nz[r, :] = Nzr[:cfg["N_R"]]
-        TZ[r, :] = TZr[:cfg["N_R"]]
-        H[r, :] = Hr[:cfg["N_R"]]
-
         Nv[r+1, :] = Nvr[cfg["N_R"]:]
-        Nu[r+1, :] = Nur[cfg["N_R"]:]
+        if cfg["neuron"] not in ["LIF"]:
+            Nu[r, :] = Nur[:cfg["N_R"]]
+            Nu[r+1, :] = Nur[cfg["N_R"]:]
+        Nz[r, :] = Nzr[:cfg["N_R"]]
         Nz[r+1, :] = Nzr[cfg["N_R"]:]
+        TZ[r, :] = TZr[:cfg["N_R"]]
         TZ[r+1, :] = TZr[cfg["N_R"]:]
+        H[r, :] = Hr[:cfg["N_R"]]
         H[r+1, :] = Hr[cfg["N_R"]:]
 
         log["Nv"][ep, :, :] = Nv
@@ -135,9 +164,10 @@ for ep in range(0, cfg["Epochs"]):
                                  log=log,
                                  ep=ep,
                                  layers=(0, 1),
-                                 neurons=(0, 1))
+                                 neurons=(0, 0))
 
 
+# Merge e-prop--functions
 # TODO: Implement adaptive e-prop
 # TODO: Combine drsnn plot and plot_logs
 # TODO: Find out if Bellec uses synscaling
