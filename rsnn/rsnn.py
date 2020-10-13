@@ -6,7 +6,7 @@ from task import task1
 
 
 def run_rsnn(cfg):
-    plot_interval = 1
+    plot_interval = 5
 
     # Variable arrays
     Nv = np.ones(shape=(cfg["N_Rec"], cfg["N_R"],)) * cfg["eqb"]
@@ -131,7 +131,7 @@ def run_rsnn(cfg):
             log["EVu"][ep, :, :, :] = EVu
             log["W"][ep, :, :, :] = W
 
-            X = np.zeros(shape=(cfg["N_R"],))  # First layer passed, set input to 0
+            # X = np.zeros(shape=(cfg["N_R"],))  # First layer passed, set input to 0
 
         # W = W / np.real(np.max(np.linalg.eigvals(W))) * cfg["synscale"]
 
@@ -176,9 +176,11 @@ if __name__ == "__main__":
     print(run_rsnn(cfg))
 
 # TODO: Merge e-prop--functions
-# TODO: Why are the thresholds different in the rsnn and the units? RSNN seems to spike at negative 65, but not unit?
-# TODO: use PLT Animation class
+# TODO: Why are the thresholds different in the rsnn and the units?
+#       RSNN seems to spike at negative 65, but not units? Same for LIF?
 # TODO: Implement adaptive e-prop
-# TODO: Combine drsnn plot and plot_logs
-# TODO: Find out if Bellec uses synscaling
-# TODO: Implement Bellec TIMIT with ALIF
+# TODO: Dictionary to facilitate sweeping function (param = key, list = item)
+# TODO: Merge drsnn plot and plot_logs
+# TODO: Refactor orthogonality
+# TODO: Implement TIMIT
+# TODO: Try replicate Bellec's results

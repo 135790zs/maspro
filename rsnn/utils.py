@@ -1,6 +1,5 @@
 import matplotlib.pyplot as plt
 from matplotlib import rcParams as rc
-import time
 import numpy as np
 from config import cfg
 rc['mathtext.fontset'] = 'stix'

@@ -25,7 +25,12 @@ def rsnn_aux(x, y):
 
 
 for y in list(itertools.product(*y0)):
-    res = minimize(rsnn_aux, x0, args=(y,), method="Nelder-Mead", tol=1e-6, options={'maxiter': 200})
+    res = minimize(rsnn_aux,
+                   x0,
+                   args=(y,),
+                   method="Nelder-Mead",
+                   tol=1e-6,
+                   options={'maxiter': 200})
     print()
     print(y)
     print(res)
