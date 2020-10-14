@@ -383,7 +383,7 @@ def plot_drsnn(fig, gsc, Nv, W, Nz, log, ep, layers=(0, 1), neurons=(0, 0)):
                            fontsize=fontsize)
             axs.imshow(unflatten(Nv[r, :num]),
                        cmap='coolwarm',
-                       vmin=-85, vmax=-85 + cfg["volt3"],
+                       vmin=-85, vmax=cfg["eqb"],
                        interpolation='nearest')
 
         # Weight heatmaps

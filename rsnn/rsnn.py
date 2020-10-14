@@ -6,7 +6,7 @@ from task import task1
 
 
 def run_rsnn(cfg):
-    plot_interval = 5
+    plot_interval = 1
 
     # Variable arrays
     Nv = np.ones(shape=(cfg["N_Rec"], cfg["N_R"],)) * cfg["eqb"]
@@ -175,12 +175,33 @@ if __name__ == "__main__":
 
     print(run_rsnn(cfg))
 
-# TODO: Merge e-prop--functions
 # TODO: Why are the thresholds different in the rsnn and the units?
 #       RSNN seems to spike at negative 65, but not units? Same for LIF?
+# TODO: Why so many neurons in rsnn plot?
+# TODO: Merge e-prop--functions
 # TODO: Implement adaptive e-prop
 # TODO: Dictionary to facilitate sweeping function (param = key, list = item)
 # TODO: Merge drsnn plot and plot_logs
 # TODO: Refactor orthogonality
 # TODO: Implement TIMIT
 # TODO: Try replicate Bellec's results
+
+"""
+MEETING NOTES 10/13
+
+* don't do too much, but do it right
+  zwaartekracht NWO
+
+
+* homeostaticity, slower dynamics in deeper layers. Neural sampling.
+* Fading input not necessarily bad: think about it
+* Learn nonlinear filter?
+* nonlinear autoregressive moving average NARMA
+* Input: drop autoregressive
+* Search for NARMA-10 benchmark
+* SEND SKYPE NAME
+
+
+
+
+"""

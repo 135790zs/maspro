@@ -169,6 +169,6 @@ def traub_izh(T=3000, num=2, uses_weights=False):  # WORKING
     ut.plot_logs(log, title="Izhikevich e-prop")
 
 
-# traub_lif()
+traub_lif()
 # bellec_alif_stdp()
-traub_izh()
+# traub_izh()
