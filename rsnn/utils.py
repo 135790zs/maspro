@@ -144,109 +144,76 @@ def get_artificial_input(T, num, dur, diff, interval, val, switch_interval):
     return X
 
 
-def lif_eprop(X, t, TZ, Nv, Nz, EVv, L, W, uses_weights=True):
+def eprop(model, X, t, TZ, Nv, Nz, EVv, L, W, uses_weights=True, Nu=None, EVu=None):
     I = np.dot(W, Nz) if uses_weights else np.zeros(shape=Nz.shape)
     I += X[t, :] if X.ndim == 2 else X
 
-    Nz = np.where(np.logical_and(t - TZ >= cfg["dt_refr"],
-                                 Nv >= cfg["thr"]),
-                  1,
-                  0)
+    if model == "LIF":
+        Nz = np.where(np.logical_and(t - TZ >= cfg["dt_refr"],
+                                     Nv >= cfg["thr"]),
+                      1,
+                      0)
+    elif model == "ALIF":
+        Nz = np.where(np.logical_and(t - TZ >= cfg["dt_refr"],
+                                     Nv >= (cfg["thr"] + cfg["beta"] * Nu)),
+                      1,
+                      0)
+    elif model == "Izhikevich":
+        Nz = np.where(Nv >= cfg["thr"], 1., 0.)
+
     TZ = np.where(Nz, t, TZ)
 
-    R = (t - TZ == cfg["dt_refr"]).astype(int)
+    if model in ["LIF", "ALIF"]:
+        R = (t - TZ == cfg["dt_refr"]).astype(int)
 
-    Nv = (cfg["alpha"] * Nv
-          + I - Nz * cfg["alpha"] * Nv
-          - R * cfg["alpha"] * Nv)
+        Nv = (cfg["alpha"] * Nv
+              + I - Nz * cfg["alpha"] * Nv
+              - R * cfg["alpha"] * Nv)
 
-    EVv = cfg["alpha"] * (1 - Nz - R) * EVv + Nz[np.newaxis].T
+    elif model == "Izhikevich":
+        Nvn = V_next(Nu=Nu, Nz=Nz, Nv=Nv, I=I)
+        Nun = U_next(Nu=Nu, Nz=Nz, Nv=Nv)
 
-    H = np.where(t - TZ < cfg["dt_refr"],
-                 -cfg["gamma"],
-                 cfg["gamma"] * np.clip(a=1 - (abs(Nv - cfg["thr"])
-                                               / cfg["thr"]),
-                                        a_min=0,
-                                        a_max=1))
+    if model == "ALIF":
+        Nu = cfg["rho"] * Nu + Nz
 
-    ET = H * EVv
+    if model in ["LIF", "ALIF"]:
+        EVv = cfg["alpha"] * (1 - Nz - R) * EVv + Nz[np.newaxis].T
 
-    if L is not None:
-        ET = ET * np.repeat(a=L, repeats=2)
+    elif model == "Izhikevich":
+        EVv = EVv_next(EVv=EVv, EVu=EVu, Nz=Nz, Nv=Nv)
+        EVu = EVu_next(EVv=EVv, EVu=EVu, Nz=Nz)
 
-    W = W + ET
+    if model == "LIF":
+        H = np.where(t - TZ < cfg["dt_refr"],
+                     -cfg["gamma"],
+                     cfg["gamma"] * np.clip(a=1 - (abs(Nv - cfg["thr"])
+                                                   / cfg["thr"]),
+                                            a_min=0,
+                                            a_max=None))
+    elif model == "ALIF":
+        H = np.where(t - TZ < cfg["dt_refr"],
+                     -cfg["gamma"],
+                     cfg["gamma"] * np.clip(
+                        a=1 - (abs(Nv - (cfg["thr"] + cfg["beta"] * Nu))
+                               / cfg["thr"]),
+                        a_min=0,
+                        a_max=None))
+        EVu = H * EVv + (cfg["rho"] - H * cfg["beta"]) * EVu
+    elif model == "Izhikevich":
+        Nv = Nvn
+        Nu = Nun
+        H = H_next(Nv=Nv)
 
-    return Nv, Nz, EVv, H, W, ET, TZ
-
-
-def alif_eprop(Nv, Nu, Nz, TZ, t, X, EVv, EVu, W, L, uses_weights=True):
-    I = np.dot(W, Nz) if uses_weights else np.zeros(shape=Nz.shape)
-    I += X[t, :] if X.ndim == 2 else X
-
-    Nz = np.where(np.logical_and(t - TZ >= cfg["dt_refr"],
-                                 Nv >= (cfg["thr"] + cfg["beta"] * Nu)),
-                  1,
-                  0)
-    TZ = np.where(Nz, t, TZ)
-
-    R = (t - TZ == cfg["dt_refr"]).astype(int)
-
-    Nv = (cfg["alpha"] * Nv
-          + I - Nz * cfg["alpha"] * Nv
-          - R * cfg["alpha"] * Nv)
-
-    Nu = cfg["rho"] * Nu + Nz
-
-    EVv = cfg["alpha"] * (1 - Nz - R) * EVv + Nz[np.newaxis].T
-
-    H = np.where(t - TZ < cfg["dt_refr"],
-                 -cfg["gamma"],
-                 cfg["gamma"] * np.clip(
-                    a=1 - (abs(Nv - (cfg["thr"] + cfg["beta"] * Nu))
-                           / cfg["thr"]),
-                    a_min=0,
-                    a_max=None))
-    EVu = H * EVv + (cfg["rho"] - H * cfg["beta"]) * EVu
-
-    ET = H * (EVv - cfg["beta"] * EVu)
-
-    if L is not None:
-        ET = ET * np.repeat(a=L, repeats=2)
-
-    W = W + ET
-
-    return Nv, Nu, Nz, EVv, EVu, H, W, ET, TZ
-
-
-def izh_eprop(Nv, Nu, Nz, X, EVv, EVu, W, L, TZ, t, uses_weights=True):
-
-    I = np.dot(W, Nz) if uses_weights else np.zeros(shape=Nz.shape)
-    I += X[t, :] if X.ndim == 2 else X
-
-    Nz = np.where(Nv >= cfg["thr"], 1., 0.)
-    TZ = np.where(Nv >= cfg["thr"], t, TZ)
-
-    Nvn = V_next(Nu=Nu, Nz=Nz, Nv=Nv, I=I)
-    Nun = U_next(Nu=Nu, Nz=Nz, Nv=Nv)
-
-    # Should this operate on Nvn instead? Probably not..?
-    EVvn = EVv_next(EVv=EVv, EVu=EVu, Nz=Nz, Nv=Nv)
-    EVun = EVu_next(EVv=EVv, EVu=EVu, Nz=Nz)
-
-    # What about this one? Probably both or neither.
-    H = H_next(Nv=Nvn)
-
-    ET = H * EVvn
+    if model in ["LIF", "Izhikevich"]:
+        ET = H * EVv
+    elif model == "ALIF":
+        ET = H * (EVv - cfg["beta"] * EVu)
 
     if L is not None:
         ET = ET * np.repeat(a=L, repeats=2)
 
     W = W + np.where(W, ET, 0)  # only update nonzero weights
-
-    EVv = EVvn
-    EVu = EVun
-    Nv = Nvn
-    Nu = Nun
 
     return Nv, Nu, Nz, EVv, EVu, H, W, ET, TZ
 
@@ -257,7 +224,7 @@ def drop_weights(W, recur_lay1=True):
     if recur_lay1:
         np.fill_diagonal(W[:N, :N], 0)  # Zero diag NW: no self-connections
     else:
-        W[:N, :N] = 0  # Zero full NW: don't recur input layer
+        W[:N, :N] = 0  # empty NW: don't recur input layer
 
     W[:, N:] = 0  # Zero full E: can't go back, nor recur next layer
 
