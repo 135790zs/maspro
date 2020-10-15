@@ -6,53 +6,62 @@ rc['mathtext.fontset'] = 'stix'
 rc['font.family'] = 'STIXGeneral'
 
 
-def U_tilde(Nu, Nz):
-    return Nu + cfg["refr1"] * Nz
+def initialize_neurons():
+    N = {}
+    N['V'] = np.ones(shape=(cfg["N_Rec"], cfg["N_R"],)) * cfg["eqb"]
+
+    if cfg["neuron"] == "ALIF":
+        N['U'] = np.ones(shape=(cfg["N_Rec"], cfg["N_R"],)) * cfg["thr"]
+    elif cfg["neuron"] in ["Izhikevich", "LIF"]:
+        N['U'] = np.zeros(shape=(cfg["N_Rec"], cfg["N_R"],))
+
+    N['Z'] = np.zeros(shape=(cfg["N_Rec"], cfg["N_R"],))
+    N['H'] = np.zeros(shape=(cfg["N_Rec"], cfg["N_R"],))
+    N['TZ'] = np.zeros(shape=(cfg["N_Rec"], cfg["N_R"],))
+
+    return N
 
 
-def V_tilde(Nv, Nz):
-    return Nv - (Nv - cfg["eqb"]) * Nz
+def initialize_weights():
+    W = {}
+
+    rng = np.random.default_rng()
+    W['W'] = rng.random(size=(cfg["N_Rec"]-1, cfg["N_R"]*2, cfg["N_R"]*2,))  # * 2 - 1
+    W['W'] *= cfg["W_mp"]
+
+    for r in range(cfg["N_Rec"]-1):
+        W['W'][r, :, :] = drop_weights(W=W['W'][r, :, :], recur_lay1=(r > 0))
+
+    W['B'] = rng.random(size=(cfg["N_Rec"]-2, cfg["N_R"],))
+
+    W['L'] = np.zeros(shape=(cfg["N_Rec"]-2, cfg["N_R"],))
+
+    W['EVV'] = np.zeros(shape=(cfg["N_Rec"]-1, cfg["N_R"]*2, cfg["N_R"]*2,))
+    W['EVU'] = np.zeros(shape=(cfg["N_Rec"]-1, cfg["N_R"]*2, cfg["N_R"]*2,))
+    W['ET'] = np.zeros(shape=(cfg["N_Rec"]-1, cfg["N_R"]*2, cfg["N_R"]*2,))
+
+    return W
 
 
-def V_next(Nv, Nu, Nz, I):
-    Nvt = V_tilde(Nv=Nv, Nz=Nz)
-    Nut = U_tilde(Nu=Nu, Nz=Nz)
-
-    return (Nvt + cfg["dt"] * (cfg["volt1"] * Nvt**2
-                               + cfg["volt2"] * Nvt
-                               + cfg["volt3"]
-                               - Nut
-                               + I))
-
-
-def U_next(Nu, Nz, Nv):
-    Nvt = V_tilde(Nv=Nv, Nz=Nz)
-    Nut = U_tilde(Nu=Nu, Nz=Nz)
-
-    return (Nut + cfg["dt"] * (cfg["refr2"] * Nvt
-                               - cfg["refr3"] * Nut))
-
-
-def EVv_next(EVv, EVu, Nz, Nv):
-    return (EVv * (1 - Nz
-                   + 2 * cfg["volt1"] * cfg["dt"] * Nv
-                   - 2 * cfg["volt1"] * cfg["dt"] * Nv * Nz
-                   + cfg["volt2"] * cfg["dt"]
-                   - cfg["volt2"] * cfg["dt"] * Nz)
-            - EVu  # Traub: "* cfg["dt"]" may have to be appended
-            + Nz[np.newaxis].T * cfg["dt"])
-
-
-def EVu_next(EVv, EVu, Nz):
-    return (cfg["refr2"] * cfg["dt"] * EVv * (1 - Nz)
-            + EVu * (1 - cfg["refr3"] * cfg["dt"]))
-
-
-def H_next(Nv):
-    return cfg["gamma"] * np.exp((np.clip(Nv,
-                                          a_min=None,
-                                          a_max=cfg["thr"]) - cfg["thr"])
-                                 / cfg["thr"])
+def initialize_log():
+    neuron_shape = (cfg["Epochs"],) + (cfg["N_Rec"], cfg["N_R"],)
+    weight_shape = (cfg["Epochs"],) + (cfg["N_Rec"]-1, cfg["N_R"]*2, cfg["N_R"]*2,)
+    return {
+        "Nv": np.zeros(shape=neuron_shape),
+        "Nu": np.zeros(shape=neuron_shape),
+        "Nz": np.zeros(shape=neuron_shape),
+        "H": np.zeros(shape=neuron_shape),
+        "EVV": np.zeros(shape=weight_shape),
+        "EVU": np.zeros(shape=weight_shape),
+        "ET": np.zeros(shape=weight_shape),
+        "W": np.zeros(shape=weight_shape),
+        "input": np.zeros(shape=(cfg["Epochs"], cfg["N_I"])),
+        "input_spike": np.zeros(shape=(cfg["Epochs"], cfg["N_I"])),
+        "output": np.zeros(shape=(cfg["Epochs"], cfg["N_O"])),
+        "output_EMA": np.zeros(shape=(cfg["Epochs"], cfg["N_O"])),
+        "target": np.zeros(shape=(cfg["Epochs"], cfg["N_O"])),
+        "target_EMA": np.zeros(shape=(cfg["Epochs"], cfg["N_O"]))
+    }
 
 
 def plot_logs(log, title=None):
@@ -171,8 +180,15 @@ def eprop(model, X, t, TZ, Nv, Nz, EVv, L, W, uses_weights=True, Nu=None, EVu=No
               - R * cfg["alpha"] * Nv)
 
     elif model == "Izhikevich":
-        Nvn = V_next(Nu=Nu, Nz=Nz, Nv=Nv, I=I)
-        Nun = U_next(Nu=Nu, Nz=Nz, Nv=Nv)
+        Nvt = Nv - (Nv - cfg["eqb"]) * Nz
+        Nut = Nu + cfg["refr1"] * Nz
+        Nvn = Nvt + cfg["dt"] * (cfg["volt1"] * Nvt**2
+                                 + cfg["volt2"] * Nvt
+                                 + cfg["volt3"]
+                                 - Nut
+                                 + I)
+        Nun = Nut + cfg["dt"] * (cfg["refr2"] * Nvt
+                                 - cfg["refr3"] * Nut)
 
     if model == "ALIF":
         Nu = cfg["rho"] * Nu + Nz
@@ -181,8 +197,15 @@ def eprop(model, X, t, TZ, Nv, Nz, EVv, L, W, uses_weights=True, Nu=None, EVu=No
         EVv = cfg["alpha"] * (1 - Nz - R) * EVv + Nz[np.newaxis].T
 
     elif model == "Izhikevich":
-        EVv = EVv_next(EVv=EVv, EVu=EVu, Nz=Nz, Nv=Nv)
-        EVu = EVu_next(EVv=EVv, EVu=EVu, Nz=Nz)
+        EVv = (EVv * (1 - Nz
+                      + 2 * cfg["volt1"] * cfg["dt"] * Nv
+                      - 2 * cfg["volt1"] * cfg["dt"] * Nv * Nz
+                      + cfg["volt2"] * cfg["dt"]
+                      - cfg["volt2"] * cfg["dt"] * Nz)
+               - EVu  # Traub: "* cfg["dt"]" may have to be appended
+               + Nz[np.newaxis].T * cfg["dt"])
+        EVu = (cfg["refr2"] * cfg["dt"] * EVv * (1 - Nz)
+               + EVu * (1 - cfg["refr3"] * cfg["dt"]))
 
     if model == "LIF":
         H = np.where(t - TZ < cfg["dt_refr"],
@@ -203,7 +226,10 @@ def eprop(model, X, t, TZ, Nv, Nz, EVv, L, W, uses_weights=True, Nu=None, EVu=No
     elif model == "Izhikevich":
         Nv = Nvn
         Nu = Nun
-        H = H_next(Nv=Nv)
+        H = cfg["gamma"] * np.exp((np.clip(Nv,
+                                           a_min=None,
+                                           a_max=cfg["thr"]) - cfg["thr"])
+                                  / cfg["thr"])
 
     if model in ["LIF", "Izhikevich"]:
         ET = H * EVv

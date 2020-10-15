@@ -1,5 +1,5 @@
 cfg = {
-    "neuron": "Izhikevich",
+    "neuron": "ALIF",
     "W_mp": 100,
 
     "alpha": 0.9,
