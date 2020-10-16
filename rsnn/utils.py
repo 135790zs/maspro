@@ -47,9 +47,9 @@ def initialize_log():
     neuron_shape = (cfg["Epochs"],) + (cfg["N_Rec"], cfg["N_R"],)
     weight_shape = (cfg["Epochs"],) + (cfg["N_Rec"]-1, cfg["N_R"]*2, cfg["N_R"]*2,)
     return {
-        "Nv": np.zeros(shape=neuron_shape),
-        "Nu": np.zeros(shape=neuron_shape),
-        "Nz": np.zeros(shape=neuron_shape),
+        "V": np.zeros(shape=neuron_shape),
+        "U": np.zeros(shape=neuron_shape),
+        "Z": np.zeros(shape=neuron_shape),
         "H": np.zeros(shape=neuron_shape),
         "EVV": np.zeros(shape=weight_shape),
         "EVU": np.zeros(shape=weight_shape),
@@ -76,12 +76,12 @@ def plot_logs(log, title=None):
         fig.suptitle(title, fontsize=20)
 
     lookup = {
-        "Nv":  {"label": "v^t"},
-        "Nu":  {"label": "u^t"},
-        "Nz":  {"label": "z^t"},
+        "V":  {"label": "v^t"},
+        "U":  {"label": "u^t"},
+        "Z":  {"label": "z^t"},
         "X":   {"label": "x^t"},
-        "EVv": {"label": "\\epsilon^t"},
-        "EVu": {"label": "\\epsilon^t"},
+        "EVV": {"label": "\\epsilon^t"},
+        "EVU": {"label": "\\epsilon^t"},
         "W":   {"label": "W^t"},
         "H":   {"label": "h^t"},
         "ET":  {"label": "e^t"},
@@ -153,64 +153,66 @@ def get_artificial_input(T, num, dur, diff, interval, val, switch_interval):
     return X
 
 
-def eprop(model, X, t, TZ, Nv, Nz, EVv, L, W, uses_weights=True, Nu=None, EVu=None):
-    I = np.dot(W, Nz) if uses_weights else np.zeros(shape=Nz.shape)
+def eprop(model, X, t, TZ, V, Z, EVV, L, W, uses_weights=True, U=None, EVU=None):
+    I = np.dot(W, Z) if uses_weights else np.zeros(shape=Z.shape)
     I += X[t, :] if X.ndim == 2 else X
 
-    if model == "LIF":
-        Nz = np.where(np.logical_and(t - TZ >= cfg["dt_refr"],
-                                     Nv >= cfg["thr"]),
-                      1,
-                      0)
-    elif model == "ALIF":
-        Nz = np.where(np.logical_and(t - TZ >= cfg["dt_refr"],
-                                     Nv >= (cfg["thr"] + cfg["beta"] * Nu)),
-                      1,
-                      0)
-    elif model == "Izhikevich":
-        Nz = np.where(Nv >= cfg["thr"], 1., 0.)
+    print(V[0])
 
-    TZ = np.where(Nz, t, TZ)
+    if model == "LIF":
+        Z = np.where(np.logical_and(t - TZ >= cfg["dt_refr"],
+                                    V >= cfg["thr"]),
+                     1,
+                     0)
+    elif model == "ALIF":
+        Z = np.where(np.logical_and(t - TZ >= cfg["dt_refr"],
+                                    V >= (cfg["thr"] + cfg["beta"] * U)),
+                     1,
+                     0)
+    elif model == "Izhikevich":
+        Z = np.where(V >= cfg["thr"], 1., 0.)
+
+    TZ = np.where(Z, t, TZ)
 
     if model in ["LIF", "ALIF"]:
         R = (t - TZ == cfg["dt_refr"]).astype(int)
 
-        Nv = (cfg["alpha"] * Nv
-              + I - Nz * cfg["alpha"] * Nv
-              - R * cfg["alpha"] * Nv)
+        V = (cfg["alpha"] * V
+             + I - Z * cfg["alpha"] * V
+             - R * cfg["alpha"] * V)
 
     elif model == "Izhikevich":
-        Nvt = Nv - (Nv - cfg["eqb"]) * Nz
-        Nut = Nu + cfg["refr1"] * Nz
-        Nvn = Nvt + cfg["dt"] * (cfg["volt1"] * Nvt**2
-                                 + cfg["volt2"] * Nvt
-                                 + cfg["volt3"]
-                                 - Nut
-                                 + I)
-        Nun = Nut + cfg["dt"] * (cfg["refr2"] * Nvt
-                                 - cfg["refr3"] * Nut)
+        Vt = V - (V - cfg["eqb"]) * Z
+        Ut = U + cfg["refr1"] * Z
+        Vn = Vt + cfg["dt"] * (cfg["volt1"] * Vt**2
+                               + cfg["volt2"] * Vt
+                               + cfg["volt3"]
+                               - Ut
+                               + I)
+        Un = Ut + cfg["dt"] * (cfg["refr2"] * Vt
+                               - cfg["refr3"] * Ut)
 
     if model == "ALIF":
-        Nu = cfg["rho"] * Nu + Nz
+        U = cfg["rho"] * U + Z
 
     if model in ["LIF", "ALIF"]:
-        EVv = cfg["alpha"] * (1 - Nz - R) * EVv + Nz[np.newaxis].T
+        EVV = cfg["alpha"] * (1 - Z - R) * EVV + Z[np.newaxis].T
 
     elif model == "Izhikevich":
-        EVv = (EVv * (1 - Nz
-                      + 2 * cfg["volt1"] * cfg["dt"] * Nv
-                      - 2 * cfg["volt1"] * cfg["dt"] * Nv * Nz
+        EVV = (EVV * (1 - Z
+                      + 2 * cfg["volt1"] * cfg["dt"] * V
+                      - 2 * cfg["volt1"] * cfg["dt"] * V * Z
                       + cfg["volt2"] * cfg["dt"]
-                      - cfg["volt2"] * cfg["dt"] * Nz)
-               - EVu  # Traub: "* cfg["dt"]" may have to be appended
-               + Nz[np.newaxis].T * cfg["dt"])
-        EVu = (cfg["refr2"] * cfg["dt"] * EVv * (1 - Nz)
-               + EVu * (1 - cfg["refr3"] * cfg["dt"]))
+                      - cfg["volt2"] * cfg["dt"] * Z)
+               - EVU  # Traub: "* cfg["dt"]" may have to be appended
+               + Z[np.newaxis].T * cfg["dt"])
+        EVU = (cfg["refr2"] * cfg["dt"] * EVV * (1 - Z)
+               + EVU * (1 - cfg["refr3"] * cfg["dt"]))
 
     if model == "LIF":
         H = np.where(t - TZ < cfg["dt_refr"],
                      -cfg["gamma"],
-                     cfg["gamma"] * np.clip(a=1 - (abs(Nv - cfg["thr"])
+                     cfg["gamma"] * np.clip(a=1 - (abs(V - cfg["thr"])
                                                    / cfg["thr"]),
                                             a_min=0,
                                             a_max=None))
@@ -218,30 +220,45 @@ def eprop(model, X, t, TZ, Nv, Nz, EVv, L, W, uses_weights=True, Nu=None, EVu=No
         H = np.where(t - TZ < cfg["dt_refr"],
                      -cfg["gamma"],
                      cfg["gamma"] * np.clip(
-                        a=1 - (abs(Nv - (cfg["thr"] + cfg["beta"] * Nu))
+                        a=1 - (abs(V - (cfg["thr"] + cfg["beta"] * U))
                                / cfg["thr"]),
                         a_min=0,
                         a_max=None))
-        EVu = H * EVv + (cfg["rho"] - H * cfg["beta"]) * EVu
+        EVU = H * EVV + (cfg["rho"] - H * cfg["beta"]) * EVU
     elif model == "Izhikevich":
-        Nv = Nvn
-        Nu = Nun
-        H = cfg["gamma"] * np.exp((np.clip(Nv,
+        V = Vn
+        U = Un
+        H = cfg["gamma"] * np.exp((np.clip(V,
                                            a_min=None,
                                            a_max=cfg["thr"]) - cfg["thr"])
                                   / cfg["thr"])
 
     if model in ["LIF", "Izhikevich"]:
-        ET = H * EVv
+        ET = H * EVV
     elif model == "ALIF":
-        ET = H * (EVv - cfg["beta"] * EVu)
+        ET = H * (EVV - cfg["beta"] * EVU)
 
     if L is not None:
         ET = ET * np.repeat(a=L, repeats=2)
 
     W = W + np.where(W, ET, 0)  # only update nonzero weights
 
-    return Nv, Nu, Nz, EVv, EVu, H, W, ET, TZ
+    N = {
+        'V': V,
+        'U': U,
+        'Z': Z,
+        'H': H,
+        'TZ': TZ,
+    }
+
+    W = {
+        'W': W,
+        'EVV': EVV,
+        'EVU': EVU,
+        'ET': ET,
+    }
+
+    return N, W
 
 
 def drop_weights(W, recur_lay1=True):
@@ -277,7 +294,7 @@ def errfn(a1, a2):
     return np.sum(np.abs(a1 - a2), axis=1)
 
 
-def plot_drsnn(fig, gsc, Nv, W, Nz, log, ep, layers=(0, 1), neurons=(0, 0)):
+def plot_drsnn(fig, gsc, V, W, Z, log, ep, layers=(0, 1), neurons=(0, 0)):
 
     assert layers[1] - layers[0] == 0 or layers[0] - layers[1] == -1
 
@@ -296,12 +313,12 @@ def plot_drsnn(fig, gsc, Nv, W, Nz, log, ep, layers=(0, 1), neurons=(0, 0)):
     if cfg["plot_pair"]:
 
         lookup = {
-            "Nv":  {"dim": 2, "label": "v^t"},
-            "Nu":  {"dim": 2, "label": "u^t"},
-            "Nz":  {"dim": 2, "label": "z^t"},
+            "V":  {"dim": 2, "label": "v^t"},
+            "U":  {"dim": 2, "label": "u^t"},
+            "Z":  {"dim": 2, "label": "z^t"},
             "X":   {"dim": 2, "label": "x^t"},
-            "EVv": {"dim": 3, "label": "\\epsilon^t"},
-            "EVu": {"dim": 3, "label": "\\epsilon^t"},
+            "EVV": {"dim": 3, "label": "\\epsilon^t"},
+            "EVU": {"dim": 3, "label": "\\epsilon^t"},
             "W":   {"dim": 3, "label": "W^t"},
             "H":   {"dim": 2, "label": "h^t"},
             "ET":  {"dim": 3, "label": "e^t"},
@@ -374,7 +391,7 @@ def plot_drsnn(fig, gsc, Nv, W, Nz, log, ep, layers=(0, 1), neurons=(0, 0)):
                            rotation=0,
                            labelpad=labelpad,
                            fontsize=fontsize)
-            axs.imshow(unflatten(Nv[r, :num]),
+            axs.imshow(unflatten(V[r, :num]),
                        cmap='coolwarm',
                        vmin=-85, vmax=cfg["eqb"],
                        interpolation='nearest')
@@ -401,7 +418,7 @@ def plot_drsnn(fig, gsc, Nv, W, Nz, log, ep, layers=(0, 1), neurons=(0, 0)):
                            rotation=0,
                            labelpad=labelpad,
                            fontsize=fontsize)
-            axs.imshow(unflatten(Nz[r, :num]),
+            axs.imshow(unflatten(Z[r, :num]),
                        cmap='gray',
                        vmin=0, vmax=1,
                        interpolation='nearest')

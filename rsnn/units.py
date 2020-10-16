@@ -31,53 +31,74 @@ def simulate_neurons(model, T=1000, num=2, uses_weights=False):
 
     # Logging arrays
     log = {  # Plotting will follow this order
-        "Nv": np.zeros(shape=(T, num,)),
-        "Nu": np.zeros(shape=(T, num,)),
+        "V": np.zeros(shape=(T, num,)),
+        "U": np.zeros(shape=(T, num,)),
         "X": X,
-        "Nz": np.zeros(shape=(T, num,)),
+        "Z": np.zeros(shape=(T, num,)),
         "H": np.zeros(shape=(T, num,)),
-        "EVv": np.zeros(shape=(T, num, num,)),
-        "EVu": np.zeros(shape=(T, num, num,)),
+        "EVV": np.zeros(shape=(T, num, num,)),
+        "EVU": np.zeros(shape=(T, num, num,)),
         "ET": np.zeros(shape=(T, num, num,)),
         "W": np.zeros(shape=(T, num, num,)),
     }
 
+    N = {}
+    W = {}
+
     # Variable arrays
     if model == "Izhikevich":
-        Nv = np.ones(shape=(num,)) * cfg["eqb"]
+        N['V'] = np.ones(shape=(num,)) * cfg["eqb"]
     elif model in ["LIF", "ALIF"]:
-        Nv = np.zeros(shape=(num,))
+        N['V'] = np.zeros(shape=(num,))
     if model == "ALIF":
-        Nu = np.ones(shape=(num,)) * cfg["thr"]
+        N['U'] = np.ones(shape=(num,)) * cfg["thr"]
     elif model in ["LIF", "Izhikevich"]:
-        Nu = np.zeros(shape=(num,))
+        N['U'] = np.zeros(shape=(num,))
 
-    Nz = np.zeros(shape=(num,))
-    H = np.zeros(shape=(num,))
-    TZ = np.zeros(shape=(num,))
+    N['Z'] = np.zeros(shape=(num,))
+    N['H'] = np.zeros(shape=(num,))
+    N['TZ'] = np.zeros(shape=(num,))
 
     rng = np.random.default_rng()
-    W = rng.random(size=(num, num,))
-    np.fill_diagonal(W, 0.)
+    W['W'] = rng.random(size=(num, num,))
+    np.fill_diagonal(W['W'], 0.)
 
-    EVv = np.zeros(shape=(num, num,))
-    EVu = np.zeros(shape=(num, num,))
-    ET = np.zeros(shape=(num, num,))
+    W['EVV'] = np.zeros(shape=(num, num,))
+    W['EVU'] = np.zeros(shape=(num, num,))
+    W['ET'] = np.zeros(shape=(num, num,))
 
     for t in range(0, T):
+        Nt, Wt = ut.eprop(
+            model=model,
+            V=N['V'],
+            U=N['U'],
+            Z=N['Z'],
+            X=X,
+            EVV=W['EVV'],
+            EVU=W['EVU'],
+            W=W['W'],
+            TZ=N['TZ'],
+            t=t,
+            uses_weights=uses_weights,
+            L=None)
 
-        Nv, Nu, Nz, EVv, EVu, H, W, ET, TZ = ut.eprop(
-            model=model, Nv=Nv, Nu=Nu, Nz=Nz, X=X, EVv=EVv, EVu=EVu,
-            W=W, TZ=TZ, t=t, uses_weights=uses_weights, L=None)
+        for key, item in Nt.items():
 
-        log["Nv"][t, :] = Nv
-        log["Nu"][t, :] = Nu
-        log["Nz"][t, :] = Nz
-        log["H"][t, :] = H
-        log["EVv"][t, :, :] = EVv
-        log["EVu"][t, :, :] = EVu
-        log["ET"][t, :, :] = ET
-        log["W"][t, :, :] = W
+            N[key] = item
+            if key != "TZ":  # No TZ log exists
+                log[key][t, :] = item
+
+        for key, item in Wt.items():
+            W[key] = item
+            log[key][t, :, :] = item
+        # log["V"][t, :] = Nv
+        # log["U"][t, :] = Nu
+        # log["Z"][t, :] = Nz
+        # log["H"][t, :] = H
+        # log["EVV"][t, :, :] = EVv
+        # log["EVU"][t, :, :] = EVu
+        # log["ET"][t, :, :] = ET
+        # log["W"][t, :, :] = W
 
     ut.plot_logs(log, title=f"{model} e-prop")
 

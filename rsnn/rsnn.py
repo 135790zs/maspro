@@ -36,37 +36,46 @@ def run_rsnn(cfg):
             else N['U'][0, :cfg["N_I"]],
             N['V'][0, :cfg["N_I"]])
         for r in range(0, cfg["N_Rec"] - 1):
-            # TODO: pass and return `N' and `W'.
-            Nvr, Nur, Nzr, W['EVV'][r, :, :], W['EVU'][r, :, :], Hr, W['W'][r, :, :], \
-                W['ET'][r, :, :], TZr = ut.eprop(
+            print(N['V'])
+            N_concat, W_layer = ut.eprop(
                     model=cfg["neuron"],
-                    Nv=np.concatenate((N['V'][r, :], N['V'][r+1, :])),
-                    Nu=np.concatenate((N['U'][r, :], N['U'][r+1, :])),
-                    Nz=np.concatenate((N['Z'][r, :], N['Z'][r+1, :])),
+                    V=np.concatenate((N['V'][r, :], N['V'][r+1, :])),
+                    U=np.concatenate((N['U'][r, :], N['U'][r+1, :])),
+                    Z=np.concatenate((N['Z'][r, :], N['Z'][r+1, :])),
                     TZ=np.concatenate((N['TZ'][r, :], N['TZ'][r+1, :])),
-                    EVv=W['EVV'][r, :, :],
-                    EVu=W['EVU'][r, :, :],
+                    EVV=W['EVV'][r, :, :],
+                    EVU=W['EVU'][r, :, :],
                     W=W['W'][r, :, :],
                     L=W['L'][r-1, :] if r > 0 else np.zeros(shape=cfg["N_R"]),
                     X=np.pad(array=log["input_spike"][ep, :],
                              pad_width=(0, 2*cfg["N_R"]-cfg["N_I"])),
                     t=ep)
 
-            N['V'][r, :] = Nvr[:cfg["N_R"]]
-            if cfg["neuron"] not in ["LIF"]:
-                N['U'][r, :] = Nur[:cfg["N_R"]]
-            N['Z'][r, :] = Nzr[:cfg["N_R"]]
-            N['TZ'][r, :] = TZr[:cfg["N_R"]]
-            N['H'][r, :] = Hr[:cfg["N_R"]]
+            for key, item in N_concat.items():
+                N[key][r, :] = item[:cfg["N_R"]]
+                if key != "TZ":
+                    log[key][ep, :, :] = N[key]
 
-            log["Nv"][ep, :, :] = N['V']
-            log["Nu"][ep, :, :] = N['U']
-            log["Nz"][ep, :, :] = N['Z']
-            log["H"][ep, :, :] = N['H']
-            log["ET"][ep, :, :, :] = W['ET']
-            log["EVV"][ep, :, :, :] = W['EVV']
-            log["EVU"][ep, :, :, :] = W['EVU']
-            log["W"][ep, :, :, :] = W['W']
+            for key, item in W_layer.items():
+                W[key][r, :, :] = item
+                log[key][ep, :, :, :] = W[key]
+
+
+            # N['V'][r, :] = Nvr[:cfg["N_R"]]
+            # if cfg["neuron"] not in ["LIF"]:
+            #     N['U'][r, :] = Nur[:cfg["N_R"]]
+            # N['Z'][r, :] = Nzr[:cfg["N_R"]]
+            # N['TZ'][r, :] = TZr[:cfg["N_R"]]
+            # N['H'][r, :] = Hr[:cfg["N_R"]]
+
+            # log["V"][ep, :, :] = N['V']
+            # log["U"][ep, :, :] = N['U']
+            # log["Z"][ep, :, :] = N['Z']
+            # log["H"][ep, :, :] = N['H']
+            # log["ET"][ep, :, :, :] = W['ET']
+            # log["EVV"][ep, :, :, :] = W['EVV']
+            # log["EVU"][ep, :, :, :] = W['EVU']
+            # log["W"][ep, :, :, :] = W['W']
 
         # ERROR AND OUTPUT COLLECTION ##################################
 
@@ -90,9 +99,9 @@ def run_rsnn(cfg):
         if plot_interval and (ep % plot_interval == 0):
             fig, gsc = ut.plot_drsnn(fig=fig,
                                      gsc=gsc,
-                                     Nv=N['V'],
+                                     V=N['V'],
                                      W=W['W'],
-                                     Nz=N['Z'],
+                                     Z=N['Z'],
                                      log=log,
                                      ep=ep,
                                      layers=(0, 1),
