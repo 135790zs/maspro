@@ -18,16 +18,18 @@ cfg = {
 
     "dt": .1,
 
-    "N_I": 2,
+    "N_I": 1,
     "N_R": 3,
-    "N_O": 2,
+    "N_O": 1,
     "N_Rec": 3,
 
     "Epochs": 100,
     "EMA": 0.6321,
 
-    "plot_io": False,
+    "plot_io": True,
     "plot_pair": False,
     "plot_heatmaps": False,
     "plot_graph": True,
+
+    "task": "narma10"
 }

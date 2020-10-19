@@ -3,7 +3,7 @@ import numpy as np
 from config import cfg
 import utils as ut
 import vis
-from task import task1
+from task import task1, narma10
 
 
 def run_rsnn(cfg):
@@ -17,7 +17,11 @@ def run_rsnn(cfg):
     for ep in range(0, cfg["Epochs"]-1):
 
         # input is nonzero for first layer
-        M["input"][ep, :] = task1(io_type="I", t=ep)
+        if cfg["task"] == "narma10":
+            # input given in array
+            pass
+        else:
+            M["input"][ep, :] = task1(io_type="I", t=ep)
 
         # Bernoulli distribtion
         rng = np.random.default_rng()
@@ -56,16 +60,22 @@ def run_rsnn(cfg):
                     M[key][ep+1, r, :, :] = item
 
         # ERROR AND OUTPUT COLLECTION ##################################
-
         M["output"][ep, :] = M['Z'][ep, -1, :cfg["N_O"]]
-        M["target"][ep, :] = task1(io_type="O", t=ep)
+        M["output_EMA"][ep, :] = ut.EMA(arr=M["output"], 
+                                 arr_ema=M["output_EMA"], 
+                                 ep=ep)
 
-        # Exponential moving average
-        for arrname in ["output", "target"]:
-            M[f"{arrname}_EMA"][ep, :] = (
-                cfg["EMA"] * M[arrname][ep, :]
-                + (1 - cfg["EMA"]) * M[f"{arrname}_EMA"][ep, :]) if ep \
-                else M[arrname][ep, :]
+        if cfg["task"] == "narma10":
+            M["target"][ep, :] = narma10(t=ep, 
+                                         u=M["input"][:ep], 
+                                         y=M["output_EMA"][:ep])    
+        else:
+            M["target"][ep, :] = task1(io_type="O", t=ep)
+        
+        M["target_EMA"][ep, :] = ut.EMA(arr=M["target"], 
+                                 arr_ema=M["target_EMA"], 
+                                 ep=ep)
+
 
         error = np.mean(ut.errfn(M["output_EMA"][:ep+1, :],
                                  M["target_EMA"][:ep+1, :]),

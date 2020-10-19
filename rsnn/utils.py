@@ -27,13 +27,16 @@ def initialize_log():
         "W": rng.random(size=weight_shape),
         "B": np.ones(shape=feedback_shape),# * rng.random(),
         "L": np.ones(shape=feedback_shape),
-        "input": np.zeros(shape=(cfg["Epochs"], cfg["N_I"])),
         "input_spike": np.zeros(shape=(cfg["Epochs"], cfg["N_I"])),
         "output": np.zeros(shape=(cfg["Epochs"], cfg["N_O"])),
         "output_EMA": np.zeros(shape=(cfg["Epochs"], cfg["N_O"])),
         "target": np.zeros(shape=(cfg["Epochs"], cfg["N_O"])),
         "target_EMA": np.zeros(shape=(cfg["Epochs"], cfg["N_O"]))
     }
+    if cfg["task"] == "narma10":
+        M["input"] = rng.random(size=(cfg["Epochs"], cfg["N_I"])) * 0.5
+    else:
+        M["input"] = np.zeros(shape=(cfg["Epochs"], cfg["N_I"]))
 
     for r in range(cfg["N_Rec"]-1):
         M['W'][0, r, :, :] = drop_weights(W=M['W'][0, r, :, :],
@@ -54,6 +57,10 @@ def get_artificial_input(T, num, dur, diff, interval, val, switch_interval):
                 else 0
             X[t, 1] = val if t % interval <= dur else 0
     return X
+
+def EMA(arr, arr_ema, ep):
+    return (cfg["EMA"] * arr[ep, :] + (1 - cfg["EMA"]) * arr_ema[ep, :]) \
+            if ep else arr[ep, :]
 
 
 def eprop(model, M, X, t, uses_weights, r=None):
