@@ -1,6 +1,5 @@
 cfg = {
-    "neuron": "ALIF",
-    "W_mp": 100,
+    "neuron": "LIF",
 
     "alpha": 0.9,
     "beta": 0.07,
@@ -8,7 +7,7 @@ cfg = {
     "rho": 0.995,
     "eqb": -65,
     "thr": 30,
-    "dt_refr": 20,
+    "dt_refr": 4,
 
     "refr1": 2,
     "refr2": 0.004,
@@ -17,14 +16,14 @@ cfg = {
     "volt2": 5,
     "volt3": 140,
 
-    "dt": 0.1,
+    "dt": .1,
 
     "N_I": 1,
-    "N_R": 32,
+    "N_R": 1,
     "N_O": 1,
     "N_Rec": 3,
 
-    "Epochs": 1000,
+    "Epochs": 100,
     "EMA": 0.6321,
 
     "plot_io": True,

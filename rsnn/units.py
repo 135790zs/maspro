@@ -9,7 +9,14 @@ rc['font.family'] = 'STIXGeneral'
 np.set_printoptions(threshold=sys.maxsize)
 
 
-def simulate_neurons(model, T=1000, num=2, uses_weights=False):
+def simulate_neurons(model, T=1000, num=2, uses_weights=True):
+
+    M = {}  # Following order is order of plotting
+
+    if model == "Izhikevich":
+        M['V'] = np.ones(shape=(T, num,)) * cfg["eqb"]
+    elif model in ["LIF", "ALIF"]:
+        M['V'] = np.zeros(shape=(T, num,))
 
     if model in ["LIF", "ALIF"]:
         X = ut.get_artificial_input(T=T,
@@ -29,80 +36,50 @@ def simulate_neurons(model, T=1000, num=2, uses_weights=False):
                                     val=32,
                                     switch_interval=500)
 
-    # Logging arrays
-    log = {  # Plotting will follow this order
-        "V": np.zeros(shape=(T, num,)),
-        "U": np.zeros(shape=(T, num,)),
-        "X": X,
-        "Z": np.zeros(shape=(T, num,)),
-        "H": np.zeros(shape=(T, num,)),
-        "EVV": np.zeros(shape=(T, num, num,)),
-        "EVU": np.zeros(shape=(T, num, num,)),
-        "ET": np.zeros(shape=(T, num, num,)),
-        "W": np.zeros(shape=(T, num, num,)),
-    }
+    M['Z'] = np.zeros(shape=(T, num,))
 
-    N = {}
-    W = {}
-
-    # Variable arrays
-    if model == "Izhikevich":
-        N['V'] = np.ones(shape=(num,)) * cfg["eqb"]
-    elif model in ["LIF", "ALIF"]:
-        N['V'] = np.zeros(shape=(num,))
     if model == "ALIF":
-        N['U'] = np.ones(shape=(num,)) * cfg["thr"]
+        M['U'] = np.ones(shape=(T, num,)) * cfg["thr"]
     elif model in ["LIF", "Izhikevich"]:
-        N['U'] = np.zeros(shape=(num,))
+        M['U'] = np.zeros(shape=(T, num,))
 
-    N['Z'] = np.zeros(shape=(num,))
-    N['H'] = np.zeros(shape=(num,))
-    N['TZ'] = np.zeros(shape=(num,))
+    M['H'] = np.zeros(shape=(T, num,))
+    M['TZ'] = np.ones(shape=(T, num,)) * -cfg["dt_refr"]
+
+    M['EVV'] = np.zeros(shape=(T, num, num,))
+    M['EVU'] = np.zeros(shape=(T, num, num,))
+    M['ET'] = np.zeros(shape=(T, num, num,))
 
     rng = np.random.default_rng()
-    W['W'] = rng.random(size=(num, num,))
-    np.fill_diagonal(W['W'], 0.)
+    M['W'] = rng.random(size=(T, num, num,))
+    M['L'] = np.ones(shape=(T, num))
+    np.fill_diagonal(M['W'][0, :, :], 0.)
+    Mt = {}
 
-    W['EVV'] = np.zeros(shape=(num, num,))
-    W['EVU'] = np.zeros(shape=(num, num,))
-    W['ET'] = np.zeros(shape=(num, num,))
+    for t in range(1, T):
 
-    for t in range(0, T):
-        Nt, Wt = ut.eprop(
+        for key, item in M.items():
+            Mt[key] = item[t-1]
+
+        Mt = ut.eprop(
             model=model,
-            V=N['V'],
-            U=N['U'],
-            Z=N['Z'],
+            M=Mt,
             X=X,
-            EVV=W['EVV'],
-            EVU=W['EVU'],
-            W=W['W'],
-            TZ=N['TZ'],
             t=t,
-            uses_weights=uses_weights,
-            L=None)
+            uses_weights=uses_weights)
+        # if t > 30 and t < 80:
+        #     print(t, Mt)
 
-        for key, item in Nt.items():
+        for key, item in Mt.items():
+            M[key][t] = item
 
-            N[key] = item
-            if key != "TZ":  # No TZ log exists
-                log[key][t, :] = item
-
-        for key, item in Wt.items():
-            W[key] = item
-            log[key][t, :, :] = item
-        # log["V"][t, :] = Nv
-        # log["U"][t, :] = Nu
-        # log["Z"][t, :] = Nz
-        # log["H"][t, :] = H
-        # log["EVV"][t, :, :] = EVv
-        # log["EVU"][t, :, :] = EVu
-        # log["ET"][t, :, :] = ET
-        # log["W"][t, :, :] = W
-
-    ut.plot_logs(log, title=f"{model} e-prop")
+    ut.plot_logs(M, X, title=f"{model} e-prop")
 
 
-# simulate_neurons(model="LIF")
-# simulate_neurons(model="ALIF", uses_weights=True)
-simulate_neurons(model="Izhikevich", uses_weights=True)
+simulate_neurons(model=cfg["neuron"], uses_weights=True)
+
+
+"""
+IDd problem: weights are reserved. Wrong weight is updated...
+
+"""

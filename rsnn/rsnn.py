@@ -9,9 +9,11 @@ def run_rsnn(cfg):
     plot_interval = 1
 
     # Variable arrays
-    N = ut.initialize_neurons()
-    W = ut.initialize_weights()
-    log = ut.initialize_log()
+    # N = ut.initialize_neurons()
+    # W = ut.initialize_weights()
+    M = ut.initialize_log()
+
+    Mt = {}
 
     if plot_interval != 0:
         fig = plt.figure(constrained_layout=False)
@@ -23,92 +25,76 @@ def run_rsnn(cfg):
 
     for ep in range(0, cfg["Epochs"]):
 
+        # `ep+1' idx is future, operating on ep.
+
         # input is nonzero for first layer
-        log["input"][ep, :] = task1(io_type="I", t=ep)
+        M["input"][ep, :] = task1(io_type="I", t=ep)
+
         # Bernoulli distribtion
         rng = np.random.default_rng()
-        log["input_spike"][ep, :] = rng.binomial(n=1, p=log["input"][ep, :])
+        M["input_spike"][ep, :] = rng.binomial(n=1, p=M["input"][ep, :])
 
-        # Feed to input layer R0
-        N['V'][0, :cfg["N_I"]] = np.where(
-            log["input_spike"][ep, :],
-            cfg["thr"] if cfg["neuron"] != "ALIF"
-            else N['U'][0, :cfg["N_I"]],
-            N['V'][0, :cfg["N_I"]])
+        # Feed to input layer R0: let first layer exceed threshold if input
+        M['V'][ep, 0, :cfg["N_I"]] = np.where(
+            M["input_spike"][ep, :],
+            (cfg["thr"] if cfg["neuron"] != "ALIF"
+             else M['U'][ep, 0, :cfg["N_I"]]),
+            M['V'][ep, 0, :cfg["N_I"]])
+
         for r in range(0, cfg["N_Rec"] - 1):
-            print(N['V'])
-            N_concat, W_layer = ut.eprop(
+            for key, item in M.items():
+                if key in ["V", "U", "Z", "TZ", "H"]:
+                    Mt[key] = np.concatenate((item[ep, r], item[ep, r+1]))
+                elif key == 'L':
+                    Mt[key] = item[ep, r-1, :] if r > 0 else np.zeros(
+                        shape=cfg["N_R"])
+                elif key in ["W", "ET", "EVV", "EVU"]:
+                    Mt[key] = item[ep, r, :, :]
+
+            Mt = ut.eprop(
                     model=cfg["neuron"],
-                    V=np.concatenate((N['V'][r, :], N['V'][r+1, :])),
-                    U=np.concatenate((N['U'][r, :], N['U'][r+1, :])),
-                    Z=np.concatenate((N['Z'][r, :], N['Z'][r+1, :])),
-                    TZ=np.concatenate((N['TZ'][r, :], N['TZ'][r+1, :])),
-                    EVV=W['EVV'][r, :, :],
-                    EVU=W['EVU'][r, :, :],
-                    W=W['W'][r, :, :],
-                    L=W['L'][r-1, :] if r > 0 else np.zeros(shape=cfg["N_R"]),
-                    X=np.pad(array=log["input_spike"][ep, :],
-                             pad_width=(0, 2*cfg["N_R"]-cfg["N_I"])),
-                    t=ep)
+                    M=Mt,
+                    X=np.pad(array=M["input_spike"][ep, :],
+                             pad_width=(0, 2 * cfg["N_R"] - cfg["N_I"])),
+                    t=ep,
+                    uses_weights=True,
+                    r=r)
 
-            for key, item in N_concat.items():
-                N[key][r, :] = item[:cfg["N_R"]]
-                if key != "TZ":
-                    log[key][ep, :, :] = N[key]
-
-            for key, item in W_layer.items():
-                W[key][r, :, :] = item
-                log[key][ep, :, :, :] = W[key]
-
-
-            # N['V'][r, :] = Nvr[:cfg["N_R"]]
-            # if cfg["neuron"] not in ["LIF"]:
-            #     N['U'][r, :] = Nur[:cfg["N_R"]]
-            # N['Z'][r, :] = Nzr[:cfg["N_R"]]
-            # N['TZ'][r, :] = TZr[:cfg["N_R"]]
-            # N['H'][r, :] = Hr[:cfg["N_R"]]
-
-            # log["V"][ep, :, :] = N['V']
-            # log["U"][ep, :, :] = N['U']
-            # log["Z"][ep, :, :] = N['Z']
-            # log["H"][ep, :, :] = N['H']
-            # log["ET"][ep, :, :, :] = W['ET']
-            # log["EVV"][ep, :, :, :] = W['EVV']
-            # log["EVU"][ep, :, :, :] = W['EVU']
-            # log["W"][ep, :, :, :] = W['W']
+            for key, item in Mt.items():
+                if key in ["V", "U", "Z", "TZ", "H"]:
+                    M[key][ep+1, r, :] = item[:cfg["N_R"]]
+                elif key in ["W", "ET", "EVV", "EVU"]:
+                    M[key][ep+1, r, :, :] = item
 
         # ERROR AND OUTPUT COLLECTION ##################################
 
-        log["output"][ep, :] = N['Z'][-1, :cfg["N_O"]]
-        log["target"][ep, :] = task1(io_type="O", t=ep)
+        M["output"][ep, :] = M['Z'][ep, -1, :cfg["N_O"]]
+        M["target"][ep, :] = task1(io_type="O", t=ep)
 
         # Exponential moving average
         for arrname in ["output", "target"]:
-            log[f"{arrname}_EMA"][ep, :] = (
-                cfg["EMA"] * log[arrname][ep, :]
-                + (1 - cfg["EMA"]) * log[f"{arrname}_EMA"][ep-1, :]) if ep \
-                else log[arrname][ep, :]
+            M[f"{arrname}_EMA"][ep, :] = (
+                cfg["EMA"] * M[arrname][ep, :]
+                + (1 - cfg["EMA"]) * M[f"{arrname}_EMA"][ep, :]) if ep \
+                else M[arrname][ep, :]
 
-        error = np.mean(ut.errfn(log["output_EMA"][:ep+1, :],
-                                 log["target_EMA"][:ep+1, :]),
+        error = np.mean(ut.errfn(M["output_EMA"][:ep+1, :],
+                                 M["target_EMA"][:ep+1, :]),
                         axis=0)
 
         # Broadcast error to neurons next epoch
-        W['L'] = error * W['B']
+        M['L'][ep+1] = error * M['B'][ep]
 
         if plot_interval and (ep % plot_interval == 0):
             fig, gsc = ut.plot_drsnn(fig=fig,
                                      gsc=gsc,
-                                     V=N['V'],
-                                     W=W['W'],
-                                     Z=N['Z'],
-                                     log=log,
+                                     M=M,
                                      ep=ep,
                                      layers=(0, 1),
                                      neurons=(0, 0))
 
-    return np.mean(ut.errfn(log["output_EMA"][:ep+1, :],
-                            log["target_EMA"][:ep+1, :]),
+    return np.mean(ut.errfn(M["output_EMA"][:ep+1, :],
+                            M["target_EMA"][:ep+1, :]),
                    axis=0)
 
 
@@ -116,6 +102,7 @@ if __name__ == "__main__":
 
     print(run_rsnn(cfg))
 
+# TODO: Use ep-1, ep, ep+1?
 # TODO: Why are the thresholds different in the rsnn and the units?
 #       RSNN seems to spike at negative 65, but not units? Same for LIF?
 # TODO: Why so many neurons in rsnn plot?
