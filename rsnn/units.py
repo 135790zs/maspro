@@ -67,8 +67,6 @@ def simulate_neurons(model, T=1000, num=2, uses_weights=True):
             X=X,
             t=t,
             uses_weights=uses_weights)
-        # if t > 30 and t < 80:
-        #     print(t, Mt)
 
         for key, item in Mt.items():
             M[key][t] = item
@@ -77,9 +75,3 @@ def simulate_neurons(model, T=1000, num=2, uses_weights=True):
 
 
 simulate_neurons(model=cfg["neuron"], uses_weights=True)
-
-
-"""
-IDd problem: weights are reserved. Wrong weight is updated...
-
-"""

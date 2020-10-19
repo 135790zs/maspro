@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from config import cfg
 import utils as ut
+import vis
 from task import task1
 
 
@@ -9,23 +10,11 @@ def run_rsnn(cfg):
     plot_interval = 1
 
     # Variable arrays
-    # N = ut.initialize_neurons()
-    # W = ut.initialize_weights()
     M = ut.initialize_log()
 
     Mt = {}
 
-    if plot_interval != 0:
-        fig = plt.figure(constrained_layout=False)
-        gsc = fig.add_gridspec(nrows=max(8, 2 * cfg["N_Rec"] - 1),
-                               ncols=4,
-                               hspace=0.2)
-
-        plt.ion()
-
-    for ep in range(0, cfg["Epochs"]):
-
-        # `ep+1' idx is future, operating on ep.
+    for ep in range(0, cfg["Epochs"]-1):
 
         # input is nonzero for first layer
         M["input"][ep, :] = task1(io_type="I", t=ep)
@@ -86,12 +75,10 @@ def run_rsnn(cfg):
         M['L'][ep+1] = error * M['B'][ep]
 
         if plot_interval and (ep % plot_interval == 0):
-            fig, gsc = ut.plot_drsnn(fig=fig,
-                                     gsc=gsc,
-                                     M=M,
-                                     ep=ep,
-                                     layers=(0, 1),
-                                     neurons=(0, 0))
+            vis.plot_drsnn(M=M,
+                           ep=ep,
+                           layers=(0, 1),
+                           neurons=(0, 0))
 
     return np.mean(ut.errfn(M["output_EMA"][:ep+1, :],
                             M["target_EMA"][:ep+1, :]),
@@ -102,15 +89,14 @@ if __name__ == "__main__":
 
     print(run_rsnn(cfg))
 
-# TODO: Use ep-1, ep, ep+1?
-# TODO: Why are the thresholds different in the rsnn and the units?
-#       RSNN seems to spike at negative 65, but not units? Same for LIF?
-# TODO: Why so many neurons in rsnn plot?
+# MUST DO:
+# TODO: Implement TIMIT
 # TODO: Implement adaptive e-prop
+# TODO: Try replicate Bellec's results
+
+# LOW PRIORITY:
 # TODO: Dictionary to facilitate sweeping function (param = key, list = item)
 # TODO: Merge drsnn plot and plot_logs
-# TODO: Implement TIMIT
-# TODO: Try replicate Bellec's results
 
 """
 MEETING NOTES 10/13

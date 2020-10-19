@@ -9,16 +9,16 @@ def task1(io_type, t):
     duration = 1
     strength_in = 1
     strength_out = 1.
-    assert cfg["N_I"] == 1
-    assert cfg["N_O"] == 1
+    # assert cfg["N_I"] == 1
+    # assert cfg["N_O"] == 1
 
     if io_type == "I":
         if t % interval < duration:
-            return np.asarray([strength_in])
+            return np.asarray([strength_in] * cfg["N_I"])
         else:
-            return np.asarray([0.])
+            return np.asarray([0.] * cfg["N_O"])
     elif io_type == "O":
         if t % interval == duration:
-            return np.asarray([strength_out])
+            return np.asarray([strength_out] * cfg["N_I"])
         else:
-            return np.asarray([0.])
+            return np.asarray([0.] * cfg["N_O"])
