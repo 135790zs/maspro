@@ -88,7 +88,7 @@ def plot_logs(M, X, title=None):
 
     axs[-1].set_xlabel("$t$", fontsize=fontsize)
 
-    plt.savefig("pair_sim.pdf")
+    plt.savefig("vis/pair_sim.pdf")
 
 
 def plot_pair(M, ep, layers=(0, 1), neurons=(0, 0)):
@@ -289,7 +289,7 @@ def plot_graph(M, ep):
 
     # neurons
     def neuroncolor(r, n):
-        v = (M['V'][ep, r, n] - np.min(M['V'])) / cfg["thr"]
+        v = (M['V'][ep, r, n] + 100) / cfg["thr"]
         cmap = mpcm.get_cmap("plasma")
         rgba = cmap(v, bytes=True)
         ret = "#"
@@ -304,11 +304,12 @@ def plot_graph(M, ep):
             if (r == 0 and n >= cfg["N_I"]) or \
                (r == cfg["N_Rec"]-1 and n >= cfg["N_O"]):
                 continue
+            spiked = bool(M['Z'][ep, r, n])
             dot.node(name=f"{r}-{n}",
                      style='filled',
                      fixedsize='false',
-                     fillcolor=neuroncolor(r=r, n=n),
-                     color=f"#444444")
+                     color=neuroncolor(r=r, n=n),
+                     fillcolor=neuroncolor(r=r, n=n))#"#cccccc" if spiked else "#555555")
 
     # weights
     def weightcolor(w):

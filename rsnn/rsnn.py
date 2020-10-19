@@ -15,6 +15,7 @@ def run_rsnn(cfg):
     Mt = {}
 
     for ep in range(0, cfg["Epochs"]-1):
+        print(M['V'][ep])
 
         # input is nonzero for first layer
         if cfg["task"] == "narma10":
@@ -67,14 +68,16 @@ def run_rsnn(cfg):
 
         if cfg["task"] == "narma10":
             M["target"][ep, :] = narma10(t=ep, 
-                                         u=M["input"][:ep], 
-                                         y=M["output_EMA"][:ep])    
+                                         u=M["input"][:ep+1], 
+                                         y=M["output_EMA"][:ep+1])    
         else:
             M["target"][ep, :] = task1(io_type="O", t=ep)
         
         M["target_EMA"][ep, :] = ut.EMA(arr=M["target"], 
                                  arr_ema=M["target_EMA"], 
                                  ep=ep)
+
+        print(np.sum(M['W'][ep]))
 
 
         error = np.mean(ut.errfn(M["output_EMA"][:ep+1, :],

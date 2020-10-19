@@ -1,5 +1,5 @@
 cfg = {
-    "neuron": "LIF",
+    "neuron": "Izhikevich",
 
     "alpha": 0.9,
     "beta": 0.07,
@@ -27,7 +27,7 @@ cfg = {
     "EMA": 0.6321,
 
     "plot_io": True,
-    "plot_pair": False,
+    "plot_pair": True,
     "plot_heatmaps": False,
     "plot_graph": True,
 

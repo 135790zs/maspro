@@ -12,27 +12,32 @@ rc['font.family'] = 'STIXGeneral'
 
 def initialize_log():
     rng = np.random.default_rng()
+    M = {}
     neuron_shape = (cfg["Epochs"],) + (cfg["N_Rec"], cfg["N_R"],)
     weight_shape = (cfg["Epochs"],) + (cfg["N_Rec"]-1, cfg["N_R"]*2, cfg["N_R"]*2,)
     feedback_shape = (cfg["Epochs"], cfg["N_Rec"]-2, cfg["N_R"],)
-    M = {
-        "V": np.zeros(shape=neuron_shape),
-        "U": np.zeros(shape=neuron_shape),
-        "Z": np.zeros(shape=neuron_shape),
-        "TZ": np.ones(shape=neuron_shape) * -cfg["dt_refr"],
-        "H": np.zeros(shape=neuron_shape),
-        "EVV": np.zeros(shape=weight_shape),
-        "EVU": np.zeros(shape=weight_shape),
-        "ET": np.zeros(shape=weight_shape),
-        "W": rng.random(size=weight_shape),
-        "B": np.ones(shape=feedback_shape),# * rng.random(),
-        "L": np.ones(shape=feedback_shape),
-        "input_spike": np.zeros(shape=(cfg["Epochs"], cfg["N_I"])),
-        "output": np.zeros(shape=(cfg["Epochs"], cfg["N_O"])),
-        "output_EMA": np.zeros(shape=(cfg["Epochs"], cfg["N_O"])),
-        "target": np.zeros(shape=(cfg["Epochs"], cfg["N_O"])),
-        "target_EMA": np.zeros(shape=(cfg["Epochs"], cfg["N_O"]))
-    }
+
+    if cfg["neuron"] == "Izhikevich":
+        M["V"] = np.ones(shape=neuron_shape) * cfg["eqb"]
+    else:
+        M["V"] = np.zeros(shape=neuron_shape)
+
+    M["U"] = np.zeros(shape=neuron_shape)
+    M["Z"] = np.zeros(shape=neuron_shape)
+    M["TZ"] = np.ones(shape=neuron_shape) * -cfg["dt_refr"]
+    M["H"] = np.zeros(shape=neuron_shape)
+    M["EVV"] = np.zeros(shape=weight_shape)
+    M["EVU"] = np.zeros(shape=weight_shape)
+    M["ET"] = np.zeros(shape=weight_shape)
+    M["W"] = rng.random(size=weight_shape) * 2
+    M["B"] = np.ones(shape=feedback_shape)# * rng.random()
+    M["L"] = np.ones(shape=feedback_shape)
+    M["input_spike"] = np.zeros(shape=(cfg["Epochs"], cfg["N_I"]))
+    M["output"] = np.zeros(shape=(cfg["Epochs"], cfg["N_O"]))
+    M["output_EMA"] = np.zeros(shape=(cfg["Epochs"], cfg["N_O"]))
+    M["target"] = np.zeros(shape=(cfg["Epochs"], cfg["N_O"]))
+    M["target_EMA"] = np.zeros(shape=(cfg["Epochs"], cfg["N_O"]))
+    
     if cfg["task"] == "narma10":
         M["input"] = rng.random(size=(cfg["Epochs"], cfg["N_I"])) * 0.5
     else:
@@ -50,10 +55,10 @@ def get_artificial_input(T, num, dur, diff, interval, val, switch_interval):
     for t in range(0, T):
         if t % (switch_interval*2) < switch_interval:
             X[t, 0] = val if t % interval <= dur else 0
-            X[t, 1] = val if (t % interval <= diff+dur and t % interval > diff) \
+            X[t, 1] = val if (t % interval <= diff + dur and t % interval > diff) \
                 else 0
         else:
-            X[t, 0] = val if (t % interval <= diff+dur and t % interval > diff) \
+            X[t, 0] = val if (t % interval <= diff + dur and t % interval > diff) \
                 else 0
             X[t, 1] = val if t % interval <= dur else 0
     return X
@@ -64,7 +69,7 @@ def EMA(arr, arr_ema, ep):
 
 
 def eprop(model, M, X, t, uses_weights, r=None):
-    Iz = np.dot(M['W'], M['Z']) if uses_weights else np.zeros(
+    Iz = np.dot(M['Z'], M['W'], ) if uses_weights else np.zeros(
             shape=M['Z'].shape)  # TODO: Weird what order of W, Z should be. Seems diff for units and rsnn
     Iz += X# if X.ndim == 2 else X
 

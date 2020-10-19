@@ -3,6 +3,7 @@ import numpy as np
 from matplotlib import rcParams as rc
 from config import cfg
 import utils as ut
+import vis
 
 rc['mathtext.fontset'] = 'stix'
 rc['font.family'] = 'STIXGeneral'
@@ -64,14 +65,14 @@ def simulate_neurons(model, T=1000, num=2, uses_weights=True):
         Mt = ut.eprop(
             model=model,
             M=Mt,
-            X=X,
+            X=X[t-1],
             t=t,
             uses_weights=uses_weights)
 
         for key, item in Mt.items():
             M[key][t] = item
 
-    ut.plot_logs(M, X, title=f"{model} e-prop")
+    vis.plot_logs(M, X, title=f"{model} e-prop")
 
 
 simulate_neurons(model=cfg["neuron"], uses_weights=True)
