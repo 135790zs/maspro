@@ -1,12 +1,12 @@
 
 # MUST DO:
+# TODO: Find out if spikes are carried correctly through RSNN. Doesn't seem so.
 # TODO: Implement TIMIT
 # TODO: Implement adaptive e-prop
 # TODO: Try replicate Bellec's results
 
 # LOW PRIORITY:
 # TODO: Dictionary to facilitate sweeping function (param = key, list = item)
-# TODO: Merge drsnn plot and plot_logs
 
 =========================================================
 

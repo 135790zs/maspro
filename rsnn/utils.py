@@ -187,7 +187,6 @@ def drop_weights(W, layer):
     if layer == cfg["N_Rec"] - 2:
         W[N+cfg["N_O"]:, :N] = 0  # No connections to nonexisting output
 
-    print(W)
     return W
 
 

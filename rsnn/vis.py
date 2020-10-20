@@ -120,15 +120,16 @@ def plot_heatmaps(M, ep):
         num = cfg["N_I"] if r == 0 \
             else cfg["N_O"] if r == cfg["N_Rec"] \
             else cfg["N_R"]
+        bounds = (-80, 60) if cfg["neuron"] == "Izhikevich" \
+            else (0, cfg["thr"])
         axs = fig.add_subplot(gsc[r, 0], label=f"nh-{ep}-{r}")
-        axs.axis('off')
         axs.set_ylabel(f"$v_{{{r}, i}}$",
                        rotation=0,
                        labelpad=labelpad,
                        fontsize=fontsize)
         axs.imshow(unflatten(M['V'][ep, r, :num]),
                    cmap='coolwarm',
-                   vmin=-85, vmax=cfg["eqb"],
+                   vmin=bounds[0], vmax=bounds[1],
                    interpolation='nearest')
 
     # Neuron spikes
@@ -137,7 +138,6 @@ def plot_heatmaps(M, ep):
             else cfg["N_O"] if r == cfg["N_Rec"] \
             else cfg["N_R"]
         axs = fig.add_subplot(gsc[r, 1], label=f"ns-{ep}-{r}")
-        axs.axis('off')
         axs.set_ylabel(f"$z_{{{r}, i}}$",
                        rotation=0,
                        labelpad=labelpad,
@@ -149,17 +149,19 @@ def plot_heatmaps(M, ep):
 
     # Weight heatmaps
     for r in range(0, cfg["N_Rec"]-1):
+        maxdev = max(abs(np.min(M['W'])),
+                     abs(np.max(M['W'])))
         axs = fig.add_subplot(gsc[r, 2],
                               label=f"wh-{ep}-{r}")
-        axs.axis('off')
         axs.set_ylabel(f"$W_{{{r}, i, j}}$",
                        rotation=0,
                        labelpad=labelpad,
                        fontsize=fontsize)
         axs.imshow(M['W'][ep, r, :, :cfg["N_R"]],
-                   cmap='coolwarm',
-                   vmin=0, vmax=100,
+                   cmap='bwr',
+                   vmin=-maxdev, vmax=maxdev,
                    interpolation='nearest')
+
     plt.savefig("vis/heatmaps.pdf", bbox_inches='tight')
     plt.close()
 
