@@ -1,5 +1,5 @@
 cfg = {
-    "neuron": "Izhikevich",
+    "neuron": "LIF",
 
     "alpha": 0.9,
     "beta": 0.07,
@@ -18,9 +18,9 @@ cfg = {
 
     "dt": .1,
 
-    "N_I": 1,
+    "N_I": 2,
     "N_R": 3,
-    "N_O": 1,
+    "N_O": 2,
     "N_Rec": 3,
 
     "Epochs": 100,

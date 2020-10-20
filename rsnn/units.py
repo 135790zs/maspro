@@ -72,7 +72,7 @@ def simulate_neurons(model, T=1000, num=2, uses_weights=True):
         for key, item in Mt.items():
             M[key][t] = item
 
-    vis.plot_pair(M=M, ep=t, X=X, is_unit=True)
+    vis.plot_pair(M=M, ep=T, X=X, is_unit=True)
 
 
 simulate_neurons(model=cfg["neuron"], uses_weights=True)

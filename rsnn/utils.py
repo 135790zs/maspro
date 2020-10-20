@@ -28,7 +28,7 @@ def initialize_log():
     M["EVV"] = np.zeros(shape=weight_shape)
     M["EVU"] = np.zeros(shape=weight_shape)
     M["ET"] = np.zeros(shape=weight_shape)
-    M["W"] = rng.random(size=weight_shape) * 2
+    M["W"] = rng.random(size=weight_shape) * 4 - 2
     M["B"] = np.ones(shape=feedback_shape) * rng.random()
     M["L"] = np.ones(shape=feedback_shape)
     M["input_spike"] = np.zeros(shape=(cfg["Epochs"], cfg["N_I"]))
@@ -44,7 +44,8 @@ def initialize_log():
 
     for r in range(cfg["N_Rec"]-1):
         M['W'][0, r, :, :] = drop_weights(W=M['W'][0, r, :, :],
-                                          recur_lay1=(r > 0))
+                                          layer=r)
+
 
     return M
 
@@ -171,16 +172,22 @@ def eprop(model, M, X, t, uses_weights):
     return M
 
 
-def drop_weights(W, recur_lay1=True):
+def drop_weights(W, layer):
+    """ Done for initial epoch, zero weights will never be updated."""
     N = W.shape[0]//2
-
-    if recur_lay1:
-        np.fill_diagonal(W[:N, :N], 0)  # Zero diag NW: no self-connections
-    else:
-        W[:N, :N] = 0  # empty NW: don't recur input layer
 
     W[:, N:] = 0  # Zero full E: can't go back, nor recur next layer
 
+    if layer != 0:
+        np.fill_diagonal(W[:N, :N], 0)  # Zero diag NW: no self-connections
+    else:
+        W[:N, :N] = 0  # empty NW: don't recur input layer
+        W[N:, cfg["N_I"]:N] = 0  # No connections from nonexisting input
+
+    if layer == cfg["N_R"] - 2:
+        W[N+cfg["N_O"]:, :N] = 0  # No connections to nonexisting output
+
+    print(W)
     return W
 
 

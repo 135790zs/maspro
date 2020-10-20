@@ -44,7 +44,8 @@ def plot_pair(M, ep, layers=(0, 1), neurons=(0, 0), X=None, is_unit=False):
     labelpad = 15
     fontsize = 14
     fontsize_legend = 12
-    fig.suptitle(f"Epoch {ep} ({cfg['neuron'] + ' pair' if is_unit else ''})",
+    fig.suptitle(f"Epoch {ep}"
+                 f"{' (' + cfg['neuron'] + ' pair)' if is_unit else ''}",
                  fontsize=20)
 
     if X is not None:
@@ -98,7 +99,10 @@ def plot_pair(M, ep, layers=(0, 1), neurons=(0, 0), X=None, is_unit=False):
 
     axs[-1].set_xlabel("$t$", fontsize=fontsize)
 
-    plt.savefig(f"vis/pair{'-sim' if is_unit else ''}.pdf")
+    plt.savefig(f"vis/pair{'-sim' if is_unit else ''}.pdf",
+                bbox_inches='tight')
+
+    plt.close()
 
 
 def plot_heatmaps(M, ep):
@@ -209,7 +213,8 @@ def plot_graph(M, ep):
 
     # neurons
     def neuroncolor(r, n, spiked):
-        bounds = (-80, 60) if cfg["neuron"] == "Izhikevich" else (-80, 60)
+        bounds = (-80, 60) if cfg["neuron"] == "Izhikevich" \
+            else (0, cfg["thr"])
         v = (M['V'][ep, r, n] - bounds[0]) / bounds[1]
         cmap = mpcm.get_cmap("coolwarm")
         rgba = cmap(v, bytes=True)
@@ -228,6 +233,7 @@ def plot_graph(M, ep):
                 continue
             spiked = bool(M['Z'][ep, r, n])
             dot.node(name=f"{r}-{n}",
+                     label=f"{r}-{n}\n{M['V'][ep, r, n]:.2f}",
                      style='radial',
                      fixedsize='false',
                      color="#ffffff",
@@ -235,7 +241,9 @@ def plot_graph(M, ep):
 
     # weights
     def weightcolor(w):
-        w = (w - np.min(M['W'])) / np.max(M['W'])
+        maxdev = max(abs(np.min(M['W'])),
+                     abs(np.max(M['W'])))
+        w = (w / maxdev) + (1 / 2)
         cmap = mpcm.get_cmap("bwr")
         rgba = cmap(w, bytes=True)
         ret = "#"
@@ -250,13 +258,10 @@ def plot_graph(M, ep):
                 n2n = n2 if n2 < cfg["N_R"] else n2 % cfg["N_R"]
                 rn = r if n2 < cfg["N_R"] else r + 1
 
-                if (r == 0 and n1 >= cfg["N_I"]) or \
-                   (r == cfg["N_Rec"]-2 and n2n >= cfg["N_O"]):
-                    continue
-
                 if M['W'][ep, r, n2, n1] != 0:
                     dot.edge(tail_name=f"{r}-{n1}",
                              head_name=f"{rn}-{n2n}",
+                             label=f"{M['W'][ep, r, n2, n1]:.2f}",
                              penwidth='1',
                              color=weightcolor(w=M['W'][ep, r, n2, n1]))
 
