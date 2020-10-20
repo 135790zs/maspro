@@ -184,7 +184,7 @@ def drop_weights(W, layer):
         W[:N, :N] = 0  # empty NW: don't recur input layer
         W[N:, cfg["N_I"]:N] = 0  # No connections from nonexisting input
 
-    if layer == cfg["N_R"] - 2:
+    if layer == cfg["N_Rec"] - 2:
         W[N+cfg["N_O"]:, :N] = 0  # No connections to nonexisting output
 
     print(W)
