@@ -33,3 +33,15 @@ cfg = {
 
     "task": "narma10"
 }
+
+lookup = {
+    "X":   {"dim": 2, "label": "x^t"},
+    "V":   {"dim": 2, "label": "v^t"},
+    "Z":   {"dim": 2, "label": "z^t"},
+    "U":   {"dim": 2, "label": "u^t"},
+    "EVV": {"dim": 3, "label": "\\epsilon^t"},
+    "EVU": {"dim": 3, "label": "\\epsilon^t"},
+    "H":   {"dim": 2, "label": "h^t"},
+    "ET":  {"dim": 3, "label": "e^t"},
+    "W":   {"dim": 3, "label": "W^t"},
+}

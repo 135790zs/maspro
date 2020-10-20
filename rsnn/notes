@@ -1,0 +1,25 @@
+
+# MUST DO:
+# TODO: Implement TIMIT
+# TODO: Implement adaptive e-prop
+# TODO: Try replicate Bellec's results
+
+# LOW PRIORITY:
+# TODO: Dictionary to facilitate sweeping function (param = key, list = item)
+# TODO: Merge drsnn plot and plot_logs
+
+=========================================================
+
+MEETING NOTES 10/13
+
+* don't do too much, but do it right
+  zwaartekracht NWO
+
+
+* homeostaticity, slower dynamics in deeper layers. Neural sampling.
+* Fading input not necessarily bad: think about it
+* Learn nonlinear filter?
+* nonlinear autoregressive moving average NARMA
+* Input: drop autoregressive
+* Search for NARMA-10 benchmark
+* SEND SKYPE NAME

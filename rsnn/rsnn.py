@@ -1,12 +1,11 @@
-import matplotlib.pyplot as plt
 import numpy as np
-from config import cfg
+from config import cfg as CFG
 import utils as ut
 import vis
 from task import task1, narma10
 
 
-def run_rsnn(cfg):
+def run_rsnn(cfg=None):
     plot_interval = 1
 
     # Variable arrays
@@ -46,13 +45,12 @@ def run_rsnn(cfg):
                     Mt[key] = item[ep, r, :, :]
 
             Mt = ut.eprop(
-                    model=cfg["neuron"],
-                    M=Mt,
-                    X=np.pad(array=M["input_spike"][ep, :],
-                             pad_width=(0, 2 * cfg["N_R"] - cfg["N_I"])),
-                    t=ep,
-                    uses_weights=True,
-                    r=r)
+                model=cfg["neuron"],
+                M=Mt,
+                X=np.pad(array=M["input_spike"][ep, :],
+                         pad_width=(0, 2 * cfg["N_R"] - cfg["N_I"])),
+                t=ep,
+                uses_weights=True)
 
             for key, item in Mt.items():
                 if key in ["V", "U", "Z", "TZ", "H"]:
@@ -62,23 +60,22 @@ def run_rsnn(cfg):
 
         # ERROR AND OUTPUT COLLECTION ##################################
         M["output"][ep, :] = M['Z'][ep, -1, :cfg["N_O"]]
-        M["output_EMA"][ep, :] = ut.EMA(arr=M["output"], 
-                                 arr_ema=M["output_EMA"], 
-                                 ep=ep)
+        M["output_EMA"][ep, :] = ut.EMA(arr=M["output"],
+                                        arr_ema=M["output_EMA"],
+                                        ep=ep)
 
         if cfg["task"] == "narma10":
-            M["target"][ep, :] = narma10(t=ep, 
-                                         u=M["input"][:ep+1], 
-                                         y=M["output_EMA"][:ep+1])    
+            M["target"][ep, :] = narma10(t=ep,
+                                         u=M["input"][:ep+1],
+                                         y=M["output_EMA"][:ep+1])
         else:
             M["target"][ep, :] = task1(io_type="O", t=ep)
-        
-        M["target_EMA"][ep, :] = ut.EMA(arr=M["target"], 
-                                 arr_ema=M["target_EMA"], 
-                                 ep=ep)
+
+        M["target_EMA"][ep, :] = ut.EMA(arr=M["target"],
+                                        arr_ema=M["target_EMA"],
+                                        ep=ep)
 
         print(np.sum(M['W'][ep]))
-
 
         error = np.mean(ut.errfn(M["output_EMA"][:ep+1, :],
                                  M["target_EMA"][:ep+1, :]),
@@ -93,40 +90,10 @@ def run_rsnn(cfg):
                            layers=(0, 1),
                            neurons=(0, 0))
 
-    return np.mean(ut.errfn(M["output_EMA"][:ep+1, :],
-                            M["target_EMA"][:ep+1, :]),
+    return np.mean(ut.errfn(M["output_EMA"], M["target_EMA"]),
                    axis=0)
 
 
 if __name__ == "__main__":
 
-    print(run_rsnn(cfg))
-
-# MUST DO:
-# TODO: Implement TIMIT
-# TODO: Implement adaptive e-prop
-# TODO: Try replicate Bellec's results
-
-# LOW PRIORITY:
-# TODO: Dictionary to facilitate sweeping function (param = key, list = item)
-# TODO: Merge drsnn plot and plot_logs
-
-"""
-MEETING NOTES 10/13
-
-* don't do too much, but do it right
-  zwaartekracht NWO
-
-
-* homeostaticity, slower dynamics in deeper layers. Neural sampling.
-* Fading input not necessarily bad: think about it
-* Learn nonlinear filter?
-* nonlinear autoregressive moving average NARMA
-* Input: drop autoregressive
-* Search for NARMA-10 benchmark
-* SEND SKYPE NAME
-
-
-
-
-"""
+    print(run_rsnn(CFG))

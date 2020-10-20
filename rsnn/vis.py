@@ -1,66 +1,76 @@
 import matplotlib.pyplot as plt
-import matplotlib.image as mpimg
 import matplotlib.cm as mpcm
 from matplotlib import rcParams as rc
 import numpy as np
-import utils as ut
-from config import cfg
 from graphviz import Digraph
+import utils as ut
+from config import cfg, lookup
 
 rc['mathtext.fontset'] = 'stix'
 rc['font.family'] = 'STIXGeneral'
 
 
-def plot_logs(M, X, title=None):
-    [M.pop(key) for key in ["TZ", "L"]]
+def plot_pair(M, ep, layers=(0, 1), neurons=(0, 0), X=None, is_unit=False):
+    Mt = {}
+
+    for key in lookup:
+        if key != "X":
+            Mt[key] = M[key]
+
+    Mt_ = {}
+
+    assert layers[1] - layers[0] == 0 or layers[0] - layers[1] == -1
+    n1 = neurons[1] + (cfg["N_R"] if layers[0] != layers[1] else 0)
+    for key, item in Mt.items():
+        if lookup[key]["dim"] == 2:
+            if not is_unit:
+                Mt_[key] = np.vstack((item[:ep, layers[0], neurons[0]],
+                                      item[:ep, layers[1], neurons[1]])).T
+            else:
+                Mt_[key] = Mt[key]
+
+        elif lookup[key]["dim"] == 3:
+            if not is_unit:
+                Mt_[key] = np.vstack((item[:ep, layers[0], neurons[0], n1],
+                                      item[:ep, layers[1], n1, neurons[0]])).T
+            else:
+                Mt_[key] = np.vstack((item[:, 0, 1],
+                                      item[:, 1, 0])).T
+    Mt = Mt_
 
     fig = plt.figure(constrained_layout=False)
-    gsc = fig.add_gridspec(nrows=len(M)+1, ncols=1, hspace=0)
+    gsc = fig.add_gridspec(nrows=len(Mt)+int(X is not None), ncols=1, hspace=0)
     axs = []
     labelpad = 15
     fontsize = 14
     fontsize_legend = 12
+    fig.suptitle(f"Epoch {ep} ({cfg['neuron'] + ' pair' if is_unit else ''})",
+                 fontsize=20)
 
-    if title:
-        fig.suptitle(title, fontsize=20)
+    if X is not None:
+        axs.append(fig.add_subplot(gsc[len(axs), :],
+                                   sharex=axs[0] if axs else None))
+        h = 0.5  # height of vlines
+        rng = np.random.default_rng()
+        inp_ys = rng.random(size=X.shape[0])
+        for n_idx in [0, 1]:
+            axs[-1].vlines(x=[idx for idx, val in
+                              enumerate(X[:, n_idx]) if val],
+                           ymin=n_idx+inp_ys/(1+h),
+                           ymax=n_idx+(inp_ys+h)/(1+h),
+                           colors=f'C{n_idx}',
+                           linewidths=0.25,
+                           label=f"$x_{n_idx}$")
+        axs[-1].set_ylabel("$x^t_j$",
+                           rotation=0,
+                           labelpad=labelpad,
+                           fontsize=fontsize)
 
-    lookup = {
-        "V":   {"dim": 2, "label": "v^t"},
-        "U":   {"dim": 2, "label": "u^t"},
-        "Z":   {"dim": 2, "label": "z^t"},
-        "X":   {"dim": 2, "label": "x^t"},
-        "TZ":  {"dim": 2, "label": "TZ^t"},
-        "EVV": {"dim": 3, "label": "\\epsilon^t"},
-        "EVU": {"dim": 3, "label": "\\epsilon^t"},
-        "W":   {"dim": 3, "label": "W^t"},
-        "H":   {"dim": 2, "label": "h^t"},
-        "ET":  {"dim": 3, "label": "e^t"},
-    }
-
-    # PRINT INPUTS
-    axs.append(fig.add_subplot(gsc[len(axs), :],
-                               sharex=axs[0] if axs else None))
-    h = 0.5  # height of vlines
-    rng = np.random.default_rng()
-    inp_ys = rng.random(size=X.shape[0])
-    for n_idx in [0, 1]:
-        axs[-1].vlines(x=[idx for idx, val in
-                          enumerate(X[:, n_idx]) if val],
-                       ymin=n_idx+inp_ys/(1+h),
-                       ymax=n_idx+(inp_ys+h)/(1+h),
-                       colors=f'C{n_idx}',
-                       linewidths=0.25,
-                       label=f"$x_{n_idx}$")
-    axs[-1].set_ylabel("$x^t_j$",
-                       rotation=0,
-                       labelpad=labelpad,
-                       fontsize=fontsize)
-
-    for key, arr in M.items():
+    for key, arr in Mt.items():
         axs.append(fig.add_subplot(gsc[len(axs), :],
                                    sharex=axs[0] if axs else None))
 
-        if arr.ndim == 2:
+        if lookup[key]["dim"] == 2:
             axs[-1].plot(arr[:, 0],
                          label=f"${lookup[key]['label']}_0$")
             axs[-1].plot(arr[:, 1],
@@ -70,11 +80,11 @@ def plot_logs(M, X, title=None):
                                labelpad=labelpad,
                                fontsize=fontsize)
 
-        elif arr.ndim == 3:
+        elif lookup[key]["dim"] == 3:
             EVtype = key[2:]+',' if key[:2] == "EV" else ""
-            axs[-1].plot(arr[:, 0, 1],
+            axs[-1].plot(arr[:, 0],
                          label=f"${lookup[key]['label']}_{{{EVtype}0,1}}$")
-            axs[-1].plot(arr[:, 1, 0],
+            axs[-1].plot(arr[:, 1],
                          label=f"${lookup[key]['label']}_{{{EVtype}1,0}}$")
             axs[-1].set_ylabel(f"${lookup[key]['label']}_{{{EVtype}i,j}}$",
                                rotation=0,
@@ -88,93 +98,7 @@ def plot_logs(M, X, title=None):
 
     axs[-1].set_xlabel("$t$", fontsize=fontsize)
 
-    plt.savefig("vis/pair_sim.pdf")
-
-
-def plot_pair(M, ep, layers=(0, 1), neurons=(0, 0)):
-    fig = plt.figure(constrained_layout=False)
-    gsc = fig.add_gridspec(nrows=8,
-                           ncols=1,
-                           hspace=0)
-
-    fig.suptitle(f"Epoch {ep}", fontsize=20)
-    assert layers[1] - layers[0] == 0 or layers[0] - layers[1] == -1
-
-    lookup = {
-        "V":   {"dim": 2, "label": "v^t"},
-        "U":   {"dim": 2, "label": "u^t"},
-        "Z":   {"dim": 2, "label": "z^t"},
-        "X":   {"dim": 2, "label": "x^t"},
-        "EVV": {"dim": 3, "label": "\\epsilon^t"},
-        "EVU": {"dim": 3, "label": "\\epsilon^t"},
-        "W":   {"dim": 3, "label": "W^t"},
-        "H":   {"dim": 2, "label": "h^t"},
-        "ET":  {"dim": 3, "label": "e^t"},
-    }
-
-    labelpad = 15
-    fontsize = 14
-    fontsize_legend = 12
-
-    n1 = neurons[1] + (cfg["N_R"] if layers[0] != layers[1] else 0)
-
-    keyidx = 0
-    for key, arr in M.items():
-        if key not in lookup.keys():
-            continue
-        if arr.ndim != lookup[key]["dim"]:
-            arr1 = arr[:ep+1, layers[0], ...]
-            arr2 = arr[:ep+1, layers[1], ...]
-        else:  # If singlelayer
-            arr1 = arr
-
-        axs = fig.add_subplot(gsc[keyidx, 0], label=f"{key}-{ep}")
-        keyidx += 1
-
-        if key == "X":
-            h = 0.5  # height of vlines
-            rng = np.random.default_rng()
-            inp_ys = rng.random(size=M["X"].shape[0])
-            for n_idx in [0, 1]:
-                axs.vlines(x=[idx for idx, val in
-                              enumerate(M["X"][:ep+1, n_idx]) if val],
-                           ymin=n_idx+inp_ys/(1+h),
-                           ymax=n_idx+(inp_ys+h)/(1+h),
-                           colors=f'C{n_idx}',
-                           linewidths=0.25,
-                           label=f"$x_{n_idx}$")
-            axs.set_ylabel("$x^t_j$",
-                           rotation=0,
-                           labelpad=labelpad,
-                           fontsize=fontsize)
-
-        elif arr1.ndim == 2:  # Voltage etc
-            axs.plot(arr1[:ep+1, neurons[0]],  # TODO: ep+1?
-                     label=f"${lookup[key]['label']}_0$")
-            axs.plot(arr2[:ep+1, neurons[0]],
-                     label=f"${lookup[key]['label']}_1$")
-            axs.set_ylabel(f"${lookup[key]['label']}_j$",
-                           rotation=0,
-                           labelpad=labelpad,
-                           fontsize=fontsize)
-
-        elif arr1.ndim == 3:  # Weights etc
-            EVtype = key[2:]+',' if key[:2] == "EV" else ""
-            axs.plot(arr1[:ep+1, neurons[0], n1],
-                     label=f"${lookup[key]['label']}_{{{EVtype}{neurons[0]}{n1}}}$")
-            axs.plot(arr2[:ep+1, n1, neurons[0]],
-                     label=f"${lookup[key]['label']}_{{{EVtype}{n1}{neurons[0]}}}$")
-            axs.set_ylabel(f"${lookup[key]['label']}_{{{EVtype}i,j}}$",
-                           rotation=0,
-                           labelpad=labelpad,
-                           fontsize=fontsize)
-        if arr.ndim == lookup[key]["dim"]:
-            axs.legend(fontsize=fontsize_legend,
-                       loc="upper right",
-                       ncol=2)
-        axs.grid(linestyle='--')
-    plt.savefig("vis/pair.pdf", bbox_inches='tight')
-    plt.close()
+    plt.savefig(f"vis/pair{'-sim' if is_unit else ''}.pdf")
 
 
 def plot_heatmaps(M, ep):
@@ -266,10 +190,6 @@ def plot_io(M, ep):
 
 
 def plot_drsnn(M, ep, layers=(0, 1), neurons=(0, 0)):
-
-    labelpad = 15
-    fontsize = 14
-    fontsize_legend = 12
 
     if cfg["plot_pair"]:
         plot_pair(M=M, ep=ep, layers=layers, neurons=neurons)

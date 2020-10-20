@@ -1,21 +1,20 @@
-import matplotlib.pyplot as plt
-import matplotlib.image as mpimg
-import matplotlib.cm as mpcm
-from matplotlib import rcParams as rc
 import numpy as np
 from config import cfg
-from graphviz import Digraph
-
-rc['mathtext.fontset'] = 'stix'
-rc['font.family'] = 'STIXGeneral'
 
 
 def initialize_log():
     rng = np.random.default_rng()
     M = {}
-    neuron_shape = (cfg["Epochs"],) + (cfg["N_Rec"], cfg["N_R"],)
-    weight_shape = (cfg["Epochs"],) + (cfg["N_Rec"]-1, cfg["N_R"]*2, cfg["N_R"]*2,)
-    feedback_shape = (cfg["Epochs"], cfg["N_Rec"]-2, cfg["N_R"],)
+    neuron_shape = (cfg["Epochs"],
+                    cfg["N_Rec"],
+                    cfg["N_R"],)
+    weight_shape = (cfg["Epochs"],
+                    cfg["N_Rec"] - 1,
+                    cfg["N_R"] * 2,
+                    cfg["N_R"] * 2,)
+    feedback_shape = (cfg["Epochs"],
+                      cfg["N_Rec"] - 2,
+                      cfg["N_R"],)
 
     if cfg["neuron"] == "Izhikevich":
         M["V"] = np.ones(shape=neuron_shape) * cfg["eqb"]
@@ -30,14 +29,14 @@ def initialize_log():
     M["EVU"] = np.zeros(shape=weight_shape)
     M["ET"] = np.zeros(shape=weight_shape)
     M["W"] = rng.random(size=weight_shape) * 2
-    M["B"] = np.ones(shape=feedback_shape)# * rng.random()
+    M["B"] = np.ones(shape=feedback_shape) * rng.random()
     M["L"] = np.ones(shape=feedback_shape)
     M["input_spike"] = np.zeros(shape=(cfg["Epochs"], cfg["N_I"]))
     M["output"] = np.zeros(shape=(cfg["Epochs"], cfg["N_O"]))
     M["output_EMA"] = np.zeros(shape=(cfg["Epochs"], cfg["N_O"]))
     M["target"] = np.zeros(shape=(cfg["Epochs"], cfg["N_O"]))
     M["target_EMA"] = np.zeros(shape=(cfg["Epochs"], cfg["N_O"]))
-    
+
     if cfg["task"] == "narma10":
         M["input"] = rng.random(size=(cfg["Epochs"], cfg["N_I"])) * 0.5
     else:
@@ -55,23 +54,26 @@ def get_artificial_input(T, num, dur, diff, interval, val, switch_interval):
     for t in range(0, T):
         if t % (switch_interval*2) < switch_interval:
             X[t, 0] = val if t % interval <= dur else 0
-            X[t, 1] = val if (t % interval <= diff + dur and t % interval > diff) \
-                else 0
+            X[t, 1] = val if (t % interval <= diff + dur
+                              and t % interval > diff) else 0
         else:
-            X[t, 0] = val if (t % interval <= diff + dur and t % interval > diff) \
-                else 0
+            X[t, 0] = val if (t % interval <= diff + dur
+                              and t % interval > diff) else 0
             X[t, 1] = val if t % interval <= dur else 0
     return X
+
 
 def EMA(arr, arr_ema, ep):
     return (cfg["EMA"] * arr[ep, :] + (1 - cfg["EMA"]) * arr_ema[ep, :]) \
             if ep else arr[ep, :]
 
 
-def eprop(model, M, X, t, uses_weights, r=None):
-    Iz = np.dot(M['Z'], M['W'], ) if uses_weights else np.zeros(
-            shape=M['Z'].shape)  # TODO: Weird what order of W, Z should be. Seems diff for units and rsnn
-    Iz += X# if X.ndim == 2 else X
+def eprop(model, M, X, t, uses_weights):
+    # TODO: Weird what order of W, Z should be. Seems diff for units and
+    # rsnn
+    Iz = (np.dot(M['Z'], M['W'], )
+          if uses_weights else np.zeros(shape=M['Z'].shape))
+    Iz += X
 
     if model == "LIF":
         M['Z'] = np.where(np.logical_and(t - M['TZ'] >= cfg["dt_refr"],
@@ -118,7 +120,7 @@ def eprop(model, M, X, t, uses_weights, r=None):
         M['EVV'] = (M['EVV'] * (1 - M['Z']
                                 + 2 * cfg["volt1"] * cfg["dt"] * M['V']
                                 - 2 * cfg["volt1"] * cfg["dt"] * M['V']
-                                    * M['Z']
+                                * M['Z']
                                 + cfg["volt2"] * cfg["dt"]
                                 - cfg["volt2"] * cfg["dt"] * M['Z'])
                     - M['EVU']  # Traub: "* cfg["dt"]" may have to be appended
@@ -130,7 +132,7 @@ def eprop(model, M, X, t, uses_weights, r=None):
         M['H'] = np.where(t - M['TZ'] < cfg["dt_refr"],
                           -cfg["gamma"],
                           cfg["gamma"] * np.clip(a=1 - (abs(M['V']
-                                                        - cfg["thr"])
+                                                            - cfg["thr"])
                                                         / cfg["thr"]),
                                                  a_min=0,
                                                  a_max=None))
@@ -188,4 +190,3 @@ def normalize(arr):
 
 def errfn(a1, a2):
     return np.sum(np.abs(a1 - a2), axis=1)
-
