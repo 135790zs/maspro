@@ -285,19 +285,21 @@ def plot_drsnn(M, ep, layers=(0, 1), neurons=(0, 0)):
 
 
 def plot_graph(M, ep):
-    dot = Digraph(format='pdf', engine='dot')
+    dot = Digraph(format='svg', engine='dot')
 
     # neurons
-    def neuroncolor(r, n):
-        v = (M['V'][ep, r, n] + 100) / cfg["thr"]
-        cmap = mpcm.get_cmap("plasma")
+    def neuroncolor(r, n, spiked):
+        bounds = (-80, 60) if cfg["neuron"] == "Izhikevich" else (-80, 60)
+        v = (M['V'][ep, r, n] - bounds[0]) / bounds[1]
+        cmap = mpcm.get_cmap("coolwarm")
         rgba = cmap(v, bytes=True)
         ret = "#"
         for val in rgba:
             hval = hex(val)[2:]
             ret += hval if hval != '0' else '00'
+        spike_col = '#33ff33' if spiked else ret
+        return spike_col + ';0.1:' + ret
 
-        return ret
     # TODO: compress loops using itertools
     for r in range(0, cfg["N_Rec"]):
         for n in range(0, cfg["N_R"]):
@@ -306,10 +308,10 @@ def plot_graph(M, ep):
                 continue
             spiked = bool(M['Z'][ep, r, n])
             dot.node(name=f"{r}-{n}",
-                     style='filled',
+                     style='radial',
                      fixedsize='false',
-                     color=neuroncolor(r=r, n=n),
-                     fillcolor=neuroncolor(r=r, n=n))#"#cccccc" if spiked else "#555555")
+                     color="#ffffff",
+                     fillcolor=neuroncolor(r=r, n=n, spiked=spiked))
 
     # weights
     def weightcolor(w):
