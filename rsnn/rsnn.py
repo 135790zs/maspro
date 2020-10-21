@@ -6,7 +6,7 @@ from task import task1, narma10
 
 
 def run_rsnn(cfg=None):
-    plot_interval = 1
+    plot_interval = 10
 
     # Variable arrays
     M = ut.initialize_log()
@@ -48,47 +48,51 @@ def run_rsnn(cfg=None):
                 M=Mt,
                 X=np.pad(array=M["input_spike"][ep, :],
                          pad_width=(0, 2 * cfg["N_R"] - cfg["N_I"])),
-                t=ep,
-                uses_weights=True)
+                t=ep)
 
             for key, item in Mt.items():
                 if key in ["V", "U", "Z", "TZ", "H"]:
-                    M[key][ep+1, r, :] = item[:cfg["N_R"]]
+                    M[key][ep, r, :] = item[:cfg["N_R"]]
+                    M[key][ep, r+1, :] = item[cfg["N_R"]:]
                 elif key in ["W", "ET", "EVV", "EVU"]:
-                    M[key][ep+1, r, :, :] = item
+                    M[key][ep, r, :, :] = item
+
+        for key, item in M.items():
+                if key in ["V", "U", "Z", "TZ", "H", "W", "ET", "EVV", "EVU"]:
+                    M[key][ep+1] = item[ep]
 
         # ERROR AND OUTPUT COLLECTION ##################################
-        M["output"][ep, :] = M['Z'][ep, -1, :cfg["N_O"]]
-        M["output_EMA"][ep, :] = ut.EMA(arr=M["output"],
-                                        arr_ema=M["output_EMA"],
-                                        ep=ep)
+        M["output"][ep] = M['Z'][ep, -1, :cfg["N_O"]]
+        M["output_EMA"][ep] = ut.EMA(arr=M["output"],
+                                     arr_ema=M["output_EMA"],
+                                     ep=ep)
 
         if cfg["task"] == "narma10":
-            M["target"][ep, :] = narma10(t=ep,
-                                         u=M["input"][:ep+1],
-                                         y=M["output_EMA"][:ep+1])
+            M["target"][ep] = narma10(t=ep,
+                                      u=M["input"][:ep+1],
+                                      y=M["output_EMA"][:ep+1])
         else:
-            M["target"][ep, :] = task1(io_type="O", t=ep)
+            M["target"][ep] = task1(io_type="O", t=ep)
 
-        M["target_EMA"][ep, :] = ut.EMA(arr=M["target"],
-                                        arr_ema=M["target_EMA"],
-                                        ep=ep)
+        M["target_EMA"][ep] = ut.EMA(arr=M["target"],
+                                     arr_ema=M["target_EMA"],
+                                     ep=ep)
 
-        error = np.mean(ut.errfn(M["output_EMA"][:ep+1, :],
-                                 M["target_EMA"][:ep+1, :]),
-                        axis=0)
+        M["error"][ep] = np.sum(M["output"][ep] - M["target"][ep]) ** 2
+        M["error_EMA"][ep] = ut.EMA(arr=M["error"],
+                                    arr_ema=M["error_EMA"],
+                                    ep=ep)
 
         # Broadcast error to neurons next epoch
-        M['L'][ep+1] = error * M['B'][ep]
+        M['L'][ep+1] = M["error"][ep] * M['B'][ep]
 
         if plot_interval and (ep % plot_interval == 0):
             vis.plot_drsnn(M=M,
                            ep=ep,
-                           layers=(0, 1),
+                           layers=(1, 2),
                            neurons=(0, 0))
 
-    return np.mean(ut.errfn(M["output_EMA"], M["target_EMA"]),
-                   axis=0)
+    return np.mean(M["error"])
 
 
 if __name__ == "__main__":

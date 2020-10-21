@@ -27,12 +27,12 @@ def plot_pair(M, ep, layers=(0, 1), neurons=(0, 0), X=None, is_unit=False):
                 Mt_[key] = np.vstack((item[:ep, layers[0], neurons[0]],
                                       item[:ep, layers[1], neurons[1]])).T
             else:
-                Mt_[key] = Mt[key]
+                Mt_[key] = item
 
         elif lookup[key]["dim"] == 3:
             if not is_unit:
-                Mt_[key] = np.vstack((item[:ep, layers[0], neurons[0], n1],
-                                      item[:ep, layers[1], n1, neurons[0]])).T
+                Mt_[key] = np.vstack((item[:ep, layers[0], neurons[0], n1],  # TODO: Maybe inverse last indices?
+                                      item[:ep, layers[1]-1, n1, neurons[0]])).T
             else:
                 Mt_[key] = np.vstack((item[:, 0, 1],
                                       item[:, 1, 0])).T
@@ -189,8 +189,8 @@ def plot_io(M, ep):
 
     axs = fig.add_subplot(gsc[1, 1])
     axs.set_title(f"Error + EMA")
-    axs.plot(ut.errfn(M["target"][:ep+1, :], M["output"][:ep+1, :]))
-    axs.plot(ut.errfn(M["target_EMA"][:ep+1, :], M["output_EMA"][:ep+1, :]))
+    axs.plot(M["error"][:ep+1])
+    axs.plot(M["error_EMA"][:ep+1])
     plt.savefig("vis/io.pdf", bbox_inches='tight')
     plt.close()
 

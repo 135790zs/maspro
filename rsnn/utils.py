@@ -28,7 +28,7 @@ def initialize_log():
     M["EVV"] = np.zeros(shape=weight_shape)
     M["EVU"] = np.zeros(shape=weight_shape)
     M["ET"] = np.zeros(shape=weight_shape)
-    M["W"] = rng.random(size=weight_shape) * 4 - 2
+    M["W"] = rng.random(size=weight_shape) * 60
     M["B"] = np.ones(shape=feedback_shape) * rng.random()
     M["L"] = np.ones(shape=feedback_shape)
     M["input_spike"] = np.zeros(shape=(cfg["Epochs"], cfg["N_I"]))
@@ -36,6 +36,8 @@ def initialize_log():
     M["output_EMA"] = np.zeros(shape=(cfg["Epochs"], cfg["N_O"]))
     M["target"] = np.zeros(shape=(cfg["Epochs"], cfg["N_O"]))
     M["target_EMA"] = np.zeros(shape=(cfg["Epochs"], cfg["N_O"]))
+    M["error"] = np.zeros(shape=(cfg["Epochs"]))
+    M["error_EMA"] = np.zeros(shape=(cfg["Epochs"]))
 
     if cfg["task"] == "narma10":
         M["input"] = rng.random(size=(cfg["Epochs"], cfg["N_I"])) * 0.5
@@ -65,16 +67,15 @@ def get_artificial_input(T, num, dur, diff, interval, val, switch_interval):
 
 
 def EMA(arr, arr_ema, ep):
-    return (cfg["EMA"] * arr[ep, :] + (1 - cfg["EMA"]) * arr_ema[ep, :]) \
-            if ep else arr[ep, :]
+    return (cfg["EMA"] * arr[ep] + (1 - cfg["EMA"]) * arr_ema[ep-1]) \
+            if ep else arr[ep]
 
 
-def eprop(model, M, X, t, uses_weights):
+def eprop(model, M, X, t):
     # TODO: Weird what order of W, Z should be. Seems diff for units and
     # rsnn
-    Iz = (np.dot(M['Z'], M['W'], )
-          if uses_weights else np.zeros(shape=M['Z'].shape))
-    Iz += X
+
+    # MOVE DOT AFTER THR?
 
     if model == "LIF":
         M['Z'] = np.where(np.logical_and(t - M['TZ'] >= cfg["dt_refr"],
@@ -90,13 +91,16 @@ def eprop(model, M, X, t, uses_weights):
     elif model == "Izhikevich":
         M['Z'] = np.where(M['V'] >= cfg["thr"], 1., 0.)
 
+    Iz = np.dot(M['W'], M['Z'])
+    Iz += X
+
     M['TZ'] = np.where(M['Z'], t, M['TZ'])
 
     if model in ["LIF", "ALIF"]:
         R = (t - M['TZ'] == cfg["dt_refr"]).astype(int)
-
         M['V'] = (cfg["alpha"] * M['V']
-                  + Iz - M['Z'] * cfg["alpha"] * M['V']
+                  + Iz 
+                  - M['Z'] * cfg["alpha"] * M['V']
                   - R * cfg["alpha"] * M['V'])
 
     elif model == "Izhikevich":
