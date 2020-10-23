@@ -6,7 +6,7 @@ from task import task1, narma10
 
 
 def run_rsnn(cfg=None):
-    plot_interval = 10
+    plot_interval = 1
 
     # Variable arrays
     M = ut.initialize_log()
@@ -58,8 +58,8 @@ def run_rsnn(cfg=None):
                     M[key][ep, r, :, :] = item
 
         for key, item in M.items():
-                if key in ["V", "U", "Z", "TZ", "H", "W", "ET", "EVV", "EVU"]:
-                    M[key][ep+1] = item[ep]
+            if key in ["V", "U", "Z", "TZ", "H", "W", "ET", "EVV", "EVU"]:
+                M[key][ep+1] = item[ep]
 
         # ERROR AND OUTPUT COLLECTION ##################################
         M["output"][ep] = M['Z'][ep, -1, :cfg["N_O"]]
@@ -98,3 +98,12 @@ def run_rsnn(cfg=None):
 if __name__ == "__main__":
 
     print(run_rsnn(CFG))
+
+
+#
+"""
+FOR THE NEXT TIME:
+
+Rewrite the whole system. Just use Bellec's model, first single-layer and then stacked. Then apply Traub's LIF fix. Then Izhikevich.
+
+"""
