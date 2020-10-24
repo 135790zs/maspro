@@ -1,13 +1,15 @@
 cfg = {
     "neuron": "LIF",
 
-    "alpha": 0.9,
-    "beta": 0.07,
-    "gamma": 0.3,
-    "rho": 0.995,
+    "alpha": 0.9,  # Leak factor
+    "beta": 1,
+    "gamma": 0.3,  # Pseudoderivative ET contribution
+    "eta": 0.01,  # Learning rate
+    "kappa": 0.5,  # Output smoothing
+    "rho": 0.99,  # Threshold leakage
     "eqb": -65,
     "thr": 30,
-    "dt_refr": 4,
+    "dt_refr": 10,
 
     "refr1": 2,
     "refr2": 0.004,
@@ -18,20 +20,19 @@ cfg = {
 
     "dt": .1,
 
-    "N_I": 1,
-    "N_R": 8,
-    "N_O": 1,
+    "N_R": 3,
     "N_Rec": 3,
 
-    "Epochs": 100,
+    "Epochs": 1000,
     "EMA": 0.05,
 
+    "plot_interval": 1,  # 0 to disable plots
     "plot_io": True,
-    "plot_pair": False,
+    "plot_pair": True,
     "plot_heatmaps": False,
     "plot_graph": True,
 
-    "task": "narma10"
+    "task": "pulse"
 }
 
 lookup = {
@@ -44,4 +45,5 @@ lookup = {
     "H":   {"dim": 2, "label": "h^t"},
     "ET":  {"dim": 3, "label": "e^t"},
     "W":   {"dim": 3, "label": "W^t"},
+    "DW":  {"dim": 3, "label": "\\Delta W"}
 }
