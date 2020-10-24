@@ -1,5 +1,5 @@
 cfg = {
-    "neuron": "LIF",
+    "neuron": "Izhikevich",
 
     "alpha": 0.9,  # Leak factor
     "beta": 1,
@@ -20,19 +20,19 @@ cfg = {
 
     "dt": .1,
 
-    "N_R": 3,
-    "N_Rec": 3,
+    "N_R": 32,
+    "N_Rec": 1,
 
-    "Epochs": 1000,
+    "Epochs": 100,
     "EMA": 0.05,
 
     "plot_interval": 1,  # 0 to disable plots
-    "plot_io": True,
-    "plot_pair": True,
+    "plot_io": False,
+    "plot_state": True,
     "plot_heatmaps": False,
-    "plot_graph": True,
+    "plot_graph": False,
 
-    "task": "pulse"
+    "task": "sinusoid"
 }
 
 lookup = {
