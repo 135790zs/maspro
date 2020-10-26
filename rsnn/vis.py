@@ -10,10 +10,11 @@ rc['font.family'] = 'STIXGeneral'
 
 
 def plot_state(M, t, fname, layers=None, neurons=None):
-    plotvars = ["X", "XZ", "V", "U", "Z", "H", "EVV", "EVU", "DW", "W", "Y",
-                "T", "error"]
+    print(t)
+    plotvars = ["X", "XZ", "I", "V", "U", "Z", "H", "EVV", "EVU", "ET", "DW", "W",
+                "Y", "T", "error"]
 
-    fig = plt.figure(constrained_layout=False, figsize=(8, 8))
+    fig = plt.figure(constrained_layout=False, figsize=(10, 14))
     gsc = fig.add_gridspec(nrows=len(plotvars) + 2, ncols=1, hspace=0)
     axs = []
     labelpad = 15
@@ -22,39 +23,22 @@ def plot_state(M, t, fname, layers=None, neurons=None):
     fig.suptitle(f"Epoch {t+1}", fontsize=20)
 
     # Print input to neurons
-    if layers is not None:
-        axs.append(fig.add_subplot(gsc[len(axs), :],
-                                   sharex=axs[0] if axs else None))
-        assert layers[1] - layers[0] in [0, 1]
-        for n in [0, 1]:
-            Z_concat = np.concatenate(
-                (M['Z'][:t, layers[n]-1] if layers[n] > 0 else np.pad(
-                    np.asarray([M['XZ'][:t]]).T,
-                    ((0, 0),
-                     (0, cfg["N_R"]-1))),
-                 M['Z'][:t, layers[n]]),
-                axis=1)
-            into = np.sum(M['W'][:t, layers[n], neurons[n]] * Z_concat, axis=1)
-            axs[-1].plot(into, label=f"$x_i$")
-            axs[-1].set_ylabel(f"$x$",
-                               rotation=0,
-                               labelpad=labelpad,
-                               fontsize=fontsize)
-            axs[-1].legend(fontsize=fontsize_legend,
-                           loc="upper right",
-                           ncol=2)
-            axs[-1].grid(linestyle='--')
-
     for var in plotvars:
         axs.append(fig.add_subplot(gsc[len(axs), :],
                                    sharex=axs[0] if axs else None))
-        if M[var][t].ndim == 0:
+        if M[var][t].ndim == 0:  # Y, T, error
             axs[-1].plot(M[var][:t])
             axs[-1].set_ylabel(var,
                                rotation=0,
                                labelpad=labelpad,
                                fontsize=fontsize)
-        if M[var][t].ndim == 2:
+        if M[var][t].ndim == 1:  # X, XZ
+            axs[-1].plot(M[var][:t],)
+            axs[-1].set_ylabel(var,
+                               rotation=0,
+                               labelpad=labelpad,
+                               fontsize=fontsize)
+        if M[var][t].ndim == 2:  # information per neuron
             if layers is not None:
                 axs[-1].plot(M[var][:t, layers[0], neurons[0]],
                              label=f"${lookup[var]['label']}_i$")
@@ -72,22 +56,19 @@ def plot_state(M, t, fname, layers=None, neurons=None):
                                labelpad=labelpad,
                                fontsize=fontsize)
 
-        elif M[var][t].ndim == 3:
-            EVtype = var[2:]+',' if var[:2] == "EV" else ""
+        elif M[var][t].ndim == 3:  # information per weight
             if layers is not None:
                 axs[-1].plot(M[var][:t,
                                     layers[1],
                                     neurons[1],
                                     neurons[0]],
-                             label=f"${lookup[var]['label']}_{{{EVtype}i,j}}$")
+                             label=f"${lookup[var]['label']}$")
                 if layers[0] == layers[1]:  # Rec, so also plot N1 -> N0
                     axs[-1].plot(M[var][:t,
                                         layers[0],
                                         neurons[0],
                                         neurons[1] + cfg["N_R"]],
-                                 # TODO: fix subscript
-                                 label=f"${lookup[var]['label']}_"
-                                       f"_{{{EVtype}i,j}}$")
+                                 label=f"${lookup[var]['label']}$")
             else:
                 axs[-1].imshow(M[var][:t].reshape(t, -1).T,
                                cmap='coolwarm',
@@ -99,10 +80,10 @@ def plot_state(M, t, fname, layers=None, neurons=None):
                                rotation=0,
                                labelpad=labelpad,
                                fontsize=fontsize)
-        if layers is not None and M[var][t].ndim > 0:
-            axs[-1].legend(fontsize=fontsize_legend,
-                           loc="upper right",
-                           ncol=2)
+        if layers is not None or M[var][t].ndim < 2:
+            # axs[-1].legend(fontsize=fontsize_legend,
+            #                loc="upper right",
+            #                ncol=2)
             axs[-1].grid(linestyle='--')
 
     axs[-1].set_xlabel("$t$", fontsize=fontsize)
@@ -193,7 +174,7 @@ def plot_io(M, t, fname):
     plt.close()
 
 
-def plot_drsnn(M, t, fname, layers=None, neurons=None):
+def plot_drsnn(M, t, fname="", layers=None, neurons=None):
 
     if cfg["plot_state"]:
         plot_state(fname=fname, M=M, t=t, layers=layers, neurons=neurons)

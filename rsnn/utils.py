@@ -23,6 +23,7 @@ def initialize_log():
         M["V"] = np.zeros(shape=neuron_shape)
 
     M["Z"] = np.zeros(shape=neuron_shape)
+    M["I"] = np.zeros(shape=neuron_shape)
     M["H"] = np.zeros(shape=neuron_shape)
     if cfg["neuron"] == "ALIF":
         M["U"] = np.ones(shape=neuron_shape) * cfg["thr"]
@@ -33,7 +34,7 @@ def initialize_log():
     M["EVU"] = np.zeros(shape=weight_shape)
     M["DW"] = np.zeros(shape=weight_shape)
     M["ET"] = np.zeros(shape=weight_shape)
-    M["W"] = rng.random(size=weight_shape) * 20
+    M["W"] = rng.random(size=weight_shape)
     M["B"] = np.ones(shape=feedback_shape) * rng.random()
 
     M["W_out"] = rng.random(size=(cfg["N_R"],))
@@ -49,13 +50,19 @@ def initialize_log():
     elif cfg["task"] == "pulse":
         M["X"] = pulse()
 
-    M["T"] = M["X"]
+    M["T"] = M["X"][:, 0]
 
     M["XZ"] = rng.binomial(n=1, p=M["X"])
 
     for r in range(cfg["N_Rec"]):
         # Zero diag E: no self-conn
         np.fill_diagonal(M['W'][0, r, :, cfg["N_R"]:], 0)
+    # M['W'][0, 0, 1, 0] = 0  # input 1 to neuron 2
+    # M['W'][0, 0, 0, 1] = 0  # input 2 to neuron 1
+    # M['W'][0, 0, 0, 0] = 70  # input 1 to neuron 1
+    # M['W'][0, 0, 1, 1] = 70  # input 2 to neuron 2
+    # M['W'][0, 0, 0, 3] = 1  # n1 to n2
+    # M['W'][0, 0, 1, 2] = 1  # n2 to n1
 
     return M
 
@@ -130,7 +137,7 @@ def eprop_U(V, U, Z):
 
 
 def eprop_EVV(EVV, EVU, Z, V, R, Z_in):
-    if cfg["neuron"] in ["LIF", "ALIF"]:
+    if cfg["neuron"] in ["LIF", "ALIF"]:  # LIF has no U or EVU
         return (EVV * cfg["alpha"] * rep_along_axis(arr=(1 - Z - R))
                 + Z_in)
 
@@ -144,7 +151,8 @@ def eprop_EVV(EVV, EVU, Z, V, R, Z_in):
 def eprop_EVU(H, Z, EVV, EVU):
     if cfg["neuron"] in ["LIF", "ALIF"]:
         H = rep_along_axis(arr=H)
-        return H * EVV + (cfg["rho"] - H * cfg["beta"]) * EVU
+        # return H * EVV + (cfg["rho"] - H * cfg["beta"]) * EVU
+        return H * EVV + cfg["rho"] * EVU
 
     # Izhikevich
     return (cfg["refr2"] * cfg["dt"] * EVV * rep_along_axis(1 - Z)

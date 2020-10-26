@@ -16,8 +16,18 @@ def sinusoid(A=0.5, B=0.5, f=2.):
     return np.sin(np.arange(cfg["Epochs"]) / f) * A + B
 
 
-def pulse(A=0.9, duration=20, gap=50):
-    ret = np.zeros(shape=(cfg["Epochs"],))
+# def pulse(A=1, duration=20, gap=50):
+#     ret = np.zeros(shape=(cfg["Epochs"],))
+#     for t in range(cfg["Epochs"]):
+#         ret[t] = A * (t % (duration + gap) < duration)
+#     return ret
+
+
+def pulse(A=(1, 1), duration=(10, 10), gap=(40, 40), offset=(0, 1)):
+    N = len(A)
+    ret = np.zeros(shape=(cfg["Epochs"], N))
+
     for t in range(cfg["Epochs"]):
-        ret[t] = A * (t % (duration + gap) < duration)
+        for n in range(N):
+            ret[t, n] = A[n] * ((t - offset[n]) % (duration[n] + gap[n]) < duration[n])
     return ret
