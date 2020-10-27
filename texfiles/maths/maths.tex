@@ -1,0 +1,86 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath, amsfonts, yfonts}
+\usepackage{algpseudocode}
+\setlength{\parskip}{5pt}
+\setlength{\parindent}{0pt}
+
+
+\newcommand\eqdef{\ \mathrel{\overset{\makebox[0pt]{\mbox{\normalfont\scriptsize\sffamily def}}}{=}}\ }
+
+\title{E-prop maths}
+\author{Werner van der Veen}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+% \tableofcontents
+\section{Proof: BPTT to E-prop}
+The main equation to be proved:
+\begin{equation}
+\frac{dE}{dW_{ji}} = 
+\sum_t\frac{dE}{dz_j^t}\cdot\left[\frac{dz_j^t}{dW_{ji}}\right]_\text{local}
+\end{equation}
+
+We start with the classical factorization of the loss gradients in an unrolled RNN:
+\begin{equation}\label{eq:clafac}
+\frac{dE}{dW_{ji}} = \frac{dE}{d\mathbf{h}_j^{t'}}\cdot\frac{\partial \mathbf{h}_j^{t'}}{\partial W_{ji}}
+\end{equation}
+The summation indicates that weights are shared in an unrolled RNN.
+
+We now decompose the first term into a series of learning signals $L_j^t = \frac{dE}{dz_j^t}$ and local factors $\frac{\partial\mathbf{h}_j^{t-t'}}{\partial\mathbf{h}_j^t}$ for $t$ since the event horizon $t'$:
+
+\begin{equation}\label{eq:rec}
+\frac{dE}{d\mathbf{h}_j^{t'}} = \underbrace{\frac{dE}{dz_j^{t'}}}_{L^{t'}_j} \frac{\partial z_j^{t'}}{\partial\mathbf{h}_j^{t'}} + \frac{dE}{d\mathbf{h}_j^{t'+1}}\frac{\partial\mathbf{h}_j^{t'+1}}{\partial\mathbf{h}_j^{t'}}
+\end{equation}
+Note that this equation is recursive.
+If we substitute the equation (\ref{eq:rec}) into the classical factorization (\ref{eq:clafac}), we get:
+\begin{equation}
+\frac{dE}{dW_{ji}} = \sum_{t'}\left(L_j^{t'}\frac{\partial z_j^{t'}}{\partial\mathbf{h}_j^{t'}} + \frac{dE}{d\mathbf{h}_j^{t'+1}}\frac{\partial\mathbf{h}_j^{'t+1}}{\partial\mathbf{h}_j^{'t}}\right)\cdot\frac{\partial\mathbf{h}_j^{t'}}{\partial W_{ji}}
+\end{equation}
+\begin{equation}
+= \sum_{t'}\left(L_j^{t'}\frac{\partial z_j^{t'}}{\partial\mathbf{h}_j^{t'}} + \left( L^{t'+1}_j \frac{\partial z_j^{t'+1}}{\partial\mathbf{h}_j^{t'+1}} + (\cdots)\frac{\partial\mathbf{h}_j^{t'+2}}{\partial\mathbf{h}_j^{t'+1}}  \right) \frac{\partial\mathbf{h}_j^{'t+1}}{\partial\mathbf{h}_j^{'t}}\right)\cdot\frac{\partial\mathbf{h}_j^{t'}}{\partial W_{ji}}
+\end{equation}
+
+We write the term in parentheses into a second term indexed by $t$:
+\begin{equation}
+\frac{dE}{dW_{ji}} = \sum_{t'}\sum_{t\geq t'}L^t_j\frac{\partial z_j^t}{\partial\mathbf{h}_j^t}\frac{\partial\mathbf{h}^t_j}{\partial\mathbf{h}_j^{t-1}} \cdots \frac{\partial\mathbf{h}_j^{t+1}}{\partial\mathbf{h}_j^{t'}}\cdot\frac{\partial\mathbf{h}_j^{'t}}{\partial W_{ji}}
+\end{equation}
+
+We then exchange the summation indices to pull out the learning signal $L_j^t$. This expresses the loss as a sum of learning signals multiplied by something we define as the eligibility trace. This eligibility trace consists of $\frac{\partial z_j^t}{\partial\mathbf{h}_j^t}$ and the eligibility vector $\mathbf{\epsilon}_{ji}^t$:
+\begin{equation}
+\frac{dE}{dW_{ji}} = \sum_tL^t_j\underbrace{\frac{\partial z_j^t}{\partial\mathbf{h}_j^t}\underbrace{\sum_{t\geq t'}\frac{\partial\mathbf{h}^t_j}{\partial\mathbf{h}_j^{t-1}} \cdots \frac{\partial\mathbf{h}_j^{t+1}}{\partial\mathbf{h}_j^{t'}}\cdot\frac{\partial\mathbf{h}_j^{'t}}{\partial W_{ji}}}_{\mathbf{\epsilon}_{ji}^t}}_{e^t_{ji}}
+\end{equation}
+This is the main e-prop equation.
+
+\section{Single-layer e-prop in pseudocode (LIF)}
+In LIF, $\{\mathbf{h}^t_j, \mathbf{\epsilon}^t_{ji}\} \subset \mathbb{R}$.
+
+\begin{algorithmic}
+\For{$t$ in $T$}
+	\State $z_j^t \gets \begin{cases}0, & \text{if}\ t - t_{z_j} < \delta t_\text{ref}.\\H(v_j^t - v_\text{thr}), & \text{otherwise}.\end{cases}$
+	\vspace{10pt}
+	\State $I^t_j \gets \sum_i W_{ji}z_i^t + \sum_u W_{ju}u(t) $
+	\vspace{10pt}
+	\State $v_j^{t+1} \gets \alpha v_j^t + I_j^t - z_j^t\alpha v_j^t - z^{t-\delta t_\text{ref}}_j\alpha v_j^t$
+	\vspace{10pt}
+	\State $\epsilon^{t+1}_{ji} = \alpha(1-z_j-z_j^{t-\delta t_\text{ref}})\epsilon^t_{ji} + z^t_i$
+	\vspace{10pt}
+	\State $h_j^{t+1} \gets \begin{cases}-\gamma, & \text{if}\ t - t_{z_j} < \delta t_\text{ref}.\\\gamma\max\left(0, 1-\left|\frac{v_j^{t+1}-v_\text{thr}}{v_\text{thr}}\right|\right), & \text{otherwise}.\end{cases}$
+	\vspace{10pt}
+	\State $e^{t+1}_{ji} \gets h^{t+1}_j\epsilon^{t+1}_{ji}$
+	\vspace{10pt}
+	\State $y^t_k = \kappa y^{t-1}_k + \sum_j W^\text{out}_{kj} z^t_j + b^\text{out}_k$
+	\vspace{10pt}
+	\State $W \gets W - \eta \sum_t\left(\sum_k B_{jk}\left(y_k^t - y_k^{*,t}\right)\right)e^t_{ji}$
+	
+\EndFor
+\end{algorithmic}
+
+
+
+
+
+\end{document}

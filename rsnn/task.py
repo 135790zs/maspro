@@ -12,8 +12,10 @@ def narma10(t, u, y):
     return new_y
 
 
-def sinusoid(A=0.5, B=0.5, f=2.):
-    return np.sin(np.arange(cfg["Epochs"]) / f) * A + B
+def sinusoid(A=0.5, B=0.5, f=2):
+    sig = np.sin(np.arange(cfg["Epochs"]) / f) * A + B
+    ret = np.expand_dims(sig, axis=1)
+    return ret
 
 
 # def pulse(A=1, duration=20, gap=50):
@@ -23,11 +25,15 @@ def sinusoid(A=0.5, B=0.5, f=2.):
 #     return ret
 
 
-def pulse(A=(1, 1), duration=(10, 10), gap=(40, 40), offset=(0, 1)):
-    N = len(A)
-    ret = np.zeros(shape=(cfg["Epochs"], N))
+def pulse(A=(1, 1, 1), duration=(10, 10, 10), gap=(40, 40, 40), offset=(0, 1, 2)):
+    A = A[:cfg["N_I"]]
+    gap = gap[:cfg["N_I"]]
+    duration = duration[:cfg["N_I"]]
+    offset = offset[:cfg["N_I"]]
+
+    ret = np.zeros(shape=(cfg["Epochs"], cfg["N_I"]))
 
     for t in range(cfg["Epochs"]):
-        for n in range(N):
+        for n in range(cfg["N_I"]):
             ret[t, n] = A[n] * ((t - offset[n]) % (duration[n] + gap[n]) < duration[n])
     return ret

@@ -4,8 +4,8 @@ cfg = {
     "alpha": 0.95,  # Leak factor
     "beta": 1,
     "gamma": 0.3,   # Pseudoderivative ET contribution
-    "eta": 0.01,    # Learning rate
-    "kappa": 0.5,   # Output smoothing
+    "eta": 0.0001,    # Learning rate
+    "kappa": 0.95,   # Output smoothing
     "rho": 0.99,    # Threshold leakage
     "eqb": -65,     # Voltage equilibrium
     "thr": 30,      # Spike threshold
@@ -20,17 +20,18 @@ cfg = {
 
     "dt": .1,
 
-    "N_R": 16,
+    "N_R": 3,
+    "N_I": 1,
     "N_Rec": 1,
 
-    "Epochs": 2000,
+    "Epochs": 500,
     "EMA": 0.05,
 
-    "plot_interval": 200,  # 0 to disable plots
+    "plot_interval": 1,  # 0 to disable plots
     "plot_io": False,
     "plot_state": True,
     "plot_heatmaps": False,
-    "plot_graph": False,
+    "plot_graph": True,
 
     "task": "pulse"
 }

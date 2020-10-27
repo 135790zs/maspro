@@ -34,11 +34,12 @@ def initialize_log():
     M["EVU"] = np.zeros(shape=weight_shape)
     M["DW"] = np.zeros(shape=weight_shape)
     M["ET"] = np.zeros(shape=weight_shape)
-    M["W"] = rng.random(size=weight_shape)
+    M["W"] = rng.random(size=weight_shape) * 10
     M["B"] = np.ones(shape=feedback_shape) * rng.random()
+    M["B"] = rng.random(size=feedback_shape)
 
     M["W_out"] = rng.random(size=(cfg["N_R"],))
-    M["b_out"] = rng.random()
+    M["b_out"] = 0  # rng.random()
 
     M['Y'] = np.zeros(shape=(cfg["Epochs"],))
     M['error'] = np.zeros(shape=(cfg["Epochs"],))

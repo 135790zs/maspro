@@ -11,7 +11,6 @@ def run_rsnn(cfg):
     M = ut.initialize_log()  # V, Z, EVV, X, Y
 
     for t in range(cfg["Epochs"]):
-        print(t, M['W'][t], '\n')
 
         # input is nonzero for first layer
         for r in range(cfg['N_Rec']):
@@ -72,8 +71,8 @@ def run_rsnn(cfg):
 
             # Calculate network output
             M['Y'][t+1] = (cfg["kappa"] * M['Y'][t]
-                           + np.sum(M['W_out'] * M['Z'][t+1, -1])
-                           + M['b_out'])
+                           + np.sum(M['W_out'] * M['Z'][t, -1])
+                           + M['b_out'])  # not y+1!
 
             # For some tasks, the desired output is the source of the input
             M["error"][t+1] = (M["Y"][t+1] - M["T"][t+1]) ** 2
@@ -90,8 +89,8 @@ def run_rsnn(cfg):
                 and ((t+1) % cfg["plot_interval"] == 0)):
             vis.plot_drsnn(M=M,
                            t=t,
-                           layers=(0, 0),   # Tuple for 2, None for heatmap
-                           neurons=(0, 1))  # Idem
+                           layers=None,   # Tuple for 2, None for heatmap
+                           neurons=None)  # Idem
 
     return np.mean(M["error"])
 

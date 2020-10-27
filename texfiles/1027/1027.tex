@@ -1,0 +1,89 @@
+\documentclass[t]{beamer}
+
+\setlength {\marginparwidth }{2cm} 
+\usepackage{todonotes}
+\usepackage{siunitx}
+\usepackage{subcaption}
+\usepackage{apacite} 	% Use APA Citation
+\presetkeys{todonotes}{inline}{}
+\beamertemplatenavigationsymbolsempty
+
+\usepackage{enumitem}
+
+% \usetheme{AnnArbor}
+% \usetheme{Antibes}
+% \usetheme{Bergen}
+% \usetheme{Berkeley}https://www.sharelatex.com/project/5b12e1a4f84b363f6f336dab
+% \usetheme{Berlin}
+% \usetheme{Boadilla}
+% \usetheme{boxes}
+\usetheme{CambridgeUS}
+% \usetheme{Copenhagen}
+%\usetheme{Darmstadt}
+% \usetheme{default}
+%\usetheme{Frankfurt}
+%\usetheme{Goettingen}
+% \usetheme{Hannover}
+% \usetheme{Ilmenau}
+% \usetheme{JuanLesPins}
+\setlength{\parskip}{10pt}
+
+% \newcommand*\vc[1]%
+% {\begin{pmatrix}#1\end{pmatrix}}
+
+\newcommand*\vc[1]%
+{\left(\begin{array}{cccc}#1\end{array}\right)}
+
+
+\newcommand\eqdef{\ \mathrel{\overset{\makebox[0pt]{\mbox{\normalfont\scriptsize\sffamily def}}}{=}}\ }
+
+\title[Eligibility propagation]{Improving eligibility propagation using Izhikevich neurons in a multilayer RSNN.\\\vspace{10pt}
+\large{Presentation 2: Visualization, validating, and visualization}}
+
+\author[Werner]{Werner~van~der~Veen\\\tiny\texttt({w.k.van.der.veen.2@umcg.nl})}\date{\today}
+
+\begin{document}
+
+\begin{frame}
+    \titlepage
+\end{frame}
+
+%======================================
+
+\small
+\section{Work done}
+
+\begin{frame}{Work done}
+	\begin{itemize}
+		\item Visualization:
+			\begin{itemize}
+				\item Network graph;
+				\item Full state history \& IO plot.
+			\end{itemize}
+		\item Validation:
+			\begin{itemize}
+				\item New tasks: pulse, sinusoid, NARMA-10;
+				\item Identified and fixed a number of errors;
+				\item Replaced EMA by $W_{out}$.
+				
+			\end{itemize}
+		\item Major refactor and cleaning of code.
+		\item Better study and increased understanding of e-prop algorithm.
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{Still to do}
+    \textbf{Next steps:}
+    
+    1. Acquire results of NARMA-10 benchmark.
+    
+    2. Implement adaptive e-prop: learning signal mapped back onto weights through learnable regression weights. Currently using static weights.
+    
+    3. Reproduce Bellec's TIMIT performance.
+\end{frame}
+
+\begin{frame}{Questions}
+    1. Implementing synaptic scaling was one of the proposed improvements to the network, but ALIF neurons effectively incorporate this. Should I stay with ALIF, or implement SS in Izhikevich neurons?
+\end{frame}
+
+\end{document}
