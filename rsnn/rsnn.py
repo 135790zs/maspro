@@ -1,7 +1,6 @@
 import numpy as np
 from config import cfg as CFG
 import utils as ut
-from task import pulse
 import vis
 
 
@@ -70,20 +69,25 @@ def run_rsnn(cfg):
         if t != cfg["Epochs"] - 1:
 
             # Calculate network output
-            M['Y'][t+1] = (cfg["kappa"] * M['Y'][t]
-                           + np.sum(M['W_out'] * M['Z'][t, -1])
-                           + M['b_out'])  # not y+1!
+            M['Y'][t] = (cfg["kappa"] * M['Y'][t-1]
+                         + np.sum(M['W_out'] * M['Z'][t-1, -1])
+                         + M['b_out'][t])  # why y+1?
 
             # For some tasks, the desired output is the source of the input
-            M["error"][t+1] = (M["Y"][t+1] - M["T"][t+1]) ** 2
+            M["error"][t] = (M["Y"][t] - M["T"][t]) ** 2  # Why t+1?
+
+            M["DW_out"][t] = -cfg["eta"] * np.sum(
+                (M["Y"][t] - M["T"][t])) * M['Z'][t, -1]
 
             M['DW'][t] = -cfg["eta"] * np.sum(
-                M['B'] * M["error"][t+1]) * M['ET'][t+1]
+                M['B'] * M["error"][t]) * M['ET'][t]
 
             # Don't update dropped weights
             M['DW'][t] = np.where(M['W'][t], M['DW'][t], 0.)
-            M['W'][t+1] = M['W'][t] + M['DW'][t]
 
+            M["W_out"][t+1] = M['W_out'][t] + M['DW_out'][t]
+            M["b_out"][t+1] = M["b_out"][t] - cfg["eta"] * np.sum((M["Y"][t] - M["T"][t]))
+            M['W'][t+1] = M['W'][t] + M['DW'][t]
         if (t > 0
                 and cfg["plot_interval"]
                 and ((t+1) % cfg["plot_interval"] == 0)):

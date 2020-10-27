@@ -1,15 +1,15 @@
 cfg = {
     "neuron": "ALIF",
 
-    "alpha": 0.95,  # Leak factor
+    "alpha": 0.95,    # Leak factor
     "beta": 1,
-    "gamma": 0.3,   # Pseudoderivative ET contribution
+    "gamma": 0.3,     # Pseudoderivative ET contribution
     "eta": 0.0001,    # Learning rate
-    "kappa": 0.95,   # Output smoothing
-    "rho": 0.99,    # Threshold leakage
-    "eqb": -65,     # Voltage equilibrium
-    "thr": 30,      # Spike threshold
-    "dt_refr": 10,  # Refractory time
+    "kappa": 0.95,    # Output smoothing
+    "rho": 0.99,      # Threshold leakage
+    "eqb": -65,       # Voltage equilibrium
+    "thr": 30,        # Spike threshold
+    "dt_refr": 10,    # Refractory time
 
     "refr1": 2,
     "refr2": 0.004,
@@ -20,20 +20,20 @@ cfg = {
 
     "dt": .1,
 
-    "N_R": 3,
+    "N_R": 10,
     "N_I": 1,
     "N_Rec": 1,
 
-    "Epochs": 500,
-    "EMA": 0.05,
+    "Epochs": 1000,
+    # "EMA": 0.05,
 
-    "plot_interval": 1,  # 0 to disable plots
+    "plot_interval": 1000,  # 0 to disable plots
     "plot_io": False,
     "plot_state": True,
     "plot_heatmaps": False,
     "plot_graph": True,
 
-    "task": "pulse"
+    "task": "sinusoid"
 }
 
 lookup = {

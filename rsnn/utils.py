@@ -33,25 +33,27 @@ def initialize_log():
     M["EVV"] = np.zeros(shape=weight_shape)
     M["EVU"] = np.zeros(shape=weight_shape)
     M["DW"] = np.zeros(shape=weight_shape)
+    M["DW_out"] = np.zeros(shape=(cfg["Epochs"], cfg["N_R"],))
     M["ET"] = np.zeros(shape=weight_shape)
     M["W"] = rng.random(size=weight_shape) * 10
     M["B"] = np.ones(shape=feedback_shape) * rng.random()
     M["B"] = rng.random(size=feedback_shape)
 
-    M["W_out"] = rng.random(size=(cfg["N_R"],))
-    M["b_out"] = 0  # rng.random()
+    M["W_out"] = rng.random(size=(cfg["Epochs"], cfg["N_R"],))
+    M["b_out"] = rng.random(size=(cfg["Epochs"], 1,))
 
     M['Y'] = np.zeros(shape=(cfg["Epochs"],))
     M['error'] = np.zeros(shape=(cfg["Epochs"],))
 
     if cfg["task"] == "narma10":
         M["X"] = rng.random(size=(cfg["Epochs"],)) * 0.5
+        M["T"] = np.mean(M["X"], axis=1)
     elif cfg["task"] == "sinusoid":
         M["X"] = sinusoid()
+        M["T"] = np.mean(M["X"], axis=1)
     elif cfg["task"] == "pulse":
         M["X"] = pulse()
-
-    M["T"] = M["X"][:, 0]
+        M["T"] = np.mean(M["X"], axis=1)
 
     M["XZ"] = rng.binomial(n=1, p=M["X"])
 
@@ -162,7 +164,7 @@ def eprop_EVU(H, Z, EVV, EVU):
 
 def eprop_H(t, TZ, V, U):
     if cfg["neuron"] == "LIF":
-        return np.where(t - TZ < cfg["dt_refr"],
+        return np.where(t - TZ < cfg["dt_refr"],  # Maybe one-off because of weird h^t instead of h^t+1 in Traub?
                         -cfg["gamma"],
                         cfg["gamma"] * np.clip(a=1 - (abs(V - cfg["thr"])
                                                       / cfg["thr"]),

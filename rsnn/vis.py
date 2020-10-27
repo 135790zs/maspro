@@ -10,8 +10,8 @@ rc['font.family'] = 'STIXGeneral'
 
 
 def plot_state(M, t, fname, layers=None, neurons=None):
-    plotvars = ["X", "XZ", "I", "V", "U", "Z", "H", "EVV", "EVU", "ET", "DW", "W",
-                "Y", "T", "error"]
+    plotvars = ["X", "XZ", "I", "V", "U", "Z", "H", "EVV", "EVU", "ET", "DW",
+                "W", "W_out", "b_out", "Y", "T", "error"]
 
     fig = plt.figure(constrained_layout=False, figsize=(8, 14))
     gsc = fig.add_gridspec(nrows=len(plotvars) + 2, ncols=1, hspace=0)
@@ -34,13 +34,25 @@ def plot_state(M, t, fname, layers=None, neurons=None):
             if var == "error" and np.max(M[var][:t]) > 0:
                 axs[-1].set_yscale("log")
         if M[var][t].ndim == 1:  # X, XZ
-            axs[-1].imshow(M[var][:t].reshape(t, -1).T,
-                           cmap='coolwarm',
-                           vmin=0,
-                           vmax=1,
-                           interpolation='nearest',
-                           aspect='auto')
-            # axs[-1].plot(M[var][:t],)
+            if M[var][t].shape == (1,):
+
+                if var != "XZ":
+                    axs[-1].plot(M[var][:t],)
+                else:
+                    # axs[-1].fill_between(np.arange(t), M[var][:t, 0])
+                    axs[-1].vlines(x=[idx for idx, val in
+                                      enumerate(M['XZ'][:t]) if val],
+                                   ymin=0,
+                                   ymax=1,
+                                   colors=f'C0',
+                                   alpha=0.7)
+            else:
+                axs[-1].imshow(M[var][:t].reshape(t, -1).T,
+                               cmap='coolwarm',
+                               vmin=0,
+                               vmax=1,
+                               interpolation='nearest',
+                               aspect='auto')
             axs[-1].set_ylabel(var,
                                rotation=0,
                                labelpad=labelpad,
@@ -284,9 +296,9 @@ def plot_graph(M, t, fname):
     for tail in range(0, cfg["N_R"]):
         dot.edge(tail_name=f"{cfg['N_Rec']-1}-{tail}",
                  head_name=f"out",
-                 label=f"{M['W_out'][tail]:.2f}",
+                 label=f"{M['W_out'][t, tail]:.2f}",
                  penwidth='1',
-                 color=weightcolor(w=M['W_out'][tail]))
+                 color=weightcolor(w=M['W_out'][t, tail]))
 
     dot.attr(label=f"Epoch {t+1}")
     dot.render(f"vis/net{fname}")

@@ -1,9 +1,9 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017/Debian) (preloaded format=pdflatex 2020.10.27)  27 OCT 2020 10:34
+This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017/Debian) (preloaded format=pdflatex 2020.10.27)  27 OCT 2020 13:52
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
-**1013.tex
-(./1013.tex
+**1027.tex
+(./1027.tex
 LaTeX2e <2017-04-15>
 Babel <3.18> and hyphenation patterns for 84 language(s) loaded.
 (/usr/share/texlive/texmf-dist/tex/latex/beamer/beamer.cls
@@ -1136,8 +1136,8 @@ Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
 (hyperref)                removing `\new@ifnextchar' on input line 45.
 
-(./1013.aux)
-\openout1 = `1013.aux'.
+(./1027.aux)
+\openout1 = `1027.aux'.
 
 LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 45.
 LaTeX Font Info:    ... okay on input line 45.
@@ -1234,9 +1234,9 @@ LaTeX Info: Redefining \ref on input line 45.
 LaTeX Info: Redefining \pageref on input line 45.
 LaTeX Info: Redefining \nameref on input line 45.
 
-(./1013.out) (./1013.out)
+(./1027.out) (./1027.out)
 \@outlinefile=\write5
-\openout5 = `1013.out'.
+\openout5 = `1027.out'.
 
 LaTeX Font Info:    Overwriting symbol font `operators' in version `normal'
 (Font)                  OT1/cmr/m/n --> OT1/cmss/m/n on input line 45.
@@ -1326,7 +1326,7 @@ Package caption Info: End \AtBeginDocument code.
 File: english.apc 2013/07/21 v6.03 apacite language file
 LaTeX Info: Redefining \BPBI on input line 129.
 LaTeX Info: Redefining \BHBI on input line 130.
-) (./1013.nav)
+) (./1027.nav)
 \c__siunitx_mathsf_int=\count353
 LaTeX Font Info:    Try loading font information for U+msa on input line 45.
 
@@ -1357,20 +1357,20 @@ thkerncmss.
 
 ]
 \tf@nav=\write6
-\openout6 = `1013.nav'.
+\openout6 = `1027.nav'.
 
 \tf@toc=\write7
-\openout7 = `1013.toc'.
+\openout7 = `1027.toc'.
 
 \tf@snm=\write8
-\openout8 = `1013.snm'.
+\openout8 = `1027.snm'.
 
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 89.
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 89.
- (./1013.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 89.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 89.
-Package rerunfilecheck Info: File `1013.out' has not changed.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 91.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 91.
+ (./1027.aux)
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 91.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 91.
+Package rerunfilecheck Info: File `1027.out' has not changed.
 (rerunfilecheck)             Checksum: 85CABB364B8024F8764E522D708B25A7;44.
  ) 
 Here is how much of TeX's memory you used:
@@ -1388,7 +1388,7 @@ ve/texmf-dist/fonts/type1/public/amsfonts/cm/cmssbx10.pfb></usr/share/texlive/t
 exmf-dist/fonts/type1/public/amsfonts/cm/cmssi10.pfb></usr/share/texlive/texmf-
 dist/fonts/type1/public/amsfonts/cm/cmssi8.pfb></usr/share/texlive/texmf-dist/f
 onts/type1/public/amsfonts/cm/cmtt8.pfb>
-Output written on 1013.pdf (4 pages, 67245 bytes).
+Output written on 1027.pdf (4 pages, 67369 bytes).
 PDF statistics:
  87 PDF objects out of 1000 (max. 8388607)
  63 compressed objects within 1 object stream
