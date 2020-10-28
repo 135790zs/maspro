@@ -14,9 +14,9 @@ def plot_state(M, t, fname, layers=None, neurons=None):
                 "W", "W_out", "b_out", "Y", "T", "error"]
 
     fig = plt.figure(constrained_layout=False, figsize=(8, 14))
-    gsc = fig.add_gridspec(nrows=len(plotvars) + 2, ncols=1, hspace=0)
+    gsc = fig.add_gridspec(nrows=len(plotvars) + 2, ncols=1, hspace=0.075)
     axs = []
-    labelpad = 15
+    labelpad = 35
     fontsize = 14
     # fontsize_legend = 12
     fig.suptitle(f"Epoch {t+1}", fontsize=20)
@@ -53,30 +53,34 @@ def plot_state(M, t, fname, layers=None, neurons=None):
                                vmax=1,
                                interpolation='nearest',
                                aspect='auto')
-            axs[-1].set_ylabel(var,
+            axs[-1].set_ylabel(f"${lookup[var]['label']}$"
+                               f"\n[{np.min(M[var][:t]):.1f}"
+                               f", {np.max(M[var][:t]):.1f}]",
                                rotation=0,
                                labelpad=labelpad,
                                fontsize=fontsize)
         if M[var][t].ndim == 2:  # information per neuron
-            if layers is not None:
+            if layers is not None:  # two line plots
                 axs[-1].plot(M[var][:t, layers[0], neurons[0]],
                              label=f"${lookup[var]['label']}_i$")
                 axs[-1].plot(M[var][:t, layers[1], neurons[1]],
                              label=f"${lookup[var]['label']}_j$")
-            else:
+            else:  # colormap
                 axs[-1].imshow(M[var][:t].reshape(t, -1).T,
                                cmap='coolwarm',
                                vmin=np.min(M[var][:t]),
                                vmax=np.max(M[var][:t]),
                                interpolation='nearest',
                                aspect='auto')
-            axs[-1].set_ylabel(f"${lookup[var]['label']}$",
+            axs[-1].set_ylabel(f"${lookup[var]['label']}$"
+                               f"\n[{np.min(M[var][:t]):.1f}"
+                               f", {np.max(M[var][:t]):.1f}]",
                                rotation=0,
                                labelpad=labelpad,
                                fontsize=fontsize)
 
         elif M[var][t].ndim == 3:  # information per weight
-            if layers is not None:
+            if layers is not None:  # two line plots
                 axs[-1].plot(M[var][:t,
                                     layers[1],
                                     neurons[1],
@@ -88,14 +92,16 @@ def plot_state(M, t, fname, layers=None, neurons=None):
                                         neurons[0],
                                         neurons[1] + cfg["N_R"]],
                                  label=f"${lookup[var]['label']}$")
-            else:
+            else:  # colormap
                 axs[-1].imshow(M[var][:t].reshape(t, -1).T,
                                cmap='coolwarm',
                                vmin=np.min(M[var][:t]),
                                vmax=np.max(M[var][:t]),
                                interpolation='nearest',
                                aspect='auto')
-            axs[-1].set_ylabel(f"${lookup[var]['label']}$",
+            axs[-1].set_ylabel(f"${lookup[var]['label']}$"
+                               f"\n[{np.min(M[var][:t]):.1f}"
+                               f", {np.max(M[var][:t]):.1f}]",
                                rotation=0,
                                labelpad=labelpad,
                                fontsize=fontsize)
@@ -107,7 +113,7 @@ def plot_state(M, t, fname, layers=None, neurons=None):
 
     axs[-1].set_xlabel("$t$", fontsize=fontsize)
 
-    plt.savefig(f"vis/state{fname}.pdf",
+    plt.savefig(f"../vis/state{fname}.pdf",
                 bbox_inches='tight')
 
     plt.close()
@@ -164,7 +170,7 @@ def plot_heatmaps(M, t, fname):
                    vmin=-maxdev, vmax=maxdev,
                    interpolation='nearest')
 
-    plt.savefig(f"vis/heatmaps{fname}.pdf", bbox_inches='tight')
+    plt.savefig(f"../vis/heatmaps{fname}.pdf", bbox_inches='tight')
     plt.close()
 
 
@@ -189,7 +195,7 @@ def plot_io(M, t, fname):
     axs.plot(M["T"][:t+1])
     axs.plot(M["error"][:t+1])
 
-    plt.savefig(f"vis/io{fname}.pdf", bbox_inches='tight')
+    plt.savefig(f"../vis/io{fname}.pdf", bbox_inches='tight')
     plt.close()
 
 
@@ -301,7 +307,7 @@ def plot_graph(M, t, fname):
                  color=weightcolor(w=M['W_out'][t, tail]))
 
     dot.attr(label=f"Epoch {t+1}")
-    dot.render(f"vis/net{fname}")
+    dot.render(f"../vis/net{fname}")
 
 
 def unflatten(arr):

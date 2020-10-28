@@ -25,19 +25,25 @@ def initialize_log():
     M["Z"] = np.zeros(shape=neuron_shape)
     M["I"] = np.zeros(shape=neuron_shape)
     M["H"] = np.zeros(shape=neuron_shape)
+    M["T"] = np.zeros(shape=(cfg["Epochs"],))
     if cfg["neuron"] == "ALIF":
         M["U"] = np.ones(shape=neuron_shape) * cfg["thr"]
     else:
         M["U"] = np.zeros(shape=neuron_shape)
+
     M["TZ"] = np.ones(shape=(cfg["N_Rec"], cfg["N_R"])) * -cfg["dt_refr"]
     M["EVV"] = np.zeros(shape=weight_shape)
     M["EVU"] = np.zeros(shape=weight_shape)
     M["DW"] = np.zeros(shape=weight_shape)
     M["DW_out"] = np.zeros(shape=(cfg["Epochs"], cfg["N_R"],))
     M["ET"] = np.zeros(shape=weight_shape)
-    M["W"] = rng.random(size=weight_shape) * 10
+    M["W"] = rng.random(size=weight_shape)
     M["B"] = np.ones(shape=feedback_shape) * rng.random()
-    M["B"] = rng.random(size=feedback_shape)
+    M["is_ALIF"] = np.zeros(shape=(cfg["N_Rec"] * cfg["N_R"]))
+    M["is_ALIF"][:int(M["is_ALIF"].size * cfg["fraction_ALIF"])] = 1
+    np.random.shuffle(M["is_ALIF"])
+    M["is_ALIF"] = M["is_ALIF"].reshape((cfg["N_Rec"], cfg["N_R"]))
+    # M["B"] = rng.random(size=feedback_shape)
 
     M["W_out"] = rng.random(size=(cfg["Epochs"], cfg["N_R"],))
     M["b_out"] = rng.random(size=(cfg["Epochs"], 1,))
@@ -46,14 +52,11 @@ def initialize_log():
     M['error'] = np.zeros(shape=(cfg["Epochs"],))
 
     if cfg["task"] == "narma10":
-        M["X"] = rng.random(size=(cfg["Epochs"],)) * 0.5
-        M["T"] = np.mean(M["X"], axis=1)
+        M["X"] = rng.random(size=(cfg["Epochs"], cfg["N_I"])) * 0.5
     elif cfg["task"] == "sinusoid":
         M["X"] = sinusoid()
-        M["T"] = np.mean(M["X"], axis=1)
     elif cfg["task"] == "pulse":
         M["X"] = pulse()
-        M["T"] = np.mean(M["X"], axis=1)
 
     M["XZ"] = rng.binomial(n=1, p=M["X"])
 
@@ -88,13 +91,7 @@ def errfn(a1, a2):
 
 
 def eprop_Z(t, TZ, V, U):
-    if cfg["neuron"] == "LIF":
-        # Note: diff from Traub! 0 during whole refr
-        return np.where(np.logical_and(t - TZ >= cfg["dt_refr"],
-                                       V >= cfg["thr"]),
-                        1,
-                        0)
-    elif cfg["neuron"] == "ALIF":
+    if cfg["neuron"] == "ALIF":
         return np.where(np.logical_and(t - TZ >= cfg["dt_refr"],
                                        V >= U),
                         1,
@@ -112,7 +109,7 @@ def Vt(V, Z):
 
 
 def eprop_V(V, U, I, Z, R):
-    if cfg["neuron"] in ["LIF", "ALIF"]:
+    if cfg["neuron"] == "ALIF":
         return (cfg["alpha"] * V
                 + I
                 - Z * cfg["alpha"] * V
@@ -127,11 +124,12 @@ def eprop_V(V, U, I, Z, R):
                               + I)
 
 
-def eprop_U(V, U, Z):
-    if cfg["neuron"] == "LIF":
-        return U
-    elif cfg["neuron"] == "ALIF":
-        return cfg["rho"] * U + Z
+def eprop_U(V, U, Z, is_ALIF):
+    if cfg["neuron"] == "ALIF":
+        # Change threshold only for ALIF neurons.
+        return np.where(is_ALIF,
+                        cfg["rho"] * U + Z,
+                        U)
 
     # Izhikevich
     Ut_ = Ut(U=U, Z=Z)
@@ -140,7 +138,7 @@ def eprop_U(V, U, Z):
 
 
 def eprop_EVV(EVV, EVU, Z, V, R, Z_in):
-    if cfg["neuron"] in ["LIF", "ALIF"]:  # LIF has no U or EVU
+    if cfg["neuron"] == "ALIF":
         return (EVV * cfg["alpha"] * rep_along_axis(arr=(1 - Z - R))
                 + Z_in)
 
@@ -152,33 +150,27 @@ def eprop_EVV(EVV, EVU, Z, V, R, Z_in):
 
 
 def eprop_EVU(H, Z, EVV, EVU):
-    if cfg["neuron"] in ["LIF", "ALIF"]:
-        H = rep_along_axis(arr=H)
-        # return H * EVV + (cfg["rho"] - H * cfg["beta"]) * EVU
-        return H * EVV + cfg["rho"] * EVU
+    if cfg["neuron"] == "ALIF":
+        return rep_along_axis(arr=H) * EVV + cfg["rho"] * EVU
 
     # Izhikevich
     return (cfg["refr2"] * cfg["dt"] * EVV * rep_along_axis(1 - Z)
             + EVU * (1 - cfg["refr3"] * cfg["dt"]))
 
 
-def eprop_H(t, TZ, V, U):
-    if cfg["neuron"] == "LIF":
-        return np.where(t - TZ < cfg["dt_refr"],  # Maybe one-off because of weird h^t instead of h^t+1 in Traub?
-                        -cfg["gamma"],
-                        cfg["gamma"] * np.clip(a=1 - (abs(V - cfg["thr"])
-                                                      / cfg["thr"]),
-                                               a_min=0,
-                                               a_max=None))
-    elif cfg["neuron"] == "ALIF":
-        return np.where(t - TZ < cfg["dt_refr"],
-                        -cfg["gamma"],
-                        cfg["gamma"] * np.clip(a=1 - (abs(V
-                                                          - cfg["thr"]
-                                                          - cfg["beta"] * U)
-                                                      / cfg["thr"]),
-                                               a_min=0,
-                                               a_max=None))
+def eprop_H(t, TZ, V, U, is_ALIF):
+    if cfg["neuron"] == "ALIF":
+        return np.where(
+            t - TZ < cfg["dt_refr"],
+            -cfg["gamma"],
+            cfg["gamma"] * np.clip(a=1 - (abs(V
+                                              - cfg["thr"]
+                                              - U * np.where(is_ALIF,
+                                                             cfg["beta"],
+                                                             1))
+                                          / cfg["thr"]),
+                                   a_min=0,
+                                   a_max=None))
 
     # Izhikevich
     return cfg["gamma"] * np.exp((np.clip(V,
@@ -187,8 +179,8 @@ def eprop_H(t, TZ, V, U):
                                  / cfg["thr"])
 
 
-def eprop_ET(H, EVV, EVU):
-    if cfg["neuron"] in ["LIF", "Izhikevich"]:
+def eprop_ET(H, EVV, EVU, is_ALIF):
+    if cfg["neuron"] == "Izhikevich":
         return rep_along_axis(H) * EVV
 
     # ALIF
