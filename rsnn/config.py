@@ -1,48 +1,48 @@
 cfg = {
     "neuron": "ALIF",
 
-    "fraction_ALIF": 0.25,  # If neuron == LIF
+    "fraction_ALIF": 1.0,  # If neuron == LIF
 
-    "alpha": 0.95,    # Leak factor
+    "alpha": 0.99,    # Leak factor
     "beta": 0.07,
     "gamma": 0.3,     # Pseudoderivative ET contribution
-    "eta": 1e-1,    # Learning rate
-    "kappa": 0.95,    # Output smoothing
-    "rho": 0.99,      # Threshold leakage
+    "eta": 1e-10,    # Learning rate
+    "kappa": 0.995,    # Output smoothing
+    "rho": 0.999,      # Threshold leakage
     "eqb": -65,       # Voltage equilibrium
     "thr": 30,        # Spike threshold
-    "dt_refr": 10,    # Refractory time
+    "dt_refr": 100,    # Refractory time
 
-    "refr1": 2,
-    "refr2": 0.004,
-    "refr3": 0.02,  # Refractory decay
-    "volt1": 0.04,
-    "volt2": 5,
-    "volt3": 140,
+    # "refr1": 2,
+    # "refr2": 0.004,
+    # "refr3": 0.02,  # Refractory decay
+    # "volt1": 0.04,
+    # "volt2": 5,
+    # "volt3": 140,
 
     "dt": .1,
 
     "N_I": 1,
-    "N_R": 32,
-    "N_Rec": 1,
+    "N_R": 2,
+    "N_Rec": 2,
 
-    "Epochs": 40,
-    # "EMA": 0.05,
+    "Epochs": 30,
 
-    "plot_interval": 40,  # 0 to disable plots
+    "plot_interval": 30,  # 0 to disable plots
     "plot_io": False,
     "plot_state": True,
     "plot_heatmaps": False,
-    "plot_graph": False,
+    "plot_graph": True,
 
-    "task": "narma10"
+    "task": "pulse"
 }
 
 lookup = {
     "X":     {"dim": 2, "label": "x"},
-    "XZ":    {"dim": 2, "label": "z_{{in}}"},
+    "XZ":    {"dim": 2, "label": "x_{{z}}"},
     "V":     {"dim": 2, "label": "v"},
     "Z":     {"dim": 2, "label": "z"},
+    "Z_in":  {"dim": 2, "label": "z_{{in}}"},
     "I":     {"dim": 2, "label": "I"},
     "U":     {"dim": 2, "label": "u"},
     "EVV":   {"dim": 3, "label": "\\epsilon_v"},

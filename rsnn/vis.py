@@ -10,7 +10,7 @@ rc['font.family'] = 'STIXGeneral'
 
 
 def plot_state(M, t, fname, layers=None, neurons=None):
-    plotvars = ["X", "XZ", "I", "V", "U", "Z", "H", "EVV", "EVU", "ET", "DW",
+    plotvars = ["X", "XZ", "I", "V", "U", "Z", "Z_in", "H", "EVV", "EVU", "ET", "DW",
                 "W", "W_out", "b_out", "Y", "T", "error"]
 
     fig = plt.figure(constrained_layout=False, figsize=(8, 14))

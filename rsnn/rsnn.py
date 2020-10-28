@@ -19,39 +19,19 @@ def run_rsnn(cfg):
                                       TZ=M['TZ'][r],
                                       V=M['V'][t, r],
                                       U=M['U'][t, r])
-
-            # Log time of spike
-            M['TZ'][r] = np.where(M['Z'][t, r], t, M['TZ'][r])
+            if t == cfg["Epochs"] - 1:
+                break
 
             # Pad any input with zeros to make it length N_R
             Z_prev = M['Z'][t, r-1] if r > 0 else np.pad(
                 M['XZ'][t], (0, cfg["N_R"]-len(M['XZ'][t])))
 
-            Z_in = np.concatenate((Z_prev, M['Z'][t, r]))
+            M["Z_in"][t, r] = np.concatenate((Z_prev, M['Z'][t, r]))
 
-            M['I'][t, r] = np.dot(M['W'][t, r], Z_in)
+            M['I'][t, r] = np.dot(M['W'][t, r], M["Z_in"][t, r])
 
-            R = (t - M['TZ'][r] <= cfg["dt_refr"])
-            if t == cfg["Epochs"] - 1:
-                break
-
-            M['V'][t+1, r] = ut.eprop_V(V=M['V'][t, r],
-                                        U=M['U'][t, r],
-                                        I=M['I'][t, r],
-                                        Z=M['Z'][t, r],
-                                        R=R)
-
-            M['U'][t+1, r] = ut.eprop_U(U=M['U'][t, r],
-                                        V=M['V'][t, r],
-                                        Z=M['Z'][t, r],
-                                        is_ALIF=M['is_ALIF'][r])
-
-            M['EVV'][t+1, r] = ut.eprop_EVV(EVV=M['EVV'][t, r],
-                                            EVU=M['EVU'][t, r],
-                                            V=M['V'][t, r],
-                                            Z=M['Z'][t, r],
-                                            R=R,
-                                            Z_in=Z_in)
+            if t > 0:
+                M["Zbar"][t, r] = cfg["alpha"] * M["Zbar"][t-1, r] + M["Z_in"][t, r]
 
             M['H'][t+1, r] = ut.eprop_H(t=t,
                                         TZ=M['TZ'][r],
@@ -59,16 +39,38 @@ def run_rsnn(cfg):
                                         U=M['U'][t+1, r],
                                         is_ALIF=M['is_ALIF'][r])
 
+            # Zt_in_prev = ut.temporal_filter(c=cfg["alpha"], a=M["Z_in"][:t+1, r])
+
+            # M['EVV'][t+1, r] = ut.eprop_EVV(EVV=M['EVV'][t, r],
+            #                                 EVU=M['EVU'][t, r],
+            #                                 V=M['V'][t, r],
+            #                                 Z=M['Z'][t, r],
+            #                                 Zbar=M["Zbar"][t, r])
+
+            # TODO: Can do without M[ET] or M[H] or M[TZ] or M[DW].
+            M['ET'][t, r] = ut.eprop_ET(H=M['H'][t, r],
+                                        EVV=M['EVV'][t, r],
+                                        EVU=M['EVU'][t, r],
+                                        Zbar=M["Zbar"][t, r],
+                                        is_ALIF=M['is_ALIF'][r])
+            if t > 0:
+                M['ETbar'][t, r] = cfg["kappa"] * M["ETbar"][t-1, r] + M["ET"][t, r]
+
             M['EVU'][t+1, r] = ut.eprop_EVU(EVV=M['EVV'][t, r],
                                             EVU=M['EVU'][t, r],
                                             H=M['H'][t, r],  # ALIF
-                                            Z=M['Z'][t, r])
+                                            Z=M['Z'][t, r],
+                                            Zbar=M["Zbar"][t, r])
 
-            # TODO: Can do without M[ET] or M[H] or M[TZ] or M[DW].
-            M['ET'][t+1, r] = ut.eprop_ET(H=M['H'][t+1, r],
-                                          EVV=M['EVV'][t+1, r],
-                                          EVU=M['EVU'][t+1, r],
-                                          is_ALIF=M['is_ALIF'][r])
+            M['V'][t+1, r] = ut.eprop_V(V=M['V'][t, r],
+                                        U=M['U'][t, r],
+                                        I=M['I'][t, r],
+                                        Z=M['Z'][t, r])
+
+            M['U'][t+1, r] = ut.eprop_U(U=M['U'][t, r],
+                                        V=M['V'][t, r],
+                                        Z=M['Z'][t, r],
+                                        is_ALIF=M['is_ALIF'][r])
 
         if t != cfg["Epochs"] - 1:
 
@@ -82,20 +84,22 @@ def run_rsnn(cfg):
             elif cfg["task"] in ["sinusoid", "pulse"]:
                 M["T"][t] = np.mean(M["X"][t])
             # For some tasks, the desired output is the source of the input
-            M["error"][t] = (M["Y"][t] - M["T"][t]) ** 2
+            M["error"][t] = (M["Y"][t] - M["T"][t])
+            # loss = M["error"][t] ** 2
 
             M['DW'][t] = -cfg["eta"] * np.sum(
-                M['B'] * M["error"][t]) * M['ET'][t]
+                M['B'] * M["error"][t]) * ut.temporal_filter(cfg["kappa"], M['ET'][:t+1])
             # Don't update dropped weights
             M['DW'][t] = np.where(M['W'][t], M['DW'][t], 0.)
 
             M["DW_out"][t] = -cfg["eta"] * np.sum(
-                (M["Y"][t] - M["T"][t])) * M['Z'][t, -1]
+                M["error"][t]) * ut.temporal_filter(cfg["kappa"], M['Z'][:t+1, -1])
 
             M['W'][t+1] = M['W'][t] + M['DW'][t]
+            # TODO: THINK ABOUT IF DW IS FOR ALL OR FOR STEP!!
 
             M["W_out"][t+1] = M['W_out'][t] + M['DW_out'][t]
-            M["b_out"][t+1] = M["b_out"][t] - cfg["eta"] * np.sum((M["Y"][t] - M["T"][t]))
+            M["b_out"][t+1] = M["b_out"][t] - cfg["eta"] * np.sum(M["error"][t])
 
         if (t > 0
                 and cfg["plot_interval"]
