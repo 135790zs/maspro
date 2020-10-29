@@ -24,7 +24,7 @@ def run_rsnn(cfg):
 
             # Pad any input with zeros to make it length N_R
             Z_prev = M['Z'][t, r-1] if r > 0 else np.pad(
-                M['XZ'][t], (0, cfg["N_R"]-len(M['XZ'][t])))
+                M['XZ'][t], (0, cfg["N_R"]-len(M['XZ'][t+1])))
 
             M["Z_in"][t, r] = np.concatenate((Z_prev, M['Z'][t, r]))
 

@@ -3,12 +3,13 @@ cfg = {
     "neuron": "ALIF",
 
     "fraction_ALIF": 1.0,  # If neuron == LIF
+    "theta_adaptation": 100,  # Depends on length of task
 
     "theta_membrane": 20,
     "beta": 0.07,
     "gamma": 0.3,     # Pseudoderivative ET contribution
-    "eta": 0,         # Learning rate
-    "kappa": 0.995,    # Output smoothing
+    "eta": 1e-4,         # Learning rate
+    "kappa": 0.5,    # Output smoothing
     "eqb": -65,       # Voltage equilibrium
     "thr": 30,        # Spike threshold
     "dt_refr": 100,    # Refractory time
@@ -27,7 +28,6 @@ cfg = {
     "N_Rec": 1,
 
     "Epochs": 200,
-    "theta_adaptation": 200,  # Depends on length of task
     "plot_interval": 200,  # 0 to disable plots
     "plot_io": False,
     "plot_state": True,

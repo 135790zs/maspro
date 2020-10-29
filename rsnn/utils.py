@@ -36,7 +36,7 @@ def initialize_log():
     M["DW"] = np.zeros(shape=weight_shape)
     M["DW_out"] = np.zeros(shape=(cfg["Epochs"], cfg["N_R"],))
     M["ET"] = np.zeros(shape=weight_shape)
-    M["W"] = rng.random(size=weight_shape)
+    M["W"] = rng.random(size=weight_shape) * 10
     M["B"] = np.ones(shape=feedback_shape) * rng.random()
     # M["B"] = rng.random(size=feedback_shape)
 
@@ -66,7 +66,7 @@ def initialize_log():
 
     # M['W'][0, 0, 1, 0] = 0  # input 1 to neuron 2
     # M['W'][0, 0, 0, 1] = 0  # input 2 to neuron 1
-    M['W'][0, 0, 0, 0] = 10  # input 1 to neuron 1
+    # M['W'][0, 0, 0, 0] = 10  # input 1 to neuron 1
     # M['W'][0, 0, 1, 1] = 70  # input 2 to neuron 2
     # M['W'][0, 0, 0, 3] = 1  # n1 to n2
     # M['W'][0, 0, 1, 2] = 1  # n2 to n1
@@ -120,10 +120,7 @@ def eprop_EVV(EVV, Z_in):
 
 
 def eprop_EVU(H, EVV, EVU):
-    return (np.dot(H,
-                   EVV)
-            + np.dot(cfg["rho"] - H * cfg["beta"],
-                     EVU))
+    return (H * EVV.T).T + ((cfg["rho"] - H * cfg["beta"]) * EVU.T).T
 
 
 def eprop_H(t, V, U, is_ALIF):
