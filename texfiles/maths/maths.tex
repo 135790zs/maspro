@@ -60,7 +60,7 @@ In LIF, $\{\mathbf{h}^t_j, \mathbf{\epsilon}^t_{ji}\} \subset \mathbb{R}$.
 
 \begin{algorithmic}
 \For{$t$ in $T$}
-	\State $z_j^t \gets \begin{cases}0, & \text{if}\ t - t_{z_j} < \delta t_\text{ref}.\\H(v_j^t - v_\text{thr}), & \text{otherwise}.\end{cases}$
+	\State $z_j^t \gets \begin{cases}0, & \text{if}\ t - t_{z_j} < \delta t_\text{ref}.\\H(v_j^t - v_\text{th}), & \text{otherwise}.\end{cases}$
 	\vspace{10pt}
 	\State $I^t_j \gets \sum_i W_{ji}z_i^t + \sum_u W_{ju}u(t) $
 	\vspace{10pt}
@@ -68,7 +68,7 @@ In LIF, $\{\mathbf{h}^t_j, \mathbf{\epsilon}^t_{ji}\} \subset \mathbb{R}$.
 	\vspace{10pt}
 	\State $\epsilon^{t+1}_{ji} = \alpha(1-z_j-z_j^{t-\delta t_\text{ref}})\epsilon^t_{ji} + z^t_i$
 	\vspace{10pt}
-	\State $h_j^{t+1} \gets \begin{cases}-\gamma, & \text{if}\ t - t_{z_j} < \delta t_\text{ref}.\\\gamma\max\left(0, 1-\left|\frac{v_j^{t+1}-v_\text{thr}}{v_\text{thr}}\right|\right), & \text{otherwise}.\end{cases}$
+	\State $h_j^{t+1} \gets \begin{cases}-\gamma, & \text{if}\ t - t_{z_j} < \delta t_\text{ref}.\\\gamma\max\left(0, 1-\left|\frac{v_j^{t+1}-v_\text{th}}{v_\text{th}}\right|\right), & \text{otherwise}.\end{cases}$
 	\vspace{10pt}
 	\State $e^{t+1}_{ji} \gets h^{t+1}_j\epsilon^{t+1}_{ji}$
 	\vspace{10pt}
@@ -78,6 +78,48 @@ In LIF, $\{\mathbf{h}^t_j, \mathbf{\epsilon}^t_{ji}\} \subset \mathbb{R}$.
 	
 \EndFor
 \end{algorithmic}
+
+\section{ALIF steps}
+\begin{align}
+I^t_j &= \sum_{t\neq j} W^\text{rec}_{ji} z_i^t + \sum_i W^\text{in}_{ji}x_i^{t+1} \\
+A^t_j &= v_\text{th}+\beta a^t_j\\
+z^t_j &= H\left(v_j^t-A_j^t\right)\\
+\psi^t_j &= \frac{1}{v_\text{th}}0.3\max\left(0, 1-\left|\frac{v_j^t-A^t_j}{v_\text{th}}\right|\right)\\
+y^t_k &= \kappa y^{t-1}_k + \sum_j W^\text{out}_{kj}z^t_j+b^\text{out}_k\\
+e^t_{ji} &= \psi^t_j\left(\epsilon^t_{ji,v} - \beta\epsilon^t_{ji,a}\right)\\
+\bar{e}^t_{ji} &= \kappa\bar{e}^{t-1}_{ji} + e^t_{ji}\\
+v^{t+1}_j &= \alpha v_j^t + I_j^t-z_jv_\text{th}\\
+a^{t+1}_j &= \rho a_j^t + z_j^t\\
+\epsilon_{ji,v}^{t+1} &= \alpha\epsilon_{ji,v}^t + z_i^t\\
+\epsilon_{ji,a}^{t+1} &= \psi^t_j\epsilon^t_{ji,v} + \left(\rho-\psi^t_j\beta\right)\epsilon^t_{ji,a}\\
+\Delta W^\text{rec}_{ji} &= -\eta\sum_t\left(\sum_kB_{jk}\left(y_k^t-y_k^{*,t}\right)\right)\bar{e}^t_{ji}\\
+\end{align}
+
+Given at time $t$, with given observable state $z_i^t$ (simplified):
+\begin{align}
+v^{t+1}_j &= \alpha v_j^t + \sum_{t\neq j} W^{\text{rec}, t}_{ji} z_i^t + \sum_i W^\text{in}_{ji}x_i^{t+1} - H\left(v_j^t-v_\text{th}-\beta a^t_j\right)v_\text{th}\\
+a^{t+1}_j &= \rho a_j^t + H\left(v_j^t-v_\text{th}-\beta a^t_j\right)\\
+\epsilon_{ji,v}^{t+1} &= \alpha\epsilon_{ji,v}^t + z_i^t\\
+\epsilon_{ji,a}^{t+1} &= \frac{1}{v_\text{th}}0.3\max\left(0, 1-\left|\frac{v_j^t-v_\text{th}-\beta a^t_j}{v_\text{th}}\right|\right)\epsilon^t_{ji,v} \\ &\quad \ + \left(\rho-\frac{1}{v_\text{th}}0.3\max\left(0, 1-\left|\frac{v_j^t-v_\text{th}-\beta a^t_j}{v_\text{th}}\right|\right)\beta\right)\epsilon^t_{ji,a}\\
+\bar{e}^t_{ji} &= \kappa\bar{e}^{t-1}_{ji} + \frac{1}{v_\text{th}}0.3\max\left(0, 1-\left|\frac{v_j^t-v_\text{th}-\beta a^t_j}{v_\text{th}}\right|\right)\left(\epsilon^t_{ji,v} - \beta\epsilon^t_{ji,a}\right)\\
+y^t_k &= \kappa y^{t-1}_k + \sum_j W^\text{out}_{kj}z^t_j+b^\text{out}_k\\
+W^{\text{rec}, t+1}_{ji} &= W^{\text{rec}, t}_{ji} -\eta\sum_t\left(\sum_kB_{jk}\left(y_k^t-y_k^{*,t}\right)\right)\bar{e}^t_{ji}\\
+\end{align}
+
+
+
+Effects of $\mathbf{h}$ on $W$:
+\begin{align}
+\frac{\partial v_j^t}{\partial W_{ji}} &= \epsilon_{ji,v}^{t-1} \\
+\frac{\partial u_j^t}{\partial W_{ji}} &= 0
+\end{align}
+
+
+
+
+
+
+
 
 
 

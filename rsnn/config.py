@@ -2,14 +2,15 @@ from numpy import exp
 cfg = {
     "neuron": "ALIF",
 
-    "fraction_ALIF": 1.0,  # If neuron == LIF
-    "theta_adaptation": 100,  # Depends on length of task
+    "fraction_ALIF": .5,  # If neuron == LIF
+    "theta_adaptation": 200,  # Depends on length of task: working memory
 
     "theta_membrane": 20,
     "beta": 0.07,
     "gamma": 0.3,     # Pseudoderivative ET contribution
-    "eta": 1e-4,         # Learning rate
-    "kappa": 0.5,    # Output smoothing
+    "eta": 1e-5,         # Learning rate
+    "weight_decay": 0.995,
+
     "eqb": -65,       # Voltage equilibrium
     "thr": 30,        # Spike threshold
     "dt_refr": 100,    # Refractory time
@@ -24,20 +25,21 @@ cfg = {
     "dt": 1,
 
     "N_I": 1,
-    "N_R": 3,
+    "N_R": 4,
     "N_Rec": 1,
 
-    "Epochs": 200,
-    "plot_interval": 200,  # 0 to disable plots
+    "Epochs": 100,
+    "plot_interval": 100,  # 0 to disable plots
     "plot_io": False,
     "plot_state": True,
     "plot_heatmaps": False,
-    "plot_graph": True,
+    "plot_graph": False,
 
-    "task": "pulse"
+    "task": "sinusoid"
 }
 cfg['rho'] = exp(-cfg["dt"] / cfg["theta_adaptation"])
 cfg['alpha'] = exp(-cfg["dt"] / cfg["theta_membrane"])
+cfg['kappa'] = exp(-cfg["dt"] / cfg["theta_membrane"])
 
 lookup = {
     "X":     {"dim": 2, "label": "x"},
@@ -51,6 +53,7 @@ lookup = {
     "EVU":   {"dim": 3, "label": "\\epsilon_u"},
     "H":     {"dim": 2, "label": "h"},
     "ET":    {"dim": 3, "label": "e"},
+    "B":     {"dim": 3, "label": "B"},
     "W":     {"dim": 3, "label": "W"},
     "W_out": {"dim": 1, "label": "W_{{out}}"},
     "b_out": {"dim": 0, "label": "b_{{out}}"},

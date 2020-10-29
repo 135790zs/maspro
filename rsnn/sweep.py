@@ -16,8 +16,8 @@ y0 = [  # Integer hyperparameters
 def rsnn_aux(xs, ys):
     cfg0 = cfg
 
-    cfg0["W_mp"] = xs[0]
-    cfg0["N_R"] = ys[0]
+    # cfg0["W_mp"] = xs[0]
+    # cfg0["N_R"] = ys[0]
 
     error = run_rsnn(cfg=cfg0)
     print(f"{error} with \tx={xs}, \ty={ys}", end='\r')

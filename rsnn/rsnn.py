@@ -88,9 +88,16 @@ def run_rsnn(cfg):
             M["DW_out"][t] = -cfg["eta"] * np.sum(
                 M["error"][t]) * ut.temporal_filter(cfg["kappa"], M['Z'][:t+1, -1])
 
+            M["B"][t+1] = M["B"][t] + M["DW_out"][t]
+            M["B"][t+1] *= cfg["weight_decay"]
+
+            # TODO: Maybe store weight change in local var, and update every N steps
+
             M['W'][t+1] = M['W'][t] + M['DW'][t]
 
             M["W_out"][t+1] = M['W_out'][t] + M['DW_out'][t]
+            M["W_out"][t+1] *= cfg["weight_decay"]
+
             M["b_out"][t+1] = M["b_out"][t] - cfg["eta"] * np.sum(M["error"][t])
 
         if (t > 0

@@ -36,8 +36,8 @@ def initialize_log():
     M["DW"] = np.zeros(shape=weight_shape)
     M["DW_out"] = np.zeros(shape=(cfg["Epochs"], cfg["N_R"],))
     M["ET"] = np.zeros(shape=weight_shape)
-    M["W"] = rng.random(size=weight_shape) * 10
-    M["B"] = np.ones(shape=feedback_shape) * rng.random()
+    M["W"] = rng.random(size=weight_shape) * 15
+    M["B"] = rng.random(size=feedback_shape)
     # M["B"] = rng.random(size=feedback_shape)
 
     M["is_ALIF"] = np.zeros(shape=(cfg["N_Rec"] * cfg["N_R"]))
@@ -75,7 +75,6 @@ def initialize_log():
 
 
 def temporal_filter(c, a):
-    assert a.shape[0] >= 1
     if a.shape[0] == 1:
         return a[0]
     return c * temporal_filter(c, a=a[:-1]) + a[-1]
