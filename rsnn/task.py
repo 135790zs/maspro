@@ -12,7 +12,7 @@ def narma10(t, u, y):
     return np.expand_dims(new_y, axis=1)
 
 
-def pulse(A=(1, 1, 1), duration=(3, 10, 10), gap=(5, 40, 40), offset=(0, 1, 2)):
+def pulse(A=(1, 1, 1), duration=(1, 10, 10), gap=(10, 40, 40), offset=(0, 1, 2)):
     A = A[:cfg["N_I"]]
     gap = gap[:cfg["N_I"]]
     duration = duration[:cfg["N_I"]]

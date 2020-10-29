@@ -1,14 +1,14 @@
+from numpy import exp
 cfg = {
     "neuron": "ALIF",
 
     "fraction_ALIF": 1.0,  # If neuron == LIF
 
-    "alpha": 0.99,    # Leak factor
+    "theta_membrane": 20,
     "beta": 0.07,
     "gamma": 0.3,     # Pseudoderivative ET contribution
-    "eta": 1e-10,    # Learning rate
+    "eta": 0,         # Learning rate
     "kappa": 0.995,    # Output smoothing
-    "rho": 0.999,      # Threshold leakage
     "eqb": -65,       # Voltage equilibrium
     "thr": 30,        # Spike threshold
     "dt_refr": 100,    # Refractory time
@@ -20,15 +20,15 @@ cfg = {
     # "volt2": 5,
     # "volt3": 140,
 
-    "dt": .1,
+    "dt": 1,
 
     "N_I": 1,
-    "N_R": 2,
-    "N_Rec": 2,
+    "N_R": 3,
+    "N_Rec": 1,
 
-    "Epochs": 30,
-
-    "plot_interval": 30,  # 0 to disable plots
+    "Epochs": 200,
+    "theta_adaptation": 200,  # Depends on length of task
+    "plot_interval": 200,  # 0 to disable plots
     "plot_io": False,
     "plot_state": True,
     "plot_heatmaps": False,
@@ -36,6 +36,8 @@ cfg = {
 
     "task": "pulse"
 }
+cfg['rho'] = exp(-cfg["dt"] / cfg["theta_adaptation"])
+cfg['alpha'] = exp(-cfg["dt"] / cfg["theta_membrane"])
 
 lookup = {
     "X":     {"dim": 2, "label": "x"},

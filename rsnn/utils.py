@@ -21,7 +21,7 @@ def initialize_log():
 
     M["Z"] = np.zeros(shape=neuron_shape)
     M["Zbar"] = np.zeros(shape=neuron_shape)
-    M["ETbar"] = np.zeros(shape=neuron_shape)
+    M["ETbar"] = np.zeros(shape=weight_shape)
     M["I"] = np.zeros(shape=neuron_shape)
     M["H"] = np.zeros(shape=neuron_shape)
     M["T"] = np.zeros(shape=(cfg["Epochs"],))
@@ -46,7 +46,7 @@ def initialize_log():
     M["is_ALIF"] = M["is_ALIF"].reshape((cfg["N_Rec"], cfg["N_R"]))
 
     M["W_out"] = rng.random(size=(cfg["Epochs"], cfg["N_R"],))
-    M["b_out"] = rng.random(size=(cfg["Epochs"], 1,))
+    M["b_out"] = np.zeros(shape=(cfg["Epochs"], 1,))
 
     M['Y'] = np.zeros(shape=(cfg["Epochs"],))
     M['error'] = np.zeros(shape=(cfg["Epochs"],))
@@ -66,7 +66,7 @@ def initialize_log():
 
     # M['W'][0, 0, 1, 0] = 0  # input 1 to neuron 2
     # M['W'][0, 0, 0, 1] = 0  # input 2 to neuron 1
-    M['W'][0, 0, 0, 0] = 0.6  # input 1 to neuron 1
+    M['W'][0, 0, 0, 0] = 10  # input 1 to neuron 1
     # M['W'][0, 0, 1, 1] = 70  # input 2 to neuron 2
     # M['W'][0, 0, 0, 3] = 1  # n1 to n2
     # M['W'][0, 0, 1, 2] = 1  # n2 to n1
@@ -105,11 +105,7 @@ def eprop_Z(t, TZ, V, U):
                     0)
 
 
-def eprop_V(V, U, I, Z, R):
-    # return (cfg["alpha"] * V
-    #         + I
-    #         - Z * cfg["alpha"] * V
-    #         - R * cfg["alpha"] * V)
+def eprop_V(V, U, I, Z):
     return cfg["alpha"] * V + I - Z * cfg["thr"]
 
 
@@ -119,20 +115,18 @@ def eprop_U(V, U, Z, is_ALIF):
                     U)
 
 
-def eprop_EVV(EVV, EVU, Z, V, R, Zbar):
-
-    return Zbar
-
-
-def eprop_EVU(H, Z, EVV, EVU, Zbar):
-
-    # return rep_along_axis(arr=H) * EVV + cfg["rho"] * EVU
-    print(np.dot(cfg["rho"] - H * cfg["beta"], EVU))
-    # print((cfg["rho"] - H * cfg["beta"]) * EVU)
-    return np.outer(H, Zbar) + np.dot(cfg["rho"] - H * cfg["beta"], EVU)
+def eprop_EVV(EVV, Z_in):
+    return cfg["alpha"] * EVV + Z_in
 
 
-def eprop_H(t, TZ, V, U, is_ALIF):
+def eprop_EVU(H, EVV, EVU):
+    return (np.dot(H,
+                   EVV)
+            + np.dot(cfg["rho"] - H * cfg["beta"],
+                     EVU))
+
+
+def eprop_H(t, V, U, is_ALIF):
     return 1 / cfg["thr"] * \
         cfg["gamma"] * np.clip(a=1 - (abs(V
                                           - cfg["thr"]
@@ -144,15 +138,5 @@ def eprop_H(t, TZ, V, U, is_ALIF):
                                a_max=None)
 
 
-def eprop_ET(H, EVV, EVU, is_ALIF, Zbar):
-
-    # ALIF
-    # return rep_along_axis(H) * (EVV - cfg["beta"] * EVU)
-    print(H.shape, Zbar.shape)
-    t1 = H * Zbar
-    t2 = np.dot(H, EVU) * cfg["beta"]
-    # return H * Zt_in_prev - H * cfg["beta"] * EVU
-    return H * Zbar - H * EVU * cfg["beta"]
-    # return H * EVV + np.where(is_ALIF,
-    #                           (cfg["rho"] - H * cfg["beta"]) * EVU,
-    #                           0)
+def eprop_ET(H, EVV, EVU, is_ALIF):
+    return np.dot(H, EVV - cfg["beta"] * EVU)

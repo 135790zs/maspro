@@ -30,37 +30,30 @@ def run_rsnn(cfg):
 
             M['I'][t, r] = np.dot(M['W'][t, r], M["Z_in"][t, r])
 
-            if t > 0:
-                M["Zbar"][t, r] = cfg["alpha"] * M["Zbar"][t-1, r] + M["Z_in"][t, r]
+            # if t > 0:
+            #     M["Zbar"][t, r] = cfg["alpha"] * M["Zbar"][t-1, r] + M["Z_in"][t, r]
 
-            M['H'][t+1, r] = ut.eprop_H(t=t,
-                                        TZ=M['TZ'][r],
-                                        V=M['V'][t+1, r],
-                                        U=M['U'][t+1, r],
-                                        is_ALIF=M['is_ALIF'][r])
+            M['H'][t, r] = ut.eprop_H(t=t,
+                                      V=M['V'][t, r],
+                                      U=M['U'][t, r],
+                                      is_ALIF=M['is_ALIF'][r])
 
             # Zt_in_prev = ut.temporal_filter(c=cfg["alpha"], a=M["Z_in"][:t+1, r])
 
-            # M['EVV'][t+1, r] = ut.eprop_EVV(EVV=M['EVV'][t, r],
-            #                                 EVU=M['EVU'][t, r],
-            #                                 V=M['V'][t, r],
-            #                                 Z=M['Z'][t, r],
-            #                                 Zbar=M["Zbar"][t, r])
+            M['EVV'][t+1, r] = ut.eprop_EVV(EVV=M['EVV'][t, r],
+                                            Z_in=M["Z_in"][t, r])
 
             # TODO: Can do without M[ET] or M[H] or M[TZ] or M[DW].
+            M['EVU'][t+1, r] = ut.eprop_EVU(EVV=M['EVV'][t, r],
+                                            EVU=M['EVU'][t, r],
+                                            H=M['H'][t, r])
+            # print(M['EVV'][t, r].shape)
             M['ET'][t, r] = ut.eprop_ET(H=M['H'][t, r],
                                         EVV=M['EVV'][t, r],
                                         EVU=M['EVU'][t, r],
-                                        Zbar=M["Zbar"][t, r],
                                         is_ALIF=M['is_ALIF'][r])
             if t > 0:
                 M['ETbar'][t, r] = cfg["kappa"] * M["ETbar"][t-1, r] + M["ET"][t, r]
-
-            M['EVU'][t+1, r] = ut.eprop_EVU(EVV=M['EVV'][t, r],
-                                            EVU=M['EVU'][t, r],
-                                            H=M['H'][t, r],  # ALIF
-                                            Z=M['Z'][t, r],
-                                            Zbar=M["Zbar"][t, r])
 
             M['V'][t+1, r] = ut.eprop_V(V=M['V'][t, r],
                                         U=M['U'][t, r],
@@ -96,7 +89,6 @@ def run_rsnn(cfg):
                 M["error"][t]) * ut.temporal_filter(cfg["kappa"], M['Z'][:t+1, -1])
 
             M['W'][t+1] = M['W'][t] + M['DW'][t]
-            # TODO: THINK ABOUT IF DW IS FOR ALL OR FOR STEP!!
 
             M["W_out"][t+1] = M['W_out'][t] + M['DW_out'][t]
             M["b_out"][t+1] = M["b_out"][t] - cfg["eta"] * np.sum(M["error"][t])
