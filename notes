@@ -1,9 +1,7 @@
 
 # MUST DO:
-# TODO: Find out if spikes are carried correctly through RSNN. Doesn't seem so.
+# LTP seems to work in vitro, see if traub leads to LTD
 # TODO: Implement TIMIT
-# TODO: Implement adaptive e-prop
-# TODO: Try replicate Bellec's results
 
 # LOW PRIORITY:
 # TODO: Dictionary to facilitate sweeping function (param = key, list = item)
@@ -23,3 +21,10 @@ MEETING NOTES 10/13
 * Input: drop autoregressive
 * Search for NARMA-10 benchmark
 * SEND SKYPE NAME
+
+=========================================================
+
+MEETING NOTES 24/13
+
+* N/A
+

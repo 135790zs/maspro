@@ -36,7 +36,7 @@ def initialize_log():
     M["DW"] = np.zeros(shape=weight_shape)
     M["DW_out"] = np.zeros(shape=(cfg["Epochs"], cfg["N_R"],))
     M["ET"] = np.zeros(shape=weight_shape)
-    M["W"] = rng.random(size=weight_shape) * 15
+    M["W"] = rng.random(size=weight_shape)
     M["B"] = rng.random(size=feedback_shape)
     # M["B"] = rng.random(size=feedback_shape)
 
@@ -64,12 +64,13 @@ def initialize_log():
         # Zero diag E: no self-conn
         np.fill_diagonal(M['W'][0, r, :, cfg["N_R"]:], 0)
 
-    # M['W'][0, 0, 1, 0] = 0  # input 1 to neuron 2
-    # M['W'][0, 0, 0, 1] = 0  # input 2 to neuron 1
-    # M['W'][0, 0, 0, 0] = 10  # input 1 to neuron 1
+    M['W'][0, 0, 0, 0] = 20  # input 1 to neuron 1
+    M['W'][0, 0, 1, 0] = 0  # input 1 to neuron 2
+    M['W'][0, 0, 0, 1] = 0  # input 2 to neuron 1
+    M['W'][0, 0, 1, 1] = 20  # input 2 to neuron 2
     # M['W'][0, 0, 1, 1] = 70  # input 2 to neuron 2
-    # M['W'][0, 0, 0, 3] = 1  # n1 to n2
-    # M['W'][0, 0, 1, 2] = 1  # n2 to n1
+    M['W'][0, 0, 0, 3] = 0  # n1 to n2
+    M['W'][0, 0, 1, 2] = 0  # n2 to n1
 
     return M
 

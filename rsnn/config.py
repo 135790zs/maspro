@@ -2,14 +2,15 @@ from numpy import exp
 cfg = {
     "neuron": "ALIF",
 
-    "fraction_ALIF": .5,  # If neuron == LIF
+    "fraction_ALIF": 1,  # If neuron == LIF
     "theta_adaptation": 200,  # Depends on length of task: working memory
 
-    "theta_membrane": 20,
+    "theta_membrane": 3,
     "beta": 0.07,
     "gamma": 0.3,     # Pseudoderivative ET contribution
-    "eta": 1e-5,         # Learning rate
-    "weight_decay": 0.995,
+    "eta": 1e-3,         # Learning rate
+    "weight_decay": 0.9,
+    "update_dead_weights": True,
 
     "eqb": -65,       # Voltage equilibrium
     "thr": 30,        # Spike threshold
@@ -24,21 +25,21 @@ cfg = {
 
     "dt": 1,
 
-    "N_I": 1,
-    "N_R": 4,
+    "N_I": 2,
+    "N_R": 2,
     "N_Rec": 1,
 
-    "Epochs": 100,
-    "plot_interval": 100,  # 0 to disable plots
+    "Epochs": 300,
+    "plot_interval": 1,  # 0 to disable plots
     "plot_io": False,
     "plot_state": True,
     "plot_heatmaps": False,
-    "plot_graph": False,
+    "plot_graph": True,
 
-    "task": "sinusoid"
+    "task": "pulse"
 }
 cfg['rho'] = exp(-cfg["dt"] / cfg["theta_adaptation"])
-cfg['alpha'] = exp(-cfg["dt"] / cfg["theta_membrane"])
+cfg['alpha'] = 0.95#exp(-cfg["dt"] / cfg["theta_membrane"])
 cfg['kappa'] = exp(-cfg["dt"] / cfg["theta_membrane"])
 
 lookup = {

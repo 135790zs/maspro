@@ -19,7 +19,9 @@ def plot_state(M, t, fname, layers=None, neurons=None):
     labelpad = 35
     fontsize = 14
     # fontsize_legend = 12
-    fig.suptitle(f"Epoch {t+1}", fontsize=20)
+    fig.suptitle(f"Epoch {t+1}, $\\alpha={cfg['alpha']:.3f}$, "
+                 f"$\\kappa={cfg['kappa']:.3f}$, $\\rho={cfg['rho']:.3f}$", 
+                 fontsize=20)
 
     # Print input to neurons
     for var in plotvars:
@@ -31,8 +33,6 @@ def plot_state(M, t, fname, layers=None, neurons=None):
                                rotation=0,
                                labelpad=labelpad,
                                fontsize=fontsize)
-            if var == "error" and np.max(M[var][:t]) > 0:
-                axs[-1].set_yscale("log")
         if var in M and M[var][t].ndim == 1:  # X, XZ
             if M[var][t].shape == (1,):
 
@@ -66,7 +66,7 @@ def plot_state(M, t, fname, layers=None, neurons=None):
             if layers is not None:  # two line plots
                 axs[-1].plot(arr[layers[0], neurons[0]],
                              label=f"${lab}_i$")
-                axs[-1].plot(M[var][:t, layers[1], neurons[1]],
+                axs[-1].plot(arr[layers[1], neurons[1]],
                              label=f"${lab}_j$")
             else:  # colormap
                 axs[-1].imshow(arr.reshape(t, -1).T,
@@ -273,11 +273,12 @@ def plot_graph(M, t, fname):
     # in-to-rec
     for tail in range(0, cfg["N_I"]):
         for head in range(0, cfg["N_R"]):
+            # print("from", f"in-{tail}", "to", f"{0}-{head}", M['W'][t, 0, head, tail])
             dot.edge(tail_name=f"in-{tail}",
                      head_name=f"{0}-{head}",
-                     label=f"{M['W'][t, 0, 0, head]:.2f}",
+                     label=f"{M['W'][t, 0, head, tail]:.2f}",
                      penwidth='1',
-                     color=weightcolor(w=M['W'][t, 0, 0, head]))
+                     color=weightcolor(w=M['W'][t, 0, head, tail]))
 
     # intra-rec
     for r in range(0, cfg["N_Rec"]):  # r to r+1

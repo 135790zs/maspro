@@ -69,29 +69,37 @@ def run_rsnn(cfg):
 
             # Calculate network output
             M['Y'][t] = (cfg["kappa"] * M['Y'][t-1]
-                         + np.sum(M['W_out'] * M['Z'][t-1, -1])
+                         + np.sum(M['W_out'] * M['Z'][t, -1])
                          + M['b_out'][t])
 
             if cfg["task"] == "narma10":
                 M['T'][t] = narma10(t=t, u=M['X'][:t], y=M['Y'][:t])
             elif cfg["task"] in ["sinusoid", "pulse"]:
                 M["T"][t] = np.mean(M["X"][t])
+
             # For some tasks, the desired output is the source of the input
             M["error"][t] = (M["Y"][t] - M["T"][t])
-            # loss = M["error"][t] ** 2
 
-            M['DW'][t] = -cfg["eta"] * np.sum(
+            M['DW'][t] = cfg["eta"] * np.sum(
                 M['B'] * M["error"][t]) * ut.temporal_filter(cfg["kappa"], M['ET'][:t+1])
-            # Don't update dropped weights
-            M['DW'][t] = np.where(M['W'][t], M['DW'][t], 0.)
+
+            # freeze input weights
+            M['DW'][t, 0, :, :cfg["N_R"]].fill(0.)
+
+            if cfg["update_dead_weights"]:
+                for r2 in range(cfg["N_Rec"]):
+                    # Zero diag E: no self-conn
+                    np.fill_diagonal(M['DW'][t, r2, :, cfg["N_R"]:], 0)
+            else:
+                # Don't update zero-weights
+                M['DW'][t] = np.where(M['W'][t], M['DW'][t], 0.)
+
 
             M["DW_out"][t] = -cfg["eta"] * np.sum(
                 M["error"][t]) * ut.temporal_filter(cfg["kappa"], M['Z'][:t+1, -1])
 
             M["B"][t+1] = M["B"][t] + M["DW_out"][t]
             M["B"][t+1] *= cfg["weight_decay"]
-
-            # TODO: Maybe store weight change in local var, and update every N steps
 
             M['W'][t+1] = M['W'][t] + M['DW'][t]
 
