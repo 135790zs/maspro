@@ -11,7 +11,7 @@ rc['font.family'] = 'STIXGeneral'
 
 def plot_state(M, t, fname, layers=None, neurons=None):
     plotvars = ["X", "XZ", "I", "V", "U", "V-U", "Z", "Z_in", "H", "EVV", "EVU", "ET", "DW",
-                "B", "W", "W_out", "b_out", "Y", "T", "error"]
+                "B", "W", "W_out", "b_out", "Y", "T", "error", "loss"]
 
     fig = plt.figure(constrained_layout=False, figsize=(8, 14))
     gsc = fig.add_gridspec(nrows=len(plotvars) + 2, ncols=1, hspace=0.075)
@@ -108,7 +108,7 @@ def plot_state(M, t, fname, layers=None, neurons=None):
                                rotation=0,
                                labelpad=labelpad,
                                fontsize=fontsize)
-        if layers is not None or var in M and M[var][t].ndim < 2:
+        if layers is not None or var in M and M[var][t].ndim < 1:
             # axs[-1].legend(fontsize=fontsize_legend,
             #                loc="upper right",
             #                ncol=2)

@@ -1,6 +1,6 @@
 import numpy as np
 from config import cfg
-from task import sinusoid, pulse
+from task import sinusoid, pulse, pulseclass
 
 
 def initialize_log():
@@ -17,39 +17,31 @@ def initialize_log():
                       cfg["N_Rec"],
                       cfg["N_R"],)
 
-    M["V"] = np.zeros(shape=neuron_shape)
+    for neuronvar in ["V", "Z", "Zbar", "I", "H"]:
+        M[neuronvar] = np.zeros(shape=neuron_shape)
 
-    M["Z"] = np.zeros(shape=neuron_shape)
-    M["Zbar"] = np.zeros(shape=neuron_shape)
-    M["ETbar"] = np.zeros(shape=weight_shape)
-    M["I"] = np.zeros(shape=neuron_shape)
-    M["H"] = np.zeros(shape=neuron_shape)
+    for weightvar in ["ETbar", "EVV", "EVU", "DW", "ET"]:
+        M[weightvar] = np.zeros(shape=weight_shape)
+
     M["T"] = np.zeros(shape=(cfg["Epochs"],))
     M["U"] = np.ones(shape=neuron_shape) * cfg["thr"]
-
     M["TZ"] = np.ones(shape=(cfg["N_Rec"], cfg["N_R"])) * -cfg["dt_refr"]
+    M["DW_out"] = np.zeros(shape=(cfg["Epochs"], cfg["N_R"],))
+    M["B"] = rng.random(size=feedback_shape)
+    M["W"] = rng.random(size=weight_shape)
+    M["W_out"] = rng.random(size=(cfg["Epochs"], cfg["N_R"],))
+    M["b_out"] = np.zeros(shape=(cfg["Epochs"], 1,))
+    M['Y'] = np.zeros(shape=(cfg["Epochs"], cfg["N_O"],))
+    M['error'] = np.zeros(shape=(cfg["Epochs"], cfg["N_O"],))
+    M['loss'] = np.zeros(shape=(cfg["Epochs"],))
     M["Z_in"] = np.zeros(shape=(cfg["Epochs"],
                                 cfg["N_Rec"],
                                 cfg["N_R"]*2,))
-    M["EVV"] = np.zeros(shape=weight_shape)
-    M["EVU"] = np.zeros(shape=weight_shape)
-    M["DW"] = np.zeros(shape=weight_shape)
-    M["DW_out"] = np.zeros(shape=(cfg["Epochs"], cfg["N_R"],))
-    M["ET"] = np.zeros(shape=weight_shape)
-    M["W"] = rng.random(size=weight_shape)
-    M["B"] = rng.random(size=feedback_shape)
-    # M["B"] = rng.random(size=feedback_shape)
 
     M["is_ALIF"] = np.zeros(shape=(cfg["N_Rec"] * cfg["N_R"]))
     M["is_ALIF"][:int(M["is_ALIF"].size * cfg["fraction_ALIF"])] = 1
     np.random.shuffle(M["is_ALIF"])
     M["is_ALIF"] = M["is_ALIF"].reshape((cfg["N_Rec"], cfg["N_R"]))
-
-    M["W_out"] = rng.random(size=(cfg["Epochs"], cfg["N_R"],))
-    M["b_out"] = np.zeros(shape=(cfg["Epochs"], 1,))
-
-    M['Y'] = np.zeros(shape=(cfg["Epochs"],))
-    M['error'] = np.zeros(shape=(cfg["Epochs"],))
 
     if cfg["task"] == "narma10":
         M["X"] = rng.random(size=(cfg["Epochs"], cfg["N_I"])) * 0.5
@@ -57,6 +49,9 @@ def initialize_log():
         M["X"] = sinusoid()
     elif cfg["task"] == "pulse":
         M["X"] = pulse()
+    elif cfg["task"] == "pulseclass":
+        M["X"] = pulseclass()["inp"]
+        M['T'] = pulseclass()["tar"]
 
     M["XZ"] = rng.binomial(n=1, p=M["X"])
 
@@ -64,13 +59,13 @@ def initialize_log():
         # Zero diag E: no self-conn
         np.fill_diagonal(M['W'][0, r, :, cfg["N_R"]:], 0)
 
-    M['W'][0, 0, 0, 0] = 20  # input 1 to neuron 1
-    M['W'][0, 0, 1, 0] = 0  # input 1 to neuron 2
-    M['W'][0, 0, 0, 1] = 0  # input 2 to neuron 1
-    M['W'][0, 0, 1, 1] = 20  # input 2 to neuron 2
-    # M['W'][0, 0, 1, 1] = 70  # input 2 to neuron 2
-    M['W'][0, 0, 0, 3] = 0  # n1 to n2
-    M['W'][0, 0, 1, 2] = 0  # n2 to n1
+    # M['W'][0, 0, 0, 0] = 20  # input 1 to neuron 1
+    # M['W'][0, 0, 1, 0] = 0  # input 1 to neuron 2
+    # M['W'][0, 0, 0, 1] = 0  # input 2 to neuron 1
+    # M['W'][0, 0, 1, 1] = 20  # input 2 to neuron 2
+    # # M['W'][0, 0, 1, 1] = 70  # input 2 to neuron 2
+    # M['W'][0, 0, 0, 3] = 0  # n1 to n2
+    # M['W'][0, 0, 1, 2] = 0  # n2 to n1
 
     return M
 
@@ -81,21 +76,8 @@ def temporal_filter(c, a):
     return c * temporal_filter(c, a=a[:-1]) + a[-1]
 
 
-# def rep_along_axis(arr):
-#     return np.repeat(arr[np.newaxis], cfg["N_R"]*2, axis=0).T
-
-
-# def EMA(arr, arr_ema, ep):
-#     return (cfg["EMA"] * arr[ep] + (1 - cfg["EMA"]) * arr_ema[ep-1]) \
-#             if ep else arr[ep]
-
-
 def normalize(arr):
     return np.interp(arr, (arr.min(), arr.max()), (-1, 1))
-
-
-# def errfn(a1, a2):
-#     return np.sum(np.abs(a1 - a2), axis=1)
 
 
 def eprop_Z(t, TZ, V, U):

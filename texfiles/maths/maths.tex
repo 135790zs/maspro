@@ -125,4 +125,101 @@ Effects of $\mathbf{h}$ on $W$:
 
 
 
+\newpage
+\section{Audio preprocessing}
+Goal: turn a .wav signal consisting of N phones into N chunks.
+
+Frame length = 400 samples.
+
+Frame step = 160 samples.
+
+For every frame, 13 MFCC coefficients are extracted.
+
+We take the DFT:
+\begin{equation}
+S_i(k) = \sum_{n=1}^N s_i(n)h(n)e^{-j2\pi kn/N}\qquad1\leq k\leq K
+\end{equation}
+where $h(n)$ is an $N$ sample long analysis window (e.g. hamming window), and $K$ is the length of the DFT (in our case, $K=512$).
+
+We then take the periodogram estimate.
+\begin{equation}
+P_i(k) = \frac{1}{N}\left|S_i(k)\right|^2
+\end{equation}
+where we then keep only the first 257 coefficients.
+
+We have a filterbank of 26 triangular filters of length 257. Each filter is mostly zero, except its specific region.
+
+To compute the Mel filterbank, we choose lower and upper frequencies of 0Hz and 8000Hz and we convert them to Mels using
+\begin{equation}
+M(f) = 1125\ln\left(1 + f/700\right)
+\end{equation}
+We obtain 0 Mels and 2834.99 Mels.
+
+To obtain our 26 filterbanks, we need 26 points spaced linearly between 0 and 2834.99:
+\begin{verbatim}
+[   0.        ,  104.99962963,  209.99925926,  314.99888889,
+  419.99851852,  524.99814815,  629.99777778,  734.99740741,
+  839.99703704,  944.99666667, 1049.9962963 , 1154.99592593,
+ 1259.99555556, 1364.99518519, 1469.99481481, 1574.99444444,
+ 1679.99407407, 1784.9937037 , 1889.99333333, 1994.99296296,
+ 2099.99259259, 2204.99222222, 2309.99185185, 2414.99148148,
+ 2519.99111111, 2624.99074074, 2729.99037037, 2834.99      ]
+\end{verbatim}
+
+We then convert these back to Hertz using
+\begin{equation}
+M^{-1}(m) = 700\left(\exp\left(m/1125\right)-1\right)
+\end{equation}
+and obtain
+\begin{verbatim}
+[   0.        ,   68.47907878,  143.65727789,  226.18995388,
+  316.79657505,  416.26699328,  525.46832953,  645.35253278,
+  776.96467861,  921.45207944, 1080.07428613, 1254.21406795,
+ 1445.38946668, 1655.26702996, 1885.67633923, 2138.62595885,
+ 2416.32094551, 2721.18207055, 3055.86692273, 3423.29307542,
+ 3826.6635202 , 4269.49458849, 4755.6466048 , 5289.35753858,
+ 5875.27994818, 6518.52153898, 7224.68968918, 7999.94033136]
+\end{verbatim}
+
+We round these frequencies to the nearest FFT bin, using
+\begin{equation}
+f(h) = \lfloor(512+1)h/16000\rfloor
+\end{equation}
+resulting in the sequence
+\begin{verbatim}
+[  0.,   2.,   4.,   7.,  10.,  13.,  16.,  20.,  24.,  29.,  34.,
+  40.,  46.,  53.,  60.,  68.,  77.,  87.,  97., 109., 122., 136.,
+ 152., 169., 188., 209., 231., 256.]
+\end{verbatim}
+
+We can use this to finally create our Mel-spaced filterbank:
+\begin{equation}
+H_m(k) = \begin{cases}
+0 & k<f(m-1)\\
+\frac{k-f(m-1)}{f(m)-f(m-1)} & f(m-1)\leq k \leq f(m) \\
+\frac{f(m+1) - k}{f(m+1)-f(m)} & f(m) \leq k \leq f(m+1)\\
+0 & k > f(m+1)
+\end{cases}
+\end{equation}
+
+
+To calculate filterbank energies, we multiply each filterbank with the power spectrum, then add up the coefficients. We then obtain 26 values that indicate how much energy was in each filterbank.
+
+We then take the log of each of these 26 energies.
+
+Finally, we take the DCT of the 26 log filterbank energies to obtain 26 cepstral coefficients. We then retain only the first 13 of the coefficients for each frame.
+
+We also compute the first and second derivatives (delta and delta-delta coefficients, resp.) of the 13 coefficients using
+\begin{equation}
+d_t = \frac{\sum^N_{n=1}n\left(c_{t+n}-c_{t-n}\right)}{2\sum_{n=1}^Nn^2}
+\end{equation}
+where $d_t$ is a delta coefficient from frame $t$ in terms of the static coefficients $c_{t+n}$ to $c_{t-n}$, using $N=2$:
+\begin{equation}
+d_t = \frac{c_{t+1}-c_{t-1}+2c_{t+2}-2c_{t-2}}{10}
+\end{equation}
+
+Second derivatives are calculated from the deltas, not the static coefficients.
+
+We finally concatenate the zeroth, first, and second derivatives and acquire a vector of length 39.
+
 \end{document}

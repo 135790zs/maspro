@@ -8,7 +8,7 @@ cfg = {
     "theta_membrane": 3,
     "beta": 0.07,
     "gamma": 0.3,     # Pseudoderivative ET contribution
-    "eta": 1e-3,         # Learning rate
+    "eta": 1e-2,      # Learning rate
     "weight_decay": 0.9,
     "update_dead_weights": True,
 
@@ -25,22 +25,28 @@ cfg = {
 
     "dt": 1,
 
-    "N_I": 2,
-    "N_R": 2,
+    "N_I": 3,
+    "N_R": 4,
+    "N_O": 4,
     "N_Rec": 1,
 
-    "Epochs": 300,
-    "plot_interval": 1,  # 0 to disable plots
+    "Epochs": 30,
+    "plot_interval": 30,  # 0 to disable plots
     "plot_io": False,
     "plot_state": True,
     "plot_heatmaps": False,
     "plot_graph": True,
 
-    "task": "pulse"
+    "task": "pulseclass",
+    "tasktype": "classification",  # classification, regression
 }
+
 cfg['rho'] = exp(-cfg["dt"] / cfg["theta_adaptation"])
 cfg['alpha'] = 0.95#exp(-cfg["dt"] / cfg["theta_membrane"])
 cfg['kappa'] = exp(-cfg["dt"] / cfg["theta_membrane"])
+
+assert cfg["N_R"] >= cfg["N_I"]
+assert cfg["N_R"] >= cfg["N_O"]
 
 lookup = {
     "X":     {"dim": 2, "label": "x"},
@@ -55,6 +61,10 @@ lookup = {
     "H":     {"dim": 2, "label": "h"},
     "ET":    {"dim": 3, "label": "e"},
     "B":     {"dim": 3, "label": "B"},
+    "Y":     {"dim": 3, "label": "Y"},
+    "error": {"dim": 3, "label": "E"},
+    "loss":  {"dim": 3, "label": "loss"},
+    "T":     {"dim": 3, "label": "T"},
     "W":     {"dim": 3, "label": "W"},
     "W_out": {"dim": 1, "label": "W_{{out}}"},
     "b_out": {"dim": 0, "label": "b_{{out}}"},

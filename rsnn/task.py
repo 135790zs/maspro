@@ -36,3 +36,23 @@ def sinusoid(A=(0.3, 0.3, 0.5), f=(4, 1, 11), phase=(0, 0, 0)):
         for t in range(cfg["Epochs"]):
             ret[:, n] = np.sin((np.arange(cfg["Epochs"]) + phase[n]) / f[n]) * A[n] + A[n]
     return ret
+
+
+def pulseclass(A=(1, 1, 1,), duration=(3, 3, 3,), gap=(5, 5, 5,), offset=(0, 2, 4)):
+    A = A[:cfg["N_I"]]
+    gap = gap[:cfg["N_I"]]
+    duration = duration[:cfg["N_I"]]
+    offset = offset[:cfg["N_I"]]
+
+    inp = np.zeros(shape=(cfg["Epochs"], cfg["N_I"]))
+    tar = np.zeros(shape=(cfg["Epochs"], cfg["N_O"]))
+
+    for t in range(cfg["Epochs"]):
+        for n in range(cfg["N_I"]):
+            inp[t, n] = A[n] * ((t - offset[n]) % (duration[n] + gap[n]) < duration[n])
+    for t in range(cfg["Epochs"]):  # classidx is sum of active
+        for n in range(cfg["N_O"]):
+            ix = int(np.sum(inp[t, :]))
+            tar[t, ix] = 1
+
+    return {"inp": inp, "tar": tar}

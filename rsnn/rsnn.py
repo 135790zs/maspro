@@ -74,13 +74,20 @@ def run_rsnn(cfg):
 
             if cfg["task"] == "narma10":
                 M['T'][t] = narma10(t=t, u=M['X'][:t], y=M['Y'][:t])
-            elif cfg["task"] in ["sinusoid", "pulse"]:
+            elif cfg["task"] in ["sinusoid", "pulse"]:  # TODO: Can delegate to init
                 M["T"][t] = np.mean(M["X"][t])
 
             # For some tasks, the desired output is the source of the input
-            M["error"][t] = (M["Y"][t] - M["T"][t])
+            if cfg["tasktype"] == "regression":
+                M["error"][t] = (M["Y"][t] - M["T"][t])
+                M["loss"][t] = np.sum(M["error"][t]**2) 
+            elif cfg["tasktype"] == "classification":
+                sm = np.exp(M['Y'][t]) / np.sum(np.exp(M['Y'][t]))
+                M["error"][t] = (sm - M["T"][t])
+                print(M["error"][t])
+                M["loss"][t] = -np.sum(M['T'][t] * np.log(sm))
 
-            M['DW'][t] = cfg["eta"] * np.sum(
+            M['DW'][t] = -cfg["eta"] * np.sum(
                 M['B'] * M["error"][t]) * ut.temporal_filter(cfg["kappa"], M['ET'][:t+1])
 
             # freeze input weights
@@ -116,7 +123,7 @@ def run_rsnn(cfg):
                            layers=None,   # Tuple for 2, None for heatmap
                            neurons=None)  # Idem
 
-    return np.mean(M["error"])
+    return np.mean(M["loss"])
 
 
 if __name__ == "__main__":
