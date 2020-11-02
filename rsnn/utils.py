@@ -29,8 +29,8 @@ def initialize_log():
     M["DW_out"] = np.zeros(shape=(cfg["Epochs"], cfg["N_R"],))
     M["B"] = rng.random(size=feedback_shape)
     M["W"] = rng.random(size=weight_shape)
-    M["W_out"] = rng.random(size=(cfg["Epochs"], cfg["N_R"],))
-    M["b_out"] = np.zeros(shape=(cfg["Epochs"], 1,))
+    M["W_out"] = rng.random(size=(cfg["Epochs"], cfg["N_R"], cfg["N_O"],))
+    M["b_out"] = np.zeros(shape=(cfg["Epochs"], cfg["N_O"],))
     M['Y'] = np.zeros(shape=(cfg["Epochs"], cfg["N_O"],))
     M['error'] = np.zeros(shape=(cfg["Epochs"], cfg["N_O"],))
     M['loss'] = np.zeros(shape=(cfg["Epochs"],))
@@ -52,6 +52,11 @@ def initialize_log():
     elif cfg["task"] == "pulseclass":
         M["X"] = pulseclass()["inp"]
         M['T'] = pulseclass()["tar"]
+    elif cfg["task"] == "timit":
+        pass # TODO
+    else:
+        print(f"Error: task \"{cfg['task']}\" unknown.")
+        raise Exception
 
     M["XZ"] = rng.binomial(n=1, p=M["X"])
 

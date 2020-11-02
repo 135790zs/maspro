@@ -304,11 +304,12 @@ def plot_graph(M, t, fname):
 
     # rec-to-out
     for tail in range(0, cfg["N_R"]):
-        dot.edge(tail_name=f"{cfg['N_Rec']-1}-{tail}",
-                 head_name=f"out",
-                 label=f"{M['W_out'][t, tail]:.2f}",
-                 penwidth='1',
-                 color=weightcolor(w=M['W_out'][t, tail]))
+        for head in range(0, cfg["N_O"]):
+          dot.edge(tail_name=f"{cfg['N_Rec']-1}-{tail}",
+                   head_name=f"out-{head}",
+                   label=f"{M['W_out'][t, tail, head]:.2f}",
+                   penwidth='1',
+                   color=weightcolor(w=M['W_out'][t, tail, head]))
 
     dot.attr(label=f"Epoch {t+1}")
     dot.render(f"../vis/net{fname}")

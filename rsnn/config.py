@@ -8,7 +8,7 @@ cfg = {
     "theta_membrane": 3,
     "beta": 0.07,
     "gamma": 0.3,     # Pseudoderivative ET contribution
-    "eta": 1e-2,      # Learning rate
+    "eta": 1e-2,      # Learning rate (1e-2 for TIMIT)
     "weight_decay": 0.9,
     "update_dead_weights": True,
 
@@ -25,19 +25,22 @@ cfg = {
 
     "dt": 1,
 
-    "N_I": 3,
-    "N_R": 4,
-    "N_O": 4,
+    "N_I": 39,
+    "N_R": 64,
+    "N_O": 61,
     "N_Rec": 1,
+
+    "TIMIT_ntrain": 55,  # def 3696
+    "TIMIT_nval": 45,  # def 400
 
     "Epochs": 30,
     "plot_interval": 30,  # 0 to disable plots
     "plot_io": False,
     "plot_state": True,
     "plot_heatmaps": False,
-    "plot_graph": True,
+    "plot_graph": False,
 
-    "task": "pulseclass",
+    "task": "timit",
     "tasktype": "classification",  # classification, regression
 }
 
