@@ -33,7 +33,13 @@ cfg = {
     "TIMIT_ntrain": 55,  # def 3696
     "TIMIT_nval": 45,  # def 400
 
-    "Epochs": 30,
+    "wavs_fname": "../data_wavs.npy",
+    "phns_fname": "../data_phns.npy",
+
+    "Epochs": 5,  # def = 80
+    "Steps": 3,  # ms per epoch, def = 5
+    "batch_size": 4,  # def = 32
+    "maxlen": 20,
     "plot_interval": 30,  # 0 to disable plots
     "plot_io": False,
     "plot_state": True,

@@ -19,7 +19,7 @@ def plot_state(M, t, fname, layers=None, neurons=None):
     labelpad = 35
     fontsize = 14
     # fontsize_legend = 12
-    fig.suptitle(f"Epoch {t+1}, $\\alpha={cfg['alpha']:.3f}$, "
+    fig.suptitle(f"Steps {t+1}, $\\alpha={cfg['alpha']:.3f}$, "
                  f"$\\kappa={cfg['kappa']:.3f}$, $\\rho={cfg['rho']:.3f}$", 
                  fontsize=20)
 
@@ -127,7 +127,7 @@ def plot_heatmaps(M, t, fname):
     fig = plt.figure(constrained_layout=False)
     gsc = fig.add_gridspec(nrows=cfg["N_Rec"],
                            ncols=3)
-    fig.suptitle(f"Epoch {t+1}", fontsize=20)
+    fig.suptitle(f"Steps {t+1}", fontsize=20)
 
     labelpad = 15
     fontsize = 14
@@ -180,7 +180,7 @@ def plot_heatmaps(M, t, fname):
 def plot_io(M, t, fname):
     fig = plt.figure(constrained_layout=True)
     gsc = fig.add_gridspec(nrows=3, ncols=1, hspace=0.2)
-    fig.suptitle(f"Epoch {t}", fontsize=20)
+    fig.suptitle(f"Steps {t}", fontsize=20)
 
     # Output, target, error
     axs = fig.add_subplot(gsc[0, 0])
@@ -311,7 +311,7 @@ def plot_graph(M, t, fname):
                    penwidth='1',
                    color=weightcolor(w=M['W_out'][t, tail, head]))
 
-    dot.attr(label=f"Epoch {t+1}")
+    dot.attr(label=f"Steps {t+1}")
     dot.render(f"../vis/net{fname}")
 
 

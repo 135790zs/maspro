@@ -1,12 +1,12 @@
 
 # MUST DO:
-# TODO: Implement ADAM
+# TODO: Implement TIMIT
 # TODO: Implement L2 reg: Add 1e-5 * ||W||^2 to loss
 # TODO: Add firing rate regularization with c_reg = 50. See supplementary notes.
-# TODO: Use minibatch-based gradient computation (does this mean updating after 32 samples?)
 # TODO: Gaussian distribution for broadcast weights (mu=0, var=1)
-# TODO: Implement TIMIT
-# LTP seems to work in vitro, see if traub leads to LTD
+# TODO: Implement ADAM
+# TODO: Use minibatch-based gradient computation (does this mean updating after 32 samples?)
+# TODO: LTP seems to work in vitro, see if traub leads to LTD
 
 # LOW PRIORITY:
 # TODO: Dictionary to facilitate sweeping function (param = key, list = item)
@@ -38,8 +38,11 @@ SCRATCHPAD
 
 * make new file to process TIMIT files and pipeline the train/val process
 
-1. Process the training folder into python data
-2. Split the data into train and validation sets (keep flexible such that training can be train+val, and test is actual test). Do this by specifying folder names.
-3. Change e-prop to classification.
-4. Train on training set
-5. Validate on validation set. Do this by setting learning rate to 0.
+For 80 epochs:
+	For each minibatch of subsequent 32 audio frames:
+		Feed each audio frame to the network for 5ms
+	Test on validation set, save network parameters iff lowest error
+
+Load network with lowest validation error
+
+------------

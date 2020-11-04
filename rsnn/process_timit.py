@@ -118,9 +118,8 @@ for subdir, dirs, files in os.walk('../TIMIT/TRAIN'):
                 break
             print(f"{idx}/{nwavs}")
 
-print(wavdata.shape)
-print(phonedata.shape)
-np.save("../data_wavs", wavdata)
-np.save("../data_phns", phonedata)
+np.save(cfg["wavs_fname"], wavdata)
+print(wavdata.shape)  # N sentences  X  Sentence len  X  Inp vec
+np.save(cfg["phns_fname"], phonedata)
 # plt.plot(mfcc_feat[:, :])
 # plt.show()
