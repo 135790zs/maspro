@@ -20,7 +20,7 @@ def plot_state(M, t, fname, layers=None, neurons=None):
     fontsize = 14
     # fontsize_legend = 12
     fig.suptitle(f"Steps {t+1}, $\\alpha={cfg['alpha']:.3f}$, "
-                 f"$\\kappa={cfg['kappa']:.3f}$, $\\rho={cfg['rho']:.3f}$", 
+                 f"$\\kappa={cfg['kappa']:.3f}$, $\\rho={cfg['rho']:.3f}$",
                  fontsize=20)
 
     # Print input to neurons

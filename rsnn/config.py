@@ -25,9 +25,9 @@ cfg = {
 
     "dt": 1,
 
-    "N_I": 39,
-    "N_R": 64,
-    "N_O": 61,
+    "N_I": 2,
+    "N_R": 5,
+    "N_O": 4,
     "N_Rec": 1,
 
     "TIMIT_ntrain": 55,  # def 3696
@@ -36,8 +36,8 @@ cfg = {
     "wavs_fname": "../data_wavs.npy",
     "phns_fname": "../data_phns.npy",
 
-    "Epochs": 5,  # def = 80
-    "Steps": 3,  # ms per epoch, def = 5
+    "Epochs": 50,  # def = 80
+    "Repeats": 3,  # ms per epoch, def = 5
     "batch_size": 4,  # def = 32
     "maxlen": 20,
     "plot_interval": 30,  # 0 to disable plots

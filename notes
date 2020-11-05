@@ -1,5 +1,6 @@
 
 # MUST DO:
+# TODO: Visualize and thereby validate batch-based system. Refactor as needed.
 # TODO: Implement TIMIT
 # TODO: Implement L2 reg: Add 1e-5 * ||W||^2 to loss
 # TODO: Add firing rate regularization with c_reg = 50. See supplementary notes.

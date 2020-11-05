@@ -222,4 +222,36 @@ Second derivatives are calculated from the deltas, not the static coefficients.
 
 We finally concatenate the zeroth, first, and second derivatives and acquire a vector of length 39.
 
+\section{Bellec's TIMIT implementatation}
+Key points:
+\begin{itemize}
+\item $N\times39$ audio frames and \\
+$N\times61$ class labels.
+\item Bi-directional LSNN.
+\item 300 LIF, 100 ALIF, $\theta_m = 20$ ms, $\theta_a = 200$ ms, $\beta = 0.184$, $v_\text{th} = 1.6$, $\theta_\text{out} = 3$ ms, refractory period of 2 ms.
+\item Train, validation, test size = 3696, 400, 192 sequences. Input $\mathbf{x}^t$ is [0,1]--normalized concatenation of zeroth to second derivatives of MFCCs.
+\item Each frame in the sequence is fed for 5 consecutive 1 ms steps.
+\item Networks trained for 80 epochs with early stopping on lowest validation error.
+\item Adam optimizer (with defaults except $\epsilon_\text{Adam} = 10^{-5}$.
+\item Batch size 32, $\gamma = 10^{-2}$. Adaptive $B_{jk}$ initialized as Gaussian with $\mu = 0$ and $\sigma = 1/n$ with $n$ being neurons in LSNN.
+\item L2 regularization with additional term $10^{-5} \cdot \|W\|^2$.
+\item In adaptive $B$, L2 weight decay on output and broadcast neurons according to [2] using $c_\text{decay} = 10^{-2}$.
+\item Fire rate regularization with $c_\text{reg} = 50$. 
+\end{itemize}
+
+Procedure:
+\begin{verbatim}
+For 80 epochs:
+	
+	For 32 batches:
+
+		F = get_frame_from_		
+		
+		For 5 steps:
+		
+			L = M(F)
+\end{verbatim}
+
+
+
 \end{document}
