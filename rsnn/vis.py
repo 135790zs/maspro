@@ -9,6 +9,10 @@ rc['mathtext.fontset'] = 'stix'
 rc['font.family'] = 'STIXGeneral'
 
 
+def plot_error(terrs, verrs):
+    pass
+
+
 def plot_state(M, t, fname, layers=None, neurons=None):
     plotvars = ["X", "XZ", "I", "V", "U", "V-U", "Z", "Z_in", "H", "EVV", "EVU", "ET", "DW",
                 "B", "W", "W_out", "b_out", "Y", "T", "error", "loss"]
