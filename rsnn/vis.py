@@ -10,117 +10,53 @@ rc['font.family'] = 'STIXGeneral'
 
 
 def plot_error(terrs, verrs):
-    pass
+    fig = plt.figure(constrained_layout=False, figsize=(8, 4))
+    gsc = fig.add_gridspec(nrows=2, ncols=1, hspace=0.05)
+    axs = []
+    axs.append(fig.add_subplot(gsc[len(axs), :]))
+    axs[-1].plot(terrs)
+    axs.append(fig.add_subplot(gsc[len(axs), :], sharex=axs[0]))
+    axs[-1].plot(verrs)
+    plt.savefig(f"../vis/errs.pdf",
+                bbox_inches='tight')
+
+    plt.close()
 
 
-def plot_state(M, t, fname, layers=None, neurons=None):
-    plotvars = ["X", "XZ", "I", "V", "U", "V-U", "Z", "Z_in", "H", "EVV", "EVU", "ET", "DW",
-                "B", "W", "W_out", "b_out", "Y", "T", "error", "loss"]
+def plot_state(M):
+    plotvars = ["XZ", "I", "V", "U", "Z_in", "Z", "Zbar", "H", "EVV", "EVU", "ET", "ETbar"]
 
     fig = plt.figure(constrained_layout=False, figsize=(8, 14))
     gsc = fig.add_gridspec(nrows=len(plotvars) + 2, ncols=1, hspace=0.075)
     axs = []
     labelpad = 35
     fontsize = 14
-    # fontsize_legend = 12
-    fig.suptitle(f"Steps {t+1}, $\\alpha={cfg['alpha']:.3f}$, "
+    fig.suptitle(f"Single-run model state\n$\\alpha={cfg['alpha']:.3f}$, "
                  f"$\\kappa={cfg['kappa']:.3f}$, $\\rho={cfg['rho']:.3f}$",
                  fontsize=20)
 
     # Print input to neurons
     for var in plotvars:
+
         axs.append(fig.add_subplot(gsc[len(axs), :],
                                    sharex=axs[0] if axs else None))
-        if var in M and M[var][t].ndim == 0:  # Y, T, error
-            axs[-1].plot(M[var][:t])
-            axs[-1].set_ylabel(var,
-                               rotation=0,
-                               labelpad=labelpad,
-                               fontsize=fontsize)
-        if var in M and M[var][t].ndim == 1:  # X, XZ
-            if M[var][t].shape == (1,):
+        axs[-1].imshow(M[var].reshape(M[var].shape[0], -1).T,
+                       cmap='coolwarm',
+                       vmin=np.min(M[var]),
+                       vmax=np.max(M[var]),
+                       interpolation='nearest',
+                       aspect='auto')
+        axs[-1].set_ylabel(f"${lookup[var]['label']}$"
+                           f"\n[{np.min(M[var]):.1f}"
+                           f", {np.max(M[var]):.1f}]",
+                           rotation=0,
+                           labelpad=labelpad,
+                           fontsize=fontsize)
 
-                if var != "XZ":
-                    axs[-1].plot(M[var][:t],)
-                else:
-                    # axs[-1].fill_between(np.arange(t), M[var][:t, 0])
-                    axs[-1].vlines(x=[idx for idx, val in
-                                      enumerate(M['XZ'][:t]) if val],
-                                   ymin=0,
-                                   ymax=1,
-                                   colors=f'C0',
-                                   alpha=0.7)
-            else:
-                axs[-1].imshow(M[var][:t].reshape(t, -1).T,
-                               cmap='coolwarm',
-                               vmin=0,
-                               vmax=1,
-                               interpolation='nearest',
-                               aspect='auto')
-            axs[-1].set_ylabel(f"${lookup[var]['label']}$"
-                               f"\n[{np.min(M[var][:t]):.1f}"
-                               f", {np.max(M[var][:t]):.1f}]",
-                               rotation=0,
-                               labelpad=labelpad,
-                               fontsize=fontsize)
-        if var == "V-U" or M[var][t].ndim == 2:  # information per neuron
-            arr = var in M and M[var][:t] if var != "V-U" else M['V'][:t] - M['U'][:t]
-            lab = lookup[var]['label'] if var != "V-U" else "v-u"
-
-            if layers is not None:  # two line plots
-                axs[-1].plot(arr[layers[0], neurons[0]],
-                             label=f"${lab}_i$")
-                axs[-1].plot(arr[layers[1], neurons[1]],
-                             label=f"${lab}_j$")
-            else:  # colormap
-                axs[-1].imshow(arr.reshape(t, -1).T,
-                               cmap='coolwarm',
-                               vmin=np.min(arr),
-                               vmax=np.max(arr),
-                               interpolation='nearest',
-                               aspect='auto')
-            axs[-1].set_ylabel(f"${lab}$"
-                               f"\n[{np.min(arr):.1f}"
-                               f", {np.max(arr):.1f}]",
-                               rotation=0,
-                               labelpad=labelpad,
-                               fontsize=fontsize)
-
-        elif var in M and M[var][t].ndim == 3:  # information per weight
-            if layers is not None:  # two line plots
-                axs[-1].plot(M[var][:t,
-                                    layers[1],
-                                    neurons[1],
-                                    neurons[0]],
-                             label=f"${lookup[var]['label']}$")
-                if layers[0] == layers[1]:  # Rec, so also plot N1 -> N0
-                    axs[-1].plot(M[var][:t,
-                                        layers[0],
-                                        neurons[0],
-                                        neurons[1] + cfg["N_R"]],
-                                 label=f"${lookup[var]['label']}$")
-            else:  # colormap
-                axs[-1].imshow(M[var][:t].reshape(t, -1).T,
-                               cmap='coolwarm',
-                               vmin=np.min(M[var][:t]),
-                               vmax=np.max(M[var][:t]),
-                               interpolation='nearest',
-                               aspect='auto')
-            axs[-1].set_ylabel(f"${lookup[var]['label']}$"
-                               f"\n[{np.min(M[var][:t]):.1f}"
-                               f", {np.max(M[var][:t]):.1f}]",
-                               rotation=0,
-                               labelpad=labelpad,
-                               fontsize=fontsize)
-        if layers is not None or var in M and M[var][t].ndim < 1:
-            # axs[-1].legend(fontsize=fontsize_legend,
-            #                loc="upper right",
-            #                ncol=2)
-            axs[-1].grid(linestyle='--')
 
     axs[-1].set_xlabel("$t$", fontsize=fontsize)
 
-    plt.savefig(f"../vis/state{fname}.pdf",
+    plt.savefig(f"../vis/state.pdf",
                 bbox_inches='tight')
 
     plt.close()
