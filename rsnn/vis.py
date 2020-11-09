@@ -9,14 +9,40 @@ rc['mathtext.fontset'] = 'stix'
 rc['font.family'] = 'STIXGeneral'
 
 
-def plot_error(terrs, verrs):
-    fig = plt.figure(constrained_layout=False, figsize=(8, 4))
-    gsc = fig.add_gridspec(nrows=2, ncols=1, hspace=0.05)
+def plot_run(terrs, verrs, W, epoch):
+    labelpad = 35
+    fontsize = 14
+    fig = plt.figure(constrained_layout=False, figsize=(8, 8))
+    gsc = fig.add_gridspec(nrows=5, ncols=1, hspace=0.05)
     axs = []
     axs.append(fig.add_subplot(gsc[len(axs), :]))
-    axs[-1].plot(terrs)
+    axs[-1].plot(terrs[:epoch])
+    axs[-1].set_ylabel("$E_T$", 
+                       rotation=0,
+                       labelpad=labelpad,
+                       fontsize=fontsize)
     axs.append(fig.add_subplot(gsc[len(axs), :], sharex=axs[0]))
-    axs[-1].plot(verrs)
+    axs[-1].plot(verrs[:epoch])
+    axs[-1].set_ylabel("$E_V$", 
+                       rotation=0,
+                       labelpad=labelpad,
+                       fontsize=fontsize)
+    if epoch >= 1:
+        for weight_type in ['W', 'W_out', 'b_out']:
+            # W
+            axs.append(fig.add_subplot(gsc[len(axs), :], sharex=axs[0]))
+            axs[-1].imshow(
+                W[weight_type][:epoch].reshape(
+                    W[weight_type][:epoch].shape[0], -1).T,
+                aspect='auto',
+                cmap='coolwarm')
+            axs[-1].set_ylabel(f"{weight_type}"
+                               f"\n[{np.min(W[weight_type][:epoch]):.1f}"
+                               f", {np.max(W[weight_type][:epoch]):.1f}]",
+                               rotation=0,
+                               labelpad=labelpad,
+                               fontsize=fontsize)
+
     plt.savefig(f"../vis/errs.pdf",
                 bbox_inches='tight')
 
@@ -24,7 +50,7 @@ def plot_error(terrs, verrs):
 
 
 def plot_state(M):
-    plotvars = ["XZ", "I", "V", "U", "Z_in", "Z", "Zbar", "H", "EVV", "EVU", "ET", "ETbar"]
+    plotvars = ["XZ", "I", "V", "U", "Z_in", "Z", "H", "EVV", "EVU", "ET"]
 
     fig = plt.figure(constrained_layout=False, figsize=(8, 14))
     gsc = fig.add_gridspec(nrows=len(plotvars) + 2, ncols=1, hspace=0.075)
@@ -62,102 +88,7 @@ def plot_state(M):
     plt.close()
 
 
-def plot_heatmaps(M, t, fname):
-
-    fig = plt.figure(constrained_layout=False)
-    gsc = fig.add_gridspec(nrows=cfg["N_Rec"],
-                           ncols=3)
-    fig.suptitle(f"Steps {t+1}", fontsize=20)
-
-    labelpad = 15
-    fontsize = 14
-
-    # Neuron heatmaps
-    for r in range(0, cfg["N_Rec"]):
-        bounds = (-80, 60) if cfg["neuron"] == "Izhikevich" \
-            else (0, cfg["thr"])
-        axs = fig.add_subplot(gsc[r, 0], label=f"nh-{t}-{r}")
-        axs.set_ylabel(f"$v_{{{r}, i}}$",
-                       rotation=0,
-                       labelpad=labelpad,
-                       fontsize=fontsize)
-        axs.imshow(unflatten(M['V'][t, r, :]),
-                   cmap='coolwarm',
-                   vmin=bounds[0], vmax=bounds[1],
-                   interpolation='nearest')
-
-    # Spike heatmap
-    for r in range(0, cfg["N_Rec"]):
-        axs = fig.add_subplot(gsc[r, 1], label=f"sh-{t}-{r}")
-        axs.set_ylabel(f"$z_{{{r}, i}}$",
-                       rotation=0,
-                       labelpad=labelpad,
-                       fontsize=fontsize)
-        axs.imshow(unflatten(M['Z'][t, r, :]),
-                   cmap='gray',
-                   vmin=0, vmax=1,
-                   interpolation='nearest')
-
-    # Weight heatmaps
-    for r in range(0, cfg["N_Rec"]):
-        maxdev = max(abs(np.min(M['W'])),
-                     abs(np.max(M['W'])))
-        axs = fig.add_subplot(gsc[r, 2],
-                              label=f"wh-{t}-{r}")
-        axs.set_ylabel(f"$W_{{{r}, i, j}}$",
-                       rotation=0,
-                       labelpad=labelpad,
-                       fontsize=fontsize)
-        axs.imshow(M['W'][t, r],
-                   cmap='bwr',
-                   vmin=-maxdev, vmax=maxdev,
-                   interpolation='nearest')
-
-    plt.savefig(f"../vis/heatmaps{fname}.pdf", bbox_inches='tight')
-    plt.close()
-
-
-def plot_io(M, t, fname):
-    fig = plt.figure(constrained_layout=True)
-    gsc = fig.add_gridspec(nrows=3, ncols=1, hspace=0.2)
-    fig.suptitle(f"Steps {t}", fontsize=20)
-
-    # Output, target, error
-    axs = fig.add_subplot(gsc[0, 0])
-    axs.set_title(f"Input + spike")
-    axs.plot(M["X"][:t+1])
-    axs.plot(M["XZ"][:t+1])
-
-    axs = fig.add_subplot(gsc[1, 0])
-    axs.set_title(f"Output")
-    axs.plot(np.sum(M['W_out'] * M['Z'][:t+1, -1]))
-    axs.plot(M["Y"][:t+1])
-
-    axs = fig.add_subplot(gsc[2, 0])
-    axs.set_title(f"Target + error")
-    axs.plot(M["T"][:t+1])
-    axs.plot(M["error"][:t+1])
-
-    plt.savefig(f"../vis/io{fname}.pdf", bbox_inches='tight')
-    plt.close()
-
-
-def plot_drsnn(M, t, fname="", layers=None, neurons=None):
-
-    if cfg["plot_state"]:
-        plot_state(fname=fname, M=M, t=t, layers=layers, neurons=neurons)
-
-    if cfg["plot_heatmaps"]:
-        plot_heatmaps(fname=fname, M=M, t=t)
-
-    if cfg["plot_io"]:
-        plot_io(fname=fname, M=M, t=t)
-
-    if cfg["plot_graph"]:
-        plot_graph(fname=fname, M=M, t=t)
-
-
-def plot_graph(M, t, fname):
+def plot_graph(M, t, W_rec, W_out):
     dot = Digraph(format='svg', engine='dot')
 
     # neurons
@@ -200,8 +131,8 @@ def plot_graph(M, t, fname):
 
     # weights
     def weightcolor(w):
-        maxdev = max(abs(np.min(M['W'])),
-                     abs(np.max(M['W'])))
+        maxdev = max(abs(np.min(W_rec)),
+                     abs(np.max(W_rec)))
         w = (w / maxdev) + (1 / 2)
         cmap = mpcm.get_cmap("bwr")
         rgba = cmap(w, bytes=True)
@@ -213,55 +144,43 @@ def plot_graph(M, t, fname):
     # in-to-rec
     for tail in range(0, cfg["N_I"]):
         for head in range(0, cfg["N_R"]):
-            # print("from", f"in-{tail}", "to", f"{0}-{head}", M['W'][t, 0, head, tail])
             dot.edge(tail_name=f"in-{tail}",
                      head_name=f"{0}-{head}",
-                     label=f"{M['W'][t, 0, head, tail]:.2f}",
+                     label=f"{W_rec[0, head, tail]:.2f}",
                      penwidth='1',
-                     color=weightcolor(w=M['W'][t, 0, head, tail]))
+                     color=weightcolor(w=W_rec[0, head, tail]))
 
     # intra-rec
     for r in range(0, cfg["N_Rec"]):  # r to r+1
         for head in range(0, cfg["N_R"]):
             for tail in range(cfg["N_R"], 2*cfg["N_R"]):
-                if M['W'][t, r, head, tail] != 0:
+                if W_rec[r, head, tail] != 0:
                     dot.edge(tail_name=f"{r}-{tail-cfg['N_R']}",
                              head_name=f"{r}-{head}",
-                             label=f"{M['W'][t, r, head, tail]:.2f}",
+                             label=f"{W_rec[r, head, tail]:.2f}",
                              penwidth='1',
-                             color=weightcolor(w=M['W'][t, r, head, tail]))
+                             color=weightcolor(w=W_rec[r, head, tail]))
 
     # inter-rec
-    for r in range(0, cfg["N_Rec"]-1):  # r to r+1
+    for r in range(0, cfg["N_Rec"]-1):
         for head in range(0, cfg["N_R"]):
             for tail in range(0, cfg["N_R"]):
                 if M['W'][t, r, head, tail] != 0:
                     dot.edge(tail_name=f"{r}-{head}",
                              head_name=f"{r+1}-{tail}",
-                             label=f"{M['W'][t, r, head, tail]:.2f}",
+                             label=f"{W_rec[r, head, tail]:.2f}",
                              penwidth='1',
-                             color=weightcolor(w=M['W'][t, r, head, tail]))
+                             color=weightcolor(w=W_rec[r, head, tail]))
 
     # rec-to-out
     for tail in range(0, cfg["N_R"]):
         for head in range(0, cfg["N_O"]):
           dot.edge(tail_name=f"{cfg['N_Rec']-1}-{tail}",
                    head_name=f"out-{head}",
-                   label=f"{M['W_out'][t, tail, head]:.2f}",
+                   label=f"{W_out[tail, head]:.2f}",
                    penwidth='1',
-                   color=weightcolor(w=M['W_out'][t, tail, head]))
+                   color=weightcolor(w=W_out[tail, head]))
 
     dot.attr(label=f"Steps {t+1}")
-    dot.render(f"../vis/net{fname}")
+    dot.render(f"../vis/net")
 
-
-def unflatten(arr):
-    a = arr.flatten().shape[0]
-    b = int(np.ceil(np.sqrt(a)))
-    arr = np.concatenate((arr.flatten(), np.zeros(b*b-a)))
-    arr = np.reshape(arr, (b, b))
-    c = b
-    while (b*c-a) >= b:
-        c -= 1
-        arr = arr[:-1, :]
-    return arr

@@ -78,10 +78,20 @@ In LIF, $\{\mathbf{h}^t_j, \mathbf{\epsilon}^t_{ji}\} \subset \mathbb{R}$.
 	
 \EndFor
 \end{algorithmic}
-
+\section{LIF steps}
+\begin{align}
+I^t_j &= \sum_{i\neq j} W^\text{rec}_{ji} z_i^t + \sum_i W^\text{in}_{ji}x_i^{t+1} \\
+z^t_j &= H\left(v_j^t-v_\text{th}\right)\\
+\psi^t_j &= \frac{1}{v_\text{th}}\gamma_{pd}\max\left(0, 1-\left|\frac{v_j^t-v_\text{th}}{v_\text{th}}\right|\right)\\
+y^t_k &= \kappa y^{t-1}_k + \sum_j W^\text{out}_{kj}z^t_j+b^\text{out}_k\\
+e^{t+1}_{ji} &= \psi^{t+1}_j\bar{z}^t_i\\
+\bar{e}^t_{ji} &= \kappa\bar{e}^{t-1}_{ji} + e^t_{ji}\\
+v^{t+1}_j &= \alpha v_j^t + I_j^t-z_jv_\text{th}\\
+\Delta W^\text{rec}_{ji} &= -\eta\sum_t\left(\sum_kB_{jk}\left(y_k^t-y_k^{*,t}\right)\right)\bar{e}^t_{ji}\\
+\end{align}
 \section{ALIF steps}
 \begin{align}
-I^t_j &= \sum_{t\neq j} W^\text{rec}_{ji} z_i^t + \sum_i W^\text{in}_{ji}x_i^{t+1} \\
+I^t_j &= \sum_{i\neq j} W^\text{rec}_{ji} z_i^t + \sum_i W^\text{in}_{ji}x_i^{t+1} \\
 A^t_j &= v_\text{th}+\beta a^t_j\\
 z^t_j &= H\left(v_j^t-A_j^t\right)\\
 \psi^t_j &= \frac{1}{v_\text{th}}0.3\max\left(0, 1-\left|\frac{v_j^t-A^t_j}{v_\text{th}}\right|\right)\\
@@ -239,18 +249,6 @@ $N\times61$ class labels.
 \item Fire rate regularization with $c_\text{reg} = 50$. 
 \end{itemize}
 
-Procedure:
-\begin{verbatim}
-For 80 epochs:
-	
-	For 32 batches:
-
-		F = get_frame_from_		
-		
-		For 5 steps:
-		
-			L = M(F)
-\end{verbatim}
 
 
 

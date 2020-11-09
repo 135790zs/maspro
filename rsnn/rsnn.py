@@ -2,11 +2,12 @@ import numpy as np
 from config import cfg as CFG
 import utils as ut
 from tqdm import tqdm
+import time
 import vis
 from task import narma10
 
 
-def network(cfg, inp, W_rec):
+def network(cfg, inp, W_rec, W_out):
     n_steps = inp.shape[0]
     M = ut.initialize_model(length=n_steps)
     M["XZ"] = np.random.default_rng().binomial(n=1, p=inp)
@@ -57,6 +58,10 @@ def network(cfg, inp, W_rec):
                                             Z=M['Z'][t, r],
                                             is_ALIF=M['is_ALIF'][r])  # Aggregate weights only
 
+        if cfg["plot_graph"]:
+            vis.plot_graph(M=M, t=t, W_rec=W_rec, W_out=W_out)
+            time.sleep(0.5)
+
     return M
 
 
@@ -77,9 +82,13 @@ def feed_batch(cfg, inps, tars, W_rec, W_out, b_out, epoch, train):
         inps_rep = np.repeat(inps[b], cfg["Repeats"], axis=0)
         tars_rep = np.repeat(tars[b], cfg["Repeats"], axis=0)
 
-        final_model = network(cfg=cfg, inp=inps_rep, W_rec=W_rec)
+        final_model = network(
+            cfg=cfg, 
+            inp=inps_rep, 
+            W_rec=W_rec,
+            W_out=W_out)
 
-        if epoch == 0 and train:
+        if cfg['plot_state'] and epoch == 0 and train:
             vis.plot_state(M=final_model)
 
         batch_err += ut.get_error(
@@ -89,11 +98,11 @@ def feed_batch(cfg, inps, tars, W_rec, W_out, b_out, epoch, train):
             W_out=W_out,
             b_out=b_out)
     
-    DW = ut.update_DWs(
-        cfg=cfg,
-        DW=DW,
-        err=batch_err,
-        M=final_model)
+        DW = ut.update_DWs(
+            cfg=cfg,
+            DW=DW,
+            err=batch_err,
+            M=final_model)
 
     batch_loss = ut.get_loss(err=batch_err)
 
@@ -129,7 +138,14 @@ def main(cfg):
             W_out=W['W_out'][e],
             b_out=W['b_out'][e])
 
-        W = ut.update_weight(cfg=cfg, W=W, DW=DW)
+        # Update weights for next epoch
+        W['W'][e+1] = W['W'][e] + DW['DW']
+        W['W'][e+1] *= cfg["weight_decay"]
+        W['W_out'][e+1] = W['W_out'][e] + DW['DW_out']
+        W['W_out'][e+1] *= cfg["weight_decay"]
+        W['b_out'][e+1] = W['b_out'][e] + DW['Db_out']
+        W['b_out'][e+1] *= cfg["weight_decay"]
+
 
         # TODO: change to actual val data
         randidxs = np.random.randint(inps.shape[0], size=cfg["batch_size"])
@@ -152,8 +168,11 @@ def main(cfg):
         terrs[e] = terr
         verrs[e] = verr
 
-        vis.plot_error(terrs, verrs)
+        if cfg["plot_main"]:
+            vis.plot_run(terrs=terrs, verrs=verrs, W=W, epoch=e)
+
     print("\nTraining complete!")
+
     return optVerr
 
 

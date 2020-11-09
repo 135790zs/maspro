@@ -5,7 +5,7 @@ from config import cfg
 n_examples = cfg['n_toy_examples']
 S_len = cfg['maxlen']
 Si = 2
-So = 4
+So = 2
 plotidx = 2
 
 rng = np.random.default_rng()
@@ -19,9 +19,9 @@ for s in range(n_examples):
     for t in range(S_len):
         for n in range(Si):
             inp[s, t, n] = A[n] * ((t - off[n]) % (dur[n] + gap[n]) < dur[n])
-    for t in range(S_len):  # classidx is sum of active
+    for t in range(S_len):  # classidx is XOR
         for n in range(So):
-            ix = int(inp[s, t, 0] + 2 * inp[s, t, 1])
+            ix = int(1-abs(inp[s, t, 0] - inp[s, t, 1]))
             tar[s, t, ix] = 1
 
 print(f"Saved {n_examples} with {S_len} frames each. "

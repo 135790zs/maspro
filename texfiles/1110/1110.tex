@@ -1,0 +1,199 @@
+\documentclass[t]{beamer}
+
+\setlength {\marginparwidth }{2cm} 
+\usepackage{todonotes}
+\usepackage{siunitx}
+\usepackage{subcaption}
+\usepackage{apacite} 	% Use APA Citation
+\presetkeys{todonotes}{inline}{}
+\beamertemplatenavigationsymbolsempty
+
+\usepackage{algpseudocode}
+\usepackage{enumitem,amssymb, yfonts}
+\newlist{todolist}{itemize}{2}
+\setlist[todolist]{label=$\square$}
+\usepackage{pifont}
+\newcommand{\cmark}{\ding{51}}%
+\newcommand{\xmark}{\ding{55}}%
+\newcommand{\done}{\rlap{$\square$}{\raisebox{2pt}{\large\hspace{1pt}\cmark}}%
+\hspace{-2.5pt}}
+
+% \usetheme{AnnArbor}
+% \usetheme{Antibes}
+% \usetheme{Bergen}
+% \usetheme{Berkeley}https://www.sharelatex.com/project/5b12e1a4f84b363f6f336dab
+% \usetheme{Berlin}
+% \usetheme{Boadilla}
+% \usetheme{boxes}
+\usetheme{CambridgeUS}
+% \usetheme{Copenhagen}
+%\usetheme{Darmstadt}
+% \usetheme{default}
+%\usetheme{Frankfurt}
+%\usetheme{Goettingen}
+% \usetheme{Hannover}
+% \usetheme{Ilmenau}
+% \usetheme{JuanLesPins}
+\setlength{\parskip}{10pt}
+
+% \newcommand*\vc[1]%
+% {\begin{pmatrix}#1\end{pmatrix}}
+
+\newcommand*\vc[1]%
+{\left(\begin{array}{cccc}#1\end{array}\right)}
+
+
+\newcommand\eqdef{\ \mathrel{\overset{\makebox[0pt]{\mbox{\normalfont\scriptsize\sffamily def}}}{=}}\ }
+
+\title[Eligibility propagation]{Improving eligibility propagation using Izhikevich neurons in a multilayer RSNN.\\\vspace{10pt}
+\large{Presentation 3: Implementing TIMIT}}
+
+\author[Werner]{Werner~van~der~Veen\\\tiny\texttt({w.k.van.der.veen.2@student.rug.nl})}\date{\today}
+
+% \pgfdeclareimage[height=1cm]{umcg-logo}{umcg.png}
+% \newif\ifplacelogo
+% \placelogotrue
+% \logo{\ifplacelogo\pgfuseimage{umcg-logo}\fi}
+
+\begin{document}
+
+\begin{frame}
+    \titlepage
+\end{frame}
+
+%======================================
+
+%\begin{frame}
+%    \tableofcontents
+%\end{frame}
+
+\small
+\section{Where things stand}
+\begin{frame}{Where things stand}
+	\begin{todolist}
+    \item[\done] Simulate LIF, ALIF and Izhikevich neuron pairs in e-prop simulation, and observe STDP-like weight change.
+    \item[\done] Make multilayered spiking recurrent neural network.
+    \item[\done] Prepend the TIMIT dataset reader to the pipeline.
+    \item Include validation sets.
+    \item Implement Bellec's tricks. Should be able to reproduce thereafter:
+    \begin{todolist}
+    	\item L2 \& firing rate regularization
+    	\item Firing rate regularization
+    	\item Gaussian distribution for broadcast weights
+    	\item Adam optimizer
+    \end{todolist}
+    \item I will enable the Izhikevich neurons and increase the number of layers (*).
+    \item Implement long-term synaptic scaling in Izhikevich neurons.
+    \item Implement metaplasticity.
+  \end{todolist}
+\end{frame}
+
+%\section{Context}
+%\footnotesize
+%\begin{frame}{The LIF e-prop implementation for 1 layer}
+%	$$\mathbf{u}^t \in \mathbb{R}^k\qquad\mathbf{y}^t \in \mathbb{R}^m$$
+%Every time step $t$ from neuron $i$ to neuron $j$:
+%\begin{align*}
+%I^t_j &= \sum_{i\neq j} W^\text{rec}_{ji} z_i^t + \sum_i W^\text{in}_{ji}\text{Bernoulli}\left(u_i^{t+1}\right) \\
+%z^t_j &= H\left(v_j^t-v_\text{th}\right)\\
+%\psi^t_j &= \frac{1}{v_\text{th}}\gamma_{pd}\max\left(0, 1-\left|\frac{v_j^t-v_\text{th}}{v_\text{th}}\right|\right)\\
+%y^t_k &= \kappa y^{t-1}_k + \sum_j W^\text{out}_{kj}z^t_j+b^\text{out}_k\\
+%e^{t+1}_{ji} &= \psi^{t+1}_j\bar{z}^t_i\\
+%\bar{e}^t_{ji} &= \kappa\bar{e}^{t-1}_{ji} + e^t_{ji}\\
+%v^{t+1}_j &= \alpha v_j^t + I_j^t-z_jv_\text{th}\\
+%\Delta W^\text{rec}_{ji} &= -\eta\sum_t\left(\sum_kB_{jk}\left(y_k^t-y_k^{*,t}\right)\right)\bar{e}^t_{ji}\\
+%\end{align*}
+%\end{frame}
+
+
+%\begin{align}
+%I^t_j &= \sum_{t\neq j} W^\text{rec}_{ji} z_i^t + \sum_i W^\text{in}_{ji}x_i^{t+1} \\
+%A^t_j &= v_\text{th}+\beta a^t_j\\
+%z^t_j &= H\left(v_j^t-A_j^t\right)\\
+%\psi^t_j &= \frac{1}{v_\text{th}}0.3\max\left(0, 1-\left|\frac{v_j^t-A^t_j}{v_\text{th}}\right|\right)\\
+%y^t_k &= \kappa y^{t-1}_k + \sum_j W^\text{out}_{kj}z^t_j+b^\text{out}_k\\
+%e^t_{ji} &= \psi^t_j\left(\epsilon^t_{ji,v} - \beta\epsilon^t_{ji,a}\right)\\
+%\bar{e}^t_{ji} &= \kappa\bar{e}^{t-1}_{ji} + e^t_{ji}\\
+%v^{t+1}_j &= \alpha v_j^t + I_j^t-z_jv_\text{th}\\
+%a^{t+1}_j &= \rho a_j^t + z_j^t\\
+%\epsilon_{ji,v}^{t+1} &= \alpha\epsilon_{ji,v}^t + z_i^t\\
+%\epsilon_{ji,a}^{t+1} &= \psi^t_j\epsilon^t_{ji,v} + \left(\rho-\psi^t_j\beta\right)\epsilon^t_{ji,a}\\
+%\Delta W^\text{rec}_{ji} &= -\eta\sum_t\left(\sum_kB_{jk}\left(y_k^t-y_k^{*,t}\right)\right)\bar{e}^t_{ji}\\
+%\end{align}
+%
+\section{Work done since previous meeting}
+\begin{frame}{Work done since previous meeting}
+	\begin{itemize}[label=--]
+	\item TIMIT preprocessing and data handling.
+	\item Wrote the outer loops processing the epochs and batches.\\
+	The whole system is now essentially a nested loop:
+	\begin{enumerate}[label=(\arabic*)]
+	\item Epochs of batches;
+	\item Batches of series;
+	\item Series of time points;
+	\item Layers to process each time point.
+	\end{enumerate}
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{TIMIT preprocessing}
+	$\mathbf{X}$: From \texttt{.wav} to $\mathbf{x}(t) \in \mathbb{R}^{39}$.
+	
+	$\mathbf{Y}$: From \texttt{.phn} to $\mathbf{y}(t) \in \mathbb{R}^{61}$.
+	\begin{enumerate}[label=(\arabic*)]
+	\item The \texttt{.wav} is sampled at $SR = 16 \text{kHz}$. Every 10ms (160 samples), we take a sample frame of 25ms (400 samples). The goal is to obtain 39 Mel-frequency cepstral coefficients (MFCCs) for each such frame.
+	\item Calculate the periodogram estimate of the power spectrum for each frame.
+	\item Apply a Mel-scaled filterbank to the power spectra and sum the energy in each filter.
+	\item Take the discrete cosine transform  (DCT) of the logarithm of the energies.
+	\item Only keep DCT coefficients 2--13.
+	\item Compute the first and second derivatives of the coefficients.
+	\item Parse the phonemes from the raw \texttt{.phn} and encode them in a one-hot vector that aligns with $\mathbf{x}(t)$.
+	\end{enumerate}
+\end{frame}
+
+\begin{frame}{Questions}
+	\begin{itemize}[label=--]
+	\item Looking ahead: should I start thinking about formal notation?
+	\end{itemize}
+\end{frame}
+
+%\begin{frame}{Outer loop (Level 0)}
+%	
+%\begin{algorithmic}
+%\State $W \gets W_0$
+%\State $D_T, D_V \gets \text{load\_data}$
+%\For{$e$ in $[0, E]$}
+%
+%	\State $B_T \gets \text{make\_batch}(D_T)$
+%	\State $(E_T, \Delta W) \gets \text{train\_on\_batch}(B_T)$
+%	\State $W \gets \text{update\_weight}(\Delta W)$
+%	\State $B_V \gets \text{make\_batch}(D_V)$
+%	\State $E_V \gets \text{train\_on\_batch}(B_T)$
+%	\If{$E_V < E_{V_\text{opt}}$}
+%	\State $W_\text{opt} \gets W$
+%	\State $E_{V_\text{opt}} \gets E_V$
+%	\EndIf
+%	
+%\EndFor
+%\end{algorithmic}
+%\end{frame}
+%
+%\begin{frame}{Batch loop (Level 1)}
+%	
+%\begin{algorithmic}
+%\State $E \gets 0$
+%\State $\Delta W \gets {(\Delta W)}_0$
+%\For{$(X, Y)$ in $B$}
+%
+%	\State $X, Y \gets \text{repeat}((X, Y))$
+%	\State $M \gets \text{eprop}(X, W)$
+%	\State $E \gets E + \text{get\_error}(M, Y)$	
+%\EndFor
+%
+%\State $\Delta W \gets \text{update\_gradients}(E, M, \Delta W)$
+%\State $L \gets $
+%\end{algorithmic}
+%\end{frame}
+
+
+\end{document}

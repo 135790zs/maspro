@@ -25,16 +25,6 @@ def update_DWs(cfg, DW, err, M):
     return DW
 
 
-def update_weight(cfg, DW, W):
-    W['W'] += DW['DW']
-    W['W'] *= cfg["weight_decay"]
-    W['W_out'] += DW['DW_out']
-    W['W_out'] *= cfg["weight_decay"]
-    W['b_out'] += DW['Db_out']
-    W['b_out'] *= cfg["weight_decay"]
-    return W
-
-
 def initialize_model(length):
     M = {}
     neuron_shape = (length,
@@ -45,10 +35,10 @@ def initialize_model(length):
                     cfg["N_R"],
                     cfg["N_R"] * 2,)
 
-    for neuronvar in ["V", "Z", "Zbar", "I", "H"]:
+    for neuronvar in ["V", "Z", "I", "H"]:
         M[neuronvar] = np.zeros(shape=neuron_shape)
 
-    for weightvar in ["ETbar", "EVV", "EVU", "ET"]:
+    for weightvar in ["EVV", "EVU", "ET"]:
         M[weightvar] = np.zeros(shape=weight_shape)
 
     M["T"] = np.zeros(shape=(length,))
