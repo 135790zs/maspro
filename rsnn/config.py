@@ -8,58 +8,48 @@ cfg = {
     "theta_membrane": 3,
     "beta": 0.07,
     "gamma": 0.3,     # Pseudoderivative ET contribution
-    "eta": 1e-6,      # Learning rate (1e-2 for TIMIT)
-    "weight_decay": 1,
+    "eta": 1e-8,      # Learning rate (1e-2 for TIMIT)
+    "weight_decay": 0.9,
     "update_dead_weights": True,
 
     "eqb": -65,       # Voltage equilibrium
     "thr": 30,        # Spike threshold
     "dt_refr": 100,    # Refractory time
 
-    # "refr1": 2,
-    # "refr2": 0.004,
-    # "refr3": 0.02,  # Refractory decay
-    # "volt1": 0.04,
-    # "volt2": 5,
-    # "volt3": 140,
+    "dt": .1,
 
-    "dt": 1,
-
-    "N_I": 2,
-    "N_R": 4,
-    "N_O": 2,
+    "N_I": 2, # timit: 39
+    "N_R": 2,
+    "N_O": 2, # timit: 61
     "N_Rec": 1,
 
     "TIMIT_ntrain": 12,  # def 3696
     "TIMIT_nval": 14,  # def 400
 
-    "wavs_fname": "../data_wavs.npy",
-    "phns_fname": "../data_phns.npy",
+    "wavs_fname": "../data_wavs",
+    "phns_fname": "../data_phns",
+    "weights_fname": "../checkpoint",
 
-    "Epochs": 100,  # def = 80
-    "Repeats": 2,  # ms per epoch, def = 5
-    "batch_size": 3,  # def = 32
-    "maxlen": 100,
-    "n_toy_examples": 4,
-    "plot_interval": 30,  # 0 to disable plots
+    "Epochs": 20,  # def = 80
+    "Repeats": 3,  # ms per epoch, def = 5
+    "batch_size": 6,  # def = 32
+    "maxlen": 300,
+    "n_examples": {'train': 30, 'val': 10, 'test': 10},
+    "plot_interval": 1,  # 0 to disable plots
     "plot_main": True,
-    "plot_state": False,
+    "plot_state": True,
     "plot_graph": False,
-
-    "task": "timit",
-    "tasktype": "classification",  # classification, regression
 }
 
 cfg['rho'] = exp(-cfg["dt"] / cfg["theta_adaptation"])
-cfg['alpha'] = 0.95#exp(-cfg["dt"] / cfg["theta_membrane"])
-cfg['kappa'] = 0.99#exp(-cfg["dt"] / cfg["theta_membrane"])
+cfg['alpha'] = exp(-cfg["dt"] / cfg["theta_membrane"])
+cfg['kappa'] = exp(-cfg["dt"] / cfg["theta_membrane"])
 
 assert cfg["N_R"] >= cfg["N_I"]
 assert cfg["N_R"] >= cfg["N_O"]
 
 lookup = {
     "X":     {"dim": 2, "label": "x"},
-    "XZ":    {"dim": 2, "label": "Bernoulli({{x}})"},
     "V":     {"dim": 2, "label": "v"},
     "Z":     {"dim": 2, "label": "z"},
     "Z_in":  {"dim": 2, "label": "z_{{in}}"},

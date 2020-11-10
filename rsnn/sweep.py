@@ -1,6 +1,6 @@
 import itertools
 from scipy.optimize import minimize
-from rsnn import run_rsnn
+from rsnn import main
 from config import cfg
 
 x0 = [  # Linear hyperparameters
@@ -19,7 +19,7 @@ def rsnn_aux(xs, ys):
     # cfg0["W_mp"] = xs[0]
     # cfg0["N_R"] = ys[0]
 
-    error = run_rsnn(cfg=cfg0)
+    error = main(cfg=cfg0)
     print(f"{error} with \tx={xs}, \ty={ys}", end='\r')
     return error
 

@@ -10,6 +10,7 @@
 
 \usepackage{algpseudocode}
 \usepackage{enumitem,amssymb, yfonts}
+\usepackage{kbordermatrix}% http://www.hss.caltech.edu/~kcb/TeX/kbordermatrix.sty
 \newlist{todolist}{itemize}{2}
 \setlist[todolist]{label=$\square$}
 \usepackage{pifont}
@@ -152,8 +153,24 @@
 \end{frame}
 
 \begin{frame}{Questions}
+	\begin{figure}[!ht]
+		\input{network.tex}	
+	\end{figure}
+	\[
+	W = \kbordermatrix{
+    & a & b & c & d & e & f \\
+    d & W_{da} & W_{db} & W_{dc} & 0 & W_{de} & W_{df} \\
+    e & W_{ea} & W_{eb} & W_{ec} & W_{ed} & 0 & W_{ef} \\
+    f & W_{fa} & W_{fb} & W_{fc} & W_{fd} & W_{fe} & 0
+  }
+	\]
+	
+
+\end{frame}
+
+\begin{frame}{Questions}
 	\begin{itemize}[label=--]
-	\item Looking ahead: should I start thinking about formal notation?
+	\item Input: now converting signal to Bernoulli spikes, and then feeding them to layer 0.
 	\end{itemize}
 \end{frame}
 

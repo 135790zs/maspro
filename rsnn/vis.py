@@ -15,18 +15,15 @@ def plot_run(terrs, verrs, W, epoch):
     fig = plt.figure(constrained_layout=False, figsize=(8, 8))
     gsc = fig.add_gridspec(nrows=5, ncols=1, hspace=0.05)
     axs = []
-    axs.append(fig.add_subplot(gsc[len(axs), :]))
-    axs[-1].plot(terrs[:epoch])
-    axs[-1].set_ylabel("$E_T$", 
-                       rotation=0,
-                       labelpad=labelpad,
-                       fontsize=fontsize)
-    axs.append(fig.add_subplot(gsc[len(axs), :], sharex=axs[0]))
-    axs[-1].plot(verrs[:epoch])
-    axs[-1].set_ylabel("$E_V$", 
-                       rotation=0,
-                       labelpad=labelpad,
-                       fontsize=fontsize)
+    for errs, label in [(terrs, "E_T"), (verrs, "E_V")]:
+        axs.append(fig.add_subplot(gsc[len(axs), :],
+                                   sharex=axs[0] if axs else None))
+        axs[-1].plot(errs[:epoch])
+        axs[-1].grid()
+        axs[-1].set_ylabel(f"${label}$",
+                           rotation=0,
+                           labelpad=labelpad,
+                           fontsize=fontsize)
     if epoch >= 1:
         for weight_type in ['W', 'W_out', 'b_out']:
             # W
@@ -50,7 +47,7 @@ def plot_run(terrs, verrs, W, epoch):
 
 
 def plot_state(M):
-    plotvars = ["XZ", "I", "V", "U", "Z_in", "Z", "H", "EVV", "EVU", "ET"]
+    plotvars = ["X", "I", "V", "U", "Z_in", "Z", "H", "EVV", "EVU", "ET", "DW"]
 
     fig = plt.figure(constrained_layout=False, figsize=(8, 14))
     gsc = fig.add_gridspec(nrows=len(plotvars) + 2, ncols=1, hspace=0.075)
@@ -94,7 +91,7 @@ def plot_graph(M, t, W_rec, W_out):
     # neurons
     def neuroncolor(r, n, spiked):
         if r is None:
-            return
+            return None
 
         bounds = (-80, 60) if cfg["neuron"] == "Izhikevich" \
             else (0, cfg["thr"])
@@ -124,10 +121,11 @@ def plot_graph(M, t, W_rec, W_out):
 
     for n in range(0, cfg["N_I"]):
         dot.node(name=f"in-{n}",
-                 label=f"in-{n}\n{M['XZ'][t, n]:.2f}",
+                 label=f"in-{n}\n{M['X'][t, n]:.2f}",
                  style='radial',
                  fixedsize='false',
-                 fillcolor="#ffffff" if M['XZ'][t, n] == 0 else "#33ff33;0.1:#ffffff")
+                 fillcolor=("#ffffff" if M['X'][t, n] == 0
+                            else "#33ff33;0.1:#ffffff"))
 
     # weights
     def weightcolor(w):
@@ -175,12 +173,11 @@ def plot_graph(M, t, W_rec, W_out):
     # rec-to-out
     for tail in range(0, cfg["N_R"]):
         for head in range(0, cfg["N_O"]):
-          dot.edge(tail_name=f"{cfg['N_Rec']-1}-{tail}",
-                   head_name=f"out-{head}",
-                   label=f"{W_out[tail, head]:.2f}",
-                   penwidth='1',
-                   color=weightcolor(w=W_out[tail, head]))
+            dot.edge(tail_name=f"{cfg['N_Rec']-1}-{tail}",
+                     head_name=f"out-{head}",
+                     label=f"{W_out[tail, head]:.2f}",
+                     penwidth='1',
+                     color=weightcolor(w=W_out[tail, head]))
 
     dot.attr(label=f"Steps {t+1}")
     dot.render(f"../vis/net")
-

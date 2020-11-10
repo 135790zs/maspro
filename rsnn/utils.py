@@ -1,6 +1,6 @@
+import os
 import numpy as np
 from config import cfg
-from task import sinusoid, pulse, pulseclass
 
 
 def get_loss(err):
@@ -8,10 +8,8 @@ def get_loss(err):
     return np.mean(np.mean(err, axis=1) ** 2)
 
 
-def update_DWs(cfg, DW, err, M):
-
-    n_steps = M['XZ'].shape[0]
-
+def update_DWs(DW, err, M):
+    n_steps = M['X'].shape[0]
     for t in range(n_steps):  # maybe until 1 shorter
         B = DW['DW_out'].T  # TODO: NOT SURE!
         DW['DW'] = (DW['DW'] - cfg["eta"]
@@ -38,7 +36,7 @@ def initialize_model(length):
     for neuronvar in ["V", "Z", "I", "H"]:
         M[neuronvar] = np.zeros(shape=neuron_shape)
 
-    for weightvar in ["EVV", "EVU", "ET"]:
+    for weightvar in ["EVV", "EVU", "ET", "DW"]:
         M[weightvar] = np.zeros(shape=weight_shape)
 
     M["T"] = np.zeros(shape=(length,))
@@ -62,15 +60,15 @@ def initialize_weights():
     W["B"] = rng.random(
         size=(cfg["Epochs"], cfg["N_Rec"], cfg["N_R"], cfg["N_O"],))
     W["W"] = rng.random(
-        size=(cfg["Epochs"], cfg["N_Rec"], cfg["N_R"], cfg["N_R"] * 2,)) * 2
+        size=(cfg["Epochs"], cfg["N_Rec"], cfg["N_R"], cfg["N_R"] * 2,)) /10
     W["W_out"] = rng.random(size=(cfg["Epochs"], cfg["N_O"], cfg["N_R"],))
     W["b_out"] = np.zeros(shape=(cfg["Epochs"], cfg["N_O"],))
 
     return W
 
 
-def get_error(M, tars, W_out, b_out, cfg):
-    n_steps = M['XZ'].shape[0]
+def get_error(M, tars, W_out, b_out):
+    n_steps = M['X'].shape[0]
     error = np.zeros(shape=(n_steps, cfg["N_O"],))
     Y = np.zeros(shape=(n_steps, cfg["N_O"],))
     # Calculate network output
@@ -82,10 +80,26 @@ def get_error(M, tars, W_out, b_out, cfg):
     return error
 
 
-def temporal_filter(c, a):
+def save_weights(W, epoch):
+    for k, v in W.items():
+        np.save(f"{cfg['weights_fname']}/{k}", v[epoch])
+
+
+def load_weights():
+    W = {}
+    for subdir, _, files in os.walk(cfg['weights_fname']):
+        for filename in files:
+            filepath = subdir + os.sep + filename
+            W[filename[:-4]] = np.load(filepath)  # cut off '.npy'
+    return W
+
+
+def temporal_filter(c, a, depth=0):
+    if depth == 32:
+        return a[-1]
     if a.shape[0] == 1:
         return a[0]
-    return c * temporal_filter(c, a=a[:-1]) + a[-1]
+    return c * temporal_filter(c, a=a[:-1], depth=depth+1) + a[-1:]
 
 
 def normalize(arr):
@@ -99,11 +113,11 @@ def eprop_Z(t, TZ, V, U):
                     0)
 
 
-def eprop_V(V, U, I, Z):
+def eprop_V(V, I, Z):
     return cfg["alpha"] * V + I - Z * cfg["thr"]
 
 
-def eprop_U(V, U, Z, is_ALIF):
+def eprop_U(U, Z, is_ALIF):
     return np.where(is_ALIF,
                     cfg["rho"] * U + Z,
                     U)
@@ -117,7 +131,7 @@ def eprop_EVU(H, EVV, EVU):
     return (H * EVV.T).T + ((cfg["rho"] - H * cfg["beta"]) * EVU.T).T
 
 
-def eprop_H(t, V, U, is_ALIF):
+def eprop_H(V, U, is_ALIF):
     return 1 / cfg["thr"] * \
         cfg["gamma"] * np.clip(a=1 - (abs(V
                                           - cfg["thr"]
@@ -129,5 +143,5 @@ def eprop_H(t, V, U, is_ALIF):
                                a_max=None)
 
 
-def eprop_ET(H, EVV, EVU, is_ALIF):
+def eprop_ET(H, EVV, EVU):
     return np.dot(H, EVV - cfg["beta"] * EVU)
