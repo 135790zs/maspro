@@ -1,5 +1,8 @@
 
 # MUST DO:
+# TODO: Auto set N_I N_O
+# TODO: Make it possible to use fewer than N_I N_Rs
+# TODO: Make N_R variable per layer
 # TODO: Implement CE loss
 # TODO: DW back into network model for visualization purposes
 # TODO: Implement L2 reg: Add 1e-5 * ||W||^2 to loss

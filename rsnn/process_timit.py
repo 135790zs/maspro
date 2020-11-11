@@ -51,6 +51,7 @@ def read_sound(fname):
     conc = np.concatenate((mfcc_feat, delta1, delta2), axis=1)
     return conc
 
+
 if __name__ == "__main__":
 
     sampling_rate = 16000

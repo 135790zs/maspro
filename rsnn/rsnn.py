@@ -83,7 +83,7 @@ def feed_batch(cfg, inps, tars, W_rec, W_out, b_out, epoch, tvt_type):
             W_rec=W_rec,
             W_out=W_out)
 
-        if cfg['plot_state'] and epoch == 0 and tvt_type == "train":
+        if cfg['plot_state'] and epoch == 0 and b == 0 and tvt_type == "train":
             vis.plot_state(M=final_model)
 
         batch_err += ut.get_error(

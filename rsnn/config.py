@@ -18,9 +18,9 @@ cfg = {
 
     "dt": .1,
 
-    "N_I": 2, # timit: 39
+    "N_I": 2,  # timit: 39
     "N_R": 2,
-    "N_O": 2, # timit: 61
+    "N_O": 2,  # timit: 61
     "N_Rec": 1,
 
     "TIMIT_ntrain": 12,  # def 3696
