@@ -60,23 +60,29 @@ def network(cfg, inp, tar, W_rec, W_out, b_out):
         M['Y'][t] = ((cfg["kappa"] * M['Y'][t-1] if t > 0 else 0)
                      + np.sum(W_out * M['Z'][t, -1], axis=1)
                      + b_out)
-        # print(np.sum(W_out * M['Z'][t, -1], axis=0))
-        mx = np.max(M['Y'][t])
-        ex = np.exp(M['Y'][t] / (mx + 1e-8))
+
+        ex = np.exp(M['Y'][t] / (np.max(M['Y'][t]) + 1e-8))  # eps prevent e/0
         M['P'][t] = ex / np.sum(ex)
 
-        # print(M['P'][t].argmax())
         M['Pmax'][t, M['P'][t].argmax()] = 1
 
-        M['E'][t] = - np.sum(M['T'][t] * np.log(M['P'][t]))
+        M['E'][t] = -np.sum(M['T'][t] * np.log(M['P'][t]))
 
-        M['DW_out'][t] = -cfg["eta"] * M['ZbarK'][t] * np.sum(
-            M['P'][t] - M['T'][t])
+        W = np.concatenate((
+            W_rec.flatten(),
+            W_out.flatten(),
+            b_out))
+        L2norm = np.linalg.norm(W) ** 2 * cfg["L2_reg"]
+
+        M['DW_out'][t] = -cfg["eta"] * M['ZbarK'][t] * (L2norm + np.sum(
+            M['P'][t] - M['T'][t]))
+
         B = M['DW_out'][t].T
-        intersum = np.sum(B * (M['P'][t] - M['T'][t]), axis=0)
         M['DW'][t] = -cfg["eta"] * M['ETbar'][t] * np.sum(
-            intersum)
-        M['Db_out'][t] = -cfg["eta"] * np.sum(M['P'][t] - M['T'][t])
+            L2norm + np.sum(B * (M['P'][t] - M['T'][t]), axis=0))
+
+        M['Db_out'][t] = -cfg["eta"] * (L2norm
+                                        + np.sum(M['P'][t] - M['T'][t]))
 
         if cfg["plot_graph"]:
             vis.plot_graph(M=M, t=t, W_rec=W_rec, W_out=W_out)
@@ -112,7 +118,7 @@ def feed_batch(cfg, inps, tars, W_rec, W_out, b_out, epoch, tvt_type):
             W_out=W_out,
             b_out=b_out)
 
-        if cfg['plot_state'] and epoch == 0 and b == 0 and tvt_type == "train":
+        if cfg['plot_state'] and b == 0 and tvt_type == "train":
             vis.plot_state(M=final_model,
                            W_rec=W_rec,
                            W_out=W_out,

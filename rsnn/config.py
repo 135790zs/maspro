@@ -8,8 +8,10 @@ cfg = {
     "theta_membrane": 3,
     "beta": 0.07,
     "gamma": 0.3,     # Pseudoderivative ET contribution
-    "eta": 1e-10,      # Learning rate (1e-2 for TIMIT)
+    "eta": 1e-9,      # Learning rate (1e-2 for TIMIT)
     "weight_decay": 0.9,
+    "L2_reg": 1e-5,
+    "FR_reg": 1e-5,
     "update_dead_weights": False,
 
     "eqb": -65,       # Voltage equilibrium
@@ -31,9 +33,9 @@ cfg = {
     "weights_fname": "../checkpoint",
 
     "Epochs": 20,  # def = 80
-    "Repeats": 3,  # ms per epoch, def = 5
+    "Repeats": 5,  # ms per epoch, def = 5
     "batch_size": 6,  # def = 32
-    "maxlen": 778,
+    "maxlen": 200,  # Don't forget to re-run process_timit.py!
     "n_examples": {'train': 30, 'val': 10, 'test': 10},
     "plot_interval": 1,  # 0 to disable plots
     "plot_main": True,
