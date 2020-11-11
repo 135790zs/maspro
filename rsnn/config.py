@@ -8,19 +8,19 @@ cfg = {
     "theta_membrane": 3,
     "beta": 0.07,
     "gamma": 0.3,     # Pseudoderivative ET contribution
-    "eta": 1e-8,      # Learning rate (1e-2 for TIMIT)
+    "eta": 1e-10,      # Learning rate (1e-2 for TIMIT)
     "weight_decay": 0.9,
-    "update_dead_weights": True,
+    "update_dead_weights": False,
 
     "eqb": -65,       # Voltage equilibrium
     "thr": 30,        # Spike threshold
-    "dt_refr": 100,    # Refractory time
+    "dt_refr": 10,    # Refractory time
 
     "dt": .1,
 
-    "N_I": 2,  # timit: 39
-    "N_R": 2,
-    "N_O": 2,  # timit: 61
+    "N_I": 39,  # timit: 39
+    "N_R": 63,
+    "N_O": 61,  # timit: 61
     "N_Rec": 1,
 
     "TIMIT_ntrain": 12,  # def 3696
@@ -33,7 +33,7 @@ cfg = {
     "Epochs": 20,  # def = 80
     "Repeats": 3,  # ms per epoch, def = 5
     "batch_size": 6,  # def = 32
-    "maxlen": 300,
+    "maxlen": 778,
     "n_examples": {'train': 30, 'val': 10, 'test': 10},
     "plot_interval": 1,  # 0 to disable plots
     "plot_main": True,
@@ -54,6 +54,7 @@ lookup = {
     "Z":     {"dim": 2, "label": "z"},
     "Z_in":  {"dim": 2, "label": "z_{{in}}"},
     "Zbar":  {"label": "\\bar{{z}}"},
+    "ZbarK": {"label": "\\bar{{z}}_\\kappa"},
     "I":     {"dim": 2, "label": "I"},
     "U":     {"dim": 2, "label": "u"},
     "EVV":   {"dim": 3, "label": "\\epsilon_v"},
@@ -63,11 +64,16 @@ lookup = {
     "ETbar": {"label": "\\bar{{e}}"},
     "B":     {"dim": 3, "label": "B"},
     "Y":     {"dim": 3, "label": "Y"},
-    "error": {"dim": 3, "label": "E"},
+    "P":     {"dim": 3, "label": "\\pi"},
+    "Pmax":  {"dim": 3, "label": "\\pi_{{max}}"},
+    "E":     {"dim": 3, "label": "E"},
     "loss":  {"dim": 3, "label": "loss"},
     "T":     {"dim": 3, "label": "T"},
     "W":     {"dim": 3, "label": "W"},
+    "W_rec": {"dim": 3, "label": "W_{{rec}}"},
     "W_out": {"dim": 1, "label": "W_{{out}}"},
     "b_out": {"dim": 0, "label": "b_{{out}}"},
-    "DW":    {"dim": 3, "label": "\\Delta W"}
+    "DW":    {"dim": 3, "label": "\\Delta W"},
+    "DW_out":    {"dim": 3, "label": "\\Delta W_{{out}}"},
+    "Db_out":    {"dim": 3, "label": "\\Delta b_{{out}}"},
 }

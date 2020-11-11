@@ -5,7 +5,7 @@ import utils as ut
 import vis
 
 
-def network(cfg, inp, W_rec, W_out):
+def network(cfg, inp, tar, W_rec, W_out, b_out):
     n_steps = inp.shape[0]
     M = ut.initialize_model(length=n_steps)
     M["X"] = inp
@@ -52,6 +52,32 @@ def network(cfg, inp, W_rec, W_out):
                                             Z=M['Z'][t, r],
                                             is_ALIF=M['is_ALIF'][r])
 
+        M['ETbar'][t] = ((cfg["kappa"] * M['ETbar'][t-1] if t > 0 else 0)
+                         + M['ET'][t])
+        M['ZbarK'][t] = ((cfg["kappa"] * M['ZbarK'][t-1] if t > 0 else 0)
+                         + M['Z'][t])
+        M['T'][t] = tar[t]
+        M['Y'][t] = ((cfg["kappa"] * M['Y'][t-1] if t > 0 else 0)
+                     + np.sum(W_out * M['Z'][t, -1], axis=1)
+                     + b_out)
+        # print(np.sum(W_out * M['Z'][t, -1], axis=0))
+        mx = np.max(M['Y'][t])
+        ex = np.exp(M['Y'][t] / (mx + 1e-8))
+        M['P'][t] = ex / np.sum(ex)
+
+        # print(M['P'][t].argmax())
+        M['Pmax'][t, M['P'][t].argmax()] = 1
+
+        M['E'][t] = - np.sum(M['T'][t] * np.log(M['P'][t]))
+
+        M['DW_out'][t] = -cfg["eta"] * M['ZbarK'][t] * np.sum(
+            M['P'][t] - M['T'][t])
+        B = M['DW_out'][t].T
+        intersum = np.sum(B * (M['P'][t] - M['T'][t]), axis=0)
+        M['DW'][t] = -cfg["eta"] * M['ETbar'][t] * np.sum(
+            intersum)
+        M['Db_out'][t] = -cfg["eta"] * np.sum(M['P'][t] - M['T'][t])
+
         if cfg["plot_graph"]:
             vis.plot_graph(M=M, t=t, W_rec=W_rec, W_out=W_out)
             time.sleep(0.5)
@@ -61,7 +87,8 @@ def network(cfg, inp, W_rec, W_out):
 
 def feed_batch(cfg, inps, tars, W_rec, W_out, b_out, epoch, tvt_type):
     batch_err = 0
-    DW = {
+    # TODO: Put all W of this batch in own dict
+    batch_DW = {
         'DW': np.zeros(
             shape=(cfg["N_Rec"], cfg["N_R"], cfg["N_R"] * 2,)),
         'DW_out': np.zeros(
@@ -72,7 +99,7 @@ def feed_batch(cfg, inps, tars, W_rec, W_out, b_out, epoch, tvt_type):
     for b in range(cfg["batch_size"]):
         print(f"\tEpoch {epoch}/{cfg['Epochs']-1}\t"
               f"{'  ' if tvt_type == 'val' else ''}{tvt_type} "
-              f"sample {b}/{cfg['batch_size']-1}",
+              f"sample {b+1}/{cfg['batch_size']}",
               end='\r' if b < cfg['Epochs']-1 else '\n')
         inps_rep = np.repeat(inps[b], cfg["Repeats"], axis=0)
         tars_rep = np.repeat(tars[b], cfg["Repeats"], axis=0)
@@ -80,11 +107,16 @@ def feed_batch(cfg, inps, tars, W_rec, W_out, b_out, epoch, tvt_type):
         final_model = network(
             cfg=cfg,
             inp=inps_rep,
+            tar=tars_rep,
             W_rec=W_rec,
-            W_out=W_out)
+            W_out=W_out,
+            b_out=b_out)
 
         if cfg['plot_state'] and epoch == 0 and b == 0 and tvt_type == "train":
-            vis.plot_state(M=final_model)
+            vis.plot_state(M=final_model,
+                           W_rec=W_rec,
+                           W_out=W_out,
+                           b_out=b_out)
 
         batch_err += ut.get_error(
             M=final_model,
@@ -92,14 +124,14 @@ def feed_batch(cfg, inps, tars, W_rec, W_out, b_out, epoch, tvt_type):
             W_out=W_out,
             b_out=b_out)
 
-        DW = ut.update_DWs(
-            DW=DW,
-            err=batch_err,
-            M=final_model)
+        batch_DW["DW"] += np.sum(final_model['DW'], axis=0)
+        batch_DW["DW_out"] += np.sum(final_model['DW_out'], axis=0)
+        batch_DW["Db_out"] += np.sum(final_model['Db_out'], axis=0)
+
 
     batch_loss = ut.get_loss(err=batch_err)
 
-    return batch_loss, DW
+    return batch_loss, batch_DW
 
 
 def main(cfg):

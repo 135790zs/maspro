@@ -33,17 +33,25 @@ def initialize_model(length):
                     cfg["N_R"],
                     cfg["N_R"] * 2,)
 
-    for neuronvar in ["V", "Z", "I", "H"]:
+    for neuronvar in ["V", "Z", "ZbarK", "I", "H"]:
         M[neuronvar] = np.zeros(shape=neuron_shape)
 
-    for weightvar in ["EVV", "EVU", "ET", "DW"]:
+    for weightvar in ["EVV", "EVU", "ET", "DW", "ETbar"]:
         M[weightvar] = np.zeros(shape=weight_shape)
 
-    M["T"] = np.zeros(shape=(length,))
     M["U"] = np.ones(shape=neuron_shape) * cfg["thr"]
     M["TZ"] = np.ones(shape=(cfg["N_Rec"], cfg["N_R"])) * -cfg["dt_refr"]
 
     M["Z_in"] = np.zeros(shape=(length, cfg["N_Rec"], cfg["N_R"] * 2,))
+
+    M["DW_out"] = np.zeros(shape=(length, cfg["N_O"], cfg["N_R"],))
+    M["Db_out"] = np.zeros(shape=(length, cfg["N_O"],))
+
+    M["T"] = np.zeros(shape=(length, cfg["N_O"],))
+    M["Y"] = np.zeros(shape=(length, cfg["N_O"],))
+    M["P"] = np.zeros(shape=(length, cfg["N_O"],))
+    M["Pmax"] = np.zeros(shape=(length, cfg["N_O"],))
+    M["E"] = np.zeros(shape=(length,))
 
     M["is_ALIF"] = np.zeros(shape=(cfg["N_Rec"] * cfg["N_R"]))
     M["is_ALIF"][:int(M["is_ALIF"].size * cfg["fraction_ALIF"])] = 1

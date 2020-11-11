@@ -102,7 +102,9 @@ v^{t+1}_j &= \alpha v_j^t + I_j^t-z_jv_\text{th}\\
 a^{t+1}_j &= \rho a_j^t + z_j^t\\
 \epsilon_{ji,v}^{t+1} &= \alpha\epsilon_{ji,v}^t + z_i^t\\
 \epsilon_{ji,a}^{t+1} &= \psi^t_j\epsilon^t_{ji,v} + \left(\rho-\psi^t_j\beta\right)\epsilon^t_{ji,a}\\
-\Delta W^\text{rec}_{ji} &= -\eta\sum_t\left(\sum_kB_{jk}\left(y_k^t-y_k^{*,t}\right)\right)\bar{e}^t_{ji}\\
+\pi_k^t &= \frac{\exp\left(y_k^t\right)}{\sum_{k'}\exp\left( y^t_{k'}\right)}\\
+E &= -\sum_{t,k}\pi_k^{*,t}\log\pi_k^t\\
+\Delta W^\text{rec}_{ji} &= -\eta\sum_t\left(\sum_kB_{jk}\left(\pi_k^t-\pi_k^{*,t}\right)\right)\bar{e}^t_{ji}\\
 \end{align}
 
 Given at time $t$, with given observable state $z_i^t$ (simplified):

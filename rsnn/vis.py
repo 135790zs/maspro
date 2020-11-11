@@ -46,11 +46,15 @@ def plot_run(terrs, verrs, W, epoch):
     plt.close()
 
 
-def plot_state(M):
-    plotvars = ["X", "I", "V", "U", "Z_in", "Z", "H", "EVV", "EVU", "ET", "DW"]
+def plot_state(M, W_rec, W_out, b_out):
+    M_plotvars = ["X", "I", "V", "H", "U", "Z_in", "Z", "ZbarK", "EVV", "EVU",
+                  "ET", "ETbar", "Y", "P", "Pmax", "T", "E", "DW", "DW_out", "Db_out"]
+    W = {"W_rec": W_rec, "W_out": W_out, "b_out": b_out}
 
     fig = plt.figure(constrained_layout=False, figsize=(8, 14))
-    gsc = fig.add_gridspec(nrows=len(plotvars) + 2, ncols=1, hspace=0.075)
+    gsc = fig.add_gridspec(nrows=len(M_plotvars) + len(W.keys()) + 2,
+                           ncols=1,
+                           hspace=0.075)
     axs = []
     labelpad = 35
     fontsize = 14
@@ -58,8 +62,7 @@ def plot_state(M):
                  f"$\\kappa={cfg['kappa']:.3f}$, $\\rho={cfg['rho']:.3f}$",
                  fontsize=20)
 
-    # Print input to neurons
-    for var in plotvars:
+    for var in M_plotvars:
 
         axs.append(fig.add_subplot(gsc[len(axs), :],
                                    sharex=axs[0] if axs else None))
@@ -72,6 +75,25 @@ def plot_state(M):
         axs[-1].set_ylabel(f"${lookup[var]['label']}$"
                            f"\n[{np.min(M[var]):.1f}"
                            f", {np.max(M[var]):.1f}]",
+                           rotation=0,
+                           labelpad=labelpad,
+                           fontsize=fontsize)
+    for k, v in W.items():
+        v = v.flatten()
+        v = np.expand_dims(v, axis=0)
+        v = np.repeat(v, M['X'].shape[0], axis=0)
+
+        axs.append(fig.add_subplot(gsc[len(axs), :],
+                                   sharex=axs[0] if axs else None))
+        axs[-1].imshow(v.reshape(v.shape[0], -1).T,
+                       cmap='coolwarm',
+                       vmin=np.min(v),
+                       vmax=np.max(v),
+                       interpolation='nearest',
+                       aspect='auto')
+        axs[-1].set_ylabel(f"${lookup[k]['label']}$"
+                           f"\n[{np.min(v):.1f}"
+                           f", {np.max(v):.1f}]",
                            rotation=0,
                            labelpad=labelpad,
                            fontsize=fontsize)

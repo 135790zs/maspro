@@ -32,13 +32,17 @@ def align_phones(phones_):
     frame = 0
     for frame in range(maxnframes):
         frametime = int(winlen / 2 + frame * steplen)
+        # print(frametime)
         for phone, phonetime in phones_:
+            # print(phonetime)
             if frametime < phonetime:
+                # A phone discovered after this frametime!
                 ret[frame, :] = phone
                 break
 
         else:
-            break
+            # No phones discovered after frametime! Silent.
+            ret[frame, :] = phones_[0][0]
 
     return ret, frame
 
@@ -94,7 +98,7 @@ if __name__ == "__main__":
                     c = read_sound(filepath)
                     wavdata[idx, :c.shape[0], :] = c[:maxnframes]
                     if idx == plotidx:
-                        axs[0].plot(sig)
+                        axs[0].plot(sig[:int(steplen*maxnframes)])
                         axs[0].margins(0)
                         axs[1].imshow(wavdata[idx, :c.shape[0]].T,
                                       aspect='auto',
@@ -109,25 +113,26 @@ if __name__ == "__main__":
                     phonedata[idx, :, :] = aligned
                     if idx == plotidx:
                         plt.suptitle(' '.join(textline.split(' ')[2:]))
-                        axs[2].imshow(aligned[:maxframe].T,
+                        axs[2].imshow(aligned[:c.shape[0]].T,
                                       aspect='auto',
                                       cmap='gray')
                         for line in phonelines:
-                            axs[0].axvline(int(line.split(' ')[0]),
+                            start, end, phone = line.split(' ')
+                            if int(start) >= maxnframes * steplen:
+                                break
+                            axs[0].axvline(int(start),
                                            color='black',
-                                           label=line.split(' ')[2])
+                                           label=phone)
                             axs[0].axis('off')
-                            xpos_start = int(line.split(' ')[0])
-                            xpos_end = int(line.split(' ')[1])
-                            xpos = (xpos_start + xpos_end) // 2
-                            axs[0].text(x=xpos,
+                            axs[0].text(x=(int(start) + int(end)) // 2,
                                         y=np.min(sig)*1.4,
-                                        s=line.split(' ')[2])
+                                        s=phone)
 
 
                     idx += 1
                     if idx == nwavs:
                         break
+
         if tvt_type == 'test':
             np.save(f'{cfg["wavs_fname"]}_{tvt_type}.npy', wavdata)
             np.save(f'{cfg["phns_fname"]}_{tvt_type}.npy', phonedata)
