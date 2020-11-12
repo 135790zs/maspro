@@ -15,14 +15,12 @@ cfg = {
     "update_dead_weights": False,
 
     "eqb": -65,       # Voltage equilibrium
-    "thr": 30,        # Spike threshold
+    "thr": 10,        # Spike threshold
     "dt_refr": 10,    # Refractory time
 
     "dt": .1,
 
-    "N_I": 39,  # timit: 39
-    "N_R": 63,
-    "N_O": 61,  # timit: 61
+    "N_R": 2,
     "N_Rec": 1,
 
     "TIMIT_ntrain": 12,  # def 3696
@@ -35,20 +33,17 @@ cfg = {
     "Epochs": 20,  # def = 80
     "Repeats": 5,  # ms per epoch, def = 5
     "batch_size": 6,  # def = 32
-    "maxlen": 200,  # Don't forget to re-run process_timit.py!
+    "maxlen": 40,  # Don't forget to re-run process_timit.py!
     "n_examples": {'train': 30, 'val': 10, 'test': 10},
     "plot_interval": 1,  # 0 to disable plots
     "plot_main": True,
     "plot_state": True,
-    "plot_graph": False,
+    "plot_graph": True,
 }
 
 cfg['rho'] = exp(-cfg["dt"] / cfg["theta_adaptation"])
 cfg['alpha'] = exp(-cfg["dt"] / cfg["theta_membrane"])
 cfg['kappa'] = exp(-cfg["dt"] / cfg["theta_membrane"])
-
-assert cfg["N_R"] >= cfg["N_I"]
-assert cfg["N_R"] >= cfg["N_O"]
 
 lookup = {
     "X":      {"scalar": False, "binary":False, "label": "x"},

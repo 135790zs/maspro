@@ -1,7 +1,6 @@
 
 # MUST DO:
 # TODO: check all t's indxs
-# TODO: Implement CE loss  (think it's done but check!)
 # TODO: Add firing rate regularization with c_reg = 50. See supplementary notes.
 # TODO: Gaussian distribution for broadcast weights (mu=0, var=1)
 # TODO: Implement ADAM
@@ -9,6 +8,5 @@
 
 # LOW PRIORITY:
 # TODO: Dictionary to facilitate sweeping function (param = key, list = item)
-# TODO: Auto set N_I N_O
 # TODO: Make it possible to use fewer than N_I N_Rs
 # TODO: Make N_R variable per layer

@@ -18,7 +18,7 @@ def update_DWs(DW, err, M):
     return DW
 
 
-def initialize_model(length):
+def initialize_model(length, tar_size):
     M = {}
     neuron_shape = (length,
                     cfg["N_Rec"],
@@ -39,13 +39,13 @@ def initialize_model(length):
 
     M["Z_in"] = np.zeros(shape=(length, cfg["N_Rec"], cfg["N_R"] * 2,))
 
-    M["DW_out"] = np.zeros(shape=(length, cfg["N_O"], cfg["N_R"],))
-    M["Db_out"] = np.zeros(shape=(length, cfg["N_O"],))
+    M["DW_out"] = np.zeros(shape=(length, tar_size, cfg["N_R"],))
+    M["Db_out"] = np.zeros(shape=(length, tar_size,))
 
-    M["T"] = np.zeros(shape=(length, cfg["N_O"],))
-    M["Y"] = np.zeros(shape=(length, cfg["N_O"],))
-    M["P"] = np.zeros(shape=(length, cfg["N_O"],))
-    M["Pmax"] = np.zeros(shape=(length, cfg["N_O"],))
+    M["T"] = np.zeros(shape=(length, tar_size,))
+    M["Y"] = np.zeros(shape=(length, tar_size,))
+    M["P"] = np.zeros(shape=(length, tar_size,))
+    M["Pmax"] = np.zeros(shape=(length, tar_size,))
     M["CE"] = np.zeros(shape=(length,))
 
     M["is_ALIF"] = np.zeros(shape=(cfg["N_Rec"] * cfg["N_R"]))
@@ -56,16 +56,16 @@ def initialize_model(length):
     return M
 
 
-def initialize_weights():
+def initialize_weights(tar_size):
     rng = np.random.default_rng()
     W = {}
 
     W["B"] = rng.random(
-        size=(cfg["Epochs"], cfg["N_Rec"], cfg["N_R"], cfg["N_O"],))
+        size=(cfg["Epochs"], cfg["N_Rec"], cfg["N_R"], tar_size,))
     W["W"] = rng.random(
-        size=(cfg["Epochs"], cfg["N_Rec"], cfg["N_R"], cfg["N_R"] * 2,)) /10
-    W["W_out"] = rng.random(size=(cfg["Epochs"], cfg["N_O"], cfg["N_R"],))
-    W["b_out"] = np.zeros(shape=(cfg["Epochs"], cfg["N_O"],))
+        size=(cfg["Epochs"], cfg["N_Rec"], cfg["N_R"], cfg["N_R"] * 2,))
+    W["W_out"] = rng.random(size=(cfg["Epochs"], tar_size, cfg["N_R"],))
+    W["b_out"] = np.zeros(shape=(cfg["Epochs"], tar_size,))
 
     return W
 

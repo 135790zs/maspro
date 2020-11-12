@@ -7,7 +7,7 @@ import vis
 
 def network(cfg, inp, tar, W_rec, W_out, b_out):
     n_steps = inp.shape[0]
-    M = ut.initialize_model(length=n_steps)
+    M = ut.initialize_model(length=n_steps, tar_size=tar.shape[-1])
     M["X"] = inp
 
     for t in range(n_steps):
@@ -61,7 +61,7 @@ def network(cfg, inp, tar, W_rec, W_out, b_out):
                      + np.sum(W_out * M['Z'][t, -1], axis=1)
                      + b_out)
 
-        ex = np.exp(M['Y'][t] / (np.max(M['Y'][t]) + 1e-8))  # eps prevent e/0
+        ex = np.exp(M['Y'][t] - np.max(M['Y'][t]))
         M['P'][t] = ex / np.sum(ex)
 
         M['Pmax'][t, M['P'][t].argmax()] = 1
@@ -74,7 +74,7 @@ def network(cfg, inp, tar, W_rec, W_out, b_out):
             b_out))
         L2norm = np.linalg.norm(W) ** 2 * cfg["L2_reg"]
 
-        M['DW_out'][t] = -cfg["eta"] * M['ZbarK'][t] * (L2norm + np.sum(
+        M['DW_out'][t] = -cfg["eta"] * M['ZbarK'][t, -1] * (L2norm + np.sum(
             M['P'][t] - M['T'][t]))
 
         B = M['DW_out'][t].T
@@ -98,9 +98,9 @@ def feed_batch(cfg, inps, tars, W_rec, W_out, b_out, epoch, tvt_type):
         'DW': np.zeros(
             shape=(cfg["N_Rec"], cfg["N_R"], cfg["N_R"] * 2,)),
         'DW_out': np.zeros(
-            shape=(cfg["N_O"], cfg["N_R"],)),
+            shape=(tars.shape[-1], cfg["N_R"],)),
         'Db_out': np.zeros(
-            shape=(cfg["N_O"],)),
+            shape=(tars.shape[-1],)),
     }
     for b in range(cfg["batch_size"]):
         print(f"\tEpoch {epoch}/{cfg['Epochs']-1}\t"
@@ -134,11 +134,6 @@ def feed_batch(cfg, inps, tars, W_rec, W_out, b_out, epoch, tvt_type):
 
 
 def main(cfg):
-    W = ut.initialize_weights()
-    optVerr = None
-    terrs = np.zeros(shape=(cfg["Epochs"]))
-    verrs = np.zeros(shape=(cfg["Epochs"]))
-
     # Load data
     inps = {}
     tars = {}
@@ -148,6 +143,13 @@ def main(cfg):
         inps[tvt_type] = ((inps[tvt_type] - np.min(inps[tvt_type]))
                           / np.ptp(inps[tvt_type]))
         tars[tvt_type] = np.load(f'{cfg["phns_fname"]}_{tvt_type}.npy')
+
+    terrs = np.zeros(shape=(cfg["Epochs"]))
+    verrs = np.zeros(shape=(cfg["Epochs"]))
+
+    optVerr = None
+
+    W = ut.initialize_weights(tar_size=tars['train'].shape[-1])
 
     for e in range(0, cfg["Epochs"]):
 
