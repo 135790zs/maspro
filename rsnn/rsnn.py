@@ -66,7 +66,7 @@ def network(cfg, inp, tar, W_rec, W_out, b_out):
 
         M['Pmax'][t, M['P'][t].argmax()] = 1
 
-        M['E'][t] = -np.sum(M['T'][t] * np.log(M['P'][t]))
+        M['CE'][t] = -np.sum(M['T'][t] * np.log(M['P'][t]))
 
         W = np.concatenate((
             W_rec.flatten(),
@@ -124,20 +124,13 @@ def feed_batch(cfg, inps, tars, W_rec, W_out, b_out, epoch, tvt_type):
                            W_out=W_out,
                            b_out=b_out)
 
-        batch_err += ut.get_error(
-            M=final_model,
-            tars=tars_rep,
-            W_out=W_out,
-            b_out=b_out)
+        batch_err += np.sum(final_model["CE"]) / cfg["batch_size"]
 
         batch_DW["DW"] += np.sum(final_model['DW'], axis=0)
         batch_DW["DW_out"] += np.sum(final_model['DW_out'], axis=0)
         batch_DW["Db_out"] += np.sum(final_model['Db_out'], axis=0)
 
-
-    batch_loss = ut.get_loss(err=batch_err)
-
-    return batch_loss, batch_DW
+    return batch_err, batch_DW
 
 
 def main(cfg):

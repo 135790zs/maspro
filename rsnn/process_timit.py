@@ -101,6 +101,7 @@ if __name__ == "__main__":
                         axs[0].plot(sig[:int(steplen*maxnframes)])
                         axs[0].margins(0)
                         axs[1].imshow(wavdata[idx, :c.shape[0]].T,
+                                      interpolation='nearest',
                                       aspect='auto',
                                       cmap='coolwarm')
 
@@ -114,6 +115,7 @@ if __name__ == "__main__":
                     if idx == plotidx:
                         plt.suptitle(' '.join(textline.split(' ')[2:]))
                         axs[2].imshow(aligned[:c.shape[0]].T,
+                                      interpolation='nearest',
                                       aspect='auto',
                                       cmap='gray')
                         for line in phonelines:

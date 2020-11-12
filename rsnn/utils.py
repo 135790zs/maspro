@@ -3,11 +3,6 @@ import numpy as np
 from config import cfg
 
 
-def get_loss(err):
-    # MSE
-    return np.mean(np.mean(err, axis=1) ** 2)
-
-
 def update_DWs(DW, err, M):
     n_steps = M['X'].shape[0]
     for t in range(n_steps):  # maybe until 1 shorter
@@ -51,7 +46,7 @@ def initialize_model(length):
     M["Y"] = np.zeros(shape=(length, cfg["N_O"],))
     M["P"] = np.zeros(shape=(length, cfg["N_O"],))
     M["Pmax"] = np.zeros(shape=(length, cfg["N_O"],))
-    M["E"] = np.zeros(shape=(length,))
+    M["CE"] = np.zeros(shape=(length,))
 
     M["is_ALIF"] = np.zeros(shape=(cfg["N_Rec"] * cfg["N_R"]))
     M["is_ALIF"][:int(M["is_ALIF"].size * cfg["fraction_ALIF"])] = 1

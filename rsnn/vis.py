@@ -32,6 +32,7 @@ def plot_run(terrs, verrs, W, epoch):
                 W[weight_type][:epoch].reshape(
                     W[weight_type][:epoch].shape[0], -1).T,
                 aspect='auto',
+                interpolation='nearest',
                 cmap='coolwarm')
             axs[-1].set_ylabel(f"{weight_type}"
                                f"\n[{np.min(W[weight_type][:epoch]):.1f}"
@@ -48,7 +49,7 @@ def plot_run(terrs, verrs, W, epoch):
 
 def plot_state(M, W_rec, W_out, b_out):
     M_plotvars = ["X", "I", "V", "H", "U", "Z_in", "Z", "ZbarK", "EVV", "EVU",
-                  "ET", "ETbar", "Y", "P", "Pmax", "T", "E", "DW", "DW_out", "Db_out"]
+                  "ET", "ETbar", "Y", "P", "Pmax", "T", "CE", "DW", "DW_out", "Db_out"]
     W = {"W_rec": W_rec, "W_out": W_out, "b_out": b_out}
 
     fig = plt.figure(constrained_layout=False, figsize=(8, 14))
@@ -66,12 +67,18 @@ def plot_state(M, W_rec, W_out, b_out):
 
         axs.append(fig.add_subplot(gsc[len(axs), :],
                                    sharex=axs[0] if axs else None))
-        axs[-1].imshow(M[var].reshape(M[var].shape[0], -1).T,
-                       cmap='coolwarm',
-                       vmin=np.min(M[var]),
-                       vmax=np.max(M[var]),
-                       interpolation='nearest',
-                       aspect='auto')
+        if lookup[var]['scalar'] == False:
+            axs[-1].imshow(M[var].reshape(M[var].shape[0], -1).T,
+                           cmap=('gray' if lookup[var]["binary"]
+                                 else 'coolwarm'),
+                           vmin=np.min(M[var]),
+                           vmax=np.max(M[var]),
+                           interpolation='nearest',
+                           aspect='auto')
+        else:
+            axs[-1].plot(M[var])
+            axs[-1].grid()
+
         axs[-1].set_ylabel(f"${lookup[var]['label']}$"
                            f"\n[{np.min(M[var]):.1f}"
                            f", {np.max(M[var]):.1f}]",
