@@ -190,7 +190,6 @@ def main(cfg):
         # Update weights for next epoch
         if not cfg["update_input_weights"]:
             DW["DW"][0, :, :inps['train'].shape[-1]] = 0
-
         # Update weights for next epoch
         if not cfg["update_dead_weights"]:
             DW["DW"][W["W"][e] == 0] = 0

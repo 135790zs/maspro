@@ -8,8 +8,8 @@ cfg = {
     "theta_membrane": 3,
     "beta": 0.07,
     "gamma": 0.3,     # Pseudoderivative ET contribution
-    "eta": 1e-1,      # Learning rate (1e-2 for TIMIT)
-    "weight_decay": 0.99,
+    "eta": 1e-3,      # Learning rate (1e-2 for TIMIT)
+    "weight_decay": 1,
     "L2_reg": 1e-5,
     "FR_reg": 1e-5,
     "update_dead_weights": False,

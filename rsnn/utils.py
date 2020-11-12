@@ -67,9 +67,23 @@ def initialize_weights(tar_size):
     W["W_out"] = rng.random(size=(cfg["Epochs"], tar_size, cfg["N_R"],))
     W["b_out"] = np.zeros(shape=(cfg["Epochs"], tar_size,))
 
+
     for r in range(cfg["N_Rec"]):
         # Zero diag recurrent W: no self-conn
         np.fill_diagonal(W['W'][0, r, :, cfg["N_R"]:], 0)
+
+    W['W'][0, 0, 0, 0] = 5  # Input 1 to rec 1
+    W['W'][0, 0, 1, 0] = 0  # Input 1 to rec 2
+    W['W'][0, 0, 0, 1] = 0  # Input 2 to rec 1
+    W['W'][0, 0, 1, 1] = 5  # Input 2 to rec 2
+    W['W'][0, 0, 1, 2] = 7  # Rec 1 to rec 2
+    W['W'][0, 0, 0, 3] = 6  # Rec 2 to rec 1
+
+    W['W'][0, 0, 0, 2] = 0  # Rec 1 to rec 1
+    W['W'][0, 0, 1, 3] = 0  # Rec 2 to rec 2
+    print(W['W'][0])
+
+
     return W
 
 

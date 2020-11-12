@@ -20,7 +20,7 @@ for tvt_type in ["train", "val", "test"]:
         for t in range(S_len):
             inp[s, t, 0] = t % int1 == 0
             inp[s, t, 1] = (t-offset2) % int1 == 0
-        for t in range(S_len):  # classidx is XOR
+        for t in range(S_len):
             tar[s, t, 0] = 1 if t < S_len//2 else 0
 
     np.save(f'{cfg["wavs_fname"]}_{tvt_type}.npy', inp)
