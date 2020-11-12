@@ -116,6 +116,7 @@ def plot_state(M, W_rec, W_out, b_out):
 
 def plot_graph(M, t, W_rec, W_out):
     dot = Digraph(format='svg', engine='dot')
+    precision = 0.01
 
     # neurons
     def neuroncolor(r, n, spiked):
@@ -147,8 +148,7 @@ def plot_graph(M, t, W_rec, W_out):
                      fixedsize='false',
                      color="#ffffff",
                      fillcolor=neuroncolor(r=r, n=n, spiked=spiked))
-
-    for n in range(0, cfg["N_I"]):
+    for n in range(0, M['X'].shape[-1]):
         dot.node(name=f"in-{n}",
                  label=f"in-{n}\n{M['X'][t, n]:.2f}",
                  style='radial',
@@ -169,11 +169,15 @@ def plot_graph(M, t, W_rec, W_out):
         return ret
 
     # in-to-rec
-    for tail in range(0, cfg["N_I"]):
+    for tail in range(0, M['X'].shape[-1]):
         for head in range(0, cfg["N_R"]):
+            rdw = np.sum(M['DW'][:, 0, head, tail])
+            added = (('+' if rdw >= 0 else '-')
+                     + f'{abs(rdw):.2f}')
             dot.edge(tail_name=f"in-{tail}",
                      head_name=f"{0}-{head}",
-                     label=f"{W_rec[0, head, tail]:.2f}",
+                     label=f"{W_rec[0, head, tail]:.2f}" +
+                           (f"({added})" if abs(rdw) > precision else ''),
                      penwidth='1',
                      color=weightcolor(w=W_rec[0, head, tail]))
 
@@ -181,10 +185,16 @@ def plot_graph(M, t, W_rec, W_out):
     for r in range(0, cfg["N_Rec"]):  # r to r+1
         for head in range(0, cfg["N_R"]):
             for tail in range(cfg["N_R"], 2*cfg["N_R"]):
+                rdw = np.sum(M['DW'][:, r, head, tail])
+                added = (('+' if rdw >= 0 else '-')
+                         + f'{abs(rdw):.2f}')
                 if W_rec[r, head, tail] != 0:
                     dot.edge(tail_name=f"{r}-{tail-cfg['N_R']}",
                              head_name=f"{r}-{head}",
-                             label=f"{W_rec[r, head, tail]:.2f}",
+                             label=f"{W_rec[r, head, tail]:.2f}" +
+                                   (f"({added})" if abs(
+                                    rdw) > precision
+                                    else ''),
                              penwidth='1',
                              color=weightcolor(w=W_rec[r, head, tail]))
 
@@ -201,12 +211,12 @@ def plot_graph(M, t, W_rec, W_out):
 
     # rec-to-out
     for tail in range(0, cfg["N_R"]):
-        for head in range(0, cfg["N_O"]):
+        for head in range(0, W_out.shape[-2]):
             dot.edge(tail_name=f"{cfg['N_Rec']-1}-{tail}",
                      head_name=f"out-{head}",
-                     label=f"{W_out[tail, head]:.2f}",
+                     label=f"{W_out[head, tail]:.2f}",
                      penwidth='1',
-                     color=weightcolor(w=W_out[tail, head]))
+                     color=weightcolor(w=W_out[head, tail]))
 
     dot.attr(label=f"Steps {t+1}")
     dot.render(f"../vis/net")

@@ -8,11 +8,12 @@ cfg = {
     "theta_membrane": 3,
     "beta": 0.07,
     "gamma": 0.3,     # Pseudoderivative ET contribution
-    "eta": 1e-9,      # Learning rate (1e-2 for TIMIT)
-    "weight_decay": 0.9,
+    "eta": 1e-1,      # Learning rate (1e-2 for TIMIT)
+    "weight_decay": 0.99,
     "L2_reg": 1e-5,
     "FR_reg": 1e-5,
     "update_dead_weights": False,
+    "update_input_weights": False,
 
     "eqb": -65,       # Voltage equilibrium
     "thr": 10,        # Spike threshold
@@ -31,14 +32,14 @@ cfg = {
     "weights_fname": "../checkpoint",
 
     "Epochs": 20,  # def = 80
-    "Repeats": 5,  # ms per epoch, def = 5
-    "batch_size": 6,  # def = 32
-    "maxlen": 40,  # Don't forget to re-run process_timit.py!
+    "Repeats": 1,  # ms per epoch, def = 5
+    "batch_size": 2,  # def = 32
+    "maxlen": 100,  # Don't forget to re-run process_timit.py!
     "n_examples": {'train': 30, 'val': 10, 'test': 10},
     "plot_interval": 1,  # 0 to disable plots
     "plot_main": True,
     "plot_state": True,
-    "plot_graph": True,
+    "plot_graph": False,
 }
 
 cfg['rho'] = exp(-cfg["dt"] / cfg["theta_adaptation"])

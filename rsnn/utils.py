@@ -60,13 +60,16 @@ def initialize_weights(tar_size):
     rng = np.random.default_rng()
     W = {}
 
-    W["B"] = rng.random(
-        size=(cfg["Epochs"], cfg["N_Rec"], cfg["N_R"], tar_size,))
+    # W["B"] = rng.random(
+    #     size=(cfg["Epochs"], cfg["N_Rec"], cfg["N_R"], tar_size,))
     W["W"] = rng.random(
         size=(cfg["Epochs"], cfg["N_Rec"], cfg["N_R"], cfg["N_R"] * 2,))
     W["W_out"] = rng.random(size=(cfg["Epochs"], tar_size, cfg["N_R"],))
     W["b_out"] = np.zeros(shape=(cfg["Epochs"], tar_size,))
 
+    for r in range(cfg["N_Rec"]):
+        # Zero diag recurrent W: no self-conn
+        np.fill_diagonal(W['W'][0, r, :, cfg["N_R"]:], 0)
     return W
 
 

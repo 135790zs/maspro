@@ -188,13 +188,17 @@ def main(cfg):
             ut.save_weights(W=W, epoch=e)
 
         # Update weights for next epoch
+        if not cfg["update_input_weights"]:
+            DW["DW"][0, :, :inps['train'].shape[-1]] = 0
+
+        # Update weights for next epoch
+        if not cfg["update_dead_weights"]:
+            DW["DW"][W["W"][e] == 0] = 0
+
         if e < cfg['Epochs'] - 1:
-            W['W'][e+1] = W['W'][e] + DW['DW']
-            W['W'][e+1] *= cfg["weight_decay"]
-            W['W_out'][e+1] = W['W_out'][e] + DW['DW_out']
-            W['W_out'][e+1] *= cfg["weight_decay"]
-            W['b_out'][e+1] = W['b_out'][e] + DW['Db_out']
-            W['b_out'][e+1] *= cfg["weight_decay"]
+            for wtype in W.keys():
+                W[wtype][e+1] = W[wtype][e] + DW[f'D{wtype}']
+                W[wtype][e+1] *= cfg["weight_decay"]
 
         if cfg["plot_main"]:
             vis.plot_run(terrs=terrs, verrs=verrs, W=W, epoch=e)

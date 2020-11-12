@@ -36,7 +36,7 @@ axs = [fig.add_subplot(gsc[r, :]) for r in range(2)]
 axs[0].imshow(inp[plotidx].T, aspect='auto', cmap='gray')
 axs[1].imshow(tar[plotidx].T, aspect='auto', cmap='gray')
 
-plt.savefig(f"../vis/exampleTOY.pdf",
+plt.savefig(f"../vis/exampleXOR.pdf",
             bbox_inches='tight')
 
 plt.close()
