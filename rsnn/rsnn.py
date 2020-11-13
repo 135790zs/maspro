@@ -41,7 +41,7 @@ def network(cfg, inp, tar, W_rec, W_out, b_out):
                                                 Z_in=M["Z_in"][t, r])
 
                 # TODO: Can do without M[ET] or M[H] or M[TZ] or M[DW].
-                M['EVU'][t+1, r] = ut.eprop_EVU(EVV=M['EVV'][t, r],
+                M['EVU'][t+1, r] = ut.eprop_EVU(EVV=M['EVV'][t, r],  # Maybe 1 less t?
                                                 EVU=M['EVU'][t, r],
                                                 H=M['H'][t, r])
                 M['V'][t+1, r] = ut.eprop_V(V=M['V'][t, r],
@@ -74,15 +74,27 @@ def network(cfg, inp, tar, W_rec, W_out, b_out):
             b_out))
         L2norm = np.linalg.norm(W) ** 2 * cfg["L2_reg"]
 
-        M['DW_out'][t] = -cfg["eta"] * M['ZbarK'][t, -1] * (L2norm + np.sum(
-            M['P'][t] - M['T'][t]))
+        # M['DW_out'][t] = -cfg["eta"] * M['ZbarK'][t, -1] * (L2norm + np.sum(
+        #     M['P'][t] - M['T'][t]))
+        M['DW_out'][t] = -cfg["eta"] * M['ZbarK'][t, -1] * (M['P'][t] - M['T'][t])
 
         B = M['DW_out'][t].T
-        M['DW'][t] = -cfg["eta"] * M['ETbar'][t] * np.sum(
-            L2norm + np.sum(B * (M['P'][t] - M['T'][t]), axis=0))
+        # TODO: Not sure if dot() or sum over axis 0. also for DW_out
+        # M['DW'][t] = -cfg["eta"] * M['ETbar'][t] * np.sum(
+        #     L2norm + np.dot(B, (M['P'][t] - M['T'][t])))
+        print("B", B.shape)
+        e = (M['P'][t] - M['T'][t])
+        print("e", e.shape)
+        L = np.dot(B, e)
+        print("L", L.shape)
+        # L = np.tile(L, (1, cfg["N_Rec"]))
+        # L should be (2, 3): teacher to each neuron in net
+        print(L.shape, M['ETbar'][t].shape)
+        M['DW'][t] = -cfg["eta"] * M['ETbar'][t] * L
 
-        M['Db_out'][t] = -cfg["eta"] * (L2norm
-                                        + np.sum(M['P'][t] - M['T'][t]))
+        # M['Db_out'][t] = -cfg["eta"] * (L2norm
+        #                                 + np.sum(M['P'][t] - M['T'][t]))
+        M['Db_out'][t] = -cfg["eta"] * (M['P'][t] - M['T'][t])
 
         if cfg["plot_graph"]:
             vis.plot_graph(M=M, t=t, W_rec=W_rec, W_out=W_out)

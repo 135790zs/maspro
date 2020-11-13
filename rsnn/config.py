@@ -21,8 +21,8 @@ cfg = {
 
     "dt": .1,
 
-    "N_R": 2,
-    "N_Rec": 1,
+    "N_R": 3,
+    "N_Rec": 2,
 
     "TIMIT_ntrain": 12,  # def 3696
     "TIMIT_nval": 14,  # def 400

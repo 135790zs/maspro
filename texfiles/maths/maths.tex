@@ -107,6 +107,29 @@ E &= -\sum_{t,k}\pi_k^{*,t}\log\pi_k^t\\
 \Delta W^\text{rec}_{ji} &= -\eta\sum_t\left(\sum_kB_{jk}\left(\pi_k^t-\pi_k^{*,t}\right)\right)\bar{e}^t_{ji}\\
 \end{align}
 
+\section{ALIF steps (multilayer)}
+Layer $r \in \left\{1, \ldots, R\right\}$, time $t \in \left\{1, \ldots, T\right\}$:
+\begin{align}
+z^t_{r} &= H\left(v^t-A^t\right)\\
+z_\text{prev}^t &= \begin{cases}z^t_{r-1},&\text{if }r > 1\\x^t,&\text{otherwise}\end{cases}\\
+{z_\text{in}}^t_{r} &= \text{concat}(z_\text{prev}^t, z^t_{r})\\
+I^t_{r} &= W^\text{rec}_r \cdot {z_\text{in}}^t_{r} \\
+\psi^t_r &= \frac{1}{v_\text{th}}0.3\max\left(0, 1-\left|\frac{v^t_r-A^t_r}{v_\text{th}}\right|\right)\\
+\epsilon_{v, r}^{t+1} &= \alpha\epsilon_{v, r}^t + {z_\text{in}}_r^t\\
+\epsilon_{a, r}^{t+1} &= \psi^t_r\epsilon_{v, r}^t + \left(\rho - \psi^t_r\beta\right)\epsilon_{a, r}^t\\
+v^{t+1}_r &= \alpha v_r^t + I_r^t-z_rv_\text{th}\\
+a^{t+1}_r &= \rho a_r^t + z_r^t\\
+e^t_r &= \psi^t\left(\epsilon^t_{v, r} - \beta\epsilon^t_{a, r}\right)\\
+\bar{e}^t_r &= \kappa\bar{e}^{t-1}_r + e^t_r\\
+\bar{z}^t_r &= \kappa\bar{z}^{t-1}_r + z^t_r\\
+y^t &= \kappa y^{t-1} + \sum_j W^\text{out}z^t_{R}+b^\text{out}\\
+\pi^t &= \frac{\exp\left(y^t\right)}{\sum_{k'}\exp\left( y^t_{k'}\right)}\\
+\Delta W^\text{rec}_r &= -\eta\sum_tB \cdot\left(\pi^t-\pi^{*,t}\right)\bar{e}^t_r\\
+\Delta W^\text{out} &= -\eta\sum_t\left(\pi^t-\pi^{*,t}\right)\bar{z}^t_R\\
+\Delta b^\text{out} &= -\eta\sum_t\left(\pi^t-\pi^{*,t}\right)\\
+E &= -\sum_{t, k}\pi_k^{*,t}\log\pi_k^t
+\end{align}
+
 Given at time $t$, with given observable state $z_i^t$ (simplified):
 \begin{align}
 v^{t+1}_j &= \alpha v_j^t + \sum_{t\neq j} W^{\text{rec}, t}_{ji} z_i^t + \sum_i W^\text{in}_{ji}x_i^{t+1} - H\left(v_j^t-v_\text{th}-\beta a^t_j\right)v_\text{th}\\

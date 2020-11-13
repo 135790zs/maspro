@@ -8,7 +8,7 @@ def update_DWs(DW, err, M):
     for t in range(n_steps):  # maybe until 1 shorter
         B = DW['DW_out'].T  # TODO: NOT SURE!
         DW['DW'] = (DW['DW'] - cfg["eta"]
-                    * np.sum(B * err[t]) * temporal_filter(
+                    * np.dot(B, err[t]) * temporal_filter(
                         cfg["kappa"], M['ET'][:t+1]))
         # print(DW['DW'].shape, B.shape, err[t].shape)
     DW['Db_out'] = -cfg["eta"] * np.sum(err, axis=0)
@@ -81,7 +81,6 @@ def initialize_weights(tar_size):
 
     W['W'][0, 0, 0, 2] = 0  # Rec 1 to rec 1
     W['W'][0, 0, 1, 3] = 0  # Rec 2 to rec 2
-    print(W['W'][0])
 
 
     return W
