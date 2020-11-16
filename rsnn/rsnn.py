@@ -80,10 +80,10 @@ def network(cfg, inp, tar, W_rec, W_out, b_out, B):
         M['DW_out'][t] = -cfg["eta"] * np.outer((M['P'][t] - M['T'][t]),
                                                 M['ZbarK'][t, -1])
 
-        L = np.dot(B, (M['P'][t] - M['T'][t]))
+        M['L'][t] = np.dot(B, (M['P'][t] - M['T'][t]))
 
         # Multiply the dimensions inside the layers
-        M['DW'][t] = -cfg["eta"] * np.einsum("rj,rji->rji", L, M['ETbar'][t])
+        M['DW'][t] = -cfg["eta"] * np.einsum("rj,rji->rji", M['L'][t], M['ETbar'][t])
 
         M['Db_out'][t] = -cfg["eta"] * (M['P'][t] - M['T'][t])
 

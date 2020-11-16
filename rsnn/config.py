@@ -60,6 +60,7 @@ lookup = {
     "EVU":     {"scalar": False, "binary":False, "label": "\\epsilon_u"},
     "H":       {"scalar": False, "binary":False, "label": "\\psi"},
     "ET":      {"scalar": False, "binary":False, "label": "e"},
+    "L":       {"scalar": False, "binary":False, "label": "L"},
     "ETbar":   {"scalar": False, "binary":False, "label": "\\bar{{e}}"},
     "B":       {"scalar": False, "binary":False, "label": "B"},
     "Y":       {"scalar": False, "binary":False, "label": "Y"},

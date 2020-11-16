@@ -55,10 +55,10 @@ def plot_state(M, W_rec, W_out, b_out):
 
     M_plotvars = ["X", "I", "V", "H", "U", "Z_in", "Z_inbar", "Z", "ZbarK",
                   "EVV", "EVU", "ET", "ETbar", "Y", "P", "Pmax", "T", "CE",
-                  "DW", "DW_out", "Db_out"]
+                  "L", "DW", "DW_out", "Db_out"]
     W = {"W_rec": W_rec, "W_out": W_out, "b_out": b_out}
 
-    fig = plt.figure(constrained_layout=False, figsize=(8, 14))
+    fig = plt.figure(constrained_layout=False, figsize=(8, 16))
     gsc = fig.add_gridspec(nrows=(len(M_plotvars)
                                   + len(w.keys())
                                   + len(W.keys()) + 2),

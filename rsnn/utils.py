@@ -13,7 +13,7 @@ def initialize_model(length, tar_size):
                     cfg["N_R"],
                     cfg["N_R"] * 2,)
 
-    for neuronvar in ["V", "Z", "ZbarK", "I", "H"]:
+    for neuronvar in ["V", "Z", "ZbarK", "I", "H", "L"]:
         M[neuronvar] = np.zeros(shape=neuron_shape)
 
     for weightvar in ["EVV", "EVU", "ET", "DW", "ETbar"]:
