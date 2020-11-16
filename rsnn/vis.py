@@ -13,7 +13,7 @@ def plot_run(terrs, verrs, W, epoch):
     labelpad = 35
     fontsize = 14
     fig = plt.figure(constrained_layout=False, figsize=(8, 8))
-    gsc = fig.add_gridspec(nrows=5, ncols=1, hspace=0.05)
+    gsc = fig.add_gridspec(nrows=6, ncols=1, hspace=0.05)
     axs = []
     for errs, label in [(terrs, "E_T"), (verrs, "E_V")]:
         axs.append(fig.add_subplot(gsc[len(axs), :],
@@ -25,7 +25,7 @@ def plot_run(terrs, verrs, W, epoch):
                            labelpad=labelpad,
                            fontsize=fontsize)
     if epoch >= 1:
-        for weight_type in ['W', 'W_out', 'b_out']:
+        for weight_type in ['W', 'W_out', 'b_out', 'B']:
             # W
             axs.append(fig.add_subplot(gsc[len(axs), :], sharex=axs[0]))
             axs[-1].imshow(
@@ -48,8 +48,9 @@ def plot_run(terrs, verrs, W, epoch):
 
 
 def plot_state(M, W_rec, W_out, b_out):
-    M_plotvars = ["X", "I", "V", "H", "U", "Z_in", "Z", "ZbarK", "EVV", "EVU",
-                  "ET", "ETbar", "Y", "P", "Pmax", "T", "CE", "DW", "DW_out", "Db_out"]
+    M_plotvars = ["X", "I", "V", "H", "U", "Z_in", "Z_inbar", "Z", "ZbarK",
+                  "EVV", "EVU", "ET", "ETbar", "Y", "P", "Pmax", "T", "CE",
+                  "DW", "DW_out", "Db_out"]
     W = {"W_rec": W_rec, "W_out": W_out, "b_out": b_out}
 
     fig = plt.figure(constrained_layout=False, figsize=(8, 14))

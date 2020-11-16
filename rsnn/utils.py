@@ -3,21 +3,6 @@ import numpy as np
 from config import cfg
 
 
-def update_DWs(DW, err, M):
-    n_steps = M['X'].shape[0]
-    for t in range(n_steps):  # maybe until 1 shorter
-        B = DW['DW_out'].T  # TODO: NOT SURE!
-        DW['DW'] = (DW['DW'] - cfg["eta"]
-                    * np.dot(B, err[t]) * temporal_filter(
-                        cfg["kappa"], M['ET'][:t+1]))
-        # print(DW['DW'].shape, B.shape, err[t].shape)
-    DW['Db_out'] = -cfg["eta"] * np.sum(err, axis=0)
-    DW['DW_out'] = (-cfg["eta"]
-                    * np.outer(np.sum(err, axis=0),
-                               temporal_filter(cfg["kappa"], M['Z'][:, -1])))
-    return DW
-
-
 def initialize_model(length, tar_size):
     M = {}
     neuron_shape = (length,
@@ -38,8 +23,10 @@ def initialize_model(length, tar_size):
     M["TZ"] = np.ones(shape=(cfg["N_Rec"], cfg["N_R"])) * -cfg["dt_refr"]
 
     M["Z_in"] = np.zeros(shape=(length, cfg["N_Rec"], cfg["N_R"] * 2,))
+    M["Z_inbar"] = np.zeros(shape=(length, cfg["N_Rec"], cfg["N_R"] * 2,))
 
     M["DW_out"] = np.zeros(shape=(length, tar_size, cfg["N_R"],))
+    M["DB"] = np.zeros(shape=(length, cfg["N_Rec"], cfg["N_R"], tar_size))
     M["Db_out"] = np.zeros(shape=(length, tar_size,))
 
     M["T"] = np.zeros(shape=(length, tar_size,))
@@ -60,8 +47,8 @@ def initialize_weights(tar_size):
     rng = np.random.default_rng()
     W = {}
 
-    # W["B"] = rng.random(
-    #     size=(cfg["Epochs"], cfg["N_Rec"], cfg["N_R"], tar_size,))
+    W["B"] = rng.random(
+        size=(cfg["Epochs"], cfg["N_Rec"], cfg["N_R"], tar_size,))
     W["W"] = rng.random(
         size=(cfg["Epochs"], cfg["N_Rec"], cfg["N_R"], cfg["N_R"] * 2,))
     W["W_out"] = rng.random(size=(cfg["Epochs"], tar_size, cfg["N_R"],))
@@ -72,15 +59,13 @@ def initialize_weights(tar_size):
         # Zero diag recurrent W: no self-conn
         np.fill_diagonal(W['W'][0, r, :, cfg["N_R"]:], 0)
 
-    W['W'][0, 0, 0, 0] = 5  # Input 1 to rec 1
+    # W['W'][0, 0, 0, 0] = 5  # Input 1 to rec 1
     W['W'][0, 0, 1, 0] = 0  # Input 1 to rec 2
     W['W'][0, 0, 0, 1] = 0  # Input 2 to rec 1
-    W['W'][0, 0, 1, 1] = 5  # Input 2 to rec 2
-    W['W'][0, 0, 1, 2] = 7  # Rec 1 to rec 2
-    W['W'][0, 0, 0, 3] = 6  # Rec 2 to rec 1
-
-    W['W'][0, 0, 0, 2] = 0  # Rec 1 to rec 1
-    W['W'][0, 0, 1, 3] = 0  # Rec 2 to rec 2
+    # W['W'][0, 0, 1, 1] = 5  # Input 2 to rec 2
+    W['W'][0, 0, 1, 2] = 0  # Rec 1 to rec 2
+    W['W'][0, 0, 0, 3] = 0  # Rec 2 to rec 1
+    print(W['W'][0])
 
 
     return W
@@ -146,8 +131,9 @@ def eprop_EVV(EVV, Z_in):
     return cfg["alpha"] * EVV + Z_in
 
 
-def eprop_EVU(H, EVV, EVU):
-    return (H * EVV.T).T + ((cfg["rho"] - H * cfg["beta"]) * EVU.T).T
+def eprop_EVU(H, Z_inbar, EVU):
+    return np.outer(H, Z_inbar) + (
+        (cfg["rho"] - H[:, np.newaxis] * cfg["beta"]) * EVU)
 
 
 def eprop_H(V, U, is_ALIF):

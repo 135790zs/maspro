@@ -5,12 +5,13 @@ import utils as ut
 import vis
 
 
-def network(cfg, inp, tar, W_rec, W_out, b_out):
+def network(cfg, inp, tar, W_rec, W_out, b_out, B):
     n_steps = inp.shape[0]
     M = ut.initialize_model(length=n_steps, tar_size=tar.shape[-1])
     M["X"] = inp
 
     for t in range(n_steps):
+
 
         # Input is nonzero for first layer
         for r in range(cfg['N_Rec']):
@@ -34,6 +35,8 @@ def network(cfg, inp, tar, W_rec, W_out, b_out):
                                         EVU=M['EVU'][t, r])
 
             M["Z_in"][t, r] = np.concatenate((Z_prev, M['Z'][t, r]))
+            M['Z_inbar'][t] = ((cfg["alpha"] * M['Z_inbar'][t-1] if t > 0 else 0)
+                               + M['Z_in'][t])
             M['I'][t, r] = np.dot(W_rec[r], M["Z_in"][t, r])
 
             if t != n_steps - 1:
@@ -41,7 +44,7 @@ def network(cfg, inp, tar, W_rec, W_out, b_out):
                                                 Z_in=M["Z_in"][t, r])
 
                 # TODO: Can do without M[ET] or M[H] or M[TZ] or M[DW].
-                M['EVU'][t+1, r] = ut.eprop_EVU(EVV=M['EVV'][t, r],  # Maybe 1 less t?
+                M['EVU'][t+1, r] = ut.eprop_EVU(Z_inbar=M['Z_inbar'][t, r],
                                                 EVU=M['EVU'][t, r],
                                                 H=M['H'][t, r])
                 M['V'][t+1, r] = ut.eprop_V(V=M['V'][t, r],
@@ -74,27 +77,17 @@ def network(cfg, inp, tar, W_rec, W_out, b_out):
             b_out))
         L2norm = np.linalg.norm(W) ** 2 * cfg["L2_reg"]
 
-        # M['DW_out'][t] = -cfg["eta"] * M['ZbarK'][t, -1] * (L2norm + np.sum(
-        #     M['P'][t] - M['T'][t]))
-        M['DW_out'][t] = -cfg["eta"] * M['ZbarK'][t, -1] * (M['P'][t] - M['T'][t])
+        M['DW_out'][t] = -cfg["eta"] * np.outer((M['P'][t] - M['T'][t]), M['ZbarK'][t, -1])
 
-        B = M['DW_out'][t].T
-        # TODO: Not sure if dot() or sum over axis 0. also for DW_out
-        # M['DW'][t] = -cfg["eta"] * M['ETbar'][t] * np.sum(
-        #     L2norm + np.dot(B, (M['P'][t] - M['T'][t])))
-        print("B", B.shape)
-        e = (M['P'][t] - M['T'][t])
-        print("e", e.shape)
-        L = np.dot(B, e)
-        print("L", L.shape)
-        # L = np.tile(L, (1, cfg["N_Rec"]))
-        # L should be (2, 3): teacher to each neuron in net
-        print(L.shape, M['ETbar'][t].shape)
-        M['DW'][t] = -cfg["eta"] * M['ETbar'][t] * L
+        L = np.dot(B, (M['P'][t] - M['T'][t]))
 
-        # M['Db_out'][t] = -cfg["eta"] * (L2norm
-        #                                 + np.sum(M['P'][t] - M['T'][t]))
+        # Multiply the dimensions inside the layers
+        M['DW'][t] = -cfg["eta"] * np.einsum("rj,rji->rji", L, M['ETbar'][t])
+
         M['Db_out'][t] = -cfg["eta"] * (M['P'][t] - M['T'][t])
+
+        # symmetric e-prop for last layer, random otherwise
+        M['DB'][t, -1] = M['DW_out'][t].T
 
         if cfg["plot_graph"]:
             vis.plot_graph(M=M, t=t, W_rec=W_rec, W_out=W_out)
@@ -103,7 +96,7 @@ def network(cfg, inp, tar, W_rec, W_out, b_out):
     return M
 
 
-def feed_batch(cfg, inps, tars, W_rec, W_out, b_out, epoch, tvt_type):
+def feed_batch(cfg, inps, tars, W_rec, W_out, b_out, B, epoch, tvt_type):
     batch_err = 0
     # TODO: Put all W of this batch in own dict
     batch_DW = {
@@ -113,6 +106,8 @@ def feed_batch(cfg, inps, tars, W_rec, W_out, b_out, epoch, tvt_type):
             shape=(tars.shape[-1], cfg["N_R"],)),
         'Db_out': np.zeros(
             shape=(tars.shape[-1],)),
+        'DB': np.zeros(
+            shape=(cfg["N_Rec"], cfg["N_R"], tars.shape[-1],)),
     }
     for b in range(cfg["batch_size"]):
         print(f"\tEpoch {epoch}/{cfg['Epochs']-1}\t"
@@ -128,7 +123,8 @@ def feed_batch(cfg, inps, tars, W_rec, W_out, b_out, epoch, tvt_type):
             tar=tars_rep,
             W_rec=W_rec,
             W_out=W_out,
-            b_out=b_out)
+            b_out=b_out,
+            B=B)
 
         if cfg['plot_state'] and b == 0 and tvt_type == "train":
             vis.plot_state(M=final_model,
@@ -176,7 +172,8 @@ def main(cfg):
             tars=tars['train'][randidxs],
             W_rec=W['W'][e],
             W_out=W['W_out'][e],
-            b_out=W['b_out'][e])
+            b_out=W['b_out'][e],
+            B=W['B'][e])
 
         randidxs = np.random.randint(inps['val'].shape[0],
                                      size=cfg["batch_size"])
@@ -188,7 +185,8 @@ def main(cfg):
             tars=tars['val'][randidxs],
             W_rec=W['W'][e],
             W_out=W['W_out'][e],
-            b_out=W['b_out'][e],)
+            b_out=W['b_out'][e],
+            B=W['B'][e])
 
         terrs[e] = terr
         verrs[e] = verr
@@ -232,7 +230,8 @@ def main(cfg):
             tars=tars['val'][randidxs],
             W_rec=optW['W'],
             W_out=optW['W_out'],
-            b_out=optW['b_out'])
+            b_out=optW['b_out'],
+            B=optW['B'])
         total_testerr += testerr
     total_testerr /= cfg["Epochs"]
 
