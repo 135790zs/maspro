@@ -59,13 +59,13 @@ def initialize_weights(tar_size):
         # Zero diag recurrent W: no self-conn
         np.fill_diagonal(W['W'][0, r, :, cfg["N_R"]:], 0)
 
-    # W['W'][0, 0, 0, 0] = 5  # Input 1 to rec 1
+    W['W'][0, 0, 0, 0] = 3  # Input 1 to rec 1: frozen
     W['W'][0, 0, 1, 0] = 0  # Input 1 to rec 2
     W['W'][0, 0, 0, 1] = 0  # Input 2 to rec 1
-    # W['W'][0, 0, 1, 1] = 5  # Input 2 to rec 2
-    W['W'][0, 0, 1, 2] = 0  # Rec 1 to rec 2
-    W['W'][0, 0, 0, 3] = 0  # Rec 2 to rec 1
-    print(W['W'][0])
+    W['W'][0, 0, 1, 1] = 3  # Input 2 to rec 2: frozen
+    W['W'][0, 0, 1, 2] = 1  # Rec 1 to rec 2
+    W['W'][0, 0, 0, 3] = 1  # Rec 2 to rec 1
+    # print(W['W'][0])
 
 
     return W

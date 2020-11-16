@@ -69,7 +69,7 @@ def network(cfg, inp, tar, W_rec, W_out, b_out, B):
 
         M['Pmax'][t, M['P'][t].argmax()] = 1
 
-        M['CE'][t] = -np.sum(M['T'][t] * np.log(M['P'][t]))
+        M['CE'][t] = -np.sum(M['T'][t] * np.log(1e-8 + M['P'][t]))
 
         W = np.concatenate((
             W_rec.flatten(),
@@ -77,7 +77,8 @@ def network(cfg, inp, tar, W_rec, W_out, b_out, B):
             b_out))
         L2norm = np.linalg.norm(W) ** 2 * cfg["L2_reg"]
 
-        M['DW_out'][t] = -cfg["eta"] * np.outer((M['P'][t] - M['T'][t]), M['ZbarK'][t, -1])
+        M['DW_out'][t] = -cfg["eta"] * np.outer((M['P'][t] - M['T'][t]),
+                                                M['ZbarK'][t, -1])
 
         L = np.dot(B, (M['P'][t] - M['T'][t]))
 
@@ -161,6 +162,7 @@ def main(cfg):
 
     for e in range(0, cfg["Epochs"]):
 
+        print(W['W'][e])
         # Make batch
         randidxs = np.random.randint(inps['train'].shape[0],
                                      size=cfg["batch_size"])

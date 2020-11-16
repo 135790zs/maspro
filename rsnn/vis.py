@@ -48,18 +48,25 @@ def plot_run(terrs, verrs, W, epoch):
 
 
 def plot_state(M, W_rec, W_out, b_out):
+    w = {
+        "w1": (0, 1, 2),
+        "w2": (0, 0, 3)
+    }
+
     M_plotvars = ["X", "I", "V", "H", "U", "Z_in", "Z_inbar", "Z", "ZbarK",
                   "EVV", "EVU", "ET", "ETbar", "Y", "P", "Pmax", "T", "CE",
                   "DW", "DW_out", "Db_out"]
     W = {"W_rec": W_rec, "W_out": W_out, "b_out": b_out}
 
     fig = plt.figure(constrained_layout=False, figsize=(8, 14))
-    gsc = fig.add_gridspec(nrows=len(M_plotvars) + len(W.keys()) + 2,
+    gsc = fig.add_gridspec(nrows=(len(M_plotvars)
+                                  + len(w.keys())
+                                  + len(W.keys()) + 2),
                            ncols=1,
                            hspace=0.075)
     axs = []
     labelpad = 35
-    fontsize = 14
+    fontsize = 13
     fig.suptitle(f"Single-run model state\n$\\alpha={cfg['alpha']:.3f}$, "
                  f"$\\kappa={cfg['kappa']:.3f}$, $\\rho={cfg['rho']:.3f}$",
                  fontsize=20)
@@ -76,7 +83,7 @@ def plot_state(M, W_rec, W_out, b_out):
                            vmax=np.max(M[var]),
                            interpolation='nearest',
                            aspect='auto')
-        else:
+        elif var == 'CE':
             axs[-1].plot(M[var])
             axs[-1].grid()
 
@@ -86,6 +93,17 @@ def plot_state(M, W_rec, W_out, b_out):
                            rotation=0,
                            labelpad=labelpad,
                            fontsize=fontsize)
+
+    for k, v in w.items():  # Sample weights
+        axs.append(fig.add_subplot(gsc[len(axs), :],
+                                   sharex=axs[0] if axs else None))
+        axs[-1].plot(M['DW'][:, v[0], v[1], v[2]])
+        axs[-1].grid()
+        axs[-1].set_ylabel(f"$\\Delta w_{{{v[0]}, {v[1]}, {v[2]%cfg['N_R']}}}$",
+                           rotation=0,
+                           labelpad=labelpad,
+                           fontsize=fontsize)
+
     for k, v in W.items():
         v = v.flatten()
         v = np.expand_dims(v, axis=0)
@@ -105,7 +123,6 @@ def plot_state(M, W_rec, W_out, b_out):
                            rotation=0,
                            labelpad=labelpad,
                            fontsize=fontsize)
-
 
     axs[-1].set_xlabel("$t$", fontsize=fontsize)
 

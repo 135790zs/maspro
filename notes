@@ -11,3 +11,7 @@
 # TODO: Dictionary to facilitate sweeping function (param = key, list = item)
 # TODO: Make it possible to use fewer than N_I N_Rs
 # TODO: Make N_R variable per layer
+
+
+I can maybe use random B for all early layers and adaptive/symmetric B for last layer
+QUESTION FOR MEETING: B for shallow layers?

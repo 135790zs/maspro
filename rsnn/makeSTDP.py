@@ -6,7 +6,7 @@ for tvt_type in ["train", "val", "test"]:
     n_examples = cfg['n_examples'][tvt_type]
     S_len = cfg['maxlen']
     Si = 2
-    So = 1
+    So = 2
     plotidx = 0
 
     rng = np.random.default_rng()
@@ -22,6 +22,7 @@ for tvt_type in ["train", "val", "test"]:
             inp[s, t, 1] = (t-offset2) % int1 == 0
         for t in range(S_len):
             tar[s, t, 0] = 1 if t < S_len//2 else 0
+            tar[s, t, 1] = 0 if t < S_len//2 else 1
 
     np.save(f'{cfg["wavs_fname"]}_{tvt_type}.npy', inp)
     np.save(f'{cfg["phns_fname"]}_{tvt_type}.npy', tar)

@@ -8,9 +8,9 @@ cfg = {
     "theta_membrane": 3,
     "beta": 0.07,
     "gamma": 0.3,     # Pseudoderivative ET contribution
-    "eta": 1e-5,      # Learning rate (1e-2 for TIMIT)
+    "eta": 1e-2,      # Learning rate (1e-2 for TIMIT)
     "weight_decay": 1,
-    "L2_reg": 1e-5,
+    "L2_reg": 0,
     # "FR_reg": 1e-5,
     "update_dead_weights": False,
     "update_input_weights": False,
@@ -33,7 +33,7 @@ cfg = {
 
     "Epochs": 200,  # def = 80
     "Repeats": 2,  # ms per epoch, def = 5
-    "batch_size": 50,  # def = 32
+    "batch_size": 10,  # def = 32
     "maxlen": 100,  # Don't forget to re-run process_timit.py!
     "n_examples": {'train': 200, 'val': 100, 'test': 100},
     "plot_interval": 1,  # 0 to disable plots
@@ -68,6 +68,7 @@ lookup = {
     "CE":      {"scalar": True,  "binary":False, "label": "CE"},
     "loss":    {"scalar": False, "binary":False, "label": "loss"},
     "T":       {"scalar": False, "binary":True,  "label": "T"},
+    "w":       {"scalar": True,  "binary":False, "label": "w^{{rec}}"},
     "W":       {"scalar": False, "binary":False, "label": "W"},
     "W_rec":   {"scalar": False, "binary":False, "label": "W_{{rec}}"},
     "W_out":   {"scalar": False, "binary":False, "label": "W_{{out}}"},
