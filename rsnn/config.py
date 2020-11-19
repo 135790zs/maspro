@@ -1,6 +1,7 @@
 from numpy import exp
 cfg = {
     "neuron": "ALIF",
+    "eprop_type": "adaptive",  # in {random, symmetric, adaptive}
 
     "fraction_ALIF": 1,  # If neuron == LIF
     "theta_adaptation": 200,  # Depends on length of task: working memory
@@ -9,7 +10,7 @@ cfg = {
     "beta": 0.07,
     "gamma": 0.3,     # Pseudoderivative ET contribution
     "eta": 1e-2,      # Learning rate (1e-2 for TIMIT)
-    "weight_decay": 1,
+    "weight_decay": 1,  # For W_out and B, only if adaptive
     "L2_reg": 0,
     # "FR_reg": 1e-5,
     "update_dead_weights": False,

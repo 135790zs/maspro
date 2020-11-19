@@ -47,13 +47,26 @@ def initialize_weights(tar_size):
     rng = np.random.default_rng()
     W = {}
 
-    W["B"] = rng.random(
-        size=(cfg["Epochs"], cfg["N_Rec"], cfg["N_R"], tar_size,))
+
+
+
     W["W"] = rng.random(
         size=(cfg["Epochs"], cfg["N_Rec"], cfg["N_R"], cfg["N_R"] * 2,))
     W["W_out"] = rng.random(size=(cfg["Epochs"], tar_size, cfg["N_R"],))
     W["b_out"] = np.zeros(shape=(cfg["Epochs"], tar_size,))
 
+    if cfg["eprop_type"] == "random":  # Variance of 1
+        W["B"] = rng.normal(
+            size=(cfg["Epochs"], cfg["N_Rec"], cfg["N_R"], tar_size,),
+            scale=1)
+    elif cfg["eprop_type"] == "adaptive":  # Variance of 1/N
+        W["B"] = rng.normal(
+            size=(cfg["Epochs"], cfg["N_Rec"], cfg["N_R"], tar_size,),
+            scale=np.sqrt(1/cfg["N_R"]))
+    else:
+        W["B"] = rng.random(
+            size=(cfg["Epochs"], cfg["N_Rec"], cfg["N_R"], tar_size,),
+            scale=1)
 
     for r in range(cfg["N_Rec"]):
         # Zero diag recurrent W: no self-conn

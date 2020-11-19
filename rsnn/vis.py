@@ -8,6 +8,17 @@ from config import cfg, lookup
 rc['mathtext.fontset'] = 'stix'
 rc['font.family'] = 'STIXGeneral'
 
+def weights_to_img(arr):
+    # print("arr", arr)
+    # if arr.ndim == 4:
+    #     print(arr)
+    #     idx = np.argwhere(np.all(arr[..., :] == 0, axis=0))
+    #     print(idx)
+    #     arr = np.delete(arr, idx, axis=1)
+    arr = arr.reshape(arr.shape[0], -1).T
+
+    return arr
+
 
 def plot_run(terrs, verrs, W, epoch):
     labelpad = 35
@@ -76,7 +87,7 @@ def plot_state(M, W_rec, W_out, b_out):
         axs.append(fig.add_subplot(gsc[len(axs), :],
                                    sharex=axs[0] if axs else None))
         if lookup[var]['scalar'] == False:
-            axs[-1].imshow(M[var].reshape(M[var].shape[0], -1).T,
+            axs[-1].imshow(weights_to_img(M[var]),
                            cmap=('gray' if lookup[var]["binary"]
                                  else 'coolwarm'),
                            vmin=np.min(M[var]),

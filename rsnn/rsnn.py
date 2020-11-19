@@ -69,13 +69,13 @@ def network(cfg, inp, tar, W_rec, W_out, b_out, B):
 
         M['Pmax'][t, M['P'][t].argmax()] = 1
 
-        M['CE'][t] = -np.sum(M['T'][t] * np.log(1e-8 + M['P'][t]))
+        # TODO: on which weights?
+        W = np.concatenate((W_rec.flatten(),
+                            W_out.flatten(),
+                            B.flatten()))
+        L2norm_W = np.linalg.norm(W) ** 2 * cfg["L2_reg"]
 
-        W = np.concatenate((
-            W_rec.flatten(),
-            W_out.flatten(),
-            b_out))
-        L2norm = np.linalg.norm(W) ** 2 * cfg["L2_reg"]
+        M['CE'][t] = -np.sum(M['T'][t] * np.log(1e-8 + M['P'][t])) + L2norm_W
 
         M['DW_out'][t] = -cfg["eta"] * np.outer((M['P'][t] - M['T'][t]),
                                                 M['ZbarK'][t, -1])
@@ -88,7 +88,8 @@ def network(cfg, inp, tar, W_rec, W_out, b_out, B):
         M['Db_out'][t] = -cfg["eta"] * (M['P'][t] - M['T'][t])
 
         # symmetric e-prop for last layer, random otherwise
-        M['DB'][t, -1] = M['DW_out'][t].T
+        if cfg["eprop_type"] == "adaptive":
+            M['DB'][t, -1] = M['DW_out'][t].T
 
         if cfg["plot_graph"]:
             vis.plot_graph(M=M, t=t, W_rec=W_rec, W_out=W_out)
@@ -135,9 +136,8 @@ def feed_batch(cfg, inps, tars, W_rec, W_out, b_out, B, epoch, tvt_type):
 
         batch_err += np.sum(final_model["CE"]) / cfg["batch_size"]
 
-        batch_DW["DW"] += np.sum(final_model['DW'], axis=0)
-        batch_DW["DW_out"] += np.sum(final_model['DW_out'], axis=0)
-        batch_DW["Db_out"] += np.sum(final_model['Db_out'], axis=0)
+        for dw_type in batch_DW.keys():
+            batch_DW[dw_type] += np.sum(final_model[dw_type], axis=0)
 
     return batch_err, batch_DW
 
@@ -162,7 +162,6 @@ def main(cfg):
 
     for e in range(0, cfg["Epochs"]):
 
-        print(W['W'][e])
         # Make batch
         randidxs = np.random.randint(inps['train'].shape[0],
                                      size=cfg["batch_size"])
@@ -206,10 +205,20 @@ def main(cfg):
         if not cfg["update_dead_weights"]:
             DW["DW"][W["W"][e] == 0] = 0
 
+        # Update weights
         if e < cfg['Epochs'] - 1:
             for wtype in W.keys():
                 W[wtype][e+1] = W[wtype][e] + DW[f'D{wtype}']
-                W[wtype][e+1] *= cfg["weight_decay"]
+
+                if cfg["eprop_type"] == "adaptive" and wtype in ["W_out", "B"]:
+                    W[wtype][e+1] -= cfg["weight_decay"] * W[wtype][e]
+
+                elif cfg["eprop_type"] == "symmetric" and wtype == "B":
+                    W[wtype][e+1] == (W["W_out"][e].T
+                                      + DW[f'DW_out'].T
+                                      - (cfg["weight_decay"]
+                                         * W["W_out"][e].T))
+
 
         if cfg["plot_main"]:
             vis.plot_run(terrs=terrs, verrs=verrs, W=W, epoch=e)
