@@ -2,8 +2,6 @@
 # MUST DO:
 # TODO: check all t's indxs
 # TODO: Check if STDP is happening: consult STDP data
-# TODO: Add firing rate regularization with c_reg = 50. See supplementary notes.
-# TODO: Gaussian distribution for broadcast weights (mu=0, var=1)
 # TODO: Implement ADAM
 # TODO: LTP seems to work in vitro, see if traub leads to LTD
 

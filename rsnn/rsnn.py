@@ -34,6 +34,17 @@ def network(cfg, inp, tar, W_rec, W_out, b_out, B):
                                         EVV=M['EVV'][t, r],
                                         EVU=M['EVU'][t, r])
 
+            # Update weights for next epoch
+            if not cfg["update_input_weights"]:
+                M["EVV"][t, 0, :, :inp.shape[-1]] = 0
+                M["EVU"][t, 0, :, :inp.shape[-1]] = 0
+                M["ET"][t, 0, :, :inp.shape[-1]] = 0
+            # Update weights for next epoch
+            if not cfg["update_dead_weights"]:
+                M["EVV"][t, r, W_rec[r] == 0] = 0
+                M["EVU"][t, r, W_rec[r] == 0] = 0
+                M["ET"][t, r, W_rec[r] == 0] = 0
+
             M["Z_in"][t, r] = np.concatenate((Z_prev, M['Z'][t, r]))
             M['Z_inbar'][t] = ((cfg["alpha"] * M['Z_inbar'][t-1] if t > 0 else 0)
                                + M['Z_in'][t])
@@ -75,15 +86,32 @@ def network(cfg, inp, tar, W_rec, W_out, b_out, B):
                             B.flatten()))
         L2norm_W = np.linalg.norm(W) ** 2 * cfg["L2_reg"]
 
-        M['CE'][t] = -np.sum(M['T'][t] * np.log(1e-8 + M['P'][t])) + L2norm_W
+        M['CE'][t] = (-np.sum(M['T'][t] * np.log(1e-8 + M['P'][t]))
+                      + L2norm_W)
 
         M['DW_out'][t] = -cfg["eta"] * np.outer((M['P'][t] - M['T'][t]),
                                                 M['ZbarK'][t, -1])
 
         M['L'][t] = np.dot(B, (M['P'][t] - M['T'][t]))
 
+        def FR_reg_fn(t_):
+            return
+        if t > 0:
+            FR_reg = (
+                cfg["eta"]
+                * cfg["FR_reg"]
+                * np.mean(np.einsum("rj,rji->rji",
+                                    cfg["FR_target"] - np.mean(M['Z'][:t],
+                                                               axis=0),
+                                    M['ET'][t]),
+                          axis=0))
+        else:
+            FR_reg = 0
+
         # Multiply the dimensions inside the layers
-        M['DW'][t] = -cfg["eta"] * np.einsum("rj,rji->rji", M['L'][t], M['ETbar'][t])
+        M['DW'][t] = -cfg["eta"] * np.einsum("rj,rji->rji",
+                                             M['L'][t],
+                                             M['ETbar'][t]) + FR_reg
 
         M['Db_out'][t] = -cfg["eta"] * (M['P'][t] - M['T'][t])
 
@@ -197,13 +225,6 @@ def main(cfg):
             print(f"\nLowest val error ({verr:.3f}) found at epoch {e}!")
             optVerr = verr
             ut.save_weights(W=W, epoch=e)
-
-        # Update weights for next epoch
-        if not cfg["update_input_weights"]:
-            DW["DW"][0, :, :inps['train'].shape[-1]] = 0
-        # Update weights for next epoch
-        if not cfg["update_dead_weights"]:
-            DW["DW"][W["W"][e] == 0] = 0
 
         # Update weights
         if e < cfg['Epochs'] - 1:

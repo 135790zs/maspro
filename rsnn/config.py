@@ -12,7 +12,8 @@ cfg = {
     "eta": 1e-2,      # Learning rate (1e-2 for TIMIT)
     "weight_decay": 1,  # For W_out and B, only if adaptive
     "L2_reg": 0,
-    # "FR_reg": 1e-5,
+    "FR_reg": 1e-5,
+    "FR_target": 0.1,
     "update_dead_weights": False,
     "update_input_weights": False,
 
