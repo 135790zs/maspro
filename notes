@@ -1,6 +1,5 @@
 
 # MUST DO:
-# TODO: Check if STDP is happening ALSO UNDER STANDARD LIF: consult STDP data
 # TODO: Implement ADAM
 # TODO: LTP seems to work in vitro, see if traub leads to LTD
 

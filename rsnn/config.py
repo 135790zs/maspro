@@ -2,7 +2,7 @@ from numpy import exp
 cfg = {
     "eprop_type": "adaptive",  # in {random, symmetric, adaptive}
 
-    "fraction_ALIF": 0,
+    "fraction_ALIF": 1,
     "theta_adaptation": 200,  # Depends on length of task: working memory
 
     "theta_membrane": 20,  # TIMIT: 20
@@ -10,9 +10,9 @@ cfg = {
     "beta": 0.184,  # TIMIT: 0.184
     "gamma": 0.3,     # Pseudoderivative ET contribution
     "eta": 1e-2,      # Learning rate (1e-2 for TIMIT)
-    "weight_decay": 0,  # For W_out and B, only if adaptive. def = 1e-2
-    "L2_reg": 0,  # 1e-5 fot TIMIT
-    "FR_reg": 0,  # 50 for TIMIT
+    "weight_decay": 1e-2,  # For W_out and B, only if adaptive. def = 1e-2
+    "L2_reg": 1e-5,  # 1e-5 fot TIMIT
+    "FR_reg": 50,  # 50 for TIMIT
     "FR_target": 6/1000,  # Desired frequency (mean per ms)
     "update_dead_weights": False,
     "update_input_weights": False,
@@ -22,7 +22,7 @@ cfg = {
 
     "dt": 1,
 
-    "N_R": 2,
+    "N_R": 64,
     "N_Rec": 1,
 
     "wavs_fname": "../data_wavs",
@@ -31,10 +31,10 @@ cfg = {
 
     "Epochs": 20,  # def = 80
     "Repeats": 1,  # ms per epoch, def = 5
-    "batch_size_train": 6,  # def = 32
-    "batch_size_val": 6,  # def = 32
+    "batch_size_train": 1,  # def = 32
+    "batch_size_val": 1,  # def = 32
     "maxlen": 100,  # Don't forget to re-run process_timit.py!
-    "n_examples": {'train': 100, 'val': 1, 'test': 1},
+    "n_examples": {'train': 1, 'val': 1, 'test': 1},
     "plot_interval": 1,  # 0 to disable plots
     "plot_main": True,
     "plot_state": True,
