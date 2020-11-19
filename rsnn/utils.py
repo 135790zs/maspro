@@ -69,13 +69,12 @@ def initialize_weights(tar_size):
         # Zero diag recurrent W: no self-conn
         np.fill_diagonal(W['W'][0, r, :, cfg["N_R"]:], 0)
 
-    W['W'][0, 0, 0, 0] = 3  # Input 1 to rec 1: frozen
+    W['W'][0, 0, 0, 0] = 0.8  # Input 1 to rec 1: frozen
     W['W'][0, 0, 1, 0] = 0  # Input 1 to rec 2
     W['W'][0, 0, 0, 1] = 0  # Input 2 to rec 1
-    W['W'][0, 0, 1, 1] = 3  # Input 2 to rec 2: frozen
-    W['W'][0, 0, 1, 2] = 1  # Rec 1 to rec 2
-    W['W'][0, 0, 0, 3] = 1  # Rec 2 to rec 1
-    # print(W['W'][0])
+    W['W'][0, 0, 1, 1] = 0.8  # Input 2 to rec 2: frozen
+    W['W'][0, 0, 1, 2] = 0.2  # Rec 1 to rec 2 (B)
+    W['W'][0, 0, 0, 3] = 0.2  # Rec 2 to rec 1 (T)
 
 
     return W
@@ -138,25 +137,41 @@ def eprop_U(U, Z, is_ALIF):
 
 
 def eprop_EVV(EVV, Z_in):
+    """
+    ALIF: Zbar
+    checked
+    TODO Needs changing for std LIF
+    """
     return cfg["alpha"] * EVV + Z_in
 
 
 def eprop_EVU(H, Z_inbar, EVU):
-    return np.outer(H, Z_inbar) + (
-        (cfg["rho"] - H[:, np.newaxis] * cfg["beta"]) * EVU)
+    """
+    H_j * Zinbar_i + (rho - H_j * beta) * EVU_ji
+    checked
+    TODO Needs changing for std LIF
+    """
+    Hp = cfg["rho"] - H * cfg["beta"]
+    res = np.outer(H, Z_inbar) + np.einsum("j, ji -> ji", Hp, EVU)
+
+
+
+    return res
 
 
 def eprop_H(V, U, is_ALIF):
     return 1 / cfg["thr"] * \
         cfg["gamma"] * np.clip(a=1 - (abs(V
-                                          - cfg["thr"]
-                                          - U * np.where(is_ALIF,
-                                                         cfg["beta"],
-                                                         1))
+                                          - np.where(is_ALIF, U, cfg["thr"])
+                                          )
                                       / cfg["thr"]),
                                a_min=0,
                                a_max=None)
 
 
 def eprop_ET(H, EVV, EVU):
-    return np.dot(H, EVV - cfg["beta"] * EVU)
+    """
+    ET_ji = H_j * (EVV_ji - beta * EVU_ji)
+
+    """
+    return np.einsum("j, ji->ji", H, EVV - cfg["beta"] * EVU)

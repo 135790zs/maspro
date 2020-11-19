@@ -1,7 +1,6 @@
 
 # MUST DO:
-# TODO: check all t's indxs
-# TODO: Check if STDP is happening: consult STDP data
+# TODO: Check if STDP is happening ALSO UNDER STANDARD LIF: consult STDP data
 # TODO: Implement ADAM
 # TODO: LTP seems to work in vitro, see if traub leads to LTD
 
@@ -9,6 +8,7 @@
 # TODO: Dictionary to facilitate sweeping function (param = key, list = item)
 # TODO: Make it possible to use fewer than N_I N_Rs
 # TODO: Make N_R variable per layer
+# TODO: Maximize according to minmax in train
 
 
 I can maybe use random B for all early layers and adaptive/symmetric B for last layer

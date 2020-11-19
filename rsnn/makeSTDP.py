@@ -15,14 +15,14 @@ for tvt_type in ["train", "val", "test"]:
 
     for s in range(n_examples):
         int1 = rng.integers(8, 14)
-        offset2 = rng.integers(2, int1//2)
+        offset2 = rng.integers(3, int1//2)
 
         for t in range(S_len):
             inp[s, t, 0] = t % int1 == 0
             inp[s, t, 1] = (t-offset2) % int1 == 0
         for t in range(S_len):
-            tar[s, t, 0] = 1 if t < S_len//2 else 0
-            tar[s, t, 1] = 0 if t < S_len//2 else 1
+            tar[s, t, 0] = 1
+            tar[s, t, 1] = 0
 
     np.save(f'{cfg["wavs_fname"]}_{tvt_type}.npy', inp)
     np.save(f'{cfg["phns_fname"]}_{tvt_type}.npy', tar)

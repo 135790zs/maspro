@@ -21,7 +21,7 @@ def network(cfg, inp, tar, W_rec, W_out, b_out, B):
                                       TZ=M['TZ'][r],
                                       V=M['V'][t, r],
                                       U=M['U'][t, r])
-
+            M['TZ'][r, M['Z'][t, r]==1] = t
             # Pad any input with zeros to make it length N_R
             Z_prev = M['Z'][t, r-1] if r > 0 else np.pad(
                 M['X'][t], (0, cfg["N_R"] - len(M['X'][t])))
@@ -94,8 +94,6 @@ def network(cfg, inp, tar, W_rec, W_out, b_out, B):
 
         M['L'][t] = np.dot(B, (M['P'][t] - M['T'][t]))
 
-        def FR_reg_fn(t_):
-            return
         if t > 0:
             FR_reg = (
                 cfg["eta"]
@@ -139,11 +137,11 @@ def feed_batch(cfg, inps, tars, W_rec, W_out, b_out, B, epoch, tvt_type):
         'DB': np.zeros(
             shape=(cfg["N_Rec"], cfg["N_R"], tars.shape[-1],)),
     }
-    for b in range(cfg["batch_size"]):
+    for b in range(inps.shape[0]):
         print(f"\tEpoch {epoch}/{cfg['Epochs']-1}\t"
               f"{'  ' if tvt_type == 'val' else ''}{tvt_type} "
-              f"sample {b+1}/{cfg['batch_size']}",
-              end='\r' if b < cfg['Epochs']-1 else '\n')
+              f"sample {b+1}/{inps.shape[0]}",
+              end='\r' if b < inps.shape[0]-1 else '\n')
         inps_rep = np.repeat(inps[b], cfg["Repeats"], axis=0)
         tars_rep = np.repeat(tars[b], cfg["Repeats"], axis=0)
 
@@ -162,7 +160,7 @@ def feed_batch(cfg, inps, tars, W_rec, W_out, b_out, B, epoch, tvt_type):
                            W_out=W_out,
                            b_out=b_out)
 
-        batch_err += np.sum(final_model["CE"]) / cfg["batch_size"]
+        batch_err += np.sum(final_model["CE"]) / inps.shape[0]
 
         for dw_type in batch_DW.keys():
             batch_DW[dw_type] += np.sum(final_model[dw_type], axis=0)
@@ -192,7 +190,7 @@ def main(cfg):
 
         # Make batch
         randidxs = np.random.randint(inps['train'].shape[0],
-                                     size=cfg["batch_size"])
+                                     size=cfg["batch_size_train"])
         terr, DW = feed_batch(
             epoch=e,
             tvt_type='train',
@@ -205,7 +203,7 @@ def main(cfg):
             B=W['B'][e])
 
         randidxs = np.random.randint(inps['val'].shape[0],
-                                     size=cfg["batch_size"])
+                                     size=cfg["batch_size_val"])
         verr, _ = feed_batch(
             epoch=e,
             tvt_type='val',
@@ -248,7 +246,7 @@ def main(cfg):
 
     # Make test batch
     randidxs = np.random.randint(inps['val'].shape[0],
-                                 size=cfg["batch_size"])
+                                 size=cfg["batch_size_val"])
 
     optW = ut.load_weights()
     total_testerr = 0

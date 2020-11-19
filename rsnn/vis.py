@@ -152,8 +152,7 @@ def plot_graph(M, t, W_rec, W_out):
         if r is None:
             return None
 
-        bounds = (-80, 60) if cfg["neuron"] == "Izhikevich" \
-            else (0, cfg["thr"])
+        bounds = (0, cfg["thr"])
         v = (M['V'][t, r, n] - bounds[0]) / bounds[1]
         cmap = mpcm.get_cmap("coolwarm")
         rgba = cmap(v, bytes=True)

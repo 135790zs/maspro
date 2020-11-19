@@ -1,43 +1,40 @@
 from numpy import exp
 cfg = {
-    "neuron": "ALIF",
     "eprop_type": "adaptive",  # in {random, symmetric, adaptive}
 
-    "fraction_ALIF": 1,  # If neuron == LIF
+    "fraction_ALIF": 0,
     "theta_adaptation": 200,  # Depends on length of task: working memory
 
-    "theta_membrane": 3,
-    "beta": 0.07,
+    "theta_membrane": 20,  # TIMIT: 20
+    "theta_output": 3,  # TIMIT: 3
+    "beta": 0.184,  # TIMIT: 0.184
     "gamma": 0.3,     # Pseudoderivative ET contribution
     "eta": 1e-2,      # Learning rate (1e-2 for TIMIT)
-    "weight_decay": 1,  # For W_out and B, only if adaptive
-    "L2_reg": 0,
-    "FR_reg": 1e-5,
-    "FR_target": 0.1,
+    "weight_decay": 0,  # For W_out and B, only if adaptive. def = 1e-2
+    "L2_reg": 0,  # 1e-5 fot TIMIT
+    "FR_reg": 0,  # 50 for TIMIT
+    "FR_target": 6/1000,  # Desired frequency (mean per ms)
     "update_dead_weights": False,
     "update_input_weights": False,
 
-    "eqb": -65,       # Voltage equilibrium
-    "thr": 10,        # Spike threshold
-    "dt_refr": 10,    # Refractory time
+    "thr": 1.6,        # Spike threshold
+    "dt_refr": 6,    # Refractory time
 
-    "dt": .1,
+    "dt": 1,
 
     "N_R": 2,
     "N_Rec": 1,
-
-    "TIMIT_ntrain": 12,  # def 3696
-    "TIMIT_nval": 14,  # def 400
 
     "wavs_fname": "../data_wavs",
     "phns_fname": "../data_phns",
     "weights_fname": "../checkpoint",
 
-    "Epochs": 200,  # def = 80
-    "Repeats": 2,  # ms per epoch, def = 5
-    "batch_size": 10,  # def = 32
+    "Epochs": 20,  # def = 80
+    "Repeats": 1,  # ms per epoch, def = 5
+    "batch_size_train": 6,  # def = 32
+    "batch_size_val": 6,  # def = 32
     "maxlen": 100,  # Don't forget to re-run process_timit.py!
-    "n_examples": {'train': 200, 'val': 100, 'test': 100},
+    "n_examples": {'train': 100, 'val': 1, 'test': 1},
     "plot_interval": 1,  # 0 to disable plots
     "plot_main": True,
     "plot_state": True,
@@ -46,7 +43,7 @@ cfg = {
 
 cfg['rho'] = exp(-cfg["dt"] / cfg["theta_adaptation"])
 cfg['alpha'] = exp(-cfg["dt"] / cfg["theta_membrane"])
-cfg['kappa'] = exp(-cfg["dt"] / cfg["theta_membrane"])
+cfg['kappa'] = exp(-cfg["dt"] / cfg["theta_output"])
 
 lookup = {
     "X":       {"scalar": False, "binary":False, "label": "x"},
