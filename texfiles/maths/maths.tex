@@ -273,8 +273,30 @@ $N\times61$ class labels.
 \item In adaptive $B$, L2 weight decay on output and broadcast neurons according to [2] using $c_\text{decay} = 10^{-2}$.
 \item Fire rate regularization with $c_\text{reg} = 50$. 
 \end{itemize}
+\newpage
+\section{Optimizer}
 
+\subsection{Deriving SGD}
 
+%Stochastic gradient descent:
+Cross-entropy loss:
+\[
+E = -\sum_{t,k}\pi_k^{*,t}\log\pi^t_k
+\]
+Therefore,
+\[
+\frac{\partial E}{\partial z^t_j} = \sum_kW^\text{out}_{kj}\sum_{t'\geq t}\left(\pi_k^{t'}-\pi_k^{*,t'}\right)\kappa^{t'-t}
+\]
+We now derive:
+\begin{align}
+\widehat{\frac{dE}{dW_{ji}}} &= \sum_{t'}\frac{\partial E}{\partial z^{t'}_j}e^{t'}_{ji}\\
+&= \sum_{k,t'}W^\text{out}_{kj}\sum_{t\geq t'}\left(\pi^t_k-\pi_k^{*,t}\right)\kappa^{t-t'}e^{t'}_{ji}\\
+&= \sum_{k,t}W^\text{out}_{kj}\left(\pi_k^t-\pi_k^{*,t}\right)\sum_{t'\leq t}\kappa^{t-t'}e^{t'}_{ji}
+\end{align}
+Therefore,
+\[
+\Delta W^\text{rec}_{ji} &= -\eta\sum_t\left(\sum_kB_{jk}\left(\pi_k^t-\pi_k^{*,t}\right)\right)\bar{e}^t_{ji}
+\]
 
 
 \end{document}

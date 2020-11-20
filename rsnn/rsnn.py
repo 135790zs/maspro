@@ -5,7 +5,7 @@ import utils as ut
 import vis
 
 
-def network(cfg, inp, tar, W_rec, W_out, b_out, B):
+def network(cfg, inp, tar, W_rec, W_out, b_out, B, adamvars):
     n_steps = inp.shape[0]
     M = ut.initialize_model(length=n_steps, tar_size=tar.shape[-1])
     M["X"] = inp
@@ -89,9 +89,6 @@ def network(cfg, inp, tar, W_rec, W_out, b_out, B):
         M['CE'][t] = (-np.sum(M['T'][t] * np.log(1e-8 + M['P'][t]))
                       + L2norm_W)
 
-        M['DW_out'][t] = -cfg["eta"] * np.outer((M['P'][t] - M['T'][t]),
-                                                M['ZbarK'][t, -1])
-
         M['L'][t] = np.dot(B, (M['P'][t] - M['T'][t]))
 
         if t > 0:
@@ -107,11 +104,32 @@ def network(cfg, inp, tar, W_rec, W_out, b_out, B):
             FR_reg = 0
 
         # Multiply the dimensions inside the layers
-        M['DW'][t] = -cfg["eta"] * np.einsum("rj,rji->rji",
-                                             M['L'][t],
-                                             M['ETbar'][t]) + FR_reg
+        M['gW'][t] = np.einsum("rj,rji->rji",
+                               M['L'][t],
+                               M['ETbar'][t])
+        M['gW_out'][t] = np.outer((M['P'][t] - M['T'][t]),
+                                   M['ZbarK'][t, -1])
+        M['gb_out'][t] = M['P'][t] - M['T'][t]
 
-        M['Db_out'][t] = -cfg["eta"] * (M['P'][t] - M['T'][t])
+        if cfg["optimizer"] == 'SGD':
+            M['DW'][t] = -cfg["eta"] * M['gW'][t] + FR_reg
+
+            M['DW_out'][t] = -cfg["eta"] * M['gW_out'][t]
+
+            M['Db_out'][t] = -cfg["eta"] * M['gb_out'][t]
+
+        elif cfg["optimizer"] == 'Adam':
+            for wtype in ["W", "W_out", "b_out"]:
+                m = (adamvars["beta1"] * adamvars[f"m{wtype}"]
+                     + (1 - adamvars["beta1"]) * M[f'g{wtype}'][t])
+                v = (adamvars["beta2"] * adamvars[f"v{wtype}"]
+                     + (1 - adamvars["beta2"]) * M[f'g{wtype}'][t] ** 2)
+                f1 = m / ( 1 - adamvars["beta1"])
+                f2 = np.sqrt(v / (1 - adamvars["beta2"])) + adamvars["eps"]
+
+                M[f'D{wtype}'][t] = cfg["eta"] * (f1 / f2)
+
+            M['DW'][t] += FR_reg
 
         # symmetric e-prop for last layer, random otherwise
         if cfg["eprop_type"] == "adaptive":
@@ -124,17 +142,27 @@ def network(cfg, inp, tar, W_rec, W_out, b_out, B):
     return M
 
 
-def feed_batch(cfg, inps, tars, W_rec, W_out, b_out, B, epoch, tvt_type):
+def feed_batch(cfg, inps, tars, W_rec, W_out, b_out, B, epoch, tvt_type, adamvars, e):
     batch_err = 0
-    # TODO: Put all W of this batch in own dict
+
     batch_DW = {
-        'DW': np.zeros(
+        'W': np.zeros(
             shape=(cfg["N_Rec"], cfg["N_R"], cfg["N_R"] * 2,)),
-        'DW_out': np.zeros(
+        'W_out': np.zeros(
             shape=(tars.shape[-1], cfg["N_R"],)),
-        'Db_out': np.zeros(
+        'b_out': np.zeros(
             shape=(tars.shape[-1],)),
-        'DB': np.zeros(
+        'B': np.zeros(
+            shape=(cfg["N_Rec"], cfg["N_R"], tars.shape[-1],)),
+    }
+    batch_gW = {
+        'W': np.zeros(
+            shape=(cfg["N_Rec"], cfg["N_R"], cfg["N_R"] * 2,)),
+        'W_out': np.zeros(
+            shape=(tars.shape[-1], cfg["N_R"],)),
+        'b_out': np.zeros(
+            shape=(tars.shape[-1],)),
+        'B': np.zeros(
             shape=(cfg["N_Rec"], cfg["N_R"], tars.shape[-1],)),
     }
     for b in range(inps.shape[0]):
@@ -152,9 +180,11 @@ def feed_batch(cfg, inps, tars, W_rec, W_out, b_out, B, epoch, tvt_type):
             W_rec=W_rec,
             W_out=W_out,
             b_out=b_out,
-            B=B)
+            B=B,
+            adamvars=adamvars)
 
-        if cfg['plot_state'] and b == 0 and tvt_type == "train":
+        if (cfg['plot_state'] and b == 0 and tvt_type == "train"
+            and cfg["plot_interval"] and e % cfg["plot_interval"] == 0):
             vis.plot_state(M=final_model,
                            W_rec=W_rec,
                            W_out=W_out,
@@ -162,10 +192,11 @@ def feed_batch(cfg, inps, tars, W_rec, W_out, b_out, B, epoch, tvt_type):
 
         batch_err += np.sum(final_model["CE"]) / inps.shape[0]
 
-        for dw_type in batch_DW.keys():
-            batch_DW[dw_type] += np.sum(final_model[dw_type], axis=0)
+        for w_type in ['W', 'W_out', 'b_out']:
+            batch_DW[w_type] += np.sum(final_model[f'D{w_type}'], axis=0)
+            batch_gW[w_type] += np.sum(final_model[f'g{w_type}'], axis=0)
 
-    return batch_err, batch_DW
+    return batch_err, batch_DW, batch_gW
 
 
 def main(cfg):
@@ -180,18 +211,31 @@ def main(cfg):
         tars[tvt_type] = np.load(f'{cfg["phns_fname"]}_{tvt_type}.npy')
 
     terrs = np.zeros(shape=(cfg["Epochs"]))
-    verrs = np.zeros(shape=(cfg["Epochs"]))
+    verrs = np.ones(shape=(cfg["Epochs"])) * -1
 
     optVerr = None
 
     W = ut.initialize_weights(tar_size=tars['train'].shape[-1])
+    # TODO: Put adam in W?
+
+    adamvars = {
+        'beta1': cfg['adam_beta1'],
+        'beta2': cfg['adam_beta2'],
+        'eps': cfg['adam_eps'],
+        'mW': 0,
+        'mW_out': 0,
+        'mb_out': 0,
+        'vW': 0,
+        'vW_out': 0,
+        'vb_out': 0,
+    }
 
     for e in range(0, cfg["Epochs"]):
 
         # Make batch
         randidxs = np.random.randint(inps['train'].shape[0],
                                      size=cfg["batch_size_train"])
-        terr, DW = feed_batch(
+        terr, DW, gW = feed_batch(
             epoch=e,
             tvt_type='train',
             cfg=cfg,
@@ -200,43 +244,62 @@ def main(cfg):
             W_rec=W['W'][e],
             W_out=W['W_out'][e],
             b_out=W['b_out'][e],
-            B=W['B'][e])
-
-        randidxs = np.random.randint(inps['val'].shape[0],
-                                     size=cfg["batch_size_val"])
-        verr, _ = feed_batch(
-            epoch=e,
-            tvt_type='val',
-            cfg=cfg,
-            inps=inps['val'][randidxs],
-            tars=tars['val'][randidxs],
-            W_rec=W['W'][e],
-            W_out=W['W_out'][e],
-            b_out=W['b_out'][e],
-            B=W['B'][e])
-
+            B=W['B'][e],
+            adamvars=adamvars,
+            e=e)
         terrs[e] = terr
-        verrs[e] = verr
 
-        # Save best weights
-        if optVerr is None or verr < optVerr:
-            print(f"\nLowest val error ({verr:.3f}) found at epoch {e}!")
-            optVerr = verr
-            ut.save_weights(W=W, epoch=e)
+        if e % cfg["val_every_E"] == 0:
+            randidxs = np.random.randint(inps['val'].shape[0],
+                                         size=cfg["batch_size_val"])
+            verr, _, _ = feed_batch(
+                epoch=e,
+                tvt_type='val',
+                cfg=cfg,
+                inps=inps['val'][randidxs],
+                tars=tars['val'][randidxs],
+                W_rec=W['W'][e],
+                W_out=W['W_out'][e],
+                b_out=W['b_out'][e],
+                B=W['B'][e],
+                adamvars=adamvars,
+                e=e)
+            verrs[e] = verr
+
+
+            # Save best weights
+            if optVerr is None or verr < optVerr:
+                print(f"\nLowest val error ({verr:.3f}) found at epoch {e}!")
+                optVerr = verr
+                ut.save_weights(W=W, epoch=e)
+
+            # Interpolate missing verrs
+            verrs[:e+1] = ut.interpolate_verrs(verrs[:e+1])
 
         # Update weights
         if e < cfg['Epochs'] - 1:
+
             for wtype in W.keys():
-                W[wtype][e+1] = W[wtype][e] + DW[f'D{wtype}']
+                # Update weights
+                W[wtype][e+1] = W[wtype][e] + DW[wtype]
 
                 if cfg["eprop_type"] == "adaptive" and wtype in ["W_out", "B"]:
                     W[wtype][e+1] -= cfg["weight_decay"] * W[wtype][e]
 
                 elif cfg["eprop_type"] == "symmetric" and wtype == "B":
                     W[wtype][e+1] == (W["W_out"][e].T
-                                      + DW[f'DW_out'].T
+                                      + DW['W_out'].T
                                       - (cfg["weight_decay"]
                                          * W["W_out"][e].T))
+                # Update Adam
+                if wtype != 'B':
+                    adamvars[f'm{wtype}'] = (
+                        adamvars["beta2"] * adamvars[f'm{wtype}']
+                        + (1 - adamvars["beta2"]) * gW[wtype])
+                    adamvars[f'v{wtype}'] = (
+                        adamvars["beta2"] * adamvars[f'v{wtype}']
+                        + (1 - adamvars["beta2"]) * gW[wtype] ** 2)
+
 
 
         if cfg["plot_main"]:
@@ -252,7 +315,7 @@ def main(cfg):
     total_testerr = 0
 
     for e in range(0, cfg["Epochs"]):
-        testerr, _ = feed_batch(
+        testerr, _, _ = feed_batch(
             epoch=e,
             tvt_type='test',
             cfg=cfg,
@@ -261,7 +324,10 @@ def main(cfg):
             W_rec=optW['W'],
             W_out=optW['W_out'],
             b_out=optW['b_out'],
-            B=optW['B'])
+            B=optW['B'],
+            adamvars=adamvars,
+            e=e)
+
         total_testerr += testerr
     total_testerr /= cfg["Epochs"]
 

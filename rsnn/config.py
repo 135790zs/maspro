@@ -1,6 +1,7 @@
 from numpy import exp
 cfg = {
     "eprop_type": "adaptive",  # in {random, symmetric, adaptive}
+    "optimizer": 'Adam',
 
     "fraction_ALIF": 1,
     "theta_adaptation": 200,  # Depends on length of task: working memory
@@ -9,11 +10,15 @@ cfg = {
     "theta_output": 3,  # TIMIT: 3
     "beta": 0.184,  # TIMIT: 0.184
     "gamma": 0.3,     # Pseudoderivative ET contribution
-    "eta": 1e-2,      # Learning rate (1e-2 for TIMIT)
+    "eta": 1e-5,      # Learning rate (1e-2 for TIMIT)
     "weight_decay": 1e-2,  # For W_out and B, only if adaptive. def = 1e-2
     "L2_reg": 1e-5,  # 1e-5 fot TIMIT
     "FR_reg": 50,  # 50 for TIMIT
     "FR_target": 6/1000,  # Desired frequency (mean per ms)
+    "adam_beta1": 0.9,
+    "adam_beta2": 0.999,
+    "adam_eps": 1e-5,
+
     "update_dead_weights": False,
     "update_input_weights": False,
 
@@ -29,13 +34,14 @@ cfg = {
     "phns_fname": "../data_phns",
     "weights_fname": "../checkpoint",
 
-    "Epochs": 20,  # def = 80
+    "Epochs": 2000,  # def = 80
     "Repeats": 1,  # ms per epoch, def = 5
     "batch_size_train": 1,  # def = 32
     "batch_size_val": 1,  # def = 32
+    "val_every_E": 10,
     "maxlen": 100,  # Don't forget to re-run process_timit.py!
     "n_examples": {'train': 1, 'val': 1, 'test': 1},
-    "plot_interval": 1,  # 0 to disable plots
+    "plot_interval": 100,  # 0 to disable plots
     "plot_main": True,
     "plot_state": True,
     "plot_graph": False,

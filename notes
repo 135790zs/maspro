@@ -11,4 +11,8 @@
 
 
 I can maybe use random B for all early layers and adaptive/symmetric B for last layer
-QUESTION FOR MEETING: B for shallow layers?
+ALSO note usage of W^out_kj in pE/pz equation in supp equation 20. Needs solution
+
+QUESTION FOR MEETING:
+* for shallow layers?
+* Bidirectional LSNN?

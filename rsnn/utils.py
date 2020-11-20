@@ -16,7 +16,7 @@ def initialize_model(length, tar_size):
     for neuronvar in ["V", "Z", "ZbarK", "I", "H", "L"]:
         M[neuronvar] = np.zeros(shape=neuron_shape)
 
-    for weightvar in ["EVV", "EVU", "ET", "DW", "ETbar"]:
+    for weightvar in ["EVV", "EVU", "ET", "DW", "ETbar", 'gW']:
         M[weightvar] = np.zeros(shape=weight_shape)
 
     M["U"] = np.ones(shape=neuron_shape) * cfg["thr"]
@@ -26,8 +26,10 @@ def initialize_model(length, tar_size):
     M["Z_inbar"] = np.zeros(shape=(length, cfg["N_Rec"], cfg["N_R"] * 2,))
 
     M["DW_out"] = np.zeros(shape=(length, tar_size, cfg["N_R"],))
+    M["gW_out"] = np.zeros(shape=(length, tar_size, cfg["N_R"],))
     M["DB"] = np.zeros(shape=(length, cfg["N_Rec"], cfg["N_R"], tar_size))
     M["Db_out"] = np.zeros(shape=(length, tar_size,))
+    M["gb_out"] = np.zeros(shape=(length, tar_size,))
 
     M["T"] = np.zeros(shape=(length, tar_size,))
     M["Y"] = np.zeros(shape=(length, tar_size,))
@@ -105,6 +107,26 @@ def load_weights():
             filepath = subdir + os.sep + filename
             W[filename[:-4]] = np.load(filepath)  # cut off '.npy'
     return W
+
+
+def interpolate_verrs(arr):
+    retarr = arr
+    x0 = 0
+    y0 = arr[x0]
+    for idx, val in enumerate(arr):
+        retarr[idx] = val
+
+        if val != -1:
+            x0 = idx
+            y0 = val
+            continue
+
+        x1 = np.argmax(arr[idx:] > -1) + idx
+        y1 = arr[x1]
+        w = (idx - x0) / (x1 - x0)
+        retarr[idx] = y0 * (1 - w) + y1 * w
+
+    return retarr
 
 
 def temporal_filter(c, a, depth=0):

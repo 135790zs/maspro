@@ -29,7 +29,7 @@ def plot_run(terrs, verrs, W, epoch):
     for errs, label in [(terrs, "E_T"), (verrs, "E_V")]:
         axs.append(fig.add_subplot(gsc[len(axs), :],
                                    sharex=axs[0] if axs else None))
-        axs[-1].plot(errs[:epoch])
+        axs[-1].plot(errs[errs >= 0][:epoch])
         axs[-1].grid()
         axs[-1].set_ylabel(f"${label}$",
                            rotation=0,
