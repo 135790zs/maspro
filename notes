@@ -1,6 +1,7 @@
 
 # MUST DO:
-# TODO: Implement ADAM
+# TODO: Delegate eprop functions to utils
+# TODO: Bidirectional?
 # TODO: LTP seems to work in vitro, see if traub leads to LTD
 
 # LOW PRIORITY:

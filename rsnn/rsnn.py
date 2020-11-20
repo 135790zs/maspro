@@ -12,7 +12,6 @@ def network(cfg, inp, tar, W_rec, W_out, b_out, B, adamvars):
 
     for t in range(n_steps):
 
-
         # Input is nonzero for first layer
         for r in range(cfg['N_Rec']):
 
@@ -21,7 +20,8 @@ def network(cfg, inp, tar, W_rec, W_out, b_out, B, adamvars):
                                       TZ=M['TZ'][r],
                                       V=M['V'][t, r],
                                       U=M['U'][t, r])
-            M['TZ'][r, M['Z'][t, r]==1] = t
+            M['TZ'][r, M['Z'][t, r]==1] = t  # Log spike time
+
             # Pad any input with zeros to make it length N_R
             Z_prev = M['Z'][t, r-1] if r > 0 else np.pad(
                 M['X'][t], (0, cfg["N_R"] - len(M['X'][t])))
@@ -30,24 +30,25 @@ def network(cfg, inp, tar, W_rec, W_out, b_out, B, adamvars):
                                       U=M['U'][t, r],
                                       is_ALIF=M['is_ALIF'][r])
 
-            M['ET'][t, r] = ut.eprop_ET(H=M['H'][t, r],
+            M['ET'][t, r] = ut.eprop_ET(is_ALIF=M['is_ALIF'][r],
+                                        H=M['H'][t, r],
                                         EVV=M['EVV'][t, r],
                                         EVU=M['EVU'][t, r])
 
             # Update weights for next epoch
             if not cfg["update_input_weights"]:
-                M["EVV"][t, 0, :, :inp.shape[-1]] = 0
-                M["EVU"][t, 0, :, :inp.shape[-1]] = 0
-                M["ET"][t, 0, :, :inp.shape[-1]] = 0
+                for var in ["EVV", "EVU", "ET"]:
+                    M[var][t, 0, :, :inp.shape[-1]] = 0
+
             # Update weights for next epoch
             if not cfg["update_dead_weights"]:
-                M["EVV"][t, r, W_rec[r] == 0] = 0
-                M["EVU"][t, r, W_rec[r] == 0] = 0
-                M["ET"][t, r, W_rec[r] == 0] = 0
+                for var in ["EVV", "EVU", "ET"]:
+                    M[var][t, r, W_rec[r] == 0] = 0
 
             M["Z_in"][t, r] = np.concatenate((Z_prev, M['Z'][t, r]))
             M['Z_inbar'][t] = ((cfg["alpha"] * M['Z_inbar'][t-1] if t > 0 else 0)
                                + M['Z_in'][t])
+
             M['I'][t, r] = np.dot(W_rec[r], M["Z_in"][t, r])
 
             if t != n_steps - 1:
@@ -57,7 +58,9 @@ def network(cfg, inp, tar, W_rec, W_out, b_out, B, adamvars):
                 # TODO: Can do without M[ET] or M[H] or M[TZ] or M[DW].
                 M['EVU'][t+1, r] = ut.eprop_EVU(Z_inbar=M['Z_inbar'][t, r],
                                                 EVU=M['EVU'][t, r],
-                                                H=M['H'][t, r])
+                                                H=M['H'][t, r],
+                                                is_ALIF=M['is_ALIF'][r])
+
                 M['V'][t+1, r] = ut.eprop_V(V=M['V'][t, r],
                                             I=M['I'][t, r],
                                             Z=M['Z'][t, r])
@@ -66,14 +69,18 @@ def network(cfg, inp, tar, W_rec, W_out, b_out, B, adamvars):
                                             Z=M['Z'][t, r],
                                             is_ALIF=M['is_ALIF'][r])
 
-        M['ETbar'][t] = ((cfg["kappa"] * M['ETbar'][t-1] if t > 0 else 0)
-                         + M['ET'][t])
-        M['ZbarK'][t] = ((cfg["kappa"] * M['ZbarK'][t-1] if t > 0 else 0)
-                         + M['Z'][t])
+        M['ETbar'][t] = ut.eprop_lpfK(lpf=M['ETbar'][t-1] if t > 0 else 0,
+                                      x=M['ET'][t])
+
+        M['ZbarK'][t] = ut.eprop_lpfK(lpf=M['ZbarK'][t-1] if t > 0 else 0,
+                                      x=M['Z'][t])
+
         M['T'][t] = tar[t]
-        M['Y'][t] = ((cfg["kappa"] * M['Y'][t-1] if t > 0 else 0)
-                     + np.sum(W_out * M['Z'][t, -1], axis=1)
-                     + b_out)
+
+        M['Y'][t] = ut.eprop_Y(Y=M['Y'][t-1] if t > 0 else 0,
+                               W_out=W_out,
+                               Z_last=M['Z'][t, -1],
+                               b_out=b_out)
 
         ex = np.exp(M['Y'][t] - np.max(M['Y'][t]))
         M['P'][t] = ex / np.sum(ex)
@@ -103,23 +110,20 @@ def network(cfg, inp, tar, W_rec, W_out, b_out, B, adamvars):
         else:
             FR_reg = 0
 
-        # Multiply the dimensions inside the layers
-        M['gW'][t] = np.einsum("rj,rji->rji",
-                               M['L'][t],
-                               M['ETbar'][t])
-        M['gW_out'][t] = np.outer((M['P'][t] - M['T'][t]),
-                                   M['ZbarK'][t, -1])
-        M['gb_out'][t] = M['P'][t] - M['T'][t]
 
-        if cfg["optimizer"] == 'SGD':
-            M['DW'][t] = -cfg["eta"] * M['gW'][t] + FR_reg
+        # TODO: make into iterable
+        for wtype in ["W", "W_out", "b_out"]:
+            M[f'g{wtype}'][t] = ut.eprop_gradient(wtype=wtype,
+                                                  L=M['L'][t],
+                                                  ETbar=M['ETbar'][t],
+                                                  Zbar_last=M['ZbarK'][t, -1],
+                                                  P=M['P'][t],
+                                                  T=M['T'][t])
 
-            M['DW_out'][t] = -cfg["eta"] * M['gW_out'][t]
+            if cfg["optimizer"] == 'SGD':
+                M[f'D{wtype}'][t] = -cfg["eta"] * M[f'g{wtype}'][t]
 
-            M['Db_out'][t] = -cfg["eta"] * M['gb_out'][t]
-
-        elif cfg["optimizer"] == 'Adam':
-            for wtype in ["W", "W_out", "b_out"]:
+            elif cfg["optimizer"] == 'Adam':
                 m = (adamvars["beta1"] * adamvars[f"m{wtype}"]
                      + (1 - adamvars["beta1"]) * M[f'g{wtype}'][t])
                 v = (adamvars["beta2"] * adamvars[f"v{wtype}"]
@@ -129,7 +133,7 @@ def network(cfg, inp, tar, W_rec, W_out, b_out, B, adamvars):
 
                 M[f'D{wtype}'][t] = cfg["eta"] * (f1 / f2)
 
-            M['DW'][t] += FR_reg
+        M['DW'][t] += FR_reg
 
         # symmetric e-prop for last layer, random otherwise
         if cfg["eprop_type"] == "adaptive":

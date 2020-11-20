@@ -50,7 +50,7 @@ def initialize_weights(tar_size):
     W = {}
 
     W["W"] = rng.random(
-        size=(cfg["Epochs"], cfg["N_Rec"], cfg["N_R"], cfg["N_R"] * 2,))
+        size=(cfg["Epochs"], cfg["N_Rec"], cfg["N_R"], cfg["N_R"] * 2,)) / 100
     W["W_out"] = rng.random(size=(cfg["Epochs"], tar_size, cfg["N_R"],))
     W["b_out"] = np.zeros(shape=(cfg["Epochs"], tar_size,))
 
@@ -71,12 +71,12 @@ def initialize_weights(tar_size):
         # Zero diag recurrent W: no self-conn
         np.fill_diagonal(W['W'][0, r, :, cfg["N_R"]:], 0)
 
-    W['W'][0, 0, 0, 0] = 0.8  # Input 1 to rec 1: frozen
-    W['W'][0, 0, 1, 0] = 0  # Input 1 to rec 2
-    W['W'][0, 0, 0, 1] = 0  # Input 2 to rec 1
-    W['W'][0, 0, 1, 1] = 0.8  # Input 2 to rec 2: frozen
-    W['W'][0, 0, 1, 2] = 0.2  # Rec 1 to rec 2 (B)
-    W['W'][0, 0, 0, 3] = 0.2  # Rec 2 to rec 1 (T)
+    # W['W'][0, 0, 0, 0] = 0.8  # Input 1 to rec 1: frozen
+    # W['W'][0, 0, 1, 0] = 0  # Input 1 to rec 2
+    # W['W'][0, 0, 0, 1] = 0  # Input 2 to rec 1
+    # W['W'][0, 0, 1, 1] = 0.8  # Input 2 to rec 2: frozen
+    # W['W'][0, 0, 1, 2] = 0.2  # Rec 1 to rec 2 (B)
+    # W['W'][0, 0, 0, 3] = 0.2  # Rec 2 to rec 1 (T)
 
 
     return W
@@ -160,25 +160,27 @@ def eprop_U(U, Z, is_ALIF):
 
 def eprop_EVV(EVV, Z_in):
     """
-    ALIF: Zbar
+    ALIF & LIF: Zbar
     checked
-    TODO Needs changing for std LIF
     """
     return cfg["alpha"] * EVV + Z_in
 
 
-def eprop_EVU(H, Z_inbar, EVU):
+def eprop_EVU(is_ALIF, H, Z_inbar, EVU):
     """
-    H_j * Zinbar_i + (rho - H_j * beta) * EVU_ji
+    ALIF: H_j * Zinbar_i + (rho - H_j * beta) * EVU_ji
+    LIF: N/A
     checked
-    TODO Needs changing for std LIF
     """
+    is_ALIF = np.repeat(a=is_ALIF[:, np.newaxis],
+                        repeats=is_ALIF.size*2,
+                        axis=1)
+
     Hp = cfg["rho"] - H * cfg["beta"]
-    res = np.outer(H, Z_inbar) + np.einsum("j, ji -> ji", Hp, EVU)
 
-
-
-    return res
+    return np.where(is_ALIF,
+                    np.outer(H, Z_inbar) + np.einsum("j, ji -> ji", Hp, EVU),
+                    EVU)
 
 
 def eprop_H(V, U, is_ALIF):
@@ -191,9 +193,36 @@ def eprop_H(V, U, is_ALIF):
                                a_max=None)
 
 
-def eprop_ET(H, EVV, EVU):
+def eprop_ET(is_ALIF, H, EVV, EVU):
     """
-    ET_ji = H_j * (EVV_ji - beta * EVU_ji)
+    ET_ji = H_j * (EVV_ji - X)
+    X = - beta * EVU_ji if ALIF else 0
 
+    checked for LIF and ALIF!
     """
-    return np.einsum("j, ji->ji", H, EVV - cfg["beta"] * EVU)
+    is_ALIF = np.repeat(a=is_ALIF[:, np.newaxis],
+                        repeats=is_ALIF.size*2,
+                        axis=1)
+
+    return np.where(is_ALIF,
+                    np.einsum("j, ji->ji", H, EVV - cfg["beta"] * EVU),
+                    np.einsum("j, ji->ji", H, EVV))
+
+
+def eprop_lpfK(lpf, x):
+    return (cfg["kappa"] * lpf) + x
+
+
+def eprop_Y(Y, W_out, Z_last, b_out):
+    return (cfg["kappa"] * Y
+            + np.sum(W_out * Z_last, axis=1)
+            + b_out)
+
+
+def eprop_gradient(wtype, L, ETbar, P, T, Zbar_last):
+    if wtype == 'W':
+        return np.einsum("rj,rji->rji", L, ETbar)
+    elif wtype == 'W_out':
+        return np.outer((P - T), Zbar_last)
+    elif wtype == 'b_out':
+        return P - T

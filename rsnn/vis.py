@@ -9,13 +9,20 @@ rc['mathtext.fontset'] = 'stix'
 rc['font.family'] = 'STIXGeneral'
 
 def weights_to_img(arr):
-    # print("arr", arr)
-    # if arr.ndim == 4:
-    #     print(arr)
-    #     idx = np.argwhere(np.all(arr[..., :] == 0, axis=0))
-    #     print(idx)
-    #     arr = np.delete(arr, idx, axis=1)
+    original_dim = arr.ndim
     arr = arr.reshape(arr.shape[0], -1).T
+
+    # TODO: drop dead weights
+    if original_dim == 4:
+        # idx = np.argwhere(np.all(arr[..., :] == 0, axis=0))
+        # arr_del = np.delete(arr, idx, axis=1)
+        del_arr = arr[~np.all(arr == 0, axis=1)]
+        if del_arr.shape[0] == 0:  # All synapses are zero, just pick the first
+            arr = arr[:1]
+        else:
+            arr = del_arr
+        # if del_arr.shape[0]:  # High enough to plot.
+
 
     return arr
 
@@ -88,7 +95,7 @@ def plot_state(M, W_rec, W_out, b_out):
                                    sharex=axs[0] if axs else None))
         if lookup[var]['scalar'] == False:
             axs[-1].imshow(weights_to_img(M[var]),
-                           cmap=('gray' if lookup[var]["binary"]
+                           cmap=('copper' if lookup[var]["binary"]
                                  else 'coolwarm'),
                            vmin=np.min(M[var]),
                            vmax=np.max(M[var]),
@@ -122,7 +129,7 @@ def plot_state(M, W_rec, W_out, b_out):
 
         axs.append(fig.add_subplot(gsc[len(axs), :],
                                    sharex=axs[0] if axs else None))
-        axs[-1].imshow(v.reshape(v.shape[0], -1).T,
+        axs[-1].imshow(weights_to_img(v),
                        cmap='coolwarm',
                        vmin=np.min(v),
                        vmax=np.max(v),

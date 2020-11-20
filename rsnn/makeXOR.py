@@ -12,6 +12,7 @@ for tvt_type in ["train", "val", "test"]:
     rng = np.random.default_rng()
     inp = np.zeros(shape=(n_examples, S_len, Si))
     tar = np.zeros(shape=(n_examples, S_len, So))
+
     for s in range(n_examples):
         A = (1, 1,)
         dur = (rng.integers(1, 4), rng.integers(1, 4),)

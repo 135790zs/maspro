@@ -3,14 +3,14 @@ cfg = {
     "eprop_type": "adaptive",  # in {random, symmetric, adaptive}
     "optimizer": 'Adam',
 
-    "fraction_ALIF": 1,
+    "fraction_ALIF": 0.25,  # def 0.25
     "theta_adaptation": 200,  # Depends on length of task: working memory
 
     "theta_membrane": 20,  # TIMIT: 20
     "theta_output": 3,  # TIMIT: 3
     "beta": 0.184,  # TIMIT: 0.184
     "gamma": 0.3,     # Pseudoderivative ET contribution
-    "eta": 1e-5,      # Learning rate (1e-2 for TIMIT)
+    "eta": 1e-2,      # Learning rate (1e-2 for TIMIT)
     "weight_decay": 1e-2,  # For W_out and B, only if adaptive. def = 1e-2
     "L2_reg": 1e-5,  # 1e-5 fot TIMIT
     "FR_reg": 50,  # 50 for TIMIT
@@ -20,14 +20,14 @@ cfg = {
     "adam_eps": 1e-5,
 
     "update_dead_weights": False,
-    "update_input_weights": False,
+    "update_input_weights": True,
 
-    "thr": 1.6,        # Spike threshold
-    "dt_refr": 6,    # Refractory time
+    "thr": 1.6,        # Spike threshold, def = 1.6
+    "dt_refr": 2,    # Refractory time, def = 2
 
     "dt": 1,
 
-    "N_R": 64,
+    "N_R": 256,
     "N_Rec": 1,
 
     "wavs_fname": "../data_wavs",
@@ -36,12 +36,12 @@ cfg = {
 
     "Epochs": 2000,  # def = 80
     "Repeats": 1,  # ms per epoch, def = 5
-    "batch_size_train": 1,  # def = 32
-    "batch_size_val": 1,  # def = 32
+    "batch_size_train": 3,  # def = 32
+    "batch_size_val": 3,  # def = 32
     "val_every_E": 10,
     "maxlen": 100,  # Don't forget to re-run process_timit.py!
-    "n_examples": {'train': 1, 'val': 1, 'test': 1},
-    "plot_interval": 100,  # 0 to disable plots
+    "n_examples": {'train': 5, 'val': 5, 'test': 5},
+    "plot_interval": 1,  #  State plot; 0 to disable plots
     "plot_main": True,
     "plot_state": True,
     "plot_graph": False,
