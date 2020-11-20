@@ -10,7 +10,7 @@ cfg = {
     "theta_output": 3,  # TIMIT: 3
     "beta": 0.184,  # TIMIT: 0.184
     "gamma": 0.3,     # Pseudoderivative ET contribution
-    "eta": 1e-2,      # Learning rate (1e-2 for TIMIT)
+    "eta": 1e-9,      # Learning rate (1e-2 for TIMIT)
     "weight_decay": 1e-2,  # For W_out and B, only if adaptive. def = 1e-2
     "L2_reg": 1e-5,  # 1e-5 for TIMIT
     "FR_reg": 50,  # 50 for TIMIT
@@ -36,8 +36,8 @@ cfg = {
 
     "Epochs": 50,  # def = 80
     "Repeats": 1,  # ms per epoch, def = 5
-    "batch_size_train": 8,  # def = 32
-    "batch_size_val": 4,  # def = 32
+    "batch_size_train": 64,  # def = 32
+    "batch_size_val": 64,  # def = 32
     "val_every_E": 2,
     "maxlen": 100,  # Don't forget to re-run process_timit.py!
     "n_examples": {'train': 128, 'val': 128, 'test': 128},

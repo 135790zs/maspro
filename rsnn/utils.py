@@ -129,6 +129,11 @@ def interpolate_verrs(arr):
     return retarr
 
 
+def eprop_Zinbar(Z_inbar, Z_in):
+    return ((cfg["alpha"] * M['Z_inbar'][t-1] if t > 0 else 0)
+                               + M['Z_in'][t])
+
+
 def temporal_filter(c, a, depth=0):
     if depth == 32:
         return a[-1]
@@ -209,14 +214,30 @@ def eprop_ET(is_ALIF, H, EVV, EVU):
                     np.einsum("j, ji->ji", H, EVV))
 
 
-def eprop_lpfK(lpf, x):
-    return (cfg["kappa"] * lpf) + x
+def eprop_lpfK(lpf, x, factor):
+    return (factor * lpf) + x
 
 
 def eprop_Y(Y, W_out, Z_last, b_out):
     return (cfg["kappa"] * Y
             + np.sum(W_out * Z_last, axis=1)
             + b_out)
+
+
+def eprop_P(Y):
+    ex = np.exp(Y - np.max(Y))
+    return ex / np.sum(ex)
+
+
+def eprop_CE(T, P, W_rec, W_out, B):
+    # TODO: on which weights?
+    W = np.concatenate((W_rec.flatten(),
+                        W_out.flatten(),
+                        B.flatten()))
+    L2norm_W = np.linalg.norm(W) ** 2 * cfg["L2_reg"]
+
+    return (-np.sum(T * np.log(1e-8 + P))
+            + L2norm_W)
 
 
 def eprop_gradient(wtype, L, ETbar, P, T, Zbar_last):
@@ -228,12 +249,26 @@ def eprop_gradient(wtype, L, ETbar, P, T, Zbar_last):
         return P - T
 
 
+def eprop_DW(wtype, adamvars, gradient, Zs, ET):
+    FR_reg = 0
+    if wtype == 'W' and Zs.shape[0]:  # Add firing rate reg term
+        FR_reg = (
+            cfg["eta"]
+            * cfg["FR_reg"]
+            * np.mean(np.einsum("rj,rji->rji",
+                                cfg["FR_target"] - np.mean(Zs, axis=0),
+                                ET),
+                      axis=0))
 
-def eprop_Adam(wtype, adamvars, gradient):
-    m = (adamvars["beta1"] * adamvars[f"m{wtype}"]
-         + (1 - adamvars["beta1"]) * gradient)
-    v = (adamvars["beta2"] * adamvars[f"v{wtype}"]
-         + (1 - adamvars["beta2"]) * gradient ** 2)
-    f1 = m / ( 1 - adamvars["beta1"])
-    f2 = np.sqrt(v / (1 - adamvars["beta2"])) + adamvars["eps"]
-    return cfg["eta"] * (f1 / f2)
+    if cfg["optimizer"] == 'SGD':
+        return -cfg["eta"] * gradient + FR_reg
+
+    elif cfg["optimizer"] == 'Adam':
+        m = (adamvars["beta1"] * adamvars[f"m{wtype}"]
+             + (1 - adamvars["beta1"]) * gradient)
+        v = (adamvars["beta2"] * adamvars[f"v{wtype}"]
+             + (1 - adamvars["beta2"]) * gradient ** 2)
+        f1 = m / ( 1 - adamvars["beta1"])
+        f2 = np.sqrt(v / (1 - adamvars["beta2"])) + adamvars["eps"]
+
+        return cfg["eta"] * (f1 / f2) + FR_reg

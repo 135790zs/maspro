@@ -37,16 +37,18 @@ def plot_run(terrs, percs_wrong_t, verrs, percs_wrong_v, W, epoch):
     fig = plt.figure(constrained_layout=False, figsize=(8, 8))
     gsc = fig.add_gridspec(nrows=8, ncols=1, hspace=0.05)
     axs = []
+
     for errs, label in [(terrs, "E_T"), (verrs, "E_V")]:
         axs.append(fig.add_subplot(gsc[len(axs), :],
                                    sharex=axs[0] if axs else None))
         axs[-1].plot(errs[errs >= 0][:epoch])
         axs[-1].grid()
-        axs[-1].set_ylim(0, np.max(errs[errs >= 0]) * 1.1)
+        # axs[-1].set_ylim(0, np.max(errs[errs >= 0]) * 1.1)
         axs[-1].set_ylabel(f"${label}$",
                            rotation=0,
                            labelpad=labelpad,
                            fontsize=fontsize)
+
     for percs_wrong, label in [(percs_wrong_t, "% wrong T"),
                                (percs_wrong_v, "% wrong V")]:
         axs.append(fig.add_subplot(gsc[len(axs), :],
@@ -58,19 +60,19 @@ def plot_run(terrs, percs_wrong_t, verrs, percs_wrong_v, W, epoch):
                            rotation=0,
                            labelpad=labelpad,
                            fontsize=fontsize)
+
     if epoch >= 1:
-        for weight_type in ['W', 'W_out', 'b_out', 'B']:
-            # W
+        for weight_type, weights in W.items():
             axs.append(fig.add_subplot(gsc[len(axs), :], sharex=axs[0]))
             axs[-1].imshow(
-                W[weight_type][:epoch].reshape(
-                    W[weight_type][:epoch].shape[0], -1).T,
+                weights[:epoch].reshape(
+                    weights[:epoch].shape[0], -1).T,
                 aspect='auto',
                 interpolation='nearest',
                 cmap='coolwarm')
             axs[-1].set_ylabel(f"{weight_type}"
-                               f"\n[{np.min(W[weight_type][:epoch]):.1f}"
-                               f", {np.max(W[weight_type][:epoch]):.1f}]",
+                               f"\n[{np.min(weights[:epoch]):.1f}"
+                               f", {np.max(weights[:epoch]):.1f}]",
                                rotation=0,
                                labelpad=labelpad,
                                fontsize=fontsize)

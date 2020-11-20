@@ -20,11 +20,13 @@ def network(cfg, inp, tar, W_rec, W_out, b_out, B, adamvars):
                                       TZ=M['TZ'][r],
                                       V=M['V'][t, r],
                                       U=M['U'][t, r])
+
             M['TZ'][r, M['Z'][t, r]==1] = t  # Log spike time
 
             # Pad any input with zeros to make it length N_R
-            Z_prev = M['Z'][t, r-1] if r > 0 else np.pad(
-                M['X'][t], (0, cfg["N_R"] - len(M['X'][t])))
+            Z_prev = M['Z'][t, r-1] if r > 0 else \
+                np.pad(M['X'][t],
+                       (0, cfg["N_R"] - len(M['X'][t])))
 
             M['H'][t, r] = ut.eprop_H(V=M['V'][t, r],
                                       U=M['U'][t, r],
@@ -46,8 +48,10 @@ def network(cfg, inp, tar, W_rec, W_out, b_out, B, adamvars):
                     M[var][t, r, W_rec[r] == 0] = 0
 
             M["Z_in"][t, r] = np.concatenate((Z_prev, M['Z'][t, r]))
-            M['Z_inbar'][t] = ((cfg["alpha"] * M['Z_inbar'][t-1] if t > 0 else 0)
-                               + M['Z_in'][t])
+
+            M['Z_inbar'][t] = ut.eprop_lpfK(lpf=M['Z_inbar'][t-1] if t > 0 else 0,
+                                            x=M['Z_in'][t],
+                                            factor=cfg["alpha"])
 
             M['I'][t, r] = np.dot(W_rec[r], M["Z_in"][t, r])
 
@@ -70,10 +74,12 @@ def network(cfg, inp, tar, W_rec, W_out, b_out, B, adamvars):
                                             is_ALIF=M['is_ALIF'][r])
 
         M['ETbar'][t] = ut.eprop_lpfK(lpf=M['ETbar'][t-1] if t > 0 else 0,
-                                      x=M['ET'][t])
+                                      x=M['ET'][t],
+                                      factor=cfg["kappa"])
 
         M['ZbarK'][t] = ut.eprop_lpfK(lpf=M['ZbarK'][t-1] if t > 0 else 0,
-                                      x=M['Z'][t])
+                                      x=M['Z'][t],
+                                      factor=cfg["kappa"])
 
         M['T'][t] = tar[t]
 
@@ -82,35 +88,19 @@ def network(cfg, inp, tar, W_rec, W_out, b_out, B, adamvars):
                                Z_last=M['Z'][t, -1],
                                b_out=b_out)
 
-        ex = np.exp(M['Y'][t] - np.max(M['Y'][t]))
-        M['P'][t] = ex / np.sum(ex)
+        M['P'][t] = ut.eprop_P(Y=M['Y'][t])
 
         M['Pmax'][t, M['P'][t].argmax()] = 1
 
-        # TODO: on which weights?
-        W = np.concatenate((W_rec.flatten(),
-                            W_out.flatten(),
-                            B.flatten()))
-        L2norm_W = np.linalg.norm(W) ** 2 * cfg["L2_reg"]
-
-        M['CE'][t] = (-np.sum(M['T'][t] * np.log(1e-8 + M['P'][t]))
-                      + L2norm_W)
+        M['CE'][t] = ut.eprop_CE(T=M['T'][t],
+                                 P=M['P'][t],
+                                 W_rec=W_rec,
+                                 W_out=W_out,
+                                 B=B)
 
         M['L'][t] = np.dot(B, (M['P'][t] - M['T'][t]))
 
-        if t > 0:
-            FR_reg = (
-                cfg["eta"]
-                * cfg["FR_reg"]
-                * np.mean(np.einsum("rj,rji->rji",
-                                    cfg["FR_target"] - np.mean(M['Z'][:t],
-                                                               axis=0),
-                                    M['ET'][t]),
-                          axis=0))
-        else:
-            FR_reg = 0
-
-
+        # Calculate gradient and weight update
         # TODO: make into iterable
         for wtype in ["W", "W_out", "b_out"]:
             M[f'g{wtype}'][t] = ut.eprop_gradient(wtype=wtype,
@@ -120,22 +110,16 @@ def network(cfg, inp, tar, W_rec, W_out, b_out, B, adamvars):
                                                   P=M['P'][t],
                                                   T=M['T'][t])
 
-            if cfg["optimizer"] == 'SGD':
-                M[f'D{wtype}'][t] = -cfg["eta"] * M[f'g{wtype}'][t]
 
-            elif cfg["optimizer"] == 'Adam':
+            M[f'D{wtype}'][t] = ut.eprop_DW(wtype=wtype,
+                                            adamvars=adamvars,
+                                            gradient=M[f'g{wtype}'][t],
+                                            Zs=M['Z'][:t],
+                                            ET=M['ET'][t])
 
-
-                M[f'D{wtype}'][t] = ut.eprop_Adam(wtype=wtype,
-                                                  adamvars=adamvars,
-                                                  gradient=M[f'g{wtype}'][t])
-
-        M['DW'][t] += FR_reg
-        # Update weights for next epoch
         if not cfg["update_input_weights"]:
                 M["DW"][t, 0, :, :inp.shape[-1]] = 0
 
-        # Update weights for next epoch
         if not cfg["update_dead_weights"]:
                 M["DW"][t, W_rec == 0] = 0
 
@@ -144,7 +128,8 @@ def network(cfg, inp, tar, W_rec, W_out, b_out, B, adamvars):
             M['DB'][t, -1] = M['DW_out'][t].T
 
         if cfg["plot_graph"]:
-            vis.plot_graph(M=M, t=t, W_rec=W_rec, W_out=W_out)
+            vis.plot_graph(
+                M=M, t=t, W_rec=W_rec, W_out=W_out)
             time.sleep(0.5)
 
     return M
@@ -209,8 +194,8 @@ def feed_batch(cfg, inps, tars, W_rec, W_out, b_out, B, epoch, tvt_type, adamvar
             batch_DW[w_type] += np.mean(final_model[f'D{w_type}'], axis=0)
             batch_gW[w_type] += np.mean(final_model[f'g{w_type}'], axis=0)
 
-    print(f"\n\tBatch CE: {batch_err:.3f},\t"
-          f"% wrong: {100*batch_perc_wrong:.1f}%")
+    print(f"\t\tCE:      {batch_err:.3f},\n"
+          f"\t\t% wrong: {100*batch_perc_wrong:.1f}%")
     return batch_err, batch_perc_wrong, batch_DW, batch_gW
 
 
@@ -287,7 +272,7 @@ def main(cfg):
 
             # Save best weights
             if optVerr is None or verr < optVerr:
-                print(f"\nLowest val error ({verr:.3f}) found at epoch {e}!")
+                print(f"\nLowest val error ({verr:.3f}) found at epoch {e}!\n")
                 optVerr = verr
                 ut.save_weights(W=W, epoch=e)
 
