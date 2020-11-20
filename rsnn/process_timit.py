@@ -93,7 +93,7 @@ if __name__ == "__main__":
                 filepath = subdir + os.sep + filename
 
                 if filepath.endswith(".WAV"):
-                    print(f"{idx+1}/{nwavs}")
+                    print(f"{idx+1}/{nwavs}", end='\r')
                     sig, _ = sf.read(filepath)
                     c = read_sound(filepath)
                     wavdata[idx, :c.shape[0], :] = c[:maxnframes]
@@ -153,3 +153,4 @@ if __name__ == "__main__":
                     bbox_inches='tight')
 
         plt.close()
+    print("\nDone parsing TIMIT dataset!")

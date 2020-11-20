@@ -50,7 +50,7 @@ def initialize_weights(tar_size):
     W = {}
 
     W["W"] = rng.random(
-        size=(cfg["Epochs"], cfg["N_Rec"], cfg["N_R"], cfg["N_R"] * 2,)) / 100
+        size=(cfg["Epochs"], cfg["N_Rec"], cfg["N_R"], cfg["N_R"] * 2,)) / 64
     W["W_out"] = rng.random(size=(cfg["Epochs"], tar_size, cfg["N_R"],))
     W["b_out"] = np.zeros(shape=(cfg["Epochs"], tar_size,))
 
@@ -226,3 +226,14 @@ def eprop_gradient(wtype, L, ETbar, P, T, Zbar_last):
         return np.outer((P - T), Zbar_last)
     elif wtype == 'b_out':
         return P - T
+
+
+
+def eprop_Adam(wtype, adamvars, gradient):
+    m = (adamvars["beta1"] * adamvars[f"m{wtype}"]
+         + (1 - adamvars["beta1"]) * gradient)
+    v = (adamvars["beta2"] * adamvars[f"v{wtype}"]
+         + (1 - adamvars["beta2"]) * gradient ** 2)
+    f1 = m / ( 1 - adamvars["beta1"])
+    f2 = np.sqrt(v / (1 - adamvars["beta2"])) + adamvars["eps"]
+    return cfg["eta"] * (f1 / f2)

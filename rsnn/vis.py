@@ -8,9 +8,13 @@ from config import cfg, lookup
 rc['mathtext.fontset'] = 'stix'
 rc['font.family'] = 'STIXGeneral'
 
-def weights_to_img(arr):
+def weights_to_img(arr, is_binary=False):
     original_dim = arr.ndim
     arr = arr.reshape(arr.shape[0], -1).T
+
+    # Pad to prevent spike trains disappearing on plot edge
+    if is_binary:
+        arr = np.pad(arr, ((8, 8), (0, 0)))
 
     # TODO: drop dead weights
     if original_dim == 4:
@@ -27,18 +31,30 @@ def weights_to_img(arr):
     return arr
 
 
-def plot_run(terrs, verrs, W, epoch):
+def plot_run(terrs, percs_wrong_t, verrs, percs_wrong_v, W, epoch):
     labelpad = 35
     fontsize = 14
     fig = plt.figure(constrained_layout=False, figsize=(8, 8))
-    gsc = fig.add_gridspec(nrows=6, ncols=1, hspace=0.05)
+    gsc = fig.add_gridspec(nrows=8, ncols=1, hspace=0.05)
     axs = []
     for errs, label in [(terrs, "E_T"), (verrs, "E_V")]:
         axs.append(fig.add_subplot(gsc[len(axs), :],
                                    sharex=axs[0] if axs else None))
         axs[-1].plot(errs[errs >= 0][:epoch])
         axs[-1].grid()
+        axs[-1].set_ylim(0, np.max(errs[errs >= 0]) * 1.1)
         axs[-1].set_ylabel(f"${label}$",
+                           rotation=0,
+                           labelpad=labelpad,
+                           fontsize=fontsize)
+    for percs_wrong, label in [(percs_wrong_t, "% wrong T"),
+                               (percs_wrong_v, "% wrong V")]:
+        axs.append(fig.add_subplot(gsc[len(axs), :],
+                                   sharex=axs[0] if axs else None))
+        axs[-1].plot(percs_wrong[percs_wrong >= 0][:epoch]*100)
+        axs[-1].grid()
+        axs[-1].set_ylim(0, 120)
+        axs[-1].set_ylabel(label,
                            rotation=0,
                            labelpad=labelpad,
                            fontsize=fontsize)
@@ -65,21 +81,21 @@ def plot_run(terrs, verrs, W, epoch):
     plt.close()
 
 
-def plot_state(M, W_rec, W_out, b_out):
+def plot_state(M, W_rec, W_out, b_out, plot_weights=False):
     w = {
-        "w1": (0, 1, 2),
-        "w2": (0, 0, 3)
+        # "w1": (0, 1, 2),
+        # "w2": (0, 0, 3)
     }
 
-    M_plotvars = ["X", "I", "V", "H", "U", "Z_in", "Z_inbar", "Z", "ZbarK",
-                  "EVV", "EVU", "ET", "ETbar", "Y", "P", "Pmax", "T", "CE",
+    M_plotvars = ["X", "I", "V", "H", "U", "Z_in", "Z",
+                  "EVV", "EVU", "ET", "Y", "P", "Pmax", "T", "CE",
                   "L", "DW", "DW_out", "Db_out"]
     W = {"W_rec": W_rec, "W_out": W_out, "b_out": b_out}
 
     fig = plt.figure(constrained_layout=False, figsize=(8, 16))
     gsc = fig.add_gridspec(nrows=(len(M_plotvars)
-                                  + len(w.keys())
-                                  + len(W.keys()) + 2),
+                                  + len(w.keys())  # explicit weights
+                                  + (len(W.keys()) if plot_weights else 0)),
                            ncols=1,
                            hspace=0.075)
     axs = []
@@ -94,14 +110,16 @@ def plot_state(M, W_rec, W_out, b_out):
         axs.append(fig.add_subplot(gsc[len(axs), :],
                                    sharex=axs[0] if axs else None))
         if lookup[var]['scalar'] == False:
-            axs[-1].imshow(weights_to_img(M[var]),
+
+            axs[-1].imshow(weights_to_img(M[var],
+                                          is_binary=lookup[var]["binary"]),
                            cmap=('copper' if lookup[var]["binary"]
                                  else 'coolwarm'),
                            vmin=np.min(M[var]),
                            vmax=np.max(M[var]),
-                           interpolation='nearest',
+                           interpolation="none",  # better than nearest here
                            aspect='auto')
-        elif var == 'CE':
+        elif var == 'CE':  # not as image but line plot
             axs[-1].plot(M[var])
             axs[-1].grid()
 
@@ -121,26 +139,26 @@ def plot_state(M, W_rec, W_out, b_out):
                            rotation=0,
                            labelpad=labelpad,
                            fontsize=fontsize)
+    if plot_weights:
+        for k, v in W.items():
+            v = v.flatten()
+            v = np.expand_dims(v, axis=0)
+            v = np.repeat(v, M['X'].shape[0], axis=0)
 
-    for k, v in W.items():
-        v = v.flatten()
-        v = np.expand_dims(v, axis=0)
-        v = np.repeat(v, M['X'].shape[0], axis=0)
-
-        axs.append(fig.add_subplot(gsc[len(axs), :],
-                                   sharex=axs[0] if axs else None))
-        axs[-1].imshow(weights_to_img(v),
-                       cmap='coolwarm',
-                       vmin=np.min(v),
-                       vmax=np.max(v),
-                       interpolation='nearest',
-                       aspect='auto')
-        axs[-1].set_ylabel(f"${lookup[k]['label']}$"
-                           f"\n[{np.min(v):.1f}"
-                           f", {np.max(v):.1f}]",
-                           rotation=0,
-                           labelpad=labelpad,
-                           fontsize=fontsize)
+            axs.append(fig.add_subplot(gsc[len(axs), :],
+                                       sharex=axs[0] if axs else None))
+            axs[-1].imshow(weights_to_img(v),
+                           cmap='coolwarm',
+                           vmin=np.min(v),
+                           vmax=np.max(v),
+                           interpolation='nearest',
+                           aspect='auto')
+            axs[-1].set_ylabel(f"${lookup[k]['label']}$"
+                               f"\n[{np.min(v):.1f}"
+                               f", {np.max(v):.1f}]",
+                               rotation=0,
+                               labelpad=labelpad,
+                               fontsize=fontsize)
 
     axs[-1].set_xlabel("$t$", fontsize=fontsize)
 

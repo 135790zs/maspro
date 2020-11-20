@@ -1,5 +1,8 @@
 
 # MUST DO:
+# TODO: Also don't forget hacky correcting factor in I calc
+# TODO: Confirm all eprop variants are functional
+# TODO: Confirm multiple layers
 # TODO: Delegate eprop functions to utils
 # TODO: Bidirectional?
 # TODO: LTP seems to work in vitro, see if traub leads to LTD
@@ -9,11 +12,19 @@
 # TODO: Make it possible to use fewer than N_I N_Rs
 # TODO: Make N_R variable per layer
 # TODO: Maximize according to minmax in train
+# TODO: Explore membrane potential reset
+# TODO: Explore non-uniform synaptic delays
+# TODO: Explore modifying the Pmax such that there is a "low-pass filter" of the previous Pmax
 
 
 I can maybe use random B for all early layers and adaptive/symmetric B for last layer
 ALSO note usage of W^out_kj in pE/pz equation in supp equation 20. Needs solution
 
+problem: input weights are trained negatively, such that they drop network voltage
+
+Discussion point: online training, bidirectional training?
+
 QUESTION FOR MEETING:
 * for shallow layers?
 * Bidirectional LSNN?
+* Init weights to which range?

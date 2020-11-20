@@ -12,36 +12,36 @@ cfg = {
     "gamma": 0.3,     # Pseudoderivative ET contribution
     "eta": 1e-2,      # Learning rate (1e-2 for TIMIT)
     "weight_decay": 1e-2,  # For W_out and B, only if adaptive. def = 1e-2
-    "L2_reg": 1e-5,  # 1e-5 fot TIMIT
+    "L2_reg": 1e-5,  # 1e-5 for TIMIT
     "FR_reg": 50,  # 50 for TIMIT
     "FR_target": 6/1000,  # Desired frequency (mean per ms)
     "adam_beta1": 0.9,
     "adam_beta2": 0.999,
     "adam_eps": 1e-5,
 
-    "update_dead_weights": False,
-    "update_input_weights": True,
+    "update_dead_weights": True,
+    "update_input_weights": False,
 
     "thr": 1.6,        # Spike threshold, def = 1.6
     "dt_refr": 2,    # Refractory time, def = 2
 
     "dt": 1,
 
-    "N_R": 256,
+    "N_R": 64,
     "N_Rec": 1,
 
     "wavs_fname": "../data_wavs",
     "phns_fname": "../data_phns",
     "weights_fname": "../checkpoint",
 
-    "Epochs": 2000,  # def = 80
+    "Epochs": 50,  # def = 80
     "Repeats": 1,  # ms per epoch, def = 5
-    "batch_size_train": 3,  # def = 32
-    "batch_size_val": 3,  # def = 32
-    "val_every_E": 10,
+    "batch_size_train": 8,  # def = 32
+    "batch_size_val": 4,  # def = 32
+    "val_every_E": 2,
     "maxlen": 100,  # Don't forget to re-run process_timit.py!
-    "n_examples": {'train': 5, 'val': 5, 'test': 5},
-    "plot_interval": 1,  #  State plot; 0 to disable plots
+    "n_examples": {'train': 128, 'val': 128, 'test': 128},
+    "plot_interval": 2,  #  State plot; 0 to disable plots
     "plot_main": True,
     "plot_state": True,
     "plot_graph": False,

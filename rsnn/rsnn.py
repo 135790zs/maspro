@@ -124,16 +124,20 @@ def network(cfg, inp, tar, W_rec, W_out, b_out, B, adamvars):
                 M[f'D{wtype}'][t] = -cfg["eta"] * M[f'g{wtype}'][t]
 
             elif cfg["optimizer"] == 'Adam':
-                m = (adamvars["beta1"] * adamvars[f"m{wtype}"]
-                     + (1 - adamvars["beta1"]) * M[f'g{wtype}'][t])
-                v = (adamvars["beta2"] * adamvars[f"v{wtype}"]
-                     + (1 - adamvars["beta2"]) * M[f'g{wtype}'][t] ** 2)
-                f1 = m / ( 1 - adamvars["beta1"])
-                f2 = np.sqrt(v / (1 - adamvars["beta2"])) + adamvars["eps"]
 
-                M[f'D{wtype}'][t] = cfg["eta"] * (f1 / f2)
+
+                M[f'D{wtype}'][t] = ut.eprop_Adam(wtype=wtype,
+                                                  adamvars=adamvars,
+                                                  gradient=M[f'g{wtype}'][t])
 
         M['DW'][t] += FR_reg
+        # Update weights for next epoch
+        if not cfg["update_input_weights"]:
+                M["DW"][t, 0, :, :inp.shape[-1]] = 0
+
+        # Update weights for next epoch
+        if not cfg["update_dead_weights"]:
+                M["DW"][t, W_rec == 0] = 0
 
         # symmetric e-prop for last layer, random otherwise
         if cfg["eprop_type"] == "adaptive":
@@ -148,6 +152,7 @@ def network(cfg, inp, tar, W_rec, W_out, b_out, B, adamvars):
 
 def feed_batch(cfg, inps, tars, W_rec, W_out, b_out, B, epoch, tvt_type, adamvars, e):
     batch_err = 0
+    batch_perc_wrong = 0
 
     batch_DW = {
         'W': np.zeros(
@@ -170,7 +175,8 @@ def feed_batch(cfg, inps, tars, W_rec, W_out, b_out, B, epoch, tvt_type, adamvar
             shape=(cfg["N_Rec"], cfg["N_R"], tars.shape[-1],)),
     }
     for b in range(inps.shape[0]):
-        print(f"\tEpoch {epoch}/{cfg['Epochs']-1}\t"
+        print((f"\tEpoch {epoch}/{cfg['Epochs']-1}\t" if tvt_type != 'test'
+               else '\t'),
               f"{'  ' if tvt_type == 'val' else ''}{tvt_type} "
               f"sample {b+1}/{inps.shape[0]}",
               end='\r' if b < inps.shape[0]-1 else '\n')
@@ -194,13 +200,18 @@ def feed_batch(cfg, inps, tars, W_rec, W_out, b_out, B, epoch, tvt_type, adamvar
                            W_out=W_out,
                            b_out=b_out)
 
-        batch_err += np.sum(final_model["CE"]) / inps.shape[0]
+        batch_err += np.sum(final_model["CE"]) / inps.shape[0]  # TODO: use mean over axis
+        batch_perc_wrong += np.mean(
+            np.max(np.abs(final_model["Pmax"]- final_model["T"]),
+                   axis=1)) / inps.shape[0]
 
         for w_type in ['W', 'W_out', 'b_out']:
-            batch_DW[w_type] += np.sum(final_model[f'D{w_type}'], axis=0)
-            batch_gW[w_type] += np.sum(final_model[f'g{w_type}'], axis=0)
+            batch_DW[w_type] += np.mean(final_model[f'D{w_type}'], axis=0)
+            batch_gW[w_type] += np.mean(final_model[f'g{w_type}'], axis=0)
 
-    return batch_err, batch_DW, batch_gW
+    print(f"\n\tBatch CE: {batch_err:.3f},\t"
+          f"% wrong: {100*batch_perc_wrong:.1f}%")
+    return batch_err, batch_perc_wrong, batch_DW, batch_gW
 
 
 def main(cfg):
@@ -216,6 +227,8 @@ def main(cfg):
 
     terrs = np.zeros(shape=(cfg["Epochs"]))
     verrs = np.ones(shape=(cfg["Epochs"])) * -1
+    percs_wrong_t = np.zeros(shape=(cfg["Epochs"]))
+    percs_wrong_v = np.ones(shape=(cfg["Epochs"])) * -1
 
     optVerr = None
 
@@ -235,11 +248,10 @@ def main(cfg):
     }
 
     for e in range(0, cfg["Epochs"]):
-
         # Make batch
         randidxs = np.random.randint(inps['train'].shape[0],
                                      size=cfg["batch_size_train"])
-        terr, DW, gW = feed_batch(
+        terr, perc_wrong_t, DW, gW = feed_batch(
             epoch=e,
             tvt_type='train',
             cfg=cfg,
@@ -252,11 +264,12 @@ def main(cfg):
             adamvars=adamvars,
             e=e)
         terrs[e] = terr
+        percs_wrong_t[e] = perc_wrong_t
 
         if e % cfg["val_every_E"] == 0:
             randidxs = np.random.randint(inps['val'].shape[0],
                                          size=cfg["batch_size_val"])
-            verr, _, _ = feed_batch(
+            verr, perc_wrong_v, _, _ = feed_batch(
                 epoch=e,
                 tvt_type='val',
                 cfg=cfg,
@@ -269,6 +282,7 @@ def main(cfg):
                 adamvars=adamvars,
                 e=e)
             verrs[e] = verr
+            percs_wrong_v[e] = perc_wrong_v
 
 
             # Save best weights
@@ -279,6 +293,7 @@ def main(cfg):
 
             # Interpolate missing verrs
             verrs[:e+1] = ut.interpolate_verrs(verrs[:e+1])
+            percs_wrong_t[:e+1] = ut.interpolate_verrs(percs_wrong_t[:e+1])
 
         # Update weights
         if e < cfg['Epochs'] - 1:
@@ -288,13 +303,13 @@ def main(cfg):
                 W[wtype][e+1] = W[wtype][e] + DW[wtype]
 
                 if cfg["eprop_type"] == "adaptive" and wtype in ["W_out", "B"]:
-                    W[wtype][e+1] -= cfg["weight_decay"] * W[wtype][e]
+                    W[wtype][e+1] -= cfg["weight_decay"] * W[wtype][e+1]
 
                 elif cfg["eprop_type"] == "symmetric" and wtype == "B":
-                    W[wtype][e+1] == (W["W_out"][e].T
-                                      + DW['W_out'].T
-                                      - (cfg["weight_decay"]
-                                         * W["W_out"][e].T))
+                    W[wtype][e+1] = (W["W_out"][e].T
+                                     + DW['W_out'].T
+                                     - (cfg["weight_decay"]
+                                        * W["W_out"][e].T))
                 # Update Adam
                 if wtype != 'B':
                     adamvars[f'm{wtype}'] = (
@@ -307,7 +322,9 @@ def main(cfg):
 
 
         if cfg["plot_main"]:
-            vis.plot_run(terrs=terrs, verrs=verrs, W=W, epoch=e)
+            vis.plot_run(terrs=terrs, percs_wrong_t=percs_wrong_t,
+                         verrs=verrs, percs_wrong_v=percs_wrong_t,
+                         W=W, epoch=e)
 
     print("\nTraining complete!\n")
 
@@ -316,26 +333,22 @@ def main(cfg):
                                  size=cfg["batch_size_val"])
 
     optW = ut.load_weights()
-    total_testerr = 0
 
-    for e in range(0, cfg["Epochs"]):
-        testerr, _, _ = feed_batch(
-            epoch=e,
-            tvt_type='test',
-            cfg=cfg,
-            inps=inps['val'][randidxs],
-            tars=tars['val'][randidxs],
-            W_rec=optW['W'],
-            W_out=optW['W_out'],
-            b_out=optW['b_out'],
-            B=optW['B'],
-            adamvars=adamvars,
-            e=e)
+    total_testerr, perc_wrong_test, _, _ = feed_batch(
+        epoch=1,
+        tvt_type='test',
+        cfg=cfg,
+        inps=inps['val'][randidxs],
+        tars=tars['val'][randidxs],
+        W_rec=optW['W'],
+        W_out=optW['W_out'],
+        b_out=optW['b_out'],
+        B=optW['B'],
+        adamvars=adamvars,
+        e=e)
 
-        total_testerr += testerr
-    total_testerr /= cfg["Epochs"]
-
-    print(f"\nTesting complete with error {total_testerr:.3f}!\n")
+    print(f"\nTesting complete with CE loss {total_testerr:.3f} and error "
+          f"rate {perc_wrong_test:.1f}%!\n")
 
     return optVerr
 
