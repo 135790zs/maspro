@@ -2,7 +2,7 @@ from numpy import exp
 cfg = {
     "eprop_type": "adaptive",  # in {random, symmetric, adaptive}
     "optimizer": 'Adam',
-
+    "n_directions": 2,  # 1 for unidirectional, 2 for bidirectional
     "fraction_ALIF": 0.25,  # def 0.25
     "theta_adaptation": 200,  # Depends on length of task: working memory
 

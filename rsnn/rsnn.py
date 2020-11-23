@@ -7,71 +7,16 @@ import vis
 
 def network(cfg, inp, tar, W_rec, W_out, b_out, B, adamvars):
     n_steps = inp.shape[0]
+
     M = ut.initialize_model(length=n_steps, tar_size=tar.shape[-1])
     M["X"] = inp
+    M["T"] = tar
 
     for t in range(n_steps):
 
         # Input is nonzero for first layer
         for r in range(cfg['N_Rec']):
-
-            # Spike if V >= threshold
-            M['Z'][t, r] = ut.eprop_Z(t=t,
-                                      TZ=M['TZ'][r],
-                                      V=M['V'][t, r],
-                                      U=M['U'][t, r])
-
-            M['TZ'][r, M['Z'][t, r]==1] = t  # Log spike time
-
-            # Pad any input with zeros to make it length N_R
-            Z_prev = M['Z'][t, r-1] if r > 0 else \
-                np.pad(M['X'][t],
-                       (0, cfg["N_R"] - len(M['X'][t])))
-
-            M['H'][t, r] = ut.eprop_H(V=M['V'][t, r],
-                                      U=M['U'][t, r],
-                                      is_ALIF=M['is_ALIF'][r])
-
-            M['ET'][t, r] = ut.eprop_ET(is_ALIF=M['is_ALIF'][r],
-                                        H=M['H'][t, r],
-                                        EVV=M['EVV'][t, r],
-                                        EVU=M['EVU'][t, r])
-
-            # Update weights for next epoch
-            if not cfg["update_input_weights"]:
-                for var in ["EVV", "EVU", "ET"]:
-                    M[var][t, 0, :, :inp.shape[-1]] = 0
-
-            # Update weights for next epoch
-            if not cfg["update_dead_weights"]:
-                for var in ["EVV", "EVU", "ET"]:
-                    M[var][t, r, W_rec[r] == 0] = 0
-
-            M["Z_in"][t, r] = np.concatenate((Z_prev, M['Z'][t, r]))
-
-            M['Z_inbar'][t] = ut.eprop_lpfK(lpf=M['Z_inbar'][t-1] if t > 0 else 0,
-                                            x=M['Z_in'][t],
-                                            factor=cfg["alpha"])
-
-            M['I'][t, r] = np.dot(W_rec[r], M["Z_in"][t, r])
-
-            if t != n_steps - 1:
-                M['EVV'][t+1, r] = ut.eprop_EVV(EVV=M['EVV'][t, r],
-                                                Z_in=M["Z_in"][t, r])
-
-                # TODO: Can do without M[ET] or M[H] or M[TZ] or M[DW].
-                M['EVU'][t+1, r] = ut.eprop_EVU(Z_inbar=M['Z_inbar'][t, r],
-                                                EVU=M['EVU'][t, r],
-                                                H=M['H'][t, r],
-                                                is_ALIF=M['is_ALIF'][r])
-
-                M['V'][t+1, r] = ut.eprop_V(V=M['V'][t, r],
-                                            I=M['I'][t, r],
-                                            Z=M['Z'][t, r])
-
-                M['U'][t+1, r] = ut.eprop_U(U=M['U'][t, r],
-                                            Z=M['Z'][t, r],
-                                            is_ALIF=M['is_ALIF'][r])
+            M = ut.process_layer(M=M, t=t, r=r, W_rec=W_rec[r])
 
         M['ETbar'][t] = ut.eprop_lpfK(lpf=M['ETbar'][t-1] if t > 0 else 0,
                                       x=M['ET'][t],
@@ -80,8 +25,6 @@ def network(cfg, inp, tar, W_rec, W_out, b_out, B, adamvars):
         M['ZbarK'][t] = ut.eprop_lpfK(lpf=M['ZbarK'][t-1] if t > 0 else 0,
                                       x=M['Z'][t],
                                       factor=cfg["kappa"])
-
-        M['T'][t] = tar[t]
 
         M['Y'][t] = ut.eprop_Y(Y=M['Y'][t-1] if t > 0 else 0,
                                W_out=W_out,

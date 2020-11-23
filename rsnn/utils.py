@@ -20,7 +20,8 @@ def initialize_model(length, tar_size):
         M[weightvar] = np.zeros(shape=weight_shape)
 
     M["U"] = np.ones(shape=neuron_shape) * cfg["thr"]
-    M["TZ"] = np.ones(shape=(cfg["N_Rec"], cfg["N_R"])) * -cfg["dt_refr"]
+    M["TZ"] = np.ones(shape=(cfg["N_Rec"],
+                             cfg["N_R"])) * -cfg["dt_refr"]
 
     M["Z_in"] = np.zeros(shape=(length, cfg["N_Rec"], cfg["N_R"] * 2,))
     M["Z_inbar"] = np.zeros(shape=(length, cfg["N_Rec"], cfg["N_R"] * 2,))
@@ -37,10 +38,12 @@ def initialize_model(length, tar_size):
     M["Pmax"] = np.zeros(shape=(length, tar_size,))
     M["CE"] = np.zeros(shape=(length,))
 
-    M["is_ALIF"] = np.zeros(shape=(cfg["N_Rec"] * cfg["N_R"]))
+    M["is_ALIF"] = np.zeros(
+        shape=(cfg["N_Rec"] * cfg["N_R"]))
     M["is_ALIF"][:int(M["is_ALIF"].size * cfg["fraction_ALIF"])] = 1
     np.random.shuffle(M["is_ALIF"])
-    M["is_ALIF"] = M["is_ALIF"].reshape((cfg["N_Rec"], cfg["N_R"]))
+    M["is_ALIF"] = M["is_ALIF"].reshape((cfg["N_Rec"],
+                                         cfg["N_R"]))
 
     return M
 
@@ -272,3 +275,66 @@ def eprop_DW(wtype, adamvars, gradient, Zs, ET):
         f2 = np.sqrt(v / (1 - adamvars["beta2"])) + adamvars["eps"]
 
         return cfg["eta"] * (f1 / f2) + FR_reg
+
+
+
+def process_layer(M, t, r, W_rec):
+    # Spike if V >= threshold
+    M['Z'][t, r] = eprop_Z(t=t,
+                              TZ=M['TZ'][r],
+                              V=M['V'][t, r],
+                              U=M['U'][t, r])
+
+    M['TZ'][r, M['Z'][t, r]==1] = t  # Log spike time
+
+    # Pad any input with zeros to make it length N_R
+    Z_prev = M['Z'][t, r-1] if r > 0 else \
+        np.pad(M['X'][t],
+               (0, cfg["N_R"] - len(M['X'][t])))
+
+    M['H'][t, r] = eprop_H(V=M['V'][t, r],
+                              U=M['U'][t, r],
+                              is_ALIF=M['is_ALIF'][r])
+
+    M['ET'][t, r] = eprop_ET(is_ALIF=M['is_ALIF'][r],
+                                H=M['H'][t, r],
+                                EVV=M['EVV'][t, r],
+                                EVU=M['EVU'][t, r])
+
+    # Update weights for next epoch
+    if not cfg["update_input_weights"]:
+        for var in ["EVV", "EVU", "ET"]:
+            M[var][t, 0, :, :M["X"].shape[-1]] = 0
+
+    # Update weights for next epoch
+    if not cfg["update_dead_weights"]:
+        for var in ["EVV", "EVU", "ET"]:
+            M[var][t, r, W_rec == 0] = 0
+
+    M["Z_in"][t, r] = np.concatenate((Z_prev, M['Z'][t, r]))
+
+    M['Z_inbar'][t] = eprop_lpfK(lpf=M['Z_inbar'][t-1] if t > 0 else 0,
+                                    x=M['Z_in'][t],
+                                    factor=cfg["alpha"])
+
+    M['I'][t, r] = np.dot(W_rec, M["Z_in"][t, r])
+
+    if t != M["X"].shape[0] - 1:
+        M['EVV'][t+1, r] = eprop_EVV(EVV=M['EVV'][t, r],
+                                        Z_in=M["Z_in"][t, r])
+
+        # TODO: Can do without M[ET] or M[H] or M[TZ] or M[DW].
+        M['EVU'][t+1, r] = eprop_EVU(Z_inbar=M['Z_inbar'][t, r],
+                                        EVU=M['EVU'][t, r],
+                                        H=M['H'][t, r],
+                                        is_ALIF=M['is_ALIF'][r])
+
+        M['V'][t+1, r] = eprop_V(V=M['V'][t, r],
+                                    I=M['I'][t, r],
+                                    Z=M['Z'][t, r])
+
+        M['U'][t+1, r] = eprop_U(U=M['U'][t, r],
+                                    Z=M['Z'][t, r],
+                                    is_ALIF=M['is_ALIF'][r])
+
+    return M
