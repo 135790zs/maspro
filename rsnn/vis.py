@@ -77,6 +77,7 @@ def plot_run(terrs, percs_wrong_t, verrs, percs_wrong_v, W, epoch):
                                labelpad=labelpad,
                                fontsize=fontsize)
 
+    axs[-1].set_xlabel("Epoch $E$", fontsize=fontsize)
     plt.savefig(f"../vis/errs.pdf",
                 bbox_inches='tight')
 

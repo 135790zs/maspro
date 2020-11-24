@@ -20,8 +20,6 @@
 I can maybe use random B for all early layers and adaptive/symmetric B for last layer
 ALSO note usage of W^out_kj in pE/pz equation in supp equation 20. Needs solution
 
-problem: input weights are trained negatively, such that they drop network voltage
-
 Discussion point: online training, bidirectional training?
 
 QUESTION FOR MEETING:

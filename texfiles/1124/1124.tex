@@ -1,0 +1,106 @@
+\documentclass[t]{beamer}
+
+\setlength {\marginparwidth }{2cm} 
+\usepackage{todonotes}
+\usepackage{siunitx}
+\usepackage{subcaption}
+\usepackage{apacite} 	% Use APA Citation
+\presetkeys{todonotes}{inline}{}
+\beamertemplatenavigationsymbolsempty
+
+\usepackage{algpseudocode}
+\usepackage{enumitem,amssymb, yfonts}
+\newlist{todolist}{itemize}{2}
+\setlist[todolist]{label=$\square$}
+\usepackage{pifont}
+\newcommand{\cmark}{\ding{51}}%
+\newcommand{\xmark}{\ding{55}}%
+\newcommand{\done}{\rlap{$\square$}{\raisebox{2pt}{\large\hspace{1pt}\cmark}}%
+\hspace{-2.5pt}}
+
+% \usetheme{AnnArbor}
+% \usetheme{Antibes}
+% \usetheme{Bergen}
+% \usetheme{Berkeley}https://www.sharelatex.com/project/5b12e1a4f84b363f6f336dab
+% \usetheme{Berlin}
+% \usetheme{Boadilla}
+% \usetheme{boxes}
+\usetheme{CambridgeUS}
+% \usetheme{Copenhagen}
+%\usetheme{Darmstadt}
+% \usetheme{default}
+%\usetheme{Frankfurt}
+%\usetheme{Goettingen}
+% \usetheme{Hannover}
+% \usetheme{Ilmenau}
+% \usetheme{JuanLesPins}
+\setlength{\parskip}{10pt}
+
+% \newcommand*\vc[1]%
+% {\begin{pmatrix}#1\end{pmatrix}}
+
+\newcommand*\vc[1]%
+{\left(\begin{array}{cccc}#1\end{array}\right)}
+
+
+\newcommand\eqdef{\ \mathrel{\overset{\makebox[0pt]{\mbox{\normalfont\scriptsize\sffamily def}}}{=}}\ }
+
+\title[Eligibility propagation]{Improving eligibility propagation using Izhikevich neurons in a multilayer RSNN.\\\vspace{10pt}
+\large{Presentation 4: A bidirectional crossroads}}
+
+\author[Werner]{Werner~van~der~Veen\\\tiny\texttt({w.k.van.der.veen.2@student.rug.nl})}\date{\today}
+
+% \pgfdeclareimage[height=1cm]{umcg-logo}{umcg.png}
+% \newif\ifplacelogo
+% \placelogotrue
+% \logo{\ifplacelogo\pgfuseimage{umcg-logo}\fi}
+
+\begin{document}
+
+\begin{frame}
+    \titlepage
+\end{frame}
+
+%======================================
+
+%\begin{frame}
+%    \tableofcontents
+%\end{frame}
+
+\small
+\section{Work done since previous meeting}
+\begin{frame}{Work done since previous meeting}
+	\begin{todolist}
+
+    \item[\done] Implement Bellec's tricks. Should be able to reproduce thereafter:
+    \begin{todolist}
+    	\item[\done] L2 \& firing rate regularization
+    	\item[\done] Firing rate regularization
+    	\item[\done] Gaussian distribution for broadcast weights
+    	\item[\done] Adam optimizer
+    \end{todolist}
+    \item \textbf{Bidirectional network} (?)
+    \item Obtain Bellec's performance.
+    \item Experiment with my own tweaks (e.g. multi-layered).
+  \end{todolist}
+\end{frame}
+
+\section{Current system performance}
+\begin{frame}{Current system performance}
+
+\end{frame}
+
+
+\begin{frame}{Questions}
+	\begin{itemize}[label=--]
+	\item Only difference: bidirectionality.\\Pros: closer to Bellec.\\Cons: no good reason, no bioplausibility, no online learning.\\
+	\item Q1: Bidirectional network: is my understanding correct? Switch target sequence too?
+	\item Q2: Should I implement it, or try to maximize performance on unidirectional?
+	\item Q3: Further suggestions on how to proceed, based on current performance?
+	\item Q4: Weights in network?
+	\end{itemize}
+\end{frame}
+
+
+
+\end{document}

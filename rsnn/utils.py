@@ -4,6 +4,7 @@ from config import cfg
 
 
 def initialize_model(length, tar_size):
+    rng = np.random.default_rng()
     M = {}
     neuron_shape = (length,
                     cfg["N_Rec"],
@@ -19,7 +20,8 @@ def initialize_model(length, tar_size):
     for weightvar in ["EVV", "EVU", "ET", "DW", "ETbar", 'gW']:
         M[weightvar] = np.zeros(shape=weight_shape)
 
-    M["U"] = np.ones(shape=neuron_shape) * cfg["thr"]
+    M["V"] = rng.random(size=neuron_shape) * cfg["thr"]
+    M["U"] = rng.random(size=neuron_shape) * cfg["thr"]
     M["TZ"] = np.ones(shape=(cfg["N_Rec"],
                              cfg["N_R"])) * -cfg["dt_refr"]
 
@@ -53,7 +55,10 @@ def initialize_weights(tar_size):
     W = {}
 
     W["W"] = rng.random(
-        size=(cfg["Epochs"], cfg["N_Rec"], cfg["N_R"], cfg["N_R"] * 2,)) / 64
+        size=(cfg["Epochs"], cfg["N_Rec"], cfg["N_R"], cfg["N_R"] * 2,))
+    W["W"][0, 0] /= cfg["N_R"]
+    W["W"][0, 1] /= (cfg["N_R"]) / 2
+    # W["W"][0, 2] /= 32
     W["W_out"] = rng.random(size=(cfg["Epochs"], tar_size, cfg["N_R"],))
     W["b_out"] = np.zeros(shape=(cfg["Epochs"], tar_size,))
 
@@ -67,8 +72,7 @@ def initialize_weights(tar_size):
             scale=np.sqrt(1/cfg["N_R"]))
     else:
         W["B"] = rng.random(
-            size=(cfg["Epochs"], cfg["N_Rec"], cfg["N_R"], tar_size,),
-            scale=1)
+            size=(cfg["Epochs"], cfg["N_Rec"], cfg["N_R"], tar_size,))
 
     for r in range(cfg["N_Rec"]):
         # Zero diag recurrent W: no self-conn

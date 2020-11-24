@@ -46,6 +46,10 @@ def network(cfg, inp, tar, W_rec, W_out, b_out, B, adamvars):
         # Calculate gradient and weight update
         # TODO: make into iterable
         for wtype in ["W", "W_out", "b_out"]:
+            if not cfg["update_bias"] and wtype == "b_out":
+                continue
+            if not cfg["update_W_out"] and wtype == "W_out":
+                continue
             M[f'g{wtype}'][t] = ut.eprop_gradient(wtype=wtype,
                                                   L=M['L'][t],
                                                   ETbar=M['ETbar'][t],
@@ -229,6 +233,11 @@ def main(cfg):
             for wtype in W.keys():
                 # Update weights
                 W[wtype][e+1] = W[wtype][e] + DW[wtype]
+
+                if not cfg["update_bias"] and wtype == "b_out":
+                    continue
+                if not cfg["update_W_out"] and wtype == "W_out":
+                    continue
 
                 if cfg["eprop_type"] == "adaptive" and wtype in ["W_out", "B"]:
                     W[wtype][e+1] -= cfg["weight_decay"] * W[wtype][e+1]
