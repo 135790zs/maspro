@@ -148,7 +148,9 @@ def plot_state(M, W_rec, W_out, b_out, plot_weights=False):
         axs.append(fig.add_subplot(gsc[row_idx, :]))
         row_idx += 1
         if var == 'Y':
-            arr = np.sum(M[var], axis=0)
+            # TODO: make special var Yc for combined Y
+            arr = M['Y'][0] + (np.flip(M['Y'][1], axis=0)
+                               if cfg["n_directions"] > 1 else 0)
         elif var == 'X' and cfg["n_directions"] > 1:
             arr = M["X1"]
         else:

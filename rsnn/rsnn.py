@@ -28,11 +28,12 @@ def network(cfg, inp, tar, W_rec, W_out, b_out, B, adamvars):
                                       W_out=W_out[s],
                                       Z_last=M['Z'][s, t, -1],
                                       b_out=b_out[s])
-        if s == 1:
-            M['Y'][1] = np.flip(M['Y'][1], axis=0)
+
+        Ysum = M['Y'][0] + (np.flip(M['Y'][1], axis=0)
+                            if cfg["n_directions"] > 1 else 0)
 
         for t in range(n_steps):  # TODO: can make more efficient
-            M['P'][t] = ut.eprop_P(Y=np.sum(M['Y'][:, t], axis=0))
+            M['P'][t] = ut.eprop_P(Y=Ysum[t])
 
             M['Pmax'][t, M['P'][t].argmax()] = 1
 

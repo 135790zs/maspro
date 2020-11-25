@@ -81,7 +81,7 @@ def initialize_weights(tar_size):
     W["W"] = rng.random(
         size=(cfg["Epochs"], cfg["n_directions"], cfg["N_Rec"], cfg["N_R"], cfg["N_R"] * 2,))
     W["W"][0, :, 0] /= cfg["N_R"]
-    W["W"][0, :, 1] /= (cfg["N_R"]) / 2
+    # W["W"][0, :, 1] /= (cfg["N_R"]) / 2
     # W["W"][0, 2] /= 32
     W["W_out"] = rng.random(size=(cfg["Epochs"], cfg["n_directions"], tar_size, cfg["N_R"],))
     W["b_out"] = np.zeros(shape=(cfg["Epochs"], cfg["n_directions"], tar_size,))
