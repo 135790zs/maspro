@@ -5,84 +5,17 @@ import utils as ut
 import vis
 
 
-def network_old(cfg, inp, tar, W_rec, W_out, b_out, B, adamvars):
-    n_steps = inp.shape[0]
-
-    M = ut.initialize_model(length=n_steps, tar_size=tar.shape[-1])
-    M["X"] = inp
-    M["T"] = tar
-
-    for t in range(n_steps):
-
-        # Input is nonzero for first layer
-        for r in range(cfg['N_Rec']):
-            M = ut.process_layer(M=M, t=t, r=r, W_rec=W_rec[r])
-
-
-        M['Y'][t] = ut.eprop_Y(Y=M['Y'][t-1] if t > 0 else 0,
-                               W_out=W_out,
-                               Z_last=M['Z'][t, -1],
-                               b_out=b_out)
-
-        M['P'][t] = ut.eprop_P(Y=M['Y'][t])
-
-        M['Pmax'][t, M['P'][t].argmax()] = 1
-
-        M['CE'][t] = ut.eprop_CE(T=M['T'][t],
-                                 P=M['P'][t],
-                                 W_rec=W_rec,
-                                 W_out=W_out,
-                                 B=B)
-
-        M['L'][t] = np.dot(B, (M['P'][t] - M['T'][t]))
-
-        # Calculate gradient and weight update
-        # TODO: make into iterable
-        for wtype in ["W", "W_out", "b_out"]:
-            if not cfg["update_bias"] and wtype == "b_out":
-                continue
-            if not cfg["update_W_out"] and wtype == "W_out":
-                continue
-            M[f'g{wtype}'][t] = ut.eprop_gradient(wtype=wtype,
-                                                  L=M['L'][t],
-                                                  ETbar=M['ETbar'][t],
-                                                  Zbar_last=M['ZbarK'][t, -1],
-                                                  P=M['P'][t],
-                                                  T=M['T'][t])
-
-
-            M[f'D{wtype}'][t] = ut.eprop_DW(wtype=wtype,
-                                            adamvars=adamvars,
-                                            gradient=M[f'g{wtype}'][t],
-                                            Zs=M['Z'][:t],
-                                            ET=M['ET'][t])
-
-        if not cfg["update_input_weights"]:
-                M["DW"][t, 0, :, :inp.shape[-1]] = 0
-
-        if not cfg["update_dead_weights"]:
-                M["DW"][t, W_rec == 0] = 0
-
-        # symmetric e-prop for last layer, random otherwise
-        if cfg["eprop_type"] == "adaptive":
-            M['DB'][t, -1] = M['DW_out'][t].T
-
-        if cfg["plot_graph"]:
-            vis.plot_graph(
-                M=M, t=t, W_rec=W_rec, W_out=W_out)
-            time.sleep(0.5)
-
-    return M
-
-
 def network(cfg, inp, tar, W_rec, W_out, b_out, B, adamvars):
-    n_steps = inp.shape[0]
+    inp = np.pad(array=inp, mode='edge', pad_width=((0, cfg["delay"]), (0, 0)))
 
+    n_steps = inp.shape[0]
     M = ut.initialize_model(length=n_steps, tar_size=tar.shape[-1])
+
     M["T"] = tar
+    M["T"] = np.pad(array=M["T"], mode='edge', pad_width=((cfg["delay"], 0), (0, 0)))
 
     for s in range(cfg["n_directions"]):
-        M["X"] = inp if s == 0 else np.flip(inp, axis=0)
+        M[f"X{s}"] = inp if s == 0 else np.flip(inp, axis=0)
 
         for t in range(n_steps):
 

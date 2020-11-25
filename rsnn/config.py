@@ -37,7 +37,7 @@ cfg = {
     "weights_fname": "../checkpoint",
 
     "Epochs": 5000,  # def = 80
-    "Repeats": 3,  # ms per epoch, def = 5
+    "Repeats": 1,  # ms per epoch, def = 5
     "batch_size_train": 3,  # def = 32
     "batch_size_val": 3,  # def = 32
     "val_every_E": 10,
@@ -55,6 +55,8 @@ cfg['kappa'] = exp(-cfg["dt"] / cfg["theta_output"])
 
 lookup = {
     "X":       {"scalar": False, "binary":False, "label": "x"},
+    "X1":      {"scalar": False, "binary":False, "label": "x_{{fwd}}"},
+    "X2":      {"scalar": False, "binary":False, "label": "x_{{rev}}"},
     "V":       {"scalar": False, "binary":False, "label": "v"},
     "Z":       {"scalar": False, "binary":True,  "label": "z"},
     "Z_in":    {"scalar": False, "binary":True,  "label": "z_{{in}}"},

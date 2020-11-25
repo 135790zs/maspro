@@ -107,9 +107,10 @@ def plot_state(M, W_rec, W_out, b_out, plot_weights=False):
                                   + len(w.keys())  # explicit weights
                                   + (len(W.keys()) if plot_weights else 0)),
                            ncols=cfg["n_directions"],
-                           hspace=0.075)
+                           hspace=0.075,
+                           wspace=0.5)
     axs = []
-    labelpad = 35
+    labelpad = 30
     fontsize = 13
 
     fig.suptitle(f"Single-run model state\n$\\alpha={cfg['alpha']:.3f}$, "
@@ -120,10 +121,10 @@ def plot_state(M, W_rec, W_out, b_out, plot_weights=False):
     for var in S_plotvars:
         for s in range(cfg["n_directions"]):
             axs.append(fig.add_subplot(gsc[row_idx, s]))
-            if var != "X":
-                arr = M[var][s]
+            if var == "X":
+                arr = M[f"X{s}"]
             else:
-                arr = M["X"] if s == 0 else np.flip(M['X'], axis=0)
+                arr = M[var][s]
             axs[-1].imshow(weights_to_img(arr,
                                           is_binary=lookup[var]["binary"]),
                            cmap=('copper' if lookup[var]["binary"]
@@ -134,8 +135,8 @@ def plot_state(M, W_rec, W_out, b_out, plot_weights=False):
                            aspect='auto')
 
             axs[-1].set_ylabel(f"${lookup[var]['label']}$"
-                               f"\n[{np.min(M[var]):.1f}"
-                               f", {np.max(M[var]):.1f}]",
+                               f"\n[{np.min(arr):.1f}"
+                               f", {np.max(arr):.1f}]",
                                rotation=0,
                                labelpad=labelpad,
                                fontsize=fontsize)
@@ -146,10 +147,13 @@ def plot_state(M, W_rec, W_out, b_out, plot_weights=False):
 
         axs.append(fig.add_subplot(gsc[row_idx, :]))
         row_idx += 1
-        if var != 'Y':
-            arr = M[var]
-        else:
+        if var == 'Y':
             arr = np.sum(M[var], axis=0)
+        elif var == 'X' and cfg["n_directions"] > 1:
+            arr = M["X1"]
+        else:
+            arr = M[var]
+
         if lookup[var]['scalar'] == False:
             axs[-1].imshow(weights_to_img(arr,
                                           is_binary=lookup[var]["binary"]),
@@ -165,8 +169,8 @@ def plot_state(M, W_rec, W_out, b_out, plot_weights=False):
             axs[-1].grid()
 
         axs[-1].set_ylabel(f"${lookup[var]['label']}$"
-                           f"\n[{np.min(M[var]):.1f}"
-                           f", {np.max(M[var]):.1f}]",
+                           f"\n[{np.min(arr):.1f}"
+                           f", {np.max(arr):.1f}]",
                            rotation=0,
                            labelpad=labelpad,
                            fontsize=fontsize)

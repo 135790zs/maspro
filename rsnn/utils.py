@@ -22,8 +22,8 @@ def initialize_model(length, tar_size):
     for weightvar in ["EVV", "EVU", "ET", "DW", "ETbar", 'gW']:
         M[weightvar] = np.zeros(shape=weight_shape)
 
-    M["V"] = rng.random(size=neuron_shape) * cfg["thr"]
-    M["U"] = rng.random(size=neuron_shape) * cfg["thr"]
+    M["V"] = np.zeros(shape=neuron_shape)  # * cfg["thr"]
+    M["U"] = np.ones(shape=neuron_shape) * cfg["thr"]
     M["TZ"] = np.ones(shape=(cfg["n_directions"],
                              cfg["N_Rec"],
                              cfg["N_R"])) * -cfg["dt_refr"]
@@ -317,8 +317,8 @@ def process_layer(M, t, s, r, W_rec):
 
     # Pad any input with zeros to make it length N_R
     Z_prev = M['Z'][s, t, r-1] if r > 0 else \
-        np.pad(M['X'][t],
-               (0, cfg["N_R"] - len(M['X'][t])))
+        np.pad(M[f'X{s}'][t],
+               (0, cfg["N_R"] - len(M[f'X{s}'][t])))
 
     M['H'][s, t, r] = eprop_H(V=M['V'][s, t, r],
                               U=M['U'][s, t, r],
@@ -332,7 +332,7 @@ def process_layer(M, t, s, r, W_rec):
     # Update weights for next epoch
     if not cfg["update_input_weights"]:
         for var in ["EVV", "EVU", "ET"]:
-            M[var][s, t, 0, :, :M["X"].shape[-1]] = 0
+            M[var][s, t, 0, :, :M[f"X{s}"].shape[-1]] = 0
 
     # Update weights for next epoch
     if not cfg["update_dead_weights"]:
@@ -355,7 +355,7 @@ def process_layer(M, t, s, r, W_rec):
                                      x=M['Z'][s, t, r],
                                      factor=cfg["kappa"])
 
-    if t != M["X"].shape[0] - 1:
+    if t != M[f"X{s}"].shape[0] - 1:
         M['EVV'][s, t+1, r] = eprop_EVV(EVV=M['EVV'][s, t, r],
                                         Z_in=M["Z_in"][s, t, r])
 
