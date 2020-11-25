@@ -9,6 +9,7 @@ rc['mathtext.fontset'] = 'stix'
 rc['font.family'] = 'STIXGeneral'
 
 def weights_to_img(arr, is_binary=False):
+
     original_dim = arr.ndim
     arr = arr.reshape(arr.shape[0], -1).T
 
@@ -26,6 +27,9 @@ def weights_to_img(arr, is_binary=False):
         else:
             arr = del_arr
         # if del_arr.shape[0]:  # High enough to plot.
+
+    # Don't plot too many weights. If too many, crop
+    arr = arr[:(1000000//arr.shape[1])]
 
 
     return arr
@@ -64,9 +68,7 @@ def plot_run(terrs, percs_wrong_t, verrs, percs_wrong_v, W, epoch):
     if epoch >= 1:
         for weight_type, weights in W.items():
             axs.append(fig.add_subplot(gsc[len(axs), :], sharex=axs[0]))
-            axs[-1].imshow(
-                weights[:epoch].reshape(
-                    weights[:epoch].shape[0], -1).T,
+            axs[-1].imshow(weights_to_img(weights[:epoch]),
                 aspect='auto',
                 interpolation='nearest',
                 cmap='coolwarm')
@@ -90,40 +92,76 @@ def plot_state(M, W_rec, W_out, b_out, plot_weights=False):
         # "w2": (0, 0, 3)
     }
 
-    M_plotvars = ["X", "I", "V", "H", "U", "Z_in", "Z",
-                  "EVV", "EVU", "ET", "Y", "P", "Pmax", "T", "CE",
-                  "L", "DW", "DW_out", "Db_out"]
+    S_plotvars = ["X", "I", "V", "H", "U", "Z_in", "Z",
+                  "EVV", "EVU", "ET", "Y", "L", "DW", "DW_out", "Db_out"]
+
+    M_plotvars = ["P", "Pmax", "T", "CE"]
+    if cfg["n_directions"] > 1:
+        M_plotvars = ["X", "Y"] + M_plotvars  # Show combined/corrected in, out
+
     W = {"W_rec": W_rec, "W_out": W_out, "b_out": b_out}
 
     fig = plt.figure(constrained_layout=False, figsize=(8, 16))
     gsc = fig.add_gridspec(nrows=(len(M_plotvars)
+                                  + len(S_plotvars)
                                   + len(w.keys())  # explicit weights
                                   + (len(W.keys()) if plot_weights else 0)),
-                           ncols=1,
+                           ncols=cfg["n_directions"],
                            hspace=0.075)
     axs = []
     labelpad = 35
     fontsize = 13
+
     fig.suptitle(f"Single-run model state\n$\\alpha={cfg['alpha']:.3f}$, "
                  f"$\\kappa={cfg['kappa']:.3f}$, $\\rho={cfg['rho']:.3f}$",
                  fontsize=20)
+    row_idx = 0
 
-    for var in M_plotvars:
-
-        axs.append(fig.add_subplot(gsc[len(axs), :],
-                                   sharex=axs[0] if axs else None))
-        if lookup[var]['scalar'] == False:
-
-            axs[-1].imshow(weights_to_img(M[var],
+    for var in S_plotvars:
+        for s in range(cfg["n_directions"]):
+            axs.append(fig.add_subplot(gsc[row_idx, s]))
+            if var != "X":
+                arr = M[var][s]
+            else:
+                arr = M["X"] if s == 0 else np.flip(M['X'], axis=0)
+            axs[-1].imshow(weights_to_img(arr,
                                           is_binary=lookup[var]["binary"]),
                            cmap=('copper' if lookup[var]["binary"]
                                  else 'coolwarm'),
-                           vmin=np.min(M[var]),
-                           vmax=np.max(M[var]),
+                           vmin=np.min(arr),
+                           vmax=np.max(arr),
                            interpolation="none",  # better than nearest here
                            aspect='auto')
+
+            axs[-1].set_ylabel(f"${lookup[var]['label']}$"
+                               f"\n[{np.min(M[var]):.1f}"
+                               f", {np.max(M[var]):.1f}]",
+                               rotation=0,
+                               labelpad=labelpad,
+                               fontsize=fontsize)
+
+        row_idx += 1
+
+    for var in M_plotvars:
+
+        axs.append(fig.add_subplot(gsc[row_idx, :]))
+        row_idx += 1
+        if var != 'Y':
+            arr = M[var]
+        else:
+            arr = np.sum(M[var], axis=0)
+        if lookup[var]['scalar'] == False:
+            axs[-1].imshow(weights_to_img(arr,
+                                          is_binary=lookup[var]["binary"]),
+                           cmap=('copper' if lookup[var]["binary"]
+                                 else 'coolwarm'),
+                           vmin=np.min(arr),
+                           vmax=np.max(arr),
+                           interpolation="none",  # better than nearest here
+                           aspect='auto')
+
         elif var == 'CE':  # not as image but line plot
-            axs[-1].plot(M[var])
+            axs[-1].plot(arr)
             axs[-1].grid()
 
         axs[-1].set_ylabel(f"${lookup[var]['label']}$"
@@ -134,8 +172,9 @@ def plot_state(M, W_rec, W_out, b_out, plot_weights=False):
                            fontsize=fontsize)
 
     for k, v in w.items():  # Sample weights
-        axs.append(fig.add_subplot(gsc[len(axs), :],
+        axs.append(fig.add_subplot(gsc[row_idx, :],
                                    sharex=axs[0] if axs else None))
+        row_idx += 1
         axs[-1].plot(M['DW'][:, v[0], v[1], v[2]])
         axs[-1].grid()
         axs[-1].set_ylabel(f"$\\Delta w_{{{v[0]}, {v[1]}, {v[2]%cfg['N_R']}}}$",
@@ -148,8 +187,9 @@ def plot_state(M, W_rec, W_out, b_out, plot_weights=False):
             v = np.expand_dims(v, axis=0)
             v = np.repeat(v, M['X'].shape[0], axis=0)
 
-            axs.append(fig.add_subplot(gsc[len(axs), :],
+            axs.append(fig.add_subplot(gsc[row_idx, :],
                                        sharex=axs[0] if axs else None))
+            row_idx += 1
             axs[-1].imshow(weights_to_img(v),
                            cmap='coolwarm',
                            vmin=np.min(v),

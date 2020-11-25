@@ -6,10 +6,12 @@ from config import cfg
 def initialize_model(length, tar_size):
     rng = np.random.default_rng()
     M = {}
-    neuron_shape = (length,
+    neuron_shape = (cfg["n_directions"],
+                    length,
                     cfg["N_Rec"],
                     cfg["N_R"],)
-    weight_shape = (length,
+    weight_shape = (cfg["n_directions"],
+                    length,
                     cfg["N_Rec"],
                     cfg["N_R"],
                     cfg["N_R"] * 2,)
@@ -22,29 +24,51 @@ def initialize_model(length, tar_size):
 
     M["V"] = rng.random(size=neuron_shape) * cfg["thr"]
     M["U"] = rng.random(size=neuron_shape) * cfg["thr"]
-    M["TZ"] = np.ones(shape=(cfg["N_Rec"],
+    M["TZ"] = np.ones(shape=(cfg["n_directions"],
+                             cfg["N_Rec"],
                              cfg["N_R"])) * -cfg["dt_refr"]
 
-    M["Z_in"] = np.zeros(shape=(length, cfg["N_Rec"], cfg["N_R"] * 2,))
-    M["Z_inbar"] = np.zeros(shape=(length, cfg["N_Rec"], cfg["N_R"] * 2,))
+    M["Z_in"] = np.zeros(shape=(cfg["n_directions"],
+                                length,
+                                cfg["N_Rec"],
+                                cfg["N_R"] * 2,))
+    M["Z_inbar"] = np.zeros(shape=(cfg["n_directions"],
+                                   length,
+                                   cfg["N_Rec"],
+                                   cfg["N_R"] * 2,))
 
-    M["DW_out"] = np.zeros(shape=(length, tar_size, cfg["N_R"],))
-    M["gW_out"] = np.zeros(shape=(length, tar_size, cfg["N_R"],))
-    M["DB"] = np.zeros(shape=(length, cfg["N_Rec"], cfg["N_R"], tar_size))
-    M["Db_out"] = np.zeros(shape=(length, tar_size,))
-    M["gb_out"] = np.zeros(shape=(length, tar_size,))
+    M["DW_out"] = np.zeros(shape=(cfg["n_directions"],
+                                  length,
+                                  tar_size,
+                                  cfg["N_R"],))
+    M["gW_out"] = np.zeros(shape=(cfg["n_directions"],
+                                  length,
+                                  tar_size,
+                                  cfg["N_R"],))
+    M["DB"] = np.zeros(shape=(cfg["n_directions"],
+                              length,
+                              cfg["N_Rec"],
+                              cfg["N_R"],
+                              tar_size))
+    M["Db_out"] = np.zeros(shape=(cfg["n_directions"],
+                                  length,
+                                  tar_size,))
+    M["gb_out"] = np.zeros(shape=(cfg["n_directions"],
+                                  length,
+                                  tar_size,))
 
+    M["Y"] = np.zeros(shape=(cfg["n_directions"], length, tar_size,))
     M["T"] = np.zeros(shape=(length, tar_size,))
-    M["Y"] = np.zeros(shape=(length, tar_size,))
     M["P"] = np.zeros(shape=(length, tar_size,))
     M["Pmax"] = np.zeros(shape=(length, tar_size,))
     M["CE"] = np.zeros(shape=(length,))
 
     M["is_ALIF"] = np.zeros(
-        shape=(cfg["N_Rec"] * cfg["N_R"]))
+        shape=(cfg["n_directions"] * cfg["N_Rec"] * cfg["N_R"]))
     M["is_ALIF"][:int(M["is_ALIF"].size * cfg["fraction_ALIF"])] = 1
     np.random.shuffle(M["is_ALIF"])
-    M["is_ALIF"] = M["is_ALIF"].reshape((cfg["N_Rec"],
+    M["is_ALIF"] = M["is_ALIF"].reshape((cfg["n_directions"],
+                                         cfg["N_Rec"],
                                          cfg["N_R"]))
 
     return M
@@ -55,28 +79,29 @@ def initialize_weights(tar_size):
     W = {}
 
     W["W"] = rng.random(
-        size=(cfg["Epochs"], cfg["N_Rec"], cfg["N_R"], cfg["N_R"] * 2,))
-    W["W"][0, 0] /= cfg["N_R"]
-    W["W"][0, 1] /= (cfg["N_R"]) / 2
+        size=(cfg["Epochs"], cfg["n_directions"], cfg["N_Rec"], cfg["N_R"], cfg["N_R"] * 2,))
+    W["W"][0, :, 0] /= cfg["N_R"]
+    W["W"][0, :, 1] /= (cfg["N_R"]) / 2
     # W["W"][0, 2] /= 32
-    W["W_out"] = rng.random(size=(cfg["Epochs"], tar_size, cfg["N_R"],))
-    W["b_out"] = np.zeros(shape=(cfg["Epochs"], tar_size,))
+    W["W_out"] = rng.random(size=(cfg["Epochs"], cfg["n_directions"], tar_size, cfg["N_R"],))
+    W["b_out"] = np.zeros(shape=(cfg["Epochs"], cfg["n_directions"], tar_size,))
 
     if cfg["eprop_type"] == "random":  # Variance of 1
         W["B"] = rng.normal(
-            size=(cfg["Epochs"], cfg["N_Rec"], cfg["N_R"], tar_size,),
+            size=(cfg["Epochs"], cfg["n_directions"], cfg["N_Rec"], cfg["N_R"], tar_size,),
             scale=1)
     elif cfg["eprop_type"] == "adaptive":  # Variance of 1/N
         W["B"] = rng.normal(
-            size=(cfg["Epochs"], cfg["N_Rec"], cfg["N_R"], tar_size,),
+            size=(cfg["Epochs"], cfg["n_directions"], cfg["N_Rec"], cfg["N_R"], tar_size,),
             scale=np.sqrt(1/cfg["N_R"]))
     else:
         W["B"] = rng.random(
-            size=(cfg["Epochs"], cfg["N_Rec"], cfg["N_R"], tar_size,))
+            size=(cfg["Epochs"], cfg["n_directions"], cfg["N_Rec"], cfg["N_R"], tar_size,))
 
     for r in range(cfg["N_Rec"]):
+        for s in range(cfg["n_directions"]):
         # Zero diag recurrent W: no self-conn
-        np.fill_diagonal(W['W'][0, r, :, cfg["N_R"]:], 0)
+            np.fill_diagonal(W['W'][0, s, r, :, cfg["N_R"]:], 0)
 
     # W['W'][0, 0, 0, 0] = 0.8  # Input 1 to rec 1: frozen
     # W['W'][0, 0, 1, 0] = 0  # Input 1 to rec 2
@@ -256,7 +281,7 @@ def eprop_gradient(wtype, L, ETbar, P, T, Zbar_last):
         return P - T
 
 
-def eprop_DW(wtype, adamvars, gradient, Zs, ET):
+def eprop_DW(wtype, s, adamvars, gradient, Zs, ET):
     FR_reg = 0
     if wtype == 'W' and Zs.shape[0]:  # Add firing rate reg term
         FR_reg = (
@@ -271,9 +296,9 @@ def eprop_DW(wtype, adamvars, gradient, Zs, ET):
         return -cfg["eta"] * gradient + FR_reg
 
     elif cfg["optimizer"] == 'Adam':
-        m = (adamvars["beta1"] * adamvars[f"m{wtype}"]
+        m = (adamvars["beta1"] * adamvars[f"m{wtype}"][s]
              + (1 - adamvars["beta1"]) * gradient)
-        v = (adamvars["beta2"] * adamvars[f"v{wtype}"]
+        v = (adamvars["beta2"] * adamvars[f"v{wtype}"][s]
              + (1 - adamvars["beta2"]) * gradient ** 2)
         f1 = m / ( 1 - adamvars["beta1"])
         f2 = np.sqrt(v / (1 - adamvars["beta2"])) + adamvars["eps"]
@@ -281,64 +306,87 @@ def eprop_DW(wtype, adamvars, gradient, Zs, ET):
         return cfg["eta"] * (f1 / f2) + FR_reg
 
 
-
-def process_layer(M, t, r, W_rec):
+def process_layer(M, t, s, r, W_rec):
     # Spike if V >= threshold
-    M['Z'][t, r] = eprop_Z(t=t,
-                              TZ=M['TZ'][r],
-                              V=M['V'][t, r],
-                              U=M['U'][t, r])
+    M['Z'][s, t, r] = eprop_Z(t=t,
+                              TZ=M['TZ'][s, r],
+                              V=M['V'][s, t, r],
+                              U=M['U'][s, t, r])
 
-    M['TZ'][r, M['Z'][t, r]==1] = t  # Log spike time
+    M['TZ'][s, r, M['Z'][s, t, r]==1] = t  # Log spike time
 
     # Pad any input with zeros to make it length N_R
-    Z_prev = M['Z'][t, r-1] if r > 0 else \
+    Z_prev = M['Z'][s, t, r-1] if r > 0 else \
         np.pad(M['X'][t],
                (0, cfg["N_R"] - len(M['X'][t])))
 
-    M['H'][t, r] = eprop_H(V=M['V'][t, r],
-                              U=M['U'][t, r],
-                              is_ALIF=M['is_ALIF'][r])
+    M['H'][s, t, r] = eprop_H(V=M['V'][s, t, r],
+                              U=M['U'][s, t, r],
+                              is_ALIF=M['is_ALIF'][s, r])
 
-    M['ET'][t, r] = eprop_ET(is_ALIF=M['is_ALIF'][r],
-                                H=M['H'][t, r],
-                                EVV=M['EVV'][t, r],
-                                EVU=M['EVU'][t, r])
+    M['ET'][s, t, r] = eprop_ET(is_ALIF=M['is_ALIF'][s, r],
+                                H=M['H'][s, t, r],
+                                EVV=M['EVV'][s, t, r],
+                                EVU=M['EVU'][s, t, r])
 
     # Update weights for next epoch
     if not cfg["update_input_weights"]:
         for var in ["EVV", "EVU", "ET"]:
-            M[var][t, 0, :, :M["X"].shape[-1]] = 0
+            M[var][s, t, 0, :, :M["X"].shape[-1]] = 0
 
     # Update weights for next epoch
     if not cfg["update_dead_weights"]:
         for var in ["EVV", "EVU", "ET"]:
-            M[var][t, r, W_rec == 0] = 0
+            M[var][s, t, r, W_rec == 0] = 0
 
-    M["Z_in"][t, r] = np.concatenate((Z_prev, M['Z'][t, r]))
+    M["Z_in"][s, t, r] = np.concatenate((Z_prev, M['Z'][s, t, r]))
 
-    M['Z_inbar'][t] = eprop_lpfK(lpf=M['Z_inbar'][t-1] if t > 0 else 0,
-                                    x=M['Z_in'][t],
+    M['Z_inbar'][s, t] = eprop_lpfK(lpf=M['Z_inbar'][s, t-1] if t > 0 else 0,
+                                    x=M['Z_in'][s, t],
                                     factor=cfg["alpha"])
 
-    M['I'][t, r] = np.dot(W_rec, M["Z_in"][t, r])
+    M['I'][s, t, r] = np.dot(W_rec, M["Z_in"][s, t, r])
+
+    M['ETbar'][s, t, r] = eprop_lpfK(lpf=M['ETbar'][s, t-1, r] if t > 0 else 0,
+                                     x=M['ET'][s, t, r],
+                                     factor=cfg["kappa"])
+
+    M['ZbarK'][s, t, r] = eprop_lpfK(lpf=M['ZbarK'][s, t-1, r] if t > 0 else 0,
+                                     x=M['Z'][s, t, r],
+                                     factor=cfg["kappa"])
 
     if t != M["X"].shape[0] - 1:
-        M['EVV'][t+1, r] = eprop_EVV(EVV=M['EVV'][t, r],
-                                        Z_in=M["Z_in"][t, r])
+        M['EVV'][s, t+1, r] = eprop_EVV(EVV=M['EVV'][s, t, r],
+                                        Z_in=M["Z_in"][s, t, r])
 
         # TODO: Can do without M[ET] or M[H] or M[TZ] or M[DW].
-        M['EVU'][t+1, r] = eprop_EVU(Z_inbar=M['Z_inbar'][t, r],
-                                        EVU=M['EVU'][t, r],
-                                        H=M['H'][t, r],
-                                        is_ALIF=M['is_ALIF'][r])
+        M['EVU'][s, t+1, r] = eprop_EVU(Z_inbar=M['Z_inbar'][s, t, r],
+                                        EVU=M['EVU'][s, t, r],
+                                        H=M['H'][s, t, r],
+                                        is_ALIF=M['is_ALIF'][s, r])
 
-        M['V'][t+1, r] = eprop_V(V=M['V'][t, r],
-                                    I=M['I'][t, r],
-                                    Z=M['Z'][t, r])
+        M['V'][s, t+1, r] = eprop_V(V=M['V'][s, t, r],
+                                    I=M['I'][s, t, r],
+                                    Z=M['Z'][s, t, r])
 
-        M['U'][t+1, r] = eprop_U(U=M['U'][t, r],
-                                    Z=M['Z'][t, r],
-                                    is_ALIF=M['is_ALIF'][r])
+        M['U'][s, t+1, r] = eprop_U(U=M['U'][s, t, r],
+                                    Z=M['Z'][s, t, r],
+                                    is_ALIF=M['is_ALIF'][s, r])
+
 
     return M
+
+
+
+def init_adam(tar_size):
+    return {
+        'beta1': cfg['adam_beta1'],
+        'beta2': cfg['adam_beta2'],
+        'eps': cfg['adam_eps'],
+        'mW': np.zeros(shape=(cfg["n_directions"], cfg["N_Rec"], cfg["N_R"], cfg["N_R"] * 2,)),
+        'vW': np.zeros(shape=(cfg["n_directions"], cfg["N_Rec"], cfg["N_R"], cfg["N_R"] * 2,)),
+        'mW_out': np.zeros(shape=(cfg["n_directions"], tar_size, cfg["N_R"],)),
+        'vW_out': np.zeros(shape=(cfg["n_directions"], tar_size, cfg["N_R"],)),
+        'mb_out': np.zeros(shape=(cfg["n_directions"], tar_size,)),
+        'vb_out': np.zeros(shape=(cfg["n_directions"], tar_size,)),
+    }

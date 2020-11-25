@@ -4,12 +4,14 @@ cfg = {
     "optimizer": 'Adam',
     "fraction_ALIF": 0.25,  # def 0.25
     "theta_adaptation": 150,  # Depends on length of task: working memory
+    "n_directions": 2,
+    "delay": 0,
 
     "theta_membrane": 20,  # TIMIT: 20
     "theta_output": 10,  # TIMIT: 3
     "beta": 0.184,  # TIMIT: 0.184
     "gamma": 0.3,     # Pseudoderivative ET contribution
-    "eta": 1e-4,      # Learning rate (1e-2 for TIMIT)
+    "eta": 1e-3,      # Learning rate (1e-2 for TIMIT)
     "thr": 1.6,        # Spike threshold, def = 1.6
     "dt_refr": 2,    # Refractory time, def = 2
     "dt": 1,
@@ -34,13 +36,13 @@ cfg = {
     "phns_fname": "../data_phns",
     "weights_fname": "../checkpoint",
 
-    "Epochs": 100,  # def = 80
+    "Epochs": 5000,  # def = 80
     "Repeats": 3,  # ms per epoch, def = 5
-    "batch_size_train": 6,  # def = 32
+    "batch_size_train": 3,  # def = 32
     "batch_size_val": 3,  # def = 32
-    "val_every_E": 2,
+    "val_every_E": 10,
     "maxlen": 150,  # Don't forget to re-run process_timit.py!
-    "n_examples": {'train': 256, 'val': 256, 'test': 256},
+    "n_examples": {'train': 1600, 'val': 400, 'test': 400},
     "plot_interval": 1,  #  State plot; 0 to disable plots
     "plot_main": True,
     "plot_state": True,

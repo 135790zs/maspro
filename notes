@@ -1,10 +1,6 @@
 
 # MUST DO:
-# TODO: Also don't forget hacky correcting factor in I calc
-# TODO: Confirm all eprop variants are functional
-# TODO: Confirm multiple layers
-# TODO: Delegate eprop functions to utils
-# TODO: Bidirectional?
+# TODO: Impl Delay
 # TODO: LTP seems to work in vitro, see if traub leads to LTD
 
 # LOW PRIORITY:
@@ -26,3 +22,9 @@ QUESTION FOR MEETING:
 * for shallow layers?
 * Bidirectional LSNN?
 * Init weights to which range?
+
+
+=========
+
+send plot to Jaeger if working
+may email Bellec et al if concrete question
