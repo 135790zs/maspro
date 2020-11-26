@@ -2,9 +2,10 @@ from numpy import exp
 cfg = {
     "eprop_type": "adaptive",  # in {random, symmetric, adaptive}
     "optimizer": 'SGD',
-    "fraction_ALIF": 0.25,  # def 0.25
+    "traub_trick": True,
+    "fraction_ALIF": 1,  # def 0.25
     "theta_adaptation": 80,  # Depends on length of task: working memory
-    "n_directions": 2,
+    "n_directions": 1,
     "delay": 0,
 
     "theta_membrane": 4,  # TIMIT: 20
@@ -24,12 +25,12 @@ cfg = {
     "adam_eps": 1e-5,
 
 
-    "update_bias": True,
-    "update_W_out": True,
+    "update_bias": False,
+    "update_W_out": False,
     "update_dead_weights": False,
     "update_input_weights": False,
 
-    "N_R": 128,
+    "N_R": 64,
     "N_Rec": 1,
 
     "wavs_fname": "../data_wavs",
@@ -41,7 +42,7 @@ cfg = {
     "batch_size_train": 32,  # def = 32
     "batch_size_val": 32,  # def = 32
     "val_every_E": 10,
-    "maxlen": 300,  # Don't forget to re-run process_timit.py!
+    "maxlen": 60,  # Don't forget to re-run process_timit.py!
     "n_examples": {'train': 800, 'val': 400, 'test': 400},
     "plot_interval": 10,  #  State plot; 0 to disable plots
     "plot_main": True,

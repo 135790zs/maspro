@@ -32,6 +32,9 @@ def initialize_model(length, tar_size):
                                 length,
                                 cfg["N_Rec"],
                                 cfg["N_R"] * 2,))
+    M["TZ_in"] = np.zeros(shape=(cfg["n_directions"],
+                                 cfg["N_Rec"],
+                                 cfg["N_R"] * 2,))
     M["Z_inbar"] = np.zeros(shape=(cfg["n_directions"],
                                    length,
                                    cfg["N_Rec"],
@@ -80,7 +83,8 @@ def initialize_weights(tar_size):
 
     W["W"] = rng.random(
         size=(cfg["Epochs"], cfg["n_directions"], cfg["N_Rec"], cfg["N_R"], cfg["N_R"] * 2,))
-    W["W"][0, :, 0] /= cfg["N_R"]
+    # W["W"][0, :, 0] *= 5
+    # W["W"][0, :, 0] /= cfg["N_R"]
     # W["W"][0, :, 1] /= (cfg["N_R"]) / 2
     # W["W"][0, 2] /= 32
     W["W_out"] = rng.random(size=(cfg["Epochs"], cfg["n_directions"], tar_size, cfg["N_R"],))
@@ -103,12 +107,12 @@ def initialize_weights(tar_size):
         # Zero diag recurrent W: no self-conn
             np.fill_diagonal(W['W'][0, s, r, :, cfg["N_R"]:], 0)
 
-    # W['W'][0, 0, 0, 0] = 0.8  # Input 1 to rec 1: frozen
-    # W['W'][0, 0, 1, 0] = 0  # Input 1 to rec 2
-    # W['W'][0, 0, 0, 1] = 0  # Input 2 to rec 1
-    # W['W'][0, 0, 1, 1] = 0.8  # Input 2 to rec 2: frozen
-    # W['W'][0, 0, 1, 2] = 0.2  # Rec 1 to rec 2 (B)
-    # W['W'][0, 0, 0, 3] = 0.2  # Rec 2 to rec 1 (T)
+    W['W'][0, 0, 0, 0, 0] = 2  # Input 1 to rec 1: frozen
+    W['W'][0, 0, 0, 1, 0] = 0  # Input 1 to rec 2
+    W['W'][0, 0, 0, 0, 1] = 0  # Input 2 to rec 1
+    W['W'][0, 0, 0, 1, 1] = 0  # Input 2 to rec 2: frozen
+    W['W'][0, 0, 0, 1, 2] = 2  # Rec 1 to rec 2 (B)
+    W['W'][0, 0, 0, 0, 3] = 0  # Rec 2 to rec 1 (T)
 
 
     return W
@@ -178,15 +182,24 @@ def normalize(arr):
     return np.interp(arr, (arr.min(), arr.max()), (-1, 1))
 
 
-def eprop_Z(t, TZ, V, U):
+def eprop_Z(t, TZ, V, U, is_ALIF):
     return np.where(np.logical_and(t - TZ >= cfg["dt_refr"],
-                                   V >= U),
+                                   V >= np.where(is_ALIF,
+                                                 cfg["thr"] + cfg["beta"] * U,
+                                                 cfg["thr"])),
                     1,
                     0)
 
 
-def eprop_V(V, I, Z):
-    return cfg["alpha"] * V + I - Z * cfg["thr"]
+def eprop_V(V, I, Z, t, TZ):
+    if not cfg["traub_trick"]:
+        return cfg["alpha"] * V + I - Z * cfg["thr"]
+    else:
+        # print(TZ.shape, (TZ == cfg["dt_refr"]).shape)
+        return (cfg["alpha"] * V
+                + I
+                - cfg["alpha"] * V * Z
+                - cfg["alpha"] * V * ((t - TZ) == cfg["dt_refr"]))
 
 
 def eprop_U(U, Z, is_ALIF):
@@ -195,12 +208,24 @@ def eprop_U(U, Z, is_ALIF):
                     U)
 
 
-def eprop_EVV(EVV, Z_in):
+def eprop_EVV(EVV, Z_in, t, TZ, TZ_in, Z):
     """
     ALIF & LIF: Zbar
     checked
     """
-    return cfg["alpha"] * EVV + Z_in
+    if not cfg["traub_trick"]:
+        return cfg["alpha"] * EVV + Z_in
+    else:
+        # Repeating to match EVV. Repeating axis differ because Z_in concerns presynaptics.
+        Zrep = np.repeat(a=Z[:, np.newaxis], repeats=EVV.shape[1], axis=1)
+        TZrep = np.repeat(a=TZ[:, np.newaxis], repeats=EVV.shape[1], axis=1)
+        Z_inrep = np.repeat(a=Z_in[np.newaxis, :], repeats=EVV.shape[0], axis=0)
+        TZ_inrep = np.repeat(a=TZ_in[np.newaxis, :], repeats=EVV.shape[0], axis=0)
+        return (cfg["alpha"] * EVV * (1
+                                - Zrep
+                                - np.less_equal((t - TZ_inrep), cfg["dt_refr"])
+                                - np.equal((t - TZrep), cfg["dt_refr"]))
+                + Z_inrep)
 
 
 def eprop_EVU(is_ALIF, H, Z_inbar, EVU):
@@ -220,14 +245,25 @@ def eprop_EVU(is_ALIF, H, Z_inbar, EVU):
                     EVU)
 
 
-def eprop_H(V, U, is_ALIF):
-    return 1 / cfg["thr"] * \
-        cfg["gamma"] * np.clip(a=1 - (abs(V
-                                          - np.where(is_ALIF, U, cfg["thr"])
-                                          )
-                                      / cfg["thr"]),
-                               a_min=0,
-                               a_max=None)
+def eprop_H(V, U, t, TZ, is_ALIF):  # TODO: 1/thr here? Traub and Bellec differ
+    if cfg["traub_trick"]:
+        return np.where(t - TZ < cfg["dt_refr"],
+            -cfg["gamma"],
+            cfg["gamma"] * np.clip(
+            a=1 - (abs(V - np.where(is_ALIF,
+                                    cfg["thr"] + cfg["beta"] * U,
+                                    cfg["thr"]))
+                       / cfg["thr"]),
+            a_min=0,
+            a_max=None))
+    else:
+        return 1 / cfg["thr"] * cfg["gamma"] * np.clip(
+            a=1 - (abs(V - np.where(is_ALIF,
+                                    cfg["thr"] + cfg["beta"] * U,
+                                    cfg["thr"]))
+                       / cfg["thr"]),
+            a_min=0,
+            a_max=None)
 
 
 def eprop_ET(is_ALIF, H, EVV, EVU):
@@ -281,7 +317,7 @@ def eprop_gradient(wtype, L, ETbar, P, T, Zbar_last):
         return P - T
 
 
-def eprop_DW(wtype, s, adamvars, gradient, Zs, ET):
+def eprop_DW(wtype, s, adamvars, gradient, Zs, ET):  # TODO: No ETbar here?
     FR_reg = 0
     if wtype == 'W' and Zs.shape[0]:  # Add firing rate reg term
         FR_reg = (
@@ -311,7 +347,8 @@ def process_layer(M, t, s, r, W_rec):
     M['Z'][s, t, r] = eprop_Z(t=t,
                               TZ=M['TZ'][s, r],
                               V=M['V'][s, t, r],
-                              U=M['U'][s, t, r])
+                              U=M['U'][s, t, r],
+                              is_ALIF=M['is_ALIF'][s, r])
 
     M['TZ'][s, r, M['Z'][s, t, r]==1] = t  # Log spike time
 
@@ -320,9 +357,14 @@ def process_layer(M, t, s, r, W_rec):
         np.pad(M[f'X{s}'][t],
                (0, cfg["N_R"] - len(M[f'X{s}'][t])))
 
+    TZ_prev = M['TZ'][s, r-1] if r > 0 else \
+        np.ones(shape=(M['TZ'][s, r].shape)) * t
+
     M['H'][s, t, r] = eprop_H(V=M['V'][s, t, r],
                               U=M['U'][s, t, r],
-                              is_ALIF=M['is_ALIF'][s, r])
+                              is_ALIF=M['is_ALIF'][s, r],
+                              t=t,
+                              TZ=M['TZ'][s, r])
 
     M['ET'][s, t, r] = eprop_ET(is_ALIF=M['is_ALIF'][s, r],
                                 H=M['H'][s, t, r],
@@ -340,6 +382,7 @@ def process_layer(M, t, s, r, W_rec):
             M[var][s, t, r, W_rec == 0] = 0
 
     M["Z_in"][s, t, r] = np.concatenate((Z_prev, M['Z'][s, t, r]))
+    M["TZ_in"][s, r] = np.concatenate((TZ_prev, M['TZ'][s, r]))
 
     M['Z_inbar'][s, t] = eprop_lpfK(lpf=M['Z_inbar'][s, t-1] if t > 0 else 0,
                                     x=M['Z_in'][s, t],
@@ -357,7 +400,11 @@ def process_layer(M, t, s, r, W_rec):
 
     if t != M[f"X{s}"].shape[0] - 1:
         M['EVV'][s, t+1, r] = eprop_EVV(EVV=M['EVV'][s, t, r],
-                                        Z_in=M["Z_in"][s, t, r])
+                                        Z_in=M["Z_in"][s, t, r],
+                                        Z=M['Z'][s, t, r],
+                                        TZ=M['TZ'][s, r],
+                                        TZ_in=M['TZ_in'][s, r],
+                                        t=t)
 
         # TODO: Can do without M[ET] or M[H] or M[TZ] or M[DW].
         M['EVU'][s, t+1, r] = eprop_EVU(Z_inbar=M['Z_inbar'][s, t, r],
@@ -367,7 +414,9 @@ def process_layer(M, t, s, r, W_rec):
 
         M['V'][s, t+1, r] = eprop_V(V=M['V'][s, t, r],
                                     I=M['I'][s, t, r],
-                                    Z=M['Z'][s, t, r])
+                                    Z=M['Z'][s, t, r],
+                                    TZ=M['TZ'][s, r],
+                                    t=t)
 
         M['U'][s, t+1, r] = eprop_U(U=M['U'][s, t, r],
                                     Z=M['Z'][s, t, r],
@@ -375,7 +424,6 @@ def process_layer(M, t, s, r, W_rec):
 
 
     return M
-
 
 
 def init_adam(tar_size):
