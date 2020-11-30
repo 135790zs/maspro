@@ -1,6 +1,7 @@
 
 # MUST DO:
 # TODO: Reproduce Bellec
+# TODO: Auto stop when end sequence
 
 # LOW PRIORITY:
 # TODO: Dictionary to facilitate sweeping function (param = key, list = item)

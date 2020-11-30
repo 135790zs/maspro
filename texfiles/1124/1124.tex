@@ -87,7 +87,12 @@
 
 \section{Current system performance}
 \begin{frame}{Current system performance}
-
+	
+	\begin{itemize}[label=--]
+	\item Training with bias or output weights: converges to single output.
+	\item Training with only recurrent weights: converges little bit but not meaningful.
+	\item \textbf{But:} when disabling weight decay and L2, no more convergence.
+	\end{itemize}
 \end{frame}
 
 

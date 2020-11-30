@@ -1,7 +1,8 @@
 import os
+import shutil
 import numpy as np
 from config import cfg
-
+import json
 
 def initialize_model(length, tar_size):
     rng = np.random.default_rng()
@@ -84,7 +85,7 @@ def initialize_weights(tar_size):
     W["W"] = rng.random(
         size=(cfg["Epochs"], cfg["n_directions"], cfg["N_Rec"], cfg["N_R"], cfg["N_R"] * 2,))
     # W["W"][0, :, 0] *= 5
-    # W["W"][0, :, 0] /= cfg["N_R"]
+    W["W"][0, :, 0] *= 2 / cfg["N_R"]
     # W["W"][0, :, 1] /= (cfg["N_R"]) / 2
     # W["W"][0, 2] /= 32
     W["W_out"] = rng.random(size=(cfg["Epochs"], cfg["n_directions"], tar_size, cfg["N_R"],))
@@ -107,12 +108,12 @@ def initialize_weights(tar_size):
         # Zero diag recurrent W: no self-conn
             np.fill_diagonal(W['W'][0, s, r, :, cfg["N_R"]:], 0)
 
-    W['W'][0, 0, 0, 0, 0] = 2  # Input 1 to rec 1: frozen
-    W['W'][0, 0, 0, 1, 0] = 0  # Input 1 to rec 2
-    W['W'][0, 0, 0, 0, 1] = 0  # Input 2 to rec 1
-    W['W'][0, 0, 0, 1, 1] = 0  # Input 2 to rec 2: frozen
-    W['W'][0, 0, 0, 1, 2] = 2  # Rec 1 to rec 2 (B)
-    W['W'][0, 0, 0, 0, 3] = 0  # Rec 2 to rec 1 (T)
+    # W['W'][0, 0, 0, 0, 0] = 2  # Input 1 to rec 1: frozen
+    # W['W'][0, 0, 0, 1, 0] = 0  # Input 1 to rec 2
+    # W['W'][0, 0, 0, 0, 1] = 0  # Input 2 to rec 1
+    # W['W'][0, 0, 0, 1, 1] = 0  # Input 2 to rec 2: frozen
+    # W['W'][0, 0, 0, 1, 2] = 2  # Rec 1 to rec 2 (B)
+    # W['W'][0, 0, 0, 0, 3] = 0  # Rec 2 to rec 1 (T)
 
 
     return W
@@ -131,9 +132,9 @@ def get_error(M, tars, W_out, b_out):
     return error
 
 
-def save_weights(W, epoch):
+def save_weights(W, epoch, log_id):
     for k, v in W.items():
-        np.save(f"{cfg['weights_fname']}/{k}", v[epoch])
+        np.save(f"../log/{log_id}/checkpoints/{k}", v[epoch])
 
 
 def load_weights():
@@ -198,8 +199,8 @@ def eprop_V(V, I, Z, t, TZ):
         # print(TZ.shape, (TZ == cfg["dt_refr"]).shape)
         return (cfg["alpha"] * V
                 + I
-                - cfg["alpha"] * V * Z
-                - cfg["alpha"] * V * ((t - TZ) == cfg["dt_refr"]))
+                - cfg["alpha"] * Z * V
+                - cfg["alpha"] * V * ((t - TZ) <= cfg["dt_refr"]))
 
 
 def eprop_U(U, Z, is_ALIF):
@@ -438,3 +439,26 @@ def init_adam(tar_size):
         'mb_out': np.zeros(shape=(cfg["n_directions"], tar_size,)),
         'vb_out': np.zeros(shape=(cfg["n_directions"], tar_size,)),
     }
+
+
+def prepare_log(cfg, log_id):
+    log_subdirs = [
+        'states',
+        'checkpoints'
+    ]
+    for subdir in log_subdirs:
+        os.makedirs(f"../log/{log_id}/{subdir}")
+
+    with open('config.json', 'w+') as fp:
+        json.dump(cfg, fp)
+
+    # folder = f"../vis/states/"
+    # for filename in os.listdir(folder):
+    #     file_path = os.path.join(folder, filename)
+    #     try:
+    #         if os.path.isfile(file_path) or os.path.islink(file_path):
+    #             os.unlink(file_path)
+    #         elif os.path.isdir(file_path):
+    #             shutil.rmtree(file_path)
+    #     except Exception as e:
+    #         print('Failed to delete %s. Reason: %s' % (file_path, e))

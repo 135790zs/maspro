@@ -1,0 +1,208 @@
+\documentclass[t]{beamer}
+
+\setlength {\marginparwidth }{2cm} 
+\setlength {\parskip}{0cm} 
+\usepackage{todonotes}
+\usepackage{siunitx}
+\usepackage{subcaption}
+\usepackage{apacite} 	% Use APA Citation
+\presetkeys{todonotes}{inline}{}
+\beamertemplatenavigationsymbolsempty
+\usefonttheme[onlymath]{serif}
+
+\usepackage{algpseudocode}
+\usepackage{enumitem,amssymb, yfonts, bm}
+\newlist{todolist}{itemize}{2}
+\setlist[todolist]{label=$\square$}
+\usepackage{pifont}
+\newcommand{\cmark}{\ding{51}}%
+\newcommand{\xmark}{\ding{55}}%
+\newcommand{\done}{\rlap{$\square$}{\raisebox{2pt}{\large\hspace{1pt}\cmark}}%
+\hspace{-2.5pt}}
+
+% \usetheme{AnnArbor}
+% \usetheme{Antibes}
+% \usetheme{Bergen}
+% \usetheme{Berkeley}https://www.sharelatex.com/project/5b12e1a4f84b363f6f336dab
+% \usetheme{Berlin}
+% \usetheme{Boadilla}
+% \usetheme{boxes}
+\usetheme{CambridgeUS}
+% \usetheme{Copenhagen}
+%\usetheme{Darmstadt}
+% \usetheme{default}
+%\usetheme{Frankfurt}
+%\usetheme{Goettingen}
+% \usetheme{Hannover}
+% \usetheme{Ilmenau}
+% \usetheme{JuanLesPins}
+\setlength{\parskip}{10pt}
+
+% \newcommand*\vc[1]%
+% {\begin{pmatrix}#1\end{pmatrix}}
+
+\newcommand*\vc[1]%
+{\left(\begin{array}{cccc}#1\end{array}\right)}
+
+
+\newcommand\eqdef{\ \mathrel{\overset{\makebox[0pt]{\mbox{\normalfont\scriptsize\rmfamily def}}}{=}}\ }
+
+\title[Eligibility propagation]{Improving eligibility propagation using Izhikevich neurons in a multilayer RSNN.\\\vspace{10pt}
+\large{Presentation 5: Evaluation meeting 1}}
+
+\author[Werner]{Werner~van~der~Veen\\\footnotesize\texttt({w.k.van.der.veen.2@student.rug.nl})}\date{\today}
+
+\begin{document}
+
+\begin{frame}
+    \titlepage
+\end{frame}
+
+%======================================
+
+%\begin{frame}
+%    \tableofcontents
+%\end{frame}
+
+\small
+\section{Project overview}
+\begin{frame}{A quick project overview}
+	Task: using eligibility propagation to classify phonemes.
+	
+	Challenges:
+	\begin{itemize}[label=--]
+		\item Desired bio-plasubility requires online and local learning rules.
+		\item Spiking and reccurent network: no good learning algorithm yet.
+	\end{itemize}
+	
+	My own contribution: investigate the benefits of
+	\begin{itemize}[label=--]
+		\item stacking multiple recurrent layers
+		\item using Izhikevich neurons
+		\item various regularization methods
+	\end{itemize}
+		
+\end{frame}
+
+\section{Background}
+\begin{frame}{Original network architecture}
+	\begin{figure}[!ht]
+		\input{bellecdiagram.tex}
+	\end{figure}
+\end{frame}
+
+
+
+\begin{frame}{The e-prop learning algorithm -- Main equation}
+	
+	\begin{align*}
+		\frac{dE}{dW_{ji}} 
+		&= \sum_tL_j^t \cdot e_{ji}^t
+	\end{align*}
+	
+	\begin{figure}[!ht]
+		\includegraphics[width=0.8\linewidth]{eligibility.pdf}
+	\end{figure}
+	
+\end{frame}
+
+\begin{frame}{The e-prop learning algorithm -- proof}
+	
+	\begin{align*}
+		\frac{dE}{dW_{ji}} 
+		&= \sum_tL_j^t \cdot e_{ji}^t
+	\end{align*}
+	
+	\begin{equation*}
+L^t_j \eqdef \frac{dE}{dz^t_j}
+\end{equation*}
+
+	\begin{equation*}
+e^t_{ji} \eqdef \frac{\partial z_j^t}{\partial\mathbf{h}_j^t}\underbrace{\sum_{t'\leq t}\frac{\partial\mathbf{h}^t_j}{\partial\mathbf{h}_j^{t-1}} \cdots \frac{\partial\mathbf{h}_j^{t'+1}}{\partial\mathbf{h}_j^{t'}}\cdot\frac{\partial\mathbf{h}_j^{t'}}{\partial W_{ji}}}_{\eqdef \bm{\varepsilon}_{ji}^t}
+\end{equation*}
+	
+	
+\end{frame}
+
+\begin{frame}{The e-prop learning algorithm -- Original LIF}
+	
+	\begin{figure}[!ht]
+		\includegraphics[width=0.8\linewidth]{eprop_demo_bellec.pdf}
+	\end{figure}
+	
+\end{frame}
+
+\begin{frame}{Previous results}
+\tiny{
+Bellec, G., Scherr, F., Subramoney, A., Hajek, E., Salaj, D., Legenstein, R., \& Maass, W. (2020). A solution to the learning dilemma for recurrent networks of spiking neurons.}
+	
+\begin{figure}[!ht]
+		\includegraphics[width=0.8\linewidth]{timitperformance.png}
+	\end{figure}
+	
+\end{frame}
+
+\begin{frame}{The e-prop learning algorithm -- STDP-corrected LIF}
+\tiny{
+Traub, M., Butz, M. V., Baayen, R. H., \& Otte, S. (2020, September). Learning Precise Spike Timings with Eligibility Traces. In International Conference on Artificial Neural Networks (pp. 659-669). Springer, Cham.}
+
+	\begin{figure}[!ht]
+		\includegraphics[width=0.78\linewidth]{demo_traubfix.pdf}
+	\end{figure}
+	
+\end{frame}
+
+\section{Proposal}
+\begin{frame}{My proposed contribution}
+\begin{itemize}[label=--]
+\item Implement the algorithm in a \emph{multi-layer} SRNN.
+	\begin{figure}[!ht]
+		\includegraphics[clip, trim=0cm 25cm 0cm 0cm, width=0.667\linewidth]{BellecDiagramML.pdf}  %lbrt
+	\end{figure}
+\item Examine model desgns such as neuron type (e.g. Izhikevich); synaptic delay; and regularization such as metaplasticity and synaptic scaling.
+\end{itemize}
+	
+\end{frame}
+
+\section{Current state}
+\begin{frame}{Work done so far}
+	\begin{todolist}
+
+    \item[\done] Implement Bellec's model with
+    \begin{todolist}
+    	\item[\done] 1-layer e-prop RSNN with ALIF neurons;
+    	\item[\done] TIMIT conversion to 13 MFCCs and their first and second derivatives;
+    	\item[\done] $L^2$ and firing rate regularization;
+    	\item[\done] Adam optimizer;
+    \item[\done] Bidirectional network.
+    \end{todolist}
+    \item Obtain Bellec's performance;
+    \item Analyze effects of
+    \begin{todolist}
+    	\item N-layered network;
+    \item Izhikevich neurons;
+    	\item Metaplasticity;
+    	\item Synaptic scaling;
+    	\item Synaptic delays.
+    \end{todolist}
+  \end{todolist}
+  
+\begin{tikzpicture}[remember picture,overlay]
+    \node[xshift=-2cm,yshift=-6.5cm] at (current page.north east) {\includegraphics[clip, trim=0cm 21cm 0cm 0cm, width=0.8\linewidth]{BellecDiagramBi.pdf}};
+\end{tikzpicture}
+\end{frame}
+
+
+\begin{frame}{Current observations}
+
+\begin{itemize}[label=--]
+\item \[\lim_{e \to \infty} W^e_\textrm{out}  = \mathbf{0}\]
+\[\lim_{e \to \infty} b^e_\textrm{out}  = \mathbf{0}\]
+\item Spike frequency normal but heavily affected by weight initialization. Weights in order of $[0, \frac{2}{N}]$ work well, where $N$ is layer size.
+\end{itemize}
+\end{frame}
+
+
+
+
+\end{document}

@@ -35,7 +35,7 @@ def weights_to_img(arr, is_binary=False):
     return arr
 
 
-def plot_run(terrs, percs_wrong_t, verrs, percs_wrong_v, W, epoch):
+def plot_run(terrs, percs_wrong_t, verrs, percs_wrong_v, W, epoch, log_id):
     labelpad = 35
     fontsize = 14
     fig = plt.figure(constrained_layout=False, figsize=(8, 8))
@@ -80,19 +80,19 @@ def plot_run(terrs, percs_wrong_t, verrs, percs_wrong_v, W, epoch):
                                fontsize=fontsize)
 
     axs[-1].set_xlabel("Epoch $E$", fontsize=fontsize)
-    plt.savefig(f"../vis/errs.pdf",
+    plt.savefig(f"../log/{log_id}/metric.pdf",
                 bbox_inches='tight')
 
     plt.close()
 
 
-def plot_state(M, W_rec, W_out, b_out, plot_weights=False):
+def plot_state(M, W_rec, W_out, b_out, e, log_id, plot_weights=False):
     w = {
         # "w1": (0, 1, 2),
         # "w2": (0, 0, 3)
     }
 
-    S_plotvars = ["X", "I", "V", "H", "U", "Z_in", "Z",
+    S_plotvars = ["X", "I", "V", "H", "U", "Z",
                   "EVV", "EVU", "ET", "Y", "L", "DW", "DW_out", "Db_out"]
 
     M_plotvars = ["P", "Pmax", "T", "CE"]
@@ -113,8 +113,11 @@ def plot_state(M, W_rec, W_out, b_out, plot_weights=False):
     labelpad = 30
     fontsize = 13
 
-    fig.suptitle(f"Single-run model state\n$\\alpha={cfg['alpha']:.3f}$, "
-                 f"$\\kappa={cfg['kappa']:.3f}$, $\\rho={cfg['rho']:.3f}$",
+    fig.suptitle(f"Single-run model state\n"
+                 f"$\\alpha={cfg['alpha']:.3f}$, "
+                 f"$\\kappa={cfg['kappa']:.3f}$, "
+                 f"$\\rho={cfg['rho']:.3f}$\n"
+                 f"ID {log_id}, Epoch {e}",
                  fontsize=20)
     row_idx = 0
 
@@ -152,7 +155,7 @@ def plot_state(M, W_rec, W_out, b_out, plot_weights=False):
             arr = M['Y'][0] + (np.flip(M['Y'][1], axis=0)
                                if cfg["n_directions"] > 1 else 0)
         elif var == 'X' and cfg["n_directions"] > 1:
-            arr = M["X1"]
+            arr = M["X0"]
         else:
             arr = M[var]
 
@@ -211,13 +214,16 @@ def plot_state(M, W_rec, W_out, b_out, plot_weights=False):
 
     axs[-1].set_xlabel("$t$", fontsize=fontsize)
 
-    plt.savefig(f"../vis/state.pdf",
+    plt.savefig(f"../log/{log_id}/states/state.pdf",
                 bbox_inches='tight')
+    if e % cfg["state_save_interval"] == 0:
+        plt.savefig(f"../log/{log_id}/states/state_{e}.pdf",
+                    bbox_inches='tight')
 
     plt.close()
 
 
-def plot_graph(M, t, W_rec, W_out):
+def plot_graph(M, t, W_rec, W_out, log_id):
     dot = Digraph(format='svg', engine='dot')
     precision = 0.01
 
@@ -321,4 +327,4 @@ def plot_graph(M, t, W_rec, W_out):
                      color=weightcolor(w=W_out[head, tail]))
 
     dot.attr(label=f"Steps {t+1}")
-    dot.render(f"../vis/net")
+    dot.render(f"../log/{log_id}/net")

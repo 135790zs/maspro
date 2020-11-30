@@ -1,4 +1,5 @@
 import time
+import datetime
 import numpy as np
 from config import cfg as CFG
 import utils as ut
@@ -32,64 +33,63 @@ def network(cfg, inp, tar, W_rec, W_out, b_out, B, adamvars):
         Ysum = M['Y'][0] + (np.flip(M['Y'][1], axis=0)
                             if cfg["n_directions"] > 1 else 0)
 
-        for t in range(n_steps):  # TODO: can make more efficient
-            M['P'][t] = ut.eprop_P(Y=Ysum[t])
+    M['P'] = ut.eprop_P(Y=Ysum)
+    M['Pmax'][range(M['P'].shape[0]),
+              M['P'].argmax(axis=1)] = 1
 
-            M['Pmax'][t, M['P'][t].argmax()] = 1
+    M['CE'] = ut.eprop_CE(T=M['T'],
+                          P=M['P'],
+                          W_rec=W_rec,
+                          W_out=W_out,
+                          B=B)
 
-            M['CE'][t] = ut.eprop_CE(T=M['T'][t],
-                                     P=M['P'][t],
-                                     W_rec=W_rec,
-                                     W_out=W_out,
-                                     B=B)
+    for s in range(cfg["n_directions"]):
 
-        for s in range(cfg["n_directions"]):
+        for t in range(n_steps):  # TODO: can make more efficient by doing einsums
+            M['L'][s, t] = np.dot(B[s], (M['P'][t] - M['T'][t]))
 
-            for t in range(n_steps):  # TODO: can make more efficient by doing einsums
-                M['L'][s, t] = np.dot(B[s], (M['P'][t] - M['T'][t]))
+            # Calculate gradient and weight update
+            # TODO: make into iterable
+            for wtype in ["W", "W_out", "b_out"]:
+                if not cfg["update_bias"] and wtype == "b_out":
+                    continue
+                if not cfg["update_W_out"] and wtype == "W_out":
+                    continue
 
-                # Calculate gradient and weight update
-                # TODO: make into iterable
-                for wtype in ["W", "W_out", "b_out"]:
-                    if not cfg["update_bias"] and wtype == "b_out":
-                        continue
-                    if not cfg["update_W_out"] and wtype == "W_out":
-                        continue
-
-                    M[f'g{wtype}'][s, t] = ut.eprop_gradient(wtype=wtype,
-                                                             L=M['L'][s, t],
-                                                             ETbar=M['ETbar'][s, t],
-                                                             Zbar_last=M['ZbarK'][s, t, -1],
-                                                             P=M['P'][t],
-                                                             T=M['T'][t])
+                M[f'g{wtype}'][s, t] = ut.eprop_gradient(wtype=wtype,
+                                                         L=M['L'][s, t],
+                                                         ETbar=M['ETbar'][s, t],
+                                                         Zbar_last=M['ZbarK'][s, t, -1],
+                                                         P=M['P'][t],
+                                                         T=M['T'][t])
 
 
-                    M[f'D{wtype}'][s, t] = ut.eprop_DW(wtype=wtype,
-                                                       s=s,
-                                                       adamvars=adamvars,
-                                                       gradient=M[f'g{wtype}'][s, t],
-                                                       Zs=M['Z'][s, :t],
-                                                       ET=M['ET'][s, t])
+                M[f'D{wtype}'][s, t] = ut.eprop_DW(wtype=wtype,
+                                                   s=s,
+                                                   adamvars=adamvars,
+                                                   gradient=M[f'g{wtype}'][s, t],
+                                                   Zs=M['Z'][s, :t],
+                                                   ET=M['ET'][s, t])
 
-                if not cfg["update_input_weights"]:
-                        M["DW"][s, t, 0, :, :inp.shape[-1]] = 0
+            if not cfg["update_input_weights"]:
+                    M["DW"][s, t, 0, :, :inp.shape[-1]] = 0
 
-                if not cfg["update_dead_weights"]:
-                        M["DW"][s, t, W_rec[s] == 0] = 0
+            if not cfg["update_dead_weights"]:
+                    M["DW"][s, t, W_rec[s] == 0] = 0
 
-                # symmetric e-prop for last layer, random otherwise
-                if cfg["eprop_type"] == "adaptive":
-                    M['DB'][s, t, -1] = M['DW_out'][s, t].T
+            # symmetric e-prop for last layer, random otherwise
+            if cfg["eprop_type"] == "adaptive":
+                M['DB'][s, t, -1] = M['DW_out'][s, t].T
 
-                if cfg["plot_graph"]:
-                    vis.plot_graph(
-                        M=M, s=s, t=t, W_rec=W_rec, W_out=W_out)
-                    time.sleep(0.5)
+            if cfg["plot_graph"]:
+                vis.plot_graph(
+                    M=M, s=s, t=t, W_rec=W_rec, W_out=W_out)
+                time.sleep(0.5)
 
     return M
 
 
-def feed_batch(cfg, inps, tars, W_rec, W_out, b_out, B, epoch, tvt_type, adamvars, e):
+def feed_batch(cfg, inps, tars, W_rec, W_out, b_out, B, epoch, tvt_type, adamvars, e, log_id):
     batch_err = 0
     batch_perc_wrong = 0
 
@@ -116,14 +116,21 @@ def feed_batch(cfg, inps, tars, W_rec, W_out, b_out, B, epoch, tvt_type, adamvar
     }
 
     for b in range(inps.shape[0]):
-        print((f"\tEpoch {epoch}/{cfg['Epochs']-1}\t" if tvt_type != 'test'
+        print((f"({log_id})\tEpoch {epoch}/{cfg['Epochs']-1}\t" if tvt_type != 'test'
                else '\t'),
               f"{'  ' if tvt_type == 'val' else ''}{tvt_type} "
               f"sample {b+1}/{inps.shape[0]}",
               end='\r' if b < inps.shape[0]-1 else '\n')
 
-        inps_rep = np.repeat(inps[b], cfg["Repeats"], axis=0)
-        tars_rep = np.repeat(tars[b], cfg["Repeats"], axis=0)
+        this_tars = tars[b]
+
+        while this_tars[-1, 0] == 1:
+            this_tars = this_tars[:-1]
+
+        this_inps = inps[b, :this_tars.shape[0]]
+
+        inps_rep = np.repeat(this_inps, cfg["Repeats"], axis=0)
+        tars_rep = np.repeat(this_tars, cfg["Repeats"], axis=0)
 
         final_model = network(
             cfg=cfg,
@@ -140,8 +147,11 @@ def feed_batch(cfg, inps, tars, W_rec, W_out, b_out, B, epoch, tvt_type, adamvar
             vis.plot_state(M=final_model,
                            W_rec=W_rec,
                            W_out=W_out,
-                           b_out=b_out)
+                           b_out=b_out,
+                           e=e,
+                           log_id=log_id)
 
+        batch_err += np.sum(final_model["CE"]) / inps.shape[0]  # TODO: use mean over axis
         batch_err += np.sum(final_model["CE"]) / inps.shape[0]  # TODO: use mean over axis
         batch_perc_wrong += np.mean(
             np.max(np.abs(final_model["Pmax"]- final_model["T"]),
@@ -166,6 +176,12 @@ def main(cfg):
         inps[tvt_type] = ((inps[tvt_type] - np.min(inps[tvt_type]))
                           / np.ptp(inps[tvt_type]))
         tars[tvt_type] = np.load(f'{cfg["phns_fname"]}_{tvt_type}.npy')
+
+
+
+    log_id = datetime.datetime.now().strftime('%Y-%m-%d-%H:%M:%S')
+
+    ut.prepare_log(cfg=cfg, log_id=log_id)
 
     terrs = np.zeros(shape=(cfg["Epochs"]))
     verrs = np.ones(shape=(cfg["Epochs"])) * -1
@@ -194,7 +210,8 @@ def main(cfg):
             b_out=W['b_out'][e],
             B=W['B'][e],
             adamvars=adamvars,
-            e=e)
+            e=e,
+            log_id=log_id)
         terrs[e] = terr
         percs_wrong_t[e] = perc_wrong_t
 
@@ -212,7 +229,8 @@ def main(cfg):
                 b_out=W['b_out'][e],
                 B=W['B'][e],
                 adamvars=adamvars,
-                e=e)
+                e=e,
+                log_id=log_id)
             verrs[e] = verr
             percs_wrong_v[e] = perc_wrong_v
 
@@ -221,7 +239,7 @@ def main(cfg):
             if optVerr is None or verr < optVerr:
                 print(f"\nLowest val error ({verr:.3f}) found at epoch {e}!\n")
                 optVerr = verr
-                ut.save_weights(W=W, epoch=e)
+                ut.save_weights(W=W, epoch=e, log_id=log_id)
 
             # Interpolate missing verrs
             verrs[:e+1] = ut.interpolate_verrs(verrs[:e+1])
@@ -230,7 +248,7 @@ def main(cfg):
         if cfg["plot_main"]:
             vis.plot_run(terrs=terrs, percs_wrong_t=percs_wrong_t,
                          verrs=verrs, percs_wrong_v=percs_wrong_t,
-                         W=W, epoch=e)
+                         W=W, epoch=e, log_id=log_id)
 
         if e == cfg['Epochs'] - 1:
             break
@@ -284,7 +302,8 @@ def main(cfg):
         b_out=optW['b_out'],
         B=optW['B'],
         adamvars=adamvars,
-        e=e)
+        e=e,
+        log_id=log_id)
 
     print(f"\nTesting complete with CE loss {total_testerr:.3f} and error "
           f"rate {100*perc_wrong_test:.1f}%!\n")
