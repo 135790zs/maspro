@@ -1,23 +1,24 @@
 from numpy import exp
 cfg = {
+    "verbose": False,
     "eprop_type": "adaptive",  # in {random, symmetric, adaptive}
     "optimizer": 'Adam',
     "traub_trick": False,
     "fraction_ALIF": 0.25,  # def 0.25
-    "theta_adaptation": 80,  # Depends on length of task: working memory
+    "theta_adaptation": 200/5,  # Depends on length of task: working memory
     "n_directions": 2,
     "delay": 0,
 
-    "theta_membrane": 4,  # TIMIT: 20
-    "theta_output": 0.75,  # TIMIT: 3
-    "beta": 0,    # TIMIT: 0.184
+    "theta_membrane": 20/5,  # TIMIT: 20
+    "theta_output": 3/5,  # TIMIT: 3
+    "beta": 0.184,    # TIMIT: 0.184
     "gamma": 0.3,     # Pseudoderivative ET contribution
-    "eta": 1e-5,      # Learning rate (1e-2 for TIMIT)
+    "eta": 1e-2,      # Learning rate (1e-2 for TIMIT)
     "thr": 0.8,        # Spike threshold, def = 1.6
     "dt_refr": 2,    # Refractory time, def = 2
     "dt": 1,
     "weight_decay": 1e-2,  # For W_out and B, only if adaptive. def = 1e-2
-    "L2_reg": 0,  # 1e-5 for TIMIT
+    "L2_reg": 1e-5,  # 1e-5 for TIMIT
     "FR_reg": 50,  # 50 for TIMIT
     "FR_target": 6/1000,  # Desired frequency (mean per ms)
     "adam_beta1": 0.9,
@@ -30,20 +31,20 @@ cfg = {
     "update_dead_weights": False,
     "update_input_weights": False,
 
-    "N_R": 64,
+    "N_R": 128,
     "N_Rec": 1,
 
     "wavs_fname": "../data_wavs",
     "phns_fname": "../data_phns",
 
-    "Epochs": 5000,  # def = 80
+    "Epochs": 30,  # def = 80
     "Repeats": 1,  # ms per epoch, def = 5
-    "batch_size_train": 8,  # def = 32
-    "batch_size_val": 2,  # def = 32
+    "batch_size_train": 16,  # def = 32
+    "batch_size_val": 8,  # def = 32
     "val_every_E": 2,
     "maxlen": 778,  # Don't forget to re-run process_timit.py!
     "n_examples": {'train': 800, 'val': 400, 'test': 400},
-    "plot_interval": 1,  #  State plot; 0 to disable plots
+    "plot_interval": 0,  #  State plot; 0 to disable plots
     "state_save_interval": 5,  #  State plot; 0 to disable plots
     "plot_main": True,
     "plot_state": True,

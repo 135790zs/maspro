@@ -1,5 +1,4 @@
 import time
-import datetime
 import numpy as np
 from config import cfg as CFG
 import utils as ut
@@ -10,7 +9,7 @@ def network(cfg, inp, tar, W_rec, W_out, b_out, B, adamvars):
     inp = np.pad(array=inp, mode='edge', pad_width=((0, cfg["delay"]), (0, 0)))
 
     n_steps = inp.shape[0]
-    M = ut.initialize_model(length=n_steps, tar_size=tar.shape[-1])
+    M = ut.initialize_model(cfg=cfg, length=n_steps, tar_size=tar.shape[-1])
 
     M["T"] = tar
     M["T"] = np.pad(array=M["T"], mode='edge', pad_width=((cfg["delay"], 0), (0, 0)))
@@ -22,10 +21,11 @@ def network(cfg, inp, tar, W_rec, W_out, b_out, B, adamvars):
 
             # Input is nonzero for first layer
             for r in range(cfg['N_Rec']):
-                M = ut.process_layer(M=M, s=s, t=t, r=r, W_rec=W_rec[s, r])
+                M = ut.process_layer(cfg=cfg, M=M, s=s, t=t, r=r, W_rec=W_rec[s, r])
 
 
-            M['Y'][s, t] = ut.eprop_Y(Y=M['Y'][s, t-1] if t > 0 else 0,
+            M['Y'][s, t] = ut.eprop_Y(cfg=cfg,
+                                      Y=M['Y'][s, t-1] if t > 0 else 0,
                                       W_out=W_out[s],
                                       Z_last=M['Z'][s, t, -1],
                                       b_out=b_out[s])
@@ -37,7 +37,8 @@ def network(cfg, inp, tar, W_rec, W_out, b_out, B, adamvars):
     M['Pmax'][range(M['P'].shape[0]),
               M['P'].argmax(axis=1)] = 1
 
-    M['CE'] = ut.eprop_CE(T=M['T'],
+    M['CE'] = ut.eprop_CE(cfg=cfg,
+                          T=M['T'],
                           P=M['P'],
                           W_rec=W_rec,
                           W_out=W_out,
@@ -64,7 +65,8 @@ def network(cfg, inp, tar, W_rec, W_out, b_out, B, adamvars):
                                                          T=M['T'][t])
 
 
-                M[f'D{wtype}'][s, t] = ut.eprop_DW(wtype=wtype,
+                M[f'D{wtype}'][s, t] = ut.eprop_DW(cfg=cfg,
+                                                   wtype=wtype,
                                                    s=s,
                                                    adamvars=adamvars,
                                                    gradient=M[f'g{wtype}'][s, t],
@@ -83,7 +85,7 @@ def network(cfg, inp, tar, W_rec, W_out, b_out, B, adamvars):
 
             if cfg["plot_graph"]:
                 vis.plot_graph(
-                    M=M, s=s, t=t, W_rec=W_rec, W_out=W_out)
+                    cfg=cfg, M=M, s=s, t=t, W_rec=W_rec, W_out=W_out)
                 time.sleep(0.5)
 
     return M
@@ -116,16 +118,23 @@ def feed_batch(cfg, inps, tars, W_rec, W_out, b_out, B, epoch, tvt_type, adamvar
     }
 
     for b in range(inps.shape[0]):
-        print((f"({log_id})\tEpoch {epoch}/{cfg['Epochs']-1}\t" if tvt_type != 'test'
-               else '\t'),
-              f"{'  ' if tvt_type == 'val' else ''}{tvt_type} "
-              f"sample {b+1}/{inps.shape[0]}",
-              end='\r' if b < inps.shape[0]-1 else '\n')
+        if cfg["verbose"]:
+            print((f"({log_id})\tEpoch {epoch}/{cfg['Epochs']-1}\t" if tvt_type != 'test'
+                   else '\t'),
+                  f"{'  ' if tvt_type == 'val' else ''}{tvt_type} "
+                  f"sample {b+1}/{inps.shape[0]}",
+                  end='\r' if b < inps.shape[0]-1 else '\n')
 
         this_tars = tars[b]
 
+        # Crop silence off of data
         while this_tars[-1, 0] == 1:
             this_tars = this_tars[:-1]
+
+            if this_tars.size == 0:
+                # Process failed: was 0 everywhere. Continue with original
+                this_tars = tars[b]
+                break
 
         this_inps = inps[b, :this_tars.shape[0]]
 
@@ -144,7 +153,8 @@ def feed_batch(cfg, inps, tars, W_rec, W_out, b_out, B, epoch, tvt_type, adamvar
 
         if (cfg['plot_state'] and b == 0 and tvt_type == "train"
             and cfg["plot_interval"] and e % cfg["plot_interval"] == 0):
-            vis.plot_state(M=final_model,
+            vis.plot_state(cfg=cfg,
+                           M=final_model,
                            W_rec=W_rec,
                            W_out=W_out,
                            b_out=b_out,
@@ -161,8 +171,9 @@ def feed_batch(cfg, inps, tars, W_rec, W_out, b_out, B, epoch, tvt_type, adamvar
             batch_DW[w_type] += np.mean(final_model[f'D{w_type}'], axis=1)
             batch_gW[w_type] += np.mean(final_model[f'g{w_type}'], axis=1)
 
-    print(f"\t\tCE:      {batch_err:.3f},\n"
-          f"\t\t% wrong: {100*batch_perc_wrong:.1f}%")
+    if cfg["verbose"]:
+        print(f"\t\tCE:      {batch_err:.3f},\n"
+              f"\t\t% wrong: {100*batch_perc_wrong:.1f}%")
     return batch_err, batch_perc_wrong, batch_DW, batch_gW
 
 
@@ -177,9 +188,7 @@ def main(cfg):
                           / np.ptp(inps[tvt_type]))
         tars[tvt_type] = np.load(f'{cfg["phns_fname"]}_{tvt_type}.npy')
 
-
-
-    log_id = datetime.datetime.now().strftime('%Y-%m-%d-%H:%M:%S')
+    log_id = ut.get_log_id()
 
     ut.prepare_log(cfg=cfg, log_id=log_id)
 
@@ -190,12 +199,14 @@ def main(cfg):
 
     optVerr = None
 
-    W = ut.initialize_weights(tar_size=tars['train'].shape[-1])
+    W = ut.initialize_weights(cfg=cfg, tar_size=tars['train'].shape[-1])
     # TODO: Put adam in W?
 
-    adamvars = ut.init_adam(tar_size=tars['train'].shape[-1])
+    adamvars = ut.init_adam(cfg=cfg, tar_size=tars['train'].shape[-1])
 
     for e in range(0, cfg["Epochs"]):
+        if not cfg["verbose"]:
+            print(f"ep {e}/{cfg['Epochs']}", end='\r')
         # Make batch
         randidxs = np.random.randint(inps['train'].shape[0],
                                      size=cfg["batch_size_train"])
@@ -237,7 +248,8 @@ def main(cfg):
 
             # Save best weights
             if optVerr is None or verr < optVerr:
-                print(f"\nLowest val error ({verr:.3f}) found at epoch {e}!\n")
+                if cfg["verbose"]:
+                    print(f"\nLowest val error ({verr:.3f}) found at epoch {e}!\n")
                 optVerr = verr
                 ut.save_weights(W=W, epoch=e, log_id=log_id)
 
@@ -283,13 +295,14 @@ def main(cfg):
                     adamvars["beta2"] * adamvars[f'v{wtype}']
                     + (1 - adamvars["beta2"]) * gW[wtype] ** 2)
 
-    print("\nTraining complete!\n")
+    if cfg["verbose"]:
+        print("\nTraining complete!\n")
 
     # Make test batch
     randidxs = np.random.randint(inps['val'].shape[0],
                                  size=cfg["batch_size_val"])
 
-    optW = ut.load_weights()
+    optW = ut.load_weights(log_id=log_id)
 
     total_testerr, perc_wrong_test, _, _ = feed_batch(
         epoch=1,

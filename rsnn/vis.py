@@ -3,7 +3,7 @@ import matplotlib.cm as mpcm
 from matplotlib import rcParams as rc
 import numpy as np
 from graphviz import Digraph
-from config import cfg, lookup
+from config import lookup
 
 rc['mathtext.fontset'] = 'stix'
 rc['font.family'] = 'STIXGeneral'
@@ -86,7 +86,7 @@ def plot_run(terrs, percs_wrong_t, verrs, percs_wrong_v, W, epoch, log_id):
     plt.close()
 
 
-def plot_state(M, W_rec, W_out, b_out, e, log_id, plot_weights=False):
+def plot_state(cfg, M, W_rec, W_out, b_out, e, log_id, plot_weights=False):
     w = {
         # "w1": (0, 1, 2),
         # "w2": (0, 0, 3)
@@ -223,7 +223,7 @@ def plot_state(M, W_rec, W_out, b_out, e, log_id, plot_weights=False):
     plt.close()
 
 
-def plot_graph(M, t, W_rec, W_out, log_id):
+def plot_graph(cfg, M, t, W_rec, W_out, log_id):
     dot = Digraph(format='svg', engine='dot')
     precision = 0.01
 

@@ -1,10 +1,10 @@
 import os
 import shutil
 import numpy as np
-from config import cfg
+import datetime
 import json
 
-def initialize_model(length, tar_size):
+def initialize_model(cfg, length, tar_size):
     rng = np.random.default_rng()
     M = {}
     neuron_shape = (cfg["n_directions"],
@@ -78,7 +78,7 @@ def initialize_model(length, tar_size):
     return M
 
 
-def initialize_weights(tar_size):
+def initialize_weights(cfg, tar_size):
     rng = np.random.default_rng()
     W = {}
 
@@ -137,9 +137,9 @@ def save_weights(W, epoch, log_id):
         np.save(f"../log/{log_id}/checkpoints/{k}", v[epoch])
 
 
-def load_weights():
+def load_weights(log_id):
     W = {}
-    for subdir, _, files in os.walk(cfg['weights_fname']):
+    for subdir, _, files in os.walk(f"../log/{log_id}/checkpoints"):
         for filename in files:
             filepath = subdir + os.sep + filename
             W[filename[:-4]] = np.load(filepath)  # cut off '.npy'
@@ -183,7 +183,7 @@ def normalize(arr):
     return np.interp(arr, (arr.min(), arr.max()), (-1, 1))
 
 
-def eprop_Z(t, TZ, V, U, is_ALIF):
+def eprop_Z(cfg, t, TZ, V, U, is_ALIF):
     return np.where(np.logical_and(t - TZ >= cfg["dt_refr"],
                                    V >= np.where(is_ALIF,
                                                  cfg["thr"] + cfg["beta"] * U,
@@ -192,7 +192,7 @@ def eprop_Z(t, TZ, V, U, is_ALIF):
                     0)
 
 
-def eprop_V(V, I, Z, t, TZ):
+def eprop_V(cfg, V, I, Z, t, TZ):
     if not cfg["traub_trick"]:
         return cfg["alpha"] * V + I - Z * cfg["thr"]
     else:
@@ -203,13 +203,13 @@ def eprop_V(V, I, Z, t, TZ):
                 - cfg["alpha"] * V * ((t - TZ) <= cfg["dt_refr"]))
 
 
-def eprop_U(U, Z, is_ALIF):
+def eprop_U(cfg, U, Z, is_ALIF):
     return np.where(is_ALIF,
                     cfg["rho"] * U + Z,
                     U)
 
 
-def eprop_EVV(EVV, Z_in, t, TZ, TZ_in, Z):
+def eprop_EVV(cfg, EVV, Z_in, t, TZ, TZ_in, Z):
     """
     ALIF & LIF: Zbar
     checked
@@ -229,7 +229,7 @@ def eprop_EVV(EVV, Z_in, t, TZ, TZ_in, Z):
                 + Z_inrep)
 
 
-def eprop_EVU(is_ALIF, H, Z_inbar, EVU):
+def eprop_EVU(cfg, is_ALIF, H, Z_inbar, EVU):
     """
     ALIF: H_j * Zinbar_i + (rho - H_j * beta) * EVU_ji
     LIF: N/A
@@ -246,7 +246,7 @@ def eprop_EVU(is_ALIF, H, Z_inbar, EVU):
                     EVU)
 
 
-def eprop_H(V, U, t, TZ, is_ALIF):  # TODO: 1/thr here? Traub and Bellec differ
+def eprop_H(cfg, V, U, t, TZ, is_ALIF):  # TODO: 1/thr here? Traub and Bellec differ
     if cfg["traub_trick"]:
         return np.where(t - TZ < cfg["dt_refr"],
             -cfg["gamma"],
@@ -267,7 +267,7 @@ def eprop_H(V, U, t, TZ, is_ALIF):  # TODO: 1/thr here? Traub and Bellec differ
             a_max=None)
 
 
-def eprop_ET(is_ALIF, H, EVV, EVU):
+def eprop_ET(cfg, is_ALIF, H, EVV, EVU):
     """
     ET_ji = H_j * (EVV_ji - X)
     X = - beta * EVU_ji if ALIF else 0
@@ -287,7 +287,7 @@ def eprop_lpfK(lpf, x, factor):
     return (factor * lpf) + x
 
 
-def eprop_Y(Y, W_out, Z_last, b_out):
+def eprop_Y(cfg, Y, W_out, Z_last, b_out):
     return (cfg["kappa"] * Y
             + np.sum(W_out * Z_last, axis=1)
             + b_out)
@@ -298,7 +298,7 @@ def eprop_P(Y):
     return ex / np.sum(ex)
 
 
-def eprop_CE(T, P, W_rec, W_out, B):
+def eprop_CE(cfg, T, P, W_rec, W_out, B):
     # TODO: on which weights?
     W = np.concatenate((W_rec.flatten(),
                         W_out.flatten(),
@@ -318,7 +318,7 @@ def eprop_gradient(wtype, L, ETbar, P, T, Zbar_last):
         return P - T
 
 
-def eprop_DW(wtype, s, adamvars, gradient, Zs, ET):  # TODO: No ETbar here?
+def eprop_DW(cfg, wtype, s, adamvars, gradient, Zs, ET):  # TODO: No ETbar here?
     FR_reg = 0
     if wtype == 'W' and Zs.shape[0]:  # Add firing rate reg term
         FR_reg = (
@@ -343,9 +343,10 @@ def eprop_DW(wtype, s, adamvars, gradient, Zs, ET):  # TODO: No ETbar here?
         return cfg["eta"] * (f1 / f2) + FR_reg
 
 
-def process_layer(M, t, s, r, W_rec):
+def process_layer(cfg, M, t, s, r, W_rec):
     # Spike if V >= threshold
-    M['Z'][s, t, r] = eprop_Z(t=t,
+    M['Z'][s, t, r] = eprop_Z(cfg=cfg,
+                              t=t,
                               TZ=M['TZ'][s, r],
                               V=M['V'][s, t, r],
                               U=M['U'][s, t, r],
@@ -361,13 +362,15 @@ def process_layer(M, t, s, r, W_rec):
     TZ_prev = M['TZ'][s, r-1] if r > 0 else \
         np.ones(shape=(M['TZ'][s, r].shape)) * t
 
-    M['H'][s, t, r] = eprop_H(V=M['V'][s, t, r],
+    M['H'][s, t, r] = eprop_H(cfg=cfg,
+                              V=M['V'][s, t, r],
                               U=M['U'][s, t, r],
                               is_ALIF=M['is_ALIF'][s, r],
                               t=t,
                               TZ=M['TZ'][s, r])
 
-    M['ET'][s, t, r] = eprop_ET(is_ALIF=M['is_ALIF'][s, r],
+    M['ET'][s, t, r] = eprop_ET(cfg=cfg,
+                                is_ALIF=M['is_ALIF'][s, r],
                                 H=M['H'][s, t, r],
                                 EVV=M['EVV'][s, t, r],
                                 EVU=M['EVU'][s, t, r])
@@ -400,7 +403,8 @@ def process_layer(M, t, s, r, W_rec):
                                      factor=cfg["kappa"])
 
     if t != M[f"X{s}"].shape[0] - 1:
-        M['EVV'][s, t+1, r] = eprop_EVV(EVV=M['EVV'][s, t, r],
+        M['EVV'][s, t+1, r] = eprop_EVV(cfg=cfg,
+                                        EVV=M['EVV'][s, t, r],
                                         Z_in=M["Z_in"][s, t, r],
                                         Z=M['Z'][s, t, r],
                                         TZ=M['TZ'][s, r],
@@ -408,18 +412,21 @@ def process_layer(M, t, s, r, W_rec):
                                         t=t)
 
         # TODO: Can do without M[ET] or M[H] or M[TZ] or M[DW].
-        M['EVU'][s, t+1, r] = eprop_EVU(Z_inbar=M['Z_inbar'][s, t, r],
+        M['EVU'][s, t+1, r] = eprop_EVU(cfg=cfg,
+                                        Z_inbar=M['Z_inbar'][s, t, r],
                                         EVU=M['EVU'][s, t, r],
                                         H=M['H'][s, t, r],
                                         is_ALIF=M['is_ALIF'][s, r])
 
-        M['V'][s, t+1, r] = eprop_V(V=M['V'][s, t, r],
+        M['V'][s, t+1, r] = eprop_V(cfg=cfg,
+                                    V=M['V'][s, t, r],
                                     I=M['I'][s, t, r],
                                     Z=M['Z'][s, t, r],
                                     TZ=M['TZ'][s, r],
                                     t=t)
 
-        M['U'][s, t+1, r] = eprop_U(U=M['U'][s, t, r],
+        M['U'][s, t+1, r] = eprop_U(cfg=cfg,
+                                    U=M['U'][s, t, r],
                                     Z=M['Z'][s, t, r],
                                     is_ALIF=M['is_ALIF'][s, r])
 
@@ -427,7 +434,7 @@ def process_layer(M, t, s, r, W_rec):
     return M
 
 
-def init_adam(tar_size):
+def init_adam(cfg, tar_size):
     return {
         'beta1': cfg['adam_beta1'],
         'beta2': cfg['adam_beta2'],
@@ -446,11 +453,18 @@ def prepare_log(cfg, log_id):
         'states',
         'checkpoints'
     ]
+
     for subdir in log_subdirs:
         os.makedirs(f"../log/{log_id}/{subdir}")
 
+    cfg0 = dict(cfg)
+
+    for k, v in cfg.items():
+        if 'numpy' in str(type(v)):
+            cfg0[k] = v.item()
+
     with open('config.json', 'w+') as fp:
-        json.dump(cfg, fp)
+        json.dump(cfg0, fp)
 
     # folder = f"../vis/states/"
     # for filename in os.listdir(folder):
@@ -462,3 +476,12 @@ def prepare_log(cfg, log_id):
     #             shutil.rmtree(file_path)
     #     except Exception as e:
     #         print('Failed to delete %s. Reason: %s' % (file_path, e))
+
+def get_log_id():
+    log_id = datetime.datetime.now().strftime('%Y-%m-%d-%H:%M:%S')
+    id_append = ""
+    count = 1
+    while os.path.isdir(f"../log/{log_id}{id_append}"):
+        id_append = f"_{count}"
+        count += 1
+    return log_id + id_append
