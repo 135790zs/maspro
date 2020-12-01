@@ -1,99 +1,70 @@
+# example of bayesian optimization with scikit-optimize
+from numpy import mean
+from sklearn.datasets import make_blobs
+from sklearn.model_selection import cross_val_score
+from sklearn.neighbors import KNeighborsClassifier
+from skopt.space import Integer, Categorical, Real
+from skopt.utils import use_named_args
+from skopt import gp_minimize
 from rsnn import main
 from config import cfg
-import numpy as np
-import matplotlib.pyplot as plt
-import warnings
-from sklearn.gaussian_process import GaussianProcessRegressor
-import scipy.stats
-catgs = { # Categoricals
-    "eprop_type": ["adaptive", "random", "symmetric"],
-    "traub_trick": [True, False],
-}
+import datetime
+import csv
 
-natrs = {  # Min, max
-    "N_R": (2, 10),
-    "Repeats": (1, 3),
-}
+# define the space of hyperparameters to search
+search_space = [
+    Categorical(("random", "symmetric", "adaptive"), name='eprop_type'),
+    Categorical(("Adam", "SGD"), name='optimizer'),
+    Categorical((False, True), name='traub_trick'),
+    Real(0, 1, name="fraction_ALIF"),
+    Real(10, 500, name="theta_adaptation"),
+    Integer(1, 2, name='n_directions'),
+    Integer(0, 5, name="delay"),
+    Real(2, 30, name="theta_membrane"),
+    Real(0.5, 6, name="theta_output"),
+    Real(0.05, 0.5, name="beta"),
+    Real(0.05, 0.7, name="gamma"),
+    Real(0, 1e-1, name="weight_decay"),
+    Real(0, 1e-1, name="L2_reg"),
+    Real(0, 100, name="FR_reg"),
+    Real(.001, .1, name="FR_target"),
+    Integer(64, 200, name='N_R'),
+]
 
-reals = {  #Min, max
-    "fraction_ALIF": (0, 1),
-    "weight_decay": (0, 1e-2),
-}
+file_id = datetime.datetime.now().strftime('%Y-%m-%d-%H:%M:%S')
+fname = f'../sweeps/sweep_results-{file_id}.csv'
 
-numx = 1000
-
-def objective(x1, x2, noise=0.1):
-    return x**2 * np.sin(5 * np.pi * x)**6 + np.random.normal(0, noise)
-
-def surrogate(model, X):
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore")
-        return model.predict(X, return_std=True)
-
-# plot real observations vs surrogate function
-def plot(X, y, model):
-    # scatter plot of inputs and real objective function
-    plt.scatter(X, y)
-    # line plot of surrogate function across domain
-    Xsamples = np.linspace(0, 1, numx).reshape(numx, 1)
-    ysamples, _ = surrogate(model, Xsamples)
-    plt.plot(Xsamples, ysamples)
-    # show the plot
-    plt.show()
-
-def opt_acquisition(X, y, model):
-    # random search, generate random samples
-    numx2 = 100
-    Xsamples = np.random.random(numx2).reshape(numx2, 1)
-    # calculate the acquisition function for each sample
-    scores = acquisition(X, Xsamples, model)
-    # locate the index of the largest scores
-    ix = np.argmax(scores)
-    return Xsamples[ix, 0]
+def rsnn_aux(**params):
+    cfg0 = dict(cfg)
+    for k, v in params.items():
+        cfg0[k] = v
+    res = main(cfg0)
+    return res
 
 
-# probability of improvement acquisition function
-def acquisition(X, Xsamples, model):
-    # calculate the best surrogate score found so far
-    yhat, _ = surrogate(model, X)
-    best = max(yhat)
-    # calculate mean and stdev via surrogate function
-    mu, std = surrogate(model, Xsamples)
-    mu = mu[:, 0]
-    # calculate the probability of improvement
-    probs = scipy.stats.norm.cdf((mu - best) / (std+1E-9))
-    return probs
+# define the function used to evaluate a given configuration
+@use_named_args(search_space)
+def evaluate_model(**params):
 
-# sample the domain sparsely with noise
-X = np.random.random(100)
-y = np.asarray([objective(x) for x in X])
-# reshape into rows and cols
-X = X.reshape(len(X), 1)
-y = y.reshape(len(y), 1)
-# define the model
-model = GaussianProcessRegressor()
-# fit the model
-model.fit(X, y)
-# plot the surrogate function
-# plot(X, y, model)
+    res = rsnn_aux(**params)
+    with open(fname, 'a', newline='') as csvfile:
+        csvwriter = csv.writer(csvfile, delimiter=',',
+                                quotechar='"', quoting=csv.QUOTE_MINIMAL)
+        csvwriter.writerow(list(params.values()) + [res])
 
-# perform the optimization process
-for i in range(150):
-    # select the next point to sample
-    x = opt_acquisition(X, y, model)
-    # sample the point
-    actual = objective(x)
-    # summarize the finding for our own reporting
-    est, _ = surrogate(model, [[x]])
-    print('>x=%.3f, f()=%3f, actual=%.3f' % (x, est, actual))
-    # add the data to the dataset
-    X = np.vstack((X, [[x]]))
-    y = np.vstack((y, [[actual]]))
-    # update the model
-    model.fit(X, y)
+    return res
 
-# plot all samples and the final surrogate function
-plot(X, y, model)
-# best result
-ix = np.argmax(y)
-print('Best Result: x=%.3f, y=%.3f' % (X[ix], y[ix]))
+with open(fname, 'w', newline='') as csvfile:
+    csvwriter = csv.writer(csvfile, delimiter=',',
+                            quotechar='"', quoting=csv.QUOTE_MINIMAL)
+    csvwriter.writerow([x.name for x in search_space] + ['V-Error'])
+
+# perform optimization
+result = gp_minimize(evaluate_model,
+                     search_space,
+                     n_calls=500,
+                     n_initial_points=20)
+# summarizing finding:
+print(result)
+print(f'Best Accuracy: {result.fun:.3f}')
+print(f'Best Parameters: {result.x}')

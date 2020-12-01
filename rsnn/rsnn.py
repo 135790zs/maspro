@@ -161,8 +161,8 @@ def feed_batch(cfg, inps, tars, W_rec, W_out, b_out, B, epoch, tvt_type, adamvar
                            e=e,
                            log_id=log_id)
 
-        batch_err += np.sum(final_model["CE"]) / inps.shape[0]  # TODO: use mean over axis
-        batch_err += np.sum(final_model["CE"]) / inps.shape[0]  # TODO: use mean over axis
+        batch_err += np.mean(final_model["CE"]) / inps.shape[0]
+        batch_err += np.mean(final_model["CE"]) / inps.shape[0]
         batch_perc_wrong += np.mean(
             np.max(np.abs(final_model["Pmax"]- final_model["T"]),
                    axis=1)) / inps.shape[0]
