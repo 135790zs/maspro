@@ -1,11 +1,11 @@
-import numpy as np
 import os
-import csv
-import pandas as pd
+from itertools import combinations
 from scipy.interpolate import griddata
 import matplotlib.pyplot as plt
-from itertools import combinations
 import seaborn as sns
+import pandas as pd
+import numpy as np
+
 
 def process_categoricals(dat):
     catdict = {}
@@ -17,12 +17,16 @@ def process_categoricals(dat):
     ticks = list(catdict.keys())
     return dat, len(ticks), ticks
 
+
 def plot_dfs(df, fname):
-    valid_varnames = [n for n in df]
-    valid_varnames.remove("V-Error")
-    pool = list(combinations(valid_varnames, r=2))
+    print(list(df))
+    varnames = list(df)
+    varnames.remove("V-Error")
+    pool = list(combinations(varnames, r=2))
+
     size = int(np.ceil(np.sqrt(len(pool))))
     fig, axs = plt.subplots(nrows=size, ncols=size, figsize=(3*size, 3*size))
+
     plt.set_cmap('cool')
 
     for idx, comb in enumerate(pool):
@@ -41,7 +45,8 @@ def plot_dfs(df, fname):
             xticks = np.arange(np.min(x), np.max(x)+1)
             nx = len(xticks)
             if len(xticks) <= 20:
-                axs[idx // size, idx % size].set_xticks(np.arange(np.min(x), np.min(x)+nx))
+                axs[idx // size, idx % size].set_xticks(np.min(x)
+                                                        + np.arange(0, nx))
                 axs[idx // size, idx % size].set_xticklabels(xticks)
         else:  # Float
             nx = 100
@@ -54,7 +59,8 @@ def plot_dfs(df, fname):
             yticks = np.arange(np.min(y), np.max(y)+1)
             ny = len(yticks)
             if len(yticks) <= 20:
-                axs[idx // size, idx % size].set_yticks(np.arange(np.min(y), np.min(y)+ny))
+                axs[idx // size, idx % size].set_yticks(np.min(y)
+                                                        + np.arange(0, ny))
                 axs[idx // size, idx % size].set_yticklabels(yticks)
         else:  # Float
             ny = 100
@@ -68,19 +74,18 @@ def plot_dfs(df, fname):
                            (grid_x, grid_y),
                            method='linear')
 
-
         axs[idx // size, idx % size].set_xlabel(comb[0])
         axs[idx // size, idx % size].set_ylabel(comb[1])
         axs[idx // size, idx % size].set_title(f"{comb[1]} vs {comb[0]}")
 
         axs[idx // size, idx % size].scatter(x=x, y=y, c='black')
         im = axs[idx // size, idx % size].imshow(
-                   grid_z0.T,
-                   extent=(np.min(x),np.max(x),np.min(y),np.max(y)),
-                   origin='lower',
-                   interpolation='none',
-                   vmin=np.min(z),
-                   vmax=np.max(z))
+            grid_z0.T,
+            extent=(np.min(x), np.max(x), np.min(y), np.max(y)),
+            origin='lower',
+            interpolation='none',
+            vmin=np.min(z),
+            vmax=np.max(z))
         axs[idx // size, idx % size].set_aspect('auto')
 
     # Remove empty axes
@@ -102,7 +107,7 @@ def plot_regressions(df, fname):
     valid_varnames.remove("V-Error")
 
     size = int(np.ceil(np.sqrt(len(valid_varnames))))
-    fig, axs = plt.subplots(nrows=size, ncols=size, figsize=(3*size, 3*size))
+    _, axs = plt.subplots(nrows=size, ncols=size, figsize=(3*size, 3*size))
 
     for idx, var in enumerate(valid_varnames):
 
@@ -118,23 +123,31 @@ def plot_regressions(df, fname):
             xticks = np.arange(np.min(x), np.max(x)+1)
             nx = len(xticks)
             if len(xticks) <= 20:
-                axs[idx // size, idx % size].set_xticks(np.arange(np.min(x), np.min(x)+nx))
+                axs[idx // size, idx % size].set_xticks(np.min(x)
+                                                        + np.arange(0, nx))
                 axs[idx // size, idx % size].set_xticklabels(xticks)
-                axs[idx // size, idx % size].set_xlim(np.min(x)-0.3, np.max(x)+0.3)
+                axs[idx // size, idx % size].set_xlim(np.min(x) - 0.3,
+                                                      np.max(x) + 0.3)
         else:  # Float
             nx = 100
+
         if idx % size:
             axs[idx // size, idx % size].get_yaxis().set_visible(False)
         else:
             axs[idx // size, idx % size].set_ylabel("V-Error")
-        sns.regplot(ax=axs[idx // size, idx % size], x=x, y=y, marker='+', order=1, color='black')
+        sns.regplot(ax=axs[idx // size, idx % size],
+                    x=x,
+                    y=y,
+                    marker='+',
+                    order=1,
+                    color='black')
         axs[idx // size, idx % size].set_xlabel(var, fontsize=14)
         # axs[idx // size, idx % size].set_title(var)
-
 
     # Remove empty axes
     for idx in range(len(valid_varnames), size**2):
         axs[idx // size, idx % size].axis('off')
+
     plt.suptitle("Regression analysis of Bayesian HPO", fontsize=2*size**2)
     plt.subplots_adjust(wspace=0, hspace=0.4)
 
@@ -142,14 +155,15 @@ def plot_regressions(df, fname):
                 bbox_inches='tight')
     plt.close()
 
-for subdir, _, files in os.walk(f"../sweeps/"):
-    for filename in files:
-        if not filename.endswith('.csv'):
-            continue
-        # if filename == "sweep_results-2020-12-01-11:11:22.csv":
-        #     continue
-        filepath = subdir + os.sep + filename
-        df = pd.read_csv(filepath)
 
-        # plot_dfs(df, fname=filename[:-4])
-        plot_regressions(df, fname=filename[:-4])
+if __name__ == "__main__":
+    for subdir, _, files in os.walk(f"../sweeps/"):
+        for filename in files:
+            if not filename.endswith('.csv'):
+                continue
+            filepath = subdir + os.sep + filename
+            # plot_dfs(df=pd.read_csv(filepath),
+            #          fname=filename[:-4])
+
+            plot_regressions(df=pd.read_csv(filepath),
+                             fname=filename[:-4])

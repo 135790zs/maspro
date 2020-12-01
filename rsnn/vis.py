@@ -8,6 +8,7 @@ from config import lookup
 rc['mathtext.fontset'] = 'stix'
 rc['font.family'] = 'STIXGeneral'
 
+
 def weights_to_img(arr, is_binary=False):
 
     original_dim = arr.ndim
@@ -30,7 +31,6 @@ def weights_to_img(arr, is_binary=False):
 
     # Don't plot too many weights. If too many, crop
     arr = arr[:(1000000//arr.shape[1])]
-
 
     return arr
 
@@ -68,7 +68,8 @@ def plot_run(terrs, percs_wrong_t, verrs, percs_wrong_v, W, epoch, log_id):
     if epoch >= 1:
         for weight_type, weights in W.items():
             axs.append(fig.add_subplot(gsc[len(axs), :], sharex=axs[0]))
-            axs[-1].imshow(weights_to_img(weights[:epoch]),
+            axs[-1].imshow(
+                weights_to_img(weights[:epoch]),
                 aspect='auto',
                 interpolation='nearest',
                 cmap='coolwarm')
@@ -159,7 +160,7 @@ def plot_state(cfg, M, W_rec, W_out, b_out, e, log_id, plot_weights=False):
         else:
             arr = M[var]
 
-        if lookup[var]['scalar'] == False:
+        if not lookup[var]['scalar']:
             axs[-1].imshow(weights_to_img(arr,
                                           is_binary=lookup[var]["binary"]),
                            cmap=('copper' if lookup[var]["binary"]
@@ -186,10 +187,12 @@ def plot_state(cfg, M, W_rec, W_out, b_out, e, log_id, plot_weights=False):
         row_idx += 1
         axs[-1].plot(M['DW'][:, v[0], v[1], v[2]])
         axs[-1].grid()
-        axs[-1].set_ylabel(f"$\\Delta w_{{{v[0]}, {v[1]}, {v[2]%cfg['N_R']}}}$",
-                           rotation=0,
-                           labelpad=labelpad,
-                           fontsize=fontsize)
+        axs[-1].set_ylabel(
+            f"$\\Delta w_{{{v[0]}, {v[1]}, {v[2]%cfg['N_R']}}}$",
+            rotation=0,
+            labelpad=labelpad,
+            fontsize=fontsize)
+
     if plot_weights:
         for k, v in W.items():
             v = v.flatten()
@@ -246,9 +249,6 @@ def plot_graph(cfg, M, t, W_rec, W_out, log_id):
     # TODO: compress loops using itertools
     for r in range(0, cfg["N_Rec"]):
         for n in range(0, cfg["N_R"]):
-            # if (r == 0 and n >= cfg["N_I"]) or \
-            #    (r == cfg["N_Rec"]-1 and n >= cfg["N_O"]):
-            #     continue
             spiked = bool(M['Z'][t, r, n])
             dot.node(name=f"{r}-{n}",
                      label=f"{r}-{n}\n{M['V'][t, r, n]:.2f}",

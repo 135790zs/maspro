@@ -1,6 +1,6 @@
 from numpy import exp
 cfg = {
-    "verbose": False,
+    "verbose": True,
     "eprop_type": "adaptive",  # in {random, symmetric, adaptive}
     "optimizer": 'Adam',
     "traub_trick": False,
@@ -31,21 +31,21 @@ cfg = {
     "update_dead_weights": False,
     "update_input_weights": False,
 
-    "N_R": 128,
+    "N_R": 64,
     "N_Rec": 1,
 
     "wavs_fname": "../data_wavs",
     "phns_fname": "../data_phns",
 
-    "Epochs": 24,  # def = 80
+    "Epochs": 2,  # def = 80
     "Repeats": 1,  # ms per epoch, def = 5
-    "batch_size_train": 16,  # def = 32
-    "batch_size_val": 16,  # def = 32
-    "val_every_E": 4,
+    "batch_size_train": 3,  # def = 32
+    "batch_size_val": 2,  # def = 32
+    "val_every_E": 1,
     "maxlen": 778,  # Don't forget to re-run process_timit.py!
     "n_examples": {'train': 800, 'val': 400, 'test': 400},
-    "plot_interval": 0,  #  State plot; 0 to disable plots
-    "state_save_interval": 5,  #  State plot; 0 to disable plots
+    "plot_interval": 1,  #  State plot; 0 to disable plots
+    "state_save_interval": 1,  #  State plot; 0 to disable plots
     "plot_main": True,
     "plot_state": True,
     "plot_graph": False,
@@ -63,8 +63,7 @@ lookup = {
     "Z":       {"scalar": False, "binary":True,  "label": "z"},
     "Z_in":    {"scalar": False, "binary":True,  "label": "z_{{in}}"},
     "Z_inbar": {"scalar": False, "binary":False, "label": "\\bar{{z}}_{{in}}"},
-    "Zbar":    {"scalar": False, "binary":False, "label": "\\bar{{z}}"},
-    "ZbarK":   {"scalar": False, "binary":False, "label": "\\bar{{z}}_\\kappa"},
+    "Zbar":    {"scalar": False, "binary":False, "label": "\\bar{{z}}_\\kappa"},
     "I":       {"scalar": False, "binary":False, "label": "I"},
     "U":       {"scalar": False, "binary":False, "label": "u"},
     "EVV":     {"scalar": False, "binary":False, "label": "\\epsilon_v"},

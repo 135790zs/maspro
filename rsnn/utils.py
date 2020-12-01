@@ -1,111 +1,175 @@
 import os
-import shutil
 import numpy as np
 import datetime
 import json
 
+
 def initialize_model(cfg, length, tar_size):
-    rng = np.random.default_rng()
+    """ Initializes the variables used in predicting a single time series.
+
+        These are the variables used in e-prop, and the reason they're
+        stored for every time step (rather than overwriting per time step)
+        is so the evolution of the network can be inspected after running.
+
+        V:       Neuron voltage
+        U:       Neuron threshold adaptation factor
+        Z:       Neuron outgoing spike train
+        Zbar:    Low-pass filter of outgoing spike train
+        TZ:      Neuron time of last outgoing spike
+        Z_in:    Neuron incoming spike train (nonbinary for first layer)
+        Z_inbar: Low-pass filter of incoming spike train
+        TZ_in:   Neuron time of last incoming spike
+        H:       Timestep pseudo-derivative
+        I:       Weighted input to neuron
+        EVV:     Synapse voltage eligibility
+        EVU:     Synapse threshold adaptation eligibility
+        ET:      Synapse eligibility trace
+        gW:      Network weights gradient
+        DW:      Network weights update
+        DB:      Broadcast weights update
+        dW_out:  Output weights update
+        gW_out:  Output weights gradient
+        db_out:  Bias update
+        gb_out:  Bias gradient
+        T:       Timestep target
+        Y:       Timestep output
+        P:       Timestep probability vector
+        Pmax:    Timestep prediction
+        CE:      Timestep cross-entropy loss
+        L:       Timestep learning signal
+        is_ALIF: Mask determining which neurons have adaptive thresholds
+    """
+
     M = {}
     neuron_shape = (cfg["n_directions"],
                     length,
                     cfg["N_Rec"],
                     cfg["N_R"],)
+
+    neuron_timeless_shape = (cfg["n_directions"],
+                             cfg["N_Rec"],
+                             cfg["N_R"],)
+
     weight_shape = (cfg["n_directions"],
                     length,
                     cfg["N_Rec"],
                     cfg["N_R"],
                     cfg["N_R"] * 2,)
+    Z_in_shape = (cfg["n_directions"],
+                  length,
+                  cfg["N_Rec"],
+                  cfg["N_R"] * 2,)
 
-    for neuronvar in ["V", "Z", "ZbarK", "I", "H", "L"]:
+    W_out_shape = (cfg["n_directions"],
+                   length,
+                   tar_size,
+                   cfg["N_R"],)
+
+    b_out_shape = (cfg["n_directions"],
+                   length,
+                   tar_size,)
+
+    T_shape = (length, tar_size,)
+
+    for T_var in ["T", "P", "Pmax"]:
+        M[T_var] = np.zeros(shape=T_shape)
+
+    for neuronvar in ["V", "Z", "Zbar", "I", "H", "L"]:
         M[neuronvar] = np.zeros(shape=neuron_shape)
 
     for weightvar in ["EVV", "EVU", "ET", "DW", "ETbar", 'gW']:
         M[weightvar] = np.zeros(shape=weight_shape)
 
-    M["V"] = np.zeros(shape=neuron_shape)  # * cfg["thr"]
-    M["U"] = np.ones(shape=neuron_shape) * cfg["thr"]
-    M["TZ"] = np.ones(shape=(cfg["n_directions"],
-                             cfg["N_Rec"],
-                             cfg["N_R"])) * -cfg["dt_refr"]
+    for z_in_var in ["Z_in", "Z_inbar"]:
+        M[z_in_var] = np.zeros(shape=Z_in_shape)
 
-    M["Z_in"] = np.zeros(shape=(cfg["n_directions"],
-                                length,
-                                cfg["N_Rec"],
-                                cfg["N_R"] * 2,))
+    for W_out_var in ["DW_out", "gW_out"]:
+        M[W_out_var] = np.zeros(shape=W_out_shape)
+
+    for b_out_var in ["Db_out", "gb_out"]:
+        M[b_out_var] = np.zeros(shape=b_out_shape)
+
+    M["U"] = np.ones(shape=neuron_shape) * cfg["thr"]
+
+    M["TZ"] = np.ones(shape=neuron_timeless_shape) * -cfg["dt_refr"]
+
     M["TZ_in"] = np.zeros(shape=(cfg["n_directions"],
                                  cfg["N_Rec"],
                                  cfg["N_R"] * 2,))
-    M["Z_inbar"] = np.zeros(shape=(cfg["n_directions"],
-                                   length,
-                                   cfg["N_Rec"],
-                                   cfg["N_R"] * 2,))
 
-    M["DW_out"] = np.zeros(shape=(cfg["n_directions"],
-                                  length,
-                                  tar_size,
-                                  cfg["N_R"],))
-    M["gW_out"] = np.zeros(shape=(cfg["n_directions"],
-                                  length,
-                                  tar_size,
-                                  cfg["N_R"],))
     M["DB"] = np.zeros(shape=(cfg["n_directions"],
                               length,
                               cfg["N_Rec"],
                               cfg["N_R"],
                               tar_size))
-    M["Db_out"] = np.zeros(shape=(cfg["n_directions"],
-                                  length,
-                                  tar_size,))
-    M["gb_out"] = np.zeros(shape=(cfg["n_directions"],
-                                  length,
-                                  tar_size,))
 
     M["Y"] = np.zeros(shape=(cfg["n_directions"], length, tar_size,))
-    M["T"] = np.zeros(shape=(length, tar_size,))
-    M["P"] = np.zeros(shape=(length, tar_size,))
-    M["Pmax"] = np.zeros(shape=(length, tar_size,))
     M["CE"] = np.zeros(shape=(length,))
 
     M["is_ALIF"] = np.zeros(
         shape=(cfg["n_directions"] * cfg["N_Rec"] * cfg["N_R"]))
+
     M["is_ALIF"][:int(M["is_ALIF"].size * cfg["fraction_ALIF"])] = 1
     np.random.shuffle(M["is_ALIF"])
-    M["is_ALIF"] = M["is_ALIF"].reshape((cfg["n_directions"],
-                                         cfg["N_Rec"],
-                                         cfg["N_R"]))
+
+    M["is_ALIF"] = M["is_ALIF"].reshape(neuron_timeless_shape)
 
     return M
 
 
 def initialize_weights(cfg, tar_size):
-    rng = np.random.default_rng()
+    """ Initializes the variables used to train a network's weights.
+
+    The difference with the Model is that the model re-initializes for
+    every new time series, while the Weights in this function are persistent
+    over many epochs. They are also stored in an array such that the
+    evolution of the weights over the number of epochs can be inspected.
+
+    W_out: Output weights
+    b_out: Bias
+    W:     Network weights
+    B:     Broadcast weights
+    """
+
     W = {}
+    rng = np.random.default_rng()
 
-    W["W"] = rng.random(
-        size=(cfg["Epochs"], cfg["n_directions"], cfg["N_Rec"], cfg["N_R"], cfg["N_R"] * 2,))
-    # W["W"][0, :, 0] *= 5
+    W["W"] = rng.random(size=(cfg["Epochs"],
+                              cfg["n_directions"],
+                              cfg["N_Rec"],
+                              cfg["N_R"],
+                              cfg["N_R"] * 2,))
+
+    # Decrease weights in first layer
     W["W"][0, :, 0] *= 2 / cfg["N_R"]
-    # W["W"][0, :, 1] /= (cfg["N_R"]) / 2
-    # W["W"][0, 2] /= 32
-    W["W_out"] = rng.random(size=(cfg["Epochs"], cfg["n_directions"], tar_size, cfg["N_R"],))
-    W["b_out"] = np.zeros(shape=(cfg["Epochs"], cfg["n_directions"], tar_size,))
 
-    if cfg["eprop_type"] == "random":  # Variance of 1
-        W["B"] = rng.normal(
-            size=(cfg["Epochs"], cfg["n_directions"], cfg["N_Rec"], cfg["N_R"], tar_size,),
-            scale=1)
-    elif cfg["eprop_type"] == "adaptive":  # Variance of 1/N
-        W["B"] = rng.normal(
-            size=(cfg["Epochs"], cfg["n_directions"], cfg["N_Rec"], cfg["N_R"], tar_size,),
-            scale=np.sqrt(1/cfg["N_R"]))
-    else:
-        W["B"] = rng.random(
-            size=(cfg["Epochs"], cfg["n_directions"], cfg["N_Rec"], cfg["N_R"], tar_size,))
+    W["W_out"] = rng.random(size=(cfg["Epochs"],
+                                  cfg["n_directions"],
+                                  tar_size,
+                                  cfg["N_R"],))
 
+    W["b_out"] = np.zeros(shape=(cfg["Epochs"],
+                                 cfg["n_directions"],
+                                 tar_size,))
+
+    B_shape = (cfg["Epochs"],
+               cfg["n_directions"],
+               cfg["N_Rec"],
+               cfg["N_R"],
+               tar_size,)
+
+    if cfg["eprop_type"] == "random":  # Gaussian, variance of 1
+        W["B"] = rng.normal(size=B_shape, scale=1)
+
+    elif cfg["eprop_type"] == "adaptive":  # Gaussian, variance of 1/N
+        W["B"] = rng.normal(size=B_shape, scale=np.sqrt(1 / cfg["N_R"]))
+
+    else:  # Uniform [0, 1]
+        W["B"] = rng.random(size=B_shape)
+
+    # Drop all self-looping weights. A neuron cannot be connected with itself.
     for r in range(cfg["N_Rec"]):
         for s in range(cfg["n_directions"]):
-        # Zero diag recurrent W: no self-conn
             np.fill_diagonal(W['W'][0, s, r, :, cfg["N_R"]:], 0)
 
     # W['W'][0, 0, 0, 0, 0] = 2  # Input 1 to rec 1: frozen
@@ -115,29 +179,27 @@ def initialize_weights(cfg, tar_size):
     # W['W'][0, 0, 0, 1, 2] = 2  # Rec 1 to rec 2 (B)
     # W['W'][0, 0, 0, 0, 3] = 0  # Rec 2 to rec 1 (T)
 
-
     return W
 
 
-def get_error(M, tars, W_out, b_out):
-    n_steps = M['X'].shape[0]
-    error = np.zeros(shape=(n_steps, cfg["N_O"],))
-    Y = np.zeros(shape=(n_steps, cfg["N_O"],))
-    # Calculate network output
-    for t in range(1, n_steps):
-        Y[t] = (cfg["kappa"] * Y[t-1]
-                + np.sum(W_out * M['Z'][t, -1])
-                + b_out)
-        error[t] = Y[t] - tars[t]
-    return error
-
-
 def save_weights(W, epoch, log_id):
+    """ Saves well-performing weights to files, to be loaded later.
+
+    Every individual run gets its own weight checkpoints.
+    """
+
     for k, v in W.items():
+        # Every type of weight (W, W_out, b_out, B) gets its own file.
         np.save(f"../log/{log_id}/checkpoints/{k}", v[epoch])
 
 
 def load_weights(log_id):
+    """ Load weights from file to be used in network again.
+
+    Mainly used for testing purposes, because the weights corresponding
+    to the lowest validation loss are stored.
+    """
+
     W = {}
     for subdir, _, files in os.walk(f"../log/{log_id}/checkpoints"):
         for filename in files:
@@ -147,6 +209,13 @@ def load_weights(log_id):
 
 
 def interpolate_verrs(arr):
+    """ Interpolate missing validation accuracy and loss values.
+
+    These exist, because validation may not happen in all epochs.
+    """
+
+    # TOOD: comments
+
     retarr = arr
     x0 = 0
     y0 = arr[x0]
@@ -166,15 +235,16 @@ def interpolate_verrs(arr):
     return retarr
 
 
-def eprop_Zinbar(Z_inbar, Z_in):
-    return ((cfg["alpha"] * M['Z_inbar'][t-1] if t > 0 else 0)
-                               + M['Z_in'][t])
-
-
 def temporal_filter(c, a, depth=0):
-    if depth == 32:
+    """ Low-pass filter of array `a' with smoothing factor `c'.
+
+    The `depth' argument is used to limit the recusion depth.
+    Consequentially, only the last 32 steps are considered.
+    """
+
+    if depth == 32:  # Maximal depth reached.
         return a[-1]
-    if a.shape[0] == 1:
+    if a.shape[0] == 1:  # Can't go back further -- no previous values
         return a[0]
     return c * temporal_filter(c, a=a[:-1], depth=depth+1) + a[-1:]
 
@@ -398,7 +468,7 @@ def process_layer(cfg, M, t, s, r, W_rec):
                                      x=M['ET'][s, t, r],
                                      factor=cfg["kappa"])
 
-    M['ZbarK'][s, t, r] = eprop_lpfK(lpf=M['ZbarK'][s, t-1, r] if t > 0 else 0,
+    M['Zbar'][s, t, r] = eprop_lpfK(lpf=M['Zbar'][s, t-1, r] if t > 0 else 0,
                                      x=M['Z'][s, t, r],
                                      factor=cfg["kappa"])
 

@@ -1,15 +1,11 @@
 # example of bayesian optimization with scikit-optimize
-from numpy import mean
-from sklearn.datasets import make_blobs
-from sklearn.model_selection import cross_val_score
-from sklearn.neighbors import KNeighborsClassifier
-from skopt.space import Integer, Categorical, Real
-from skopt.utils import use_named_args
-from skopt import gp_minimize
-from rsnn import main
-from config import cfg
 import datetime
 import csv
+from skopt import gp_minimize
+from skopt.space import Integer, Categorical, Real
+from skopt.utils import use_named_args
+from rsnn import main
+from config import cfg
 
 # define the space of hyperparameters to search
 search_space = [
@@ -34,6 +30,7 @@ search_space = [
 file_id = datetime.datetime.now().strftime('%Y-%m-%d-%H:%M:%S')
 fname = f'../sweeps/sweep_results-{file_id}.csv'
 
+
 def rsnn_aux(**params):
     cfg0 = dict(cfg)
     for k, v in params.items():
@@ -42,29 +39,34 @@ def rsnn_aux(**params):
     return res
 
 
-# define the function used to evaluate a given configuration
 @use_named_args(search_space)
 def evaluate_model(**params):
 
     res = rsnn_aux(**params)
     with open(fname, 'a', newline='') as csvfile:
-        csvwriter = csv.writer(csvfile, delimiter=',',
-                                quotechar='"', quoting=csv.QUOTE_MINIMAL)
+        csvwriter = csv.writer(csvfile,
+                               delimiter=',',
+                               quotechar='"',
+                               quoting=csv.QUOTE_MINIMAL)
         csvwriter.writerow(list(params.values()) + [res])
 
     return res
 
-with open(fname, 'w', newline='') as csvfile:
-    csvwriter = csv.writer(csvfile, delimiter=',',
-                            quotechar='"', quoting=csv.QUOTE_MINIMAL)
-    csvwriter.writerow([x.name for x in search_space] + ['V-Error'])
 
-# perform optimization
-result = gp_minimize(evaluate_model,
-                     search_space,
-                     n_calls=500,
-                     n_initial_points=20)
-# summarizing finding:
-print(result)
-print(f'Best Accuracy: {result.fun:.3f}')
-print(f'Best Parameters: {result.x}')
+if __name__ == "__main__":
+    with open(fname, 'w', newline='') as new_csv:
+        varname_writer = csv.writer(new_csv,
+                                    delimiter=',',
+                                    quotechar='"',
+                                    quoting=csv.QUOTE_MINIMAL)
+        varname_writer.writerow([x.name for x in search_space] + ['V-Error'])
+
+    # perform optimization
+    result = gp_minimize(evaluate_model,
+                         search_space,
+                         n_calls=500,
+                         n_initial_points=20)
+    # summarizing finding:
+    print(result)
+    print(f'Best Accuracy: {result.fun:.3f}')
+    print(f'Best Parameters: {result.x}')
