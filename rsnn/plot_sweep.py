@@ -4,8 +4,8 @@ import csv
 import pandas as pd
 from scipy.interpolate import griddata
 import matplotlib.pyplot as plt
-
-varnames = ["Repeats", "traub_trick", "V-Error"]
+from itertools import combinations
+import seaborn as sns
 
 def process_categoricals(dat):
     catdict = {}
@@ -14,65 +14,142 @@ def process_categoricals(dat):
             catdict[cat] = len(catdict)
     dat = [catdict[k] for k in dat]
 
-    ticks = [''] * len(catdict)
-    for k, v in catdict.items():
-        ticks[v] = k
+    ticks = list(catdict.keys())
     return dat, len(ticks), ticks
 
-def plot_df(df, fname):
-    try:
-        x = df[varnames[0]].to_numpy()
-        y = df[varnames[1]].to_numpy()
-        z = df["V-Error"].to_numpy()
-    except KeyError:
-        return
-
-    if type(x[0]).__name__ in ['str', 'int64', 'bool_']:
-        x, nx, xticks = process_categoricals(dat=x)
-        plt.xticks(np.arange(0, nx), xticks)
-    else:
-        nx = 100
-
-    if type(y[0]).__name__ in ['str', 'int64', 'bool_']:
-        y, ny, yticks = process_categoricals(dat=y)
-        plt.yticks(np.arange(0, ny), yticks)
-    else:
-        ny = 100
-
-    grid_x, grid_y = np.mgrid[np.min(x):np.max(x):complex(nx, 0),
-                              np.min(y):np.max(y):complex(ny, 0)]
-
-    grid_z0 = griddata(np.stack((x, y),
-                                axis=1),
-                       z,
-                       (grid_x, grid_y),
-                       method='linear')
-
-    fig = plt.figure()
-    ax = fig.add_subplot(111)
-
-    plt.xlabel(varnames[0])
-    plt.ylabel(varnames[1])
+def plot_dfs(df, fname):
+    valid_varnames = [n for n in df]
+    valid_varnames.remove("V-Error")
+    pool = list(combinations(valid_varnames, r=2))
+    size = int(np.ceil(np.sqrt(len(pool))))
+    fig, axs = plt.subplots(nrows=size, ncols=size, figsize=(3*size, 3*size))
     plt.set_cmap('cool')
 
-    plt.scatter(x=x, y=y, c='black')
-    plt.imshow(grid_z0.T,
-               extent=(np.min(x),np.max(x),np.min(y),np.max(y)),
-               origin='lower',
-               interpolation='none')
-    ax.set_aspect('auto', adjustable='box')
-    plt.colorbar()
+    for idx, comb in enumerate(pool):
+        x = df[comb[0]].to_numpy()
+        y = df[comb[1]].to_numpy()
+        z = df["V-Error"].to_numpy()
 
-    plt.savefig(f"../sweeps/{fname}-{varnames[0]}-{varnames[1]}.pdf",
+        if not os.path.exists(f"../sweeps/{fname}"):
+            os.makedirs(f"../sweeps/{fname}")
+
+        if type(x[0]).__name__ in ['str', 'bool_']:
+            x, nx, xticks = process_categoricals(dat=x)
+            axs[idx // size, idx % size].set_xticks(np.arange(0, nx))
+            axs[idx // size, idx % size].set_xticklabels(xticks)
+        elif type(x[0]).__name__ == 'int64':
+            xticks = np.arange(np.min(x), np.max(x)+1)
+            nx = len(xticks)
+            if len(xticks) <= 20:
+                axs[idx // size, idx % size].set_xticks(np.arange(np.min(x), np.min(x)+nx))
+                axs[idx // size, idx % size].set_xticklabels(xticks)
+        else:  # Float
+            nx = 100
+
+        if type(y[0]).__name__ in ['str', 'bool_']:
+            y, ny, yticks = process_categoricals(dat=y)
+            axs[idx // size, idx % size].set_yticks(np.arange(0, ny))
+            axs[idx // size, idx % size].set_yticklabels(yticks)
+        elif type(y[0]).__name__ == 'int64':
+            yticks = np.arange(np.min(y), np.max(y)+1)
+            ny = len(yticks)
+            if len(yticks) <= 20:
+                axs[idx // size, idx % size].set_yticks(np.arange(np.min(y), np.min(y)+ny))
+                axs[idx // size, idx % size].set_yticklabels(yticks)
+        else:  # Float
+            ny = 100
+
+        grid_x, grid_y = np.mgrid[np.min(x):np.max(x):complex(nx, 0),
+                                  np.min(y):np.max(y):complex(ny, 0)]
+
+        grid_z0 = griddata(np.stack((x, y),
+                                    axis=1),
+                           z,
+                           (grid_x, grid_y),
+                           method='linear')
+
+
+        axs[idx // size, idx % size].set_xlabel(comb[0])
+        axs[idx // size, idx % size].set_ylabel(comb[1])
+        axs[idx // size, idx % size].set_title(f"{comb[1]} vs {comb[0]}")
+
+        axs[idx // size, idx % size].scatter(x=x, y=y, c='black')
+        im = axs[idx // size, idx % size].imshow(
+                   grid_z0.T,
+                   extent=(np.min(x),np.max(x),np.min(y),np.max(y)),
+                   origin='lower',
+                   interpolation='none',
+                   vmin=np.min(z),
+                   vmax=np.max(z))
+        axs[idx // size, idx % size].set_aspect('auto')
+
+    # Remove empty axes
+    for idx in range(len(pool), size**2):
+        axs[idx // size, idx % size].axis('off')
+
+    plt.tight_layout()
+    fig.subplots_adjust(right=0.8)
+    cbar_ax = fig.add_axes([0.85, 0.15, 0.05, 0.7])
+    fig.colorbar(im, cax=cbar_ax)
+
+    plt.savefig(f"../sweeps/{fname}/all.pdf",
                 bbox_inches='tight')
     plt.close()
 
+
+def plot_regressions(df, fname):
+    valid_varnames = [n for n in df]
+    valid_varnames.remove("V-Error")
+
+    size = int(np.ceil(np.sqrt(len(valid_varnames))))
+    fig, axs = plt.subplots(nrows=size, ncols=size, figsize=(3*size, 3*size))
+
+    for idx, var in enumerate(valid_varnames):
+
+        x = df[var].to_numpy()
+        y = df["V-Error"].to_numpy()
+
+        if type(x[0]).__name__ in ['str', 'bool_']:
+            x, nx, xticks = process_categoricals(dat=x)
+            axs[idx // size, idx % size].set_xticks(np.arange(0, nx))
+            axs[idx // size, idx % size].set_xticklabels(xticks)
+            axs[idx // size, idx % size].set_xlim(np.min(x)-0.3, np.max(x)+0.3)
+        elif type(x[0]).__name__ == 'int64':
+            xticks = np.arange(np.min(x), np.max(x)+1)
+            nx = len(xticks)
+            if len(xticks) <= 20:
+                axs[idx // size, idx % size].set_xticks(np.arange(np.min(x), np.min(x)+nx))
+                axs[idx // size, idx % size].set_xticklabels(xticks)
+                axs[idx // size, idx % size].set_xlim(np.min(x)-0.3, np.max(x)+0.3)
+        else:  # Float
+            nx = 100
+        if idx % size:
+            axs[idx // size, idx % size].get_yaxis().set_visible(False)
+        else:
+            axs[idx // size, idx % size].set_ylabel("V-Error")
+        sns.regplot(ax=axs[idx // size, idx % size], x=x, y=y, marker='+', order=1, color='black')
+        axs[idx // size, idx % size].set_xlabel(var, fontsize=14)
+        # axs[idx // size, idx % size].set_title(var)
+
+
+    # Remove empty axes
+    for idx in range(len(valid_varnames), size**2):
+        axs[idx // size, idx % size].axis('off')
+    plt.suptitle("Regression analysis of Bayesian HPO", fontsize=2*size**2)
+    plt.subplots_adjust(wspace=0, hspace=0.4)
+
+    plt.savefig(f"../sweeps/{fname}/scatters.pdf",
+                bbox_inches='tight')
+    plt.close()
 
 for subdir, _, files in os.walk(f"../sweeps/"):
     for filename in files:
         if not filename.endswith('.csv'):
             continue
+        # if filename == "sweep_results-2020-12-01-11:11:22.csv":
+        #     continue
         filepath = subdir + os.sep + filename
         df = pd.read_csv(filepath)
 
-        plot_df(df, fname=filename)
+        # plot_dfs(df, fname=filename[:-4])
+        plot_regressions(df, fname=filename[:-4])
