@@ -172,6 +172,10 @@ def initialize_weights(cfg, tar_size):
         for s in range(cfg["n_directions"]):
             np.fill_diagonal(W['W'][0, s, r, :, cfg["N_R"]:], 0)
 
+    W['W'][0] = np.where(np.random.random(W['W'][0].shape) < cfg["dropout"],
+                         0,
+                         W['W'][0])
+
     # W['W'][0, 0, 0, 0, 0] = 2  # Input 1 to rec 1: frozen
     # W['W'][0, 0, 0, 1, 0] = 0  # Input 1 to rec 2
     # W['W'][0, 0, 0, 0, 1] = 0  # Input 2 to rec 1
@@ -260,6 +264,10 @@ def eprop_Z(cfg, t, TZ, V, U, is_ALIF):
                                                  cfg["thr"])),
                     1,
                     0)
+
+
+def eprop_I(W_rec, Z_in):
+    return np.dot(W_rec, Z_in)
 
 
 def eprop_V(cfg, V, I, Z, t, TZ):
@@ -462,7 +470,8 @@ def process_layer(cfg, M, t, s, r, W_rec):
                                     x=M['Z_in'][s, t],
                                     factor=cfg["alpha"])
 
-    M['I'][s, t, r] = np.dot(W_rec, M["Z_in"][s, t, r])
+    M['I'][s, t, r] = eprop_I(W_rec=W_rec,
+                              Z_in=M["Z_in"][s, t, r])
 
     M['ETbar'][s, t, r] = eprop_lpfK(lpf=M['ETbar'][s, t-1, r] if t > 0 else 0,
                                      x=M['ET'][s, t, r],
@@ -546,6 +555,7 @@ def prepare_log(cfg, log_id):
     #             shutil.rmtree(file_path)
     #     except Exception as e:
     #         print('Failed to delete %s. Reason: %s' % (file_path, e))
+
 
 def get_log_id():
     log_id = datetime.datetime.now().strftime('%Y-%m-%d-%H:%M:%S')

@@ -60,7 +60,7 @@ def network(cfg, inp, tar, W_rec, W_out, b_out, B, adamvars):
                 M[f'g{wtype}'][s, t] = ut.eprop_gradient(wtype=wtype,
                                                          L=M['L'][s, t],
                                                          ETbar=M['ETbar'][s, t],
-                                                         Zbar_last=M['ZbarK'][s, t, -1],
+                                                         Zbar_last=M['Zbar'][s, t, -1],
                                                          P=M['P'][t],
                                                          T=M['T'][t])
 
@@ -181,6 +181,7 @@ def main(cfg):
     # Load data
     inps = {}
     tars = {}
+
     for tvt_type in cfg['n_examples'].keys():
         inps[tvt_type] = np.load(f'{cfg["wavs_fname"]}_{tvt_type}.npy')
         # Normalize [0, 1]

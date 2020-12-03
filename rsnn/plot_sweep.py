@@ -29,6 +29,10 @@ def plot_dfs(df, fname):
 
     plt.set_cmap('cool')
 
+    def jitter(arr, strength=0.02):
+        stdev = strength * (max(arr) - min(arr))
+        return arr + np.random.randn(len(arr)) * stdev
+
     for idx, comb in enumerate(pool):
         x = df[comb[0]].to_numpy()
         y = df[comb[1]].to_numpy()
@@ -41,28 +45,41 @@ def plot_dfs(df, fname):
             x, nx, xticks = process_categoricals(dat=x)
             axs[idx // size, idx % size].set_xticks(np.arange(0, nx))
             axs[idx // size, idx % size].set_xticklabels(xticks)
+            extentx = (min(x)-.5, max(x)+.5)
+            add_x_jiiter = True
         elif type(x[0]).__name__ == 'int64':
             xticks = np.arange(np.min(x), np.max(x)+1)
+            extentx = (min(x)-.5, max(x)+.5)
+            add_x_jiiter = True
             nx = len(xticks)
             if len(xticks) <= 20:
                 axs[idx // size, idx % size].set_xticks(np.min(x)
                                                         + np.arange(0, nx))
                 axs[idx // size, idx % size].set_xticklabels(xticks)
         else:  # Float
+            extentx = (min(x), max(x))
+            add_x_jiiter = False
+
             nx = 100
 
         if type(y[0]).__name__ in ['str', 'bool_']:
             y, ny, yticks = process_categoricals(dat=y)
             axs[idx // size, idx % size].set_yticks(np.arange(0, ny))
             axs[idx // size, idx % size].set_yticklabels(yticks)
+            extenty = (min(y)-.5, max(y)+.5)
+            add_y_jiiter = True
         elif type(y[0]).__name__ == 'int64':
             yticks = np.arange(np.min(y), np.max(y)+1)
+            extenty = (min(y)-.5, max(y)+.5)
+            add_y_jiiter = True
             ny = len(yticks)
             if len(yticks) <= 20:
                 axs[idx // size, idx % size].set_yticks(np.min(y)
                                                         + np.arange(0, ny))
                 axs[idx // size, idx % size].set_yticklabels(yticks)
         else:  # Float
+            extenty = (min(y), max(y))
+            add_y_jiiter = False
             ny = 100
 
         grid_x, grid_y = np.mgrid[np.min(x):np.max(x):complex(nx, 0),
@@ -78,14 +95,16 @@ def plot_dfs(df, fname):
         axs[idx // size, idx % size].set_ylabel(comb[1])
         axs[idx // size, idx % size].set_title(f"{comb[1]} vs {comb[0]}")
 
-        axs[idx // size, idx % size].scatter(x=x, y=y, c='black')
+        axs[idx // size, idx % size].scatter(x=jitter(x) if add_x_jiiter else x,
+                                             y=jitter(y) if add_y_jiiter else y,
+                                             c='black', marker='+', alpha=0.35)
         im = axs[idx // size, idx % size].imshow(
             grid_z0.T,
-            extent=(np.min(x), np.max(x), np.min(y), np.max(y)),
+            extent=(extentx[0], extentx[1], extenty[0], extenty[1]),
             origin='lower',
             interpolation='none',
             vmin=np.min(z),
-            vmax=np.max(z))
+            vmax=np.max(z),)
         axs[idx // size, idx % size].set_aspect('auto')
 
     # Remove empty axes
@@ -162,8 +181,8 @@ if __name__ == "__main__":
             if not filename.endswith('.csv'):
                 continue
             filepath = subdir + os.sep + filename
-            # plot_dfs(df=pd.read_csv(filepath),
-            #          fname=filename[:-4])
+            plot_dfs(df=pd.read_csv(filepath),
+                     fname=filename[:-4])
 
             plot_regressions(df=pd.read_csv(filepath),
                              fname=filename[:-4])
