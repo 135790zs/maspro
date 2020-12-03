@@ -37,14 +37,16 @@ cfg = {
     "wavs_fname": "../data_wavs",
     "phns_fname": "../data_phns",
 
-    "Epochs": 5,  # def = 80
+    "Epochs": 779,  # def = 80
+    "Track_weights": True,
+    "Track_state": True,
     "Repeats": 1,  # ms per epoch, def = 5
-    "batch_size_train": 4,  # def = 32
-    "batch_size_val": 2,  # def = 32
-    "val_every_E": 1,
+    "batch_size_train": 1,  # def = 32
+    "batch_size_val": 1,  # def = 32
+    "val_every_E": 5,
     "maxlen": 778,  # Don't forget to re-run process_timit.py!
     "n_examples": {'train': 800, 'val': 400, 'test': 400},
-    "plot_interval": 1,  #  State plot; 0 to disable plots
+    "plot_interval": 0,  #  State plot; 0 to disable plots
     "state_save_interval": 1,  #  State plot; 0 to disable plots
     "plot_main": True,
     "plot_state": True,

@@ -114,6 +114,7 @@ def initialize_model(cfg, length, tar_size):
 
     M["is_ALIF"] = M["is_ALIF"].reshape(neuron_timeless_shape)
 
+
     return M
 
 
@@ -134,7 +135,9 @@ def initialize_weights(cfg, tar_size):
     W = {}
     rng = np.random.default_rng()
 
-    W["W"] = rng.random(size=(cfg["Epochs"],
+    n_epochs = cfg["Epochs"] if cfg["Track_weights"] else 1
+
+    W["W"] = rng.random(size=(n_epochs,
                               cfg["n_directions"],
                               cfg["N_Rec"],
                               cfg["N_R"],
@@ -143,16 +146,16 @@ def initialize_weights(cfg, tar_size):
     # Decrease weights in first layer
     W["W"][0, :, 0] *= 2 / cfg["N_R"]
 
-    W["W_out"] = rng.random(size=(cfg["Epochs"],
+    W["W_out"] = rng.random(size=(n_epochs,
                                   cfg["n_directions"],
                                   tar_size,
                                   cfg["N_R"],))
 
-    W["b_out"] = np.zeros(shape=(cfg["Epochs"],
+    W["b_out"] = np.zeros(shape=(n_epochs,
                                  cfg["n_directions"],
                                  tar_size,))
 
-    B_shape = (cfg["Epochs"],
+    B_shape = (n_epochs,
                cfg["n_directions"],
                cfg["N_Rec"],
                cfg["N_R"],
@@ -183,6 +186,11 @@ def initialize_weights(cfg, tar_size):
     # W['W'][0, 0, 0, 1, 2] = 2  # Rec 1 to rec 2 (B)
     # W['W'][0, 0, 0, 0, 3] = 0  # Rec 2 to rec 1 (T)
 
+    # for k, v in W.items():
+    #     print(k, v.size)
+    # sizes = [v.size for k, v in W.items()]
+    # print(sorted(sizes))
+    # exit()
     return W
 
 

@@ -206,6 +206,7 @@ def main(cfg):
     adamvars = ut.init_adam(cfg=cfg, tar_size=tars['train'].shape[-1])
 
     for e in range(0, cfg["Epochs"]):
+        ep_curr = e if cfg["Track_weights"] else 0
         if not cfg["verbose"]:
             print(f"ep {e}/{cfg['Epochs']}", end='\r')
         # Make batch
@@ -217,10 +218,10 @@ def main(cfg):
             cfg=cfg,
             inps=inps['train'][randidxs],
             tars=tars['train'][randidxs],
-            W_rec=W['W'][e],
-            W_out=W['W_out'][e],
-            b_out=W['b_out'][e],
-            B=W['B'][e],
+            W_rec=W['W'][ep_curr],
+            W_out=W['W_out'][ep_curr],
+            b_out=W['b_out'][ep_curr],
+            B=W['B'][ep_curr],
             adamvars=adamvars,
             e=e,
             log_id=log_id)
@@ -236,10 +237,10 @@ def main(cfg):
                 cfg=cfg,
                 inps=inps['val'][randidxs],
                 tars=tars['val'][randidxs],
-                W_rec=W['W'][e],
-                W_out=W['W_out'][e],
-                b_out=W['b_out'][e],
-                B=W['B'][e],
+                W_rec=W['W'][ep_curr],
+                W_out=W['W_out'][ep_curr],
+                b_out=W['b_out'][ep_curr],
+                B=W['B'][ep_curr],
                 adamvars=adamvars,
                 e=e,
                 log_id=log_id)
@@ -252,7 +253,7 @@ def main(cfg):
                 if cfg["verbose"]:
                     print(f"\nLowest val error ({verr:.3f}) found at epoch {e}!\n")
                 optVerr = verr
-                ut.save_weights(W=W, epoch=e, log_id=log_id)
+                ut.save_weights(W=W, epoch=e if cfg["Track_weights"] else 0, log_id=log_id)
 
             # Interpolate missing verrs
             verrs[:e+1] = ut.interpolate_verrs(verrs[:e+1])
@@ -267,9 +268,10 @@ def main(cfg):
             break
 
         # Update weights
+        ep_incr = 1 if cfg["Track_weights"] else 0
         for wtype in W.keys():
             # Update weights
-            W[wtype][e+1] = W[wtype][e] + DW[wtype]
+            W[wtype][ep_curr+ep_incr] = W[wtype][ep_curr] + DW[wtype]
 
             if not cfg["update_bias"] and wtype == "b_out":
                 continue
@@ -278,15 +280,15 @@ def main(cfg):
 
             # Decay iff adaptive
             if cfg["eprop_type"] == "adaptive" and wtype in ["W_out", "B"]:
-                W[wtype][e+1] -= cfg["weight_decay"] * W[wtype][e+1]
+                W[wtype][ep_curr+ep_incr] -= cfg["weight_decay"] * W[wtype][ep_curr+ep_incr]
 
             # Mirror B <-> W_out if symmetric
             elif cfg["eprop_type"] == "symmetric" and wtype == "B":
                 for s in range(cfg["n_directions"]):
-                    W[wtype][e+1, s] = (W["W_out"][e, s].T
+                    W[wtype][ep_curr+ep_incr, s] = (W["W_out"][ep_curr, s].T
                                         + DW['W_out'][s].T
                                         - (cfg["weight_decay"]
-                                           * W["W_out"][e, s].T))
+                                           * W["W_out"][ep_curr, s].T))
             # Update Adam
             if wtype != 'B':
                 adamvars[f'm{wtype}'] = (
