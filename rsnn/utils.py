@@ -126,7 +126,7 @@ def initialize_model(cfg, length, tar_size):
     return M
 
 
-def initialize_weights(cfg, tar_size):
+def initialize_weights(cfg, inp_size, tar_size):
     """ Initializes the variables used to train a network's weights.
 
     The difference with the Model is that the model re-initializes for
@@ -152,7 +152,7 @@ def initialize_weights(cfg, tar_size):
                               cfg["N_R"] * 2,))
 
     # Decrease weights in first layer
-    W["W"][0, :, 0] *= 2 / cfg["N_R"]
+    W["W"][0, :, 0] *= cfg["weight_scale"] / (cfg["N_R"] + inp_size)  # Epoch 0, layer 0
 
     W["W_out"] = rng.random(size=(n_epochs,
                                   cfg["n_directions"],
@@ -392,10 +392,9 @@ def eprop_CE(cfg, T, P, W_rec, W_out, B):
     W = np.concatenate((W_rec.flatten(),
                         W_out.flatten(),
                         B.flatten()))
+    # print((T * np.log(1e-8 + P)).shape, T.shape)
     L2norm_W = np.linalg.norm(W) ** 2 * cfg["L2_reg"]
-
-    return (-np.sum(T * np.log(1e-8 + P))
-            + L2norm_W)
+    return (-np.sum(T * np.log(1e-8 + P), axis=1) + L2norm_W)
 
 
 def eprop_gradient(wtype, L, ETbar, P, T, Zbar_last):

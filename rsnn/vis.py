@@ -205,6 +205,8 @@ def plot_state(cfg, M, W_rec, W_out, b_out, e, log_id, plot_weights=False):
 
     plt.savefig(f"../log/{log_id}/states/state.pdf",
                 bbox_inches='tight')
+    plt.savefig(f"../log/latest_state.pdf",
+                bbox_inches='tight')
     if e % cfg["state_save_interval"] == 0:
         plt.savefig(f"../log/{log_id}/states/state_{e}.pdf",
                     bbox_inches='tight')

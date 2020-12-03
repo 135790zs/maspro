@@ -210,18 +210,21 @@ def main(cfg):
 
     optVerr = None
 
-    W = ut.initialize_weights(cfg=cfg, tar_size=tars['train'].shape[-1])
+    W = ut.initialize_weights(cfg=cfg,
+                              inp_size=inps['train'].shape[-1],
+                              tar_size=tars['train'].shape[-1])
+
+
+
+    if cfg["verbose"]:
+        M = ut.initialize_model(cfg=cfg,
+                                length=cfg["maxlen"]*cfg["Repeats"],
+                                tar_size=tars['train'].shape[-1])
+        print("\nTOTAL NETWORK SIZE:",
+              sum([sum([v.size for k, v in D.items()]) for D in [M, W]])//1000)
+        del M
+
     # TODO: Put adam in W?
-
-
-    M = ut.initialize_model(cfg=cfg,
-                            length=cfg["maxlen"]*cfg["Repeats"],
-                            tar_size=tars['train'].shape[-1])
-
-    print("\nTOTAL NETWORK SIZE:",
-          sum([sum([v.size for k, v in D.items()]) for D in [M, W]])//1000)
-    del M
-
     adamvars = ut.init_adam(cfg=cfg, tar_size=tars['train'].shape[-1])
 
     for e in range(0, cfg["Epochs"]):

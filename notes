@@ -11,13 +11,6 @@
 I can maybe use random B for all early layers and adaptive/symmetric B for last layer
 ALSO note usage of W^out_kj in pE/pz equation in supp equation 20. Needs solution
 
-Discussion point: online training, bidirectional training?
-
-QUESTION FOR MEETING:
-* for shallow layers?
-* Bidirectional LSNN?
-* Init weights to which range?
-
 
 =========
 
@@ -28,7 +21,6 @@ may email Bellec et al if concrete question
 
 TODAY:
 # TODO: Explore non-uniform synaptic delays
-# TODO: No epoch tracking
-# TODO: No state tracking
+# TODO: Time complexity!
 # TODO: Comment code
 # TODO: Explore membrane potential reset

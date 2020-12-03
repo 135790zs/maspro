@@ -9,23 +9,26 @@ from config import cfg
 
 # define the space of hyperparameters to search
 search_space = [
-    # Categorical(("random", "symmetric", "adaptive"), name='eprop_type'),
-    # Categorical(("Adam", "SGD"), name='optimizer'),
-    # Categorical((False, True), name='traub_trick'),
-    # Real(0, 1, name="fraction_ALIF"),
-    # Real(10, 500, name="theta_adaptation"),
-    # Integer(1, 2, name='n_directions'),
-    # Integer(0, 5, name="delay"),
-    # Real(2, 30, name="theta_membrane"),
-    # Real(0.5, 6, name="theta_output"),
-    # Real(0.05, 0.5, name="beta"),
+    Categorical(("random", "symmetric", "adaptive"), name='eprop_type'),
+    Categorical(("Adam", "SGD"), name='optimizer'),
+    Categorical((False, True), name='traub_trick'),
+    Integer(1, 2, name='n_directions'),
+    Integer(1, 20, name="dt_refr"),
+    Integer(0, 5, name="delay"),
+    Real(0, 1, name="fraction_ALIF"),
+    Real(10, 500, name="theta_adaptation"),
+    Real(1e-2, 1e-1, name='eta'),
+    Real(2, 30, name="theta_membrane"),
+    Real(0.5, 6, name="theta_output"),
+    Real(0.05, 0.5, name="beta"),
     Real(0.3, 1, name="gamma"),
     Real(0.05, 0.5, name="weight_decay"),
     Real(0, 1e-4, name="L2_reg"),
-    # Real(0, 100, name="FR_reg"),
+    Real(0.2, 2, name="thr"),
     Real(0.05, .2, name="FR_target"),
     Real(0, .9, name="dropout"),
-    # Integer(128, 220, name='N_R'),
+    Integer(300, 800, name='N_R'),
+    Integer(300, 800, name='N_R'),
 ]
 
 file_id = datetime.datetime.now().strftime('%Y-%m-%d-%H:%M:%S')
