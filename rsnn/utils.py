@@ -40,6 +40,8 @@ def initialize_model(cfg, length, tar_size):
         is_ALIF: Mask determining which neurons have adaptive thresholds
     """
 
+    pruned_length = length if cfg["Track_state"] else 1
+
     M = {}
     neuron_shape = (cfg["n_directions"],
                     length,
@@ -51,7 +53,7 @@ def initialize_model(cfg, length, tar_size):
                              cfg["N_R"],)
 
     weight_shape = (cfg["n_directions"],
-                    length,
+                    pruned_length,
                     cfg["N_Rec"],
                     cfg["N_R"],
                     cfg["N_R"] * 2,)
@@ -61,12 +63,12 @@ def initialize_model(cfg, length, tar_size):
                   cfg["N_R"] * 2,)
 
     W_out_shape = (cfg["n_directions"],
-                   length,
+                   pruned_length,
                    tar_size,
                    cfg["N_R"],)
 
     b_out_shape = (cfg["n_directions"],
-                   length,
+                   pruned_length,
                    tar_size,)
 
     T_shape = (length, tar_size,)
@@ -98,7 +100,7 @@ def initialize_model(cfg, length, tar_size):
                                  cfg["N_R"] * 2,))
 
     M["DB"] = np.zeros(shape=(cfg["n_directions"],
-                              length,
+                              pruned_length,
                               cfg["N_Rec"],
                               cfg["N_R"],
                               tar_size))
@@ -114,6 +116,12 @@ def initialize_model(cfg, length, tar_size):
 
     M["is_ALIF"] = M["is_ALIF"].reshape(neuron_timeless_shape)
 
+
+    # for k, v in M.items():
+    #     print(k, v.size)
+    # sizes = [v.size for k, v in M.items()]
+    # print(sorted(sizes))
+    # exit()
 
     return M
 
@@ -186,11 +194,6 @@ def initialize_weights(cfg, tar_size):
     # W['W'][0, 0, 0, 1, 2] = 2  # Rec 1 to rec 2 (B)
     # W['W'][0, 0, 0, 0, 3] = 0  # Rec 2 to rec 1 (T)
 
-    # for k, v in W.items():
-    #     print(k, v.size)
-    # sizes = [v.size for k, v in W.items()]
-    # print(sorted(sizes))
-    # exit()
     return W
 
 
@@ -430,6 +433,15 @@ def eprop_DW(cfg, wtype, s, adamvars, gradient, Zs, ET):  # TODO: No ETbar here?
 
 
 def process_layer(cfg, M, t, s, r, W_rec):
+    if cfg["Track_state"]:
+        prev_t = t-1
+        curr_t = t
+        next_t = t+1
+    else:
+        prev_t = 0
+        curr_t = 0
+        next_t = 0
+
     # Spike if V >= threshold
     M['Z'][s, t, r] = eprop_Z(cfg=cfg,
                               t=t,
@@ -455,34 +467,34 @@ def process_layer(cfg, M, t, s, r, W_rec):
                               t=t,
                               TZ=M['TZ'][s, r])
 
-    M['ET'][s, t, r] = eprop_ET(cfg=cfg,
+    M['ET'][s, curr_t, r] = eprop_ET(cfg=cfg,
                                 is_ALIF=M['is_ALIF'][s, r],
                                 H=M['H'][s, t, r],
-                                EVV=M['EVV'][s, t, r],
-                                EVU=M['EVU'][s, t, r])
+                                EVV=M['EVV'][s, curr_t, r],
+                                EVU=M['EVU'][s, curr_t, r])
 
     # Update weights for next epoch
     if not cfg["update_input_weights"]:
         for var in ["EVV", "EVU", "ET"]:
-            M[var][s, t, 0, :, :M[f"X{s}"].shape[-1]] = 0
+            M[var][s, curr_t, 0, :, :M[f"X{s}"].shape[-1]] = 0
 
     # Update weights for next epoch
     if not cfg["update_dead_weights"]:
         for var in ["EVV", "EVU", "ET"]:
-            M[var][s, t, r, W_rec == 0] = 0
+            M[var][s, curr_t, r, W_rec == 0] = 0
 
     M["Z_in"][s, t, r] = np.concatenate((Z_prev, M['Z'][s, t, r]))
     M["TZ_in"][s, r] = np.concatenate((TZ_prev, M['TZ'][s, r]))
 
     M['Z_inbar'][s, t] = eprop_lpfK(lpf=M['Z_inbar'][s, t-1] if t > 0 else 0,
-                                    x=M['Z_in'][s, t],
+                                    x=M['Z_in'][s, curr_t],
                                     factor=cfg["alpha"])
 
     M['I'][s, t, r] = eprop_I(W_rec=W_rec,
                               Z_in=M["Z_in"][s, t, r])
 
-    M['ETbar'][s, t, r] = eprop_lpfK(lpf=M['ETbar'][s, t-1, r] if t > 0 else 0,
-                                     x=M['ET'][s, t, r],
+    M['ETbar'][s, curr_t, r] = eprop_lpfK(lpf=M['ETbar'][s, prev_t, r] if t > 0 else 0,
+                                     x=M['ET'][s, curr_t, r],
                                      factor=cfg["kappa"])
 
     M['Zbar'][s, t, r] = eprop_lpfK(lpf=M['Zbar'][s, t-1, r] if t > 0 else 0,
@@ -490,19 +502,19 @@ def process_layer(cfg, M, t, s, r, W_rec):
                                      factor=cfg["kappa"])
 
     if t != M[f"X{s}"].shape[0] - 1:
-        M['EVV'][s, t+1, r] = eprop_EVV(cfg=cfg,
-                                        EVV=M['EVV'][s, t, r],
-                                        Z_in=M["Z_in"][s, t, r],
-                                        Z=M['Z'][s, t, r],
+        M['EVV'][s, next_t, r] = eprop_EVV(cfg=cfg,
+                                        EVV=M['EVV'][s, curr_t, r],
+                                        Z_in=M["Z_in"][s, curr_t, r],
+                                        Z=M['Z'][s, curr_t, r],
                                         TZ=M['TZ'][s, r],
                                         TZ_in=M['TZ_in'][s, r],
                                         t=t)
 
         # TODO: Can do without M[ET] or M[H] or M[TZ] or M[DW].
-        M['EVU'][s, t+1, r] = eprop_EVU(cfg=cfg,
-                                        Z_inbar=M['Z_inbar'][s, t, r],
-                                        EVU=M['EVU'][s, t, r],
-                                        H=M['H'][s, t, r],
+        M['EVU'][s, next_t, r] = eprop_EVU(cfg=cfg,
+                                        Z_inbar=M['Z_inbar'][s, curr_t, r],
+                                        EVU=M['EVU'][s, curr_t, r],
+                                        H=M['H'][s, curr_t, r],
                                         is_ALIF=M['is_ALIF'][s, r])
 
         M['V'][s, t+1, r] = eprop_V(cfg=cfg,

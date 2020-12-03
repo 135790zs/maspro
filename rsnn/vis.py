@@ -88,13 +88,12 @@ def plot_run(terrs, percs_wrong_t, verrs, percs_wrong_v, W, epoch, log_id):
 
 
 def plot_state(cfg, M, W_rec, W_out, b_out, e, log_id, plot_weights=False):
-    w = {
-        # "w1": (0, 1, 2),
-        # "w2": (0, 0, 3)
-    }
-
     S_plotvars = ["X", "I", "V", "H", "U", "Z",
-                  "EVV", "EVU", "ET", "Y", "L", "DW", "DW_out", "Db_out"]
+                  "Y", "L"]
+    if cfg["Track_state"]:
+        S_plotvars = S_plotvars[6:] + ["EVV", "EVU", "ET"] + S_plotvars[6:]
+    if cfg["Track_state"]:
+        S_plotvars = S_plotvars + ["DW", "DW_out", "Db_out"]
 
     M_plotvars = ["P", "Pmax", "T", "CE"]
     if cfg["n_directions"] > 1:
@@ -105,7 +104,6 @@ def plot_state(cfg, M, W_rec, W_out, b_out, e, log_id, plot_weights=False):
     fig = plt.figure(constrained_layout=False, figsize=(8, 16))
     gsc = fig.add_gridspec(nrows=(len(M_plotvars)
                                   + len(S_plotvars)
-                                  + len(w.keys())  # explicit weights
                                   + (len(W.keys()) if plot_weights else 0)),
                            ncols=cfg["n_directions"],
                            hspace=0.075,
@@ -180,18 +178,6 @@ def plot_state(cfg, M, W_rec, W_out, b_out, e, log_id, plot_weights=False):
                            rotation=0,
                            labelpad=labelpad,
                            fontsize=fontsize)
-
-    for k, v in w.items():  # Sample weights
-        axs.append(fig.add_subplot(gsc[row_idx, :],
-                                   sharex=axs[0] if axs else None))
-        row_idx += 1
-        axs[-1].plot(M['DW'][:, v[0], v[1], v[2]])
-        axs[-1].grid()
-        axs[-1].set_ylabel(
-            f"$\\Delta w_{{{v[0]}, {v[1]}, {v[2]%cfg['N_R']}}}$",
-            rotation=0,
-            labelpad=labelpad,
-            fontsize=fontsize)
 
     if plot_weights:
         for k, v in W.items():

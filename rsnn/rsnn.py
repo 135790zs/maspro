@@ -18,6 +18,12 @@ def network(cfg, inp, tar, W_rec, W_out, b_out, B, adamvars):
         M[f"X{s}"] = inp if s == 0 else np.flip(inp, axis=0)
 
         for t in range(n_steps):
+            if cfg["Track_state"]:
+                prev_t = t-1
+                curr_t = t
+            else:
+                prev_t = 0
+                curr_t = 0
 
             # Input is nonzero for first layer
             for r in range(cfg['N_Rec']):
@@ -25,10 +31,10 @@ def network(cfg, inp, tar, W_rec, W_out, b_out, B, adamvars):
 
 
             M['Y'][s, t] = ut.eprop_Y(cfg=cfg,
-                                      Y=M['Y'][s, t-1] if t > 0 else 0,
-                                      W_out=W_out[s],
-                                      Z_last=M['Z'][s, t, -1],
-                                      b_out=b_out[s])
+                                           Y=M['Y'][s, prev_t] if t > 0 else 0,
+                                           W_out=W_out[s],
+                                           Z_last=M['Z'][s, t, -1],
+                                           b_out=b_out[s])
 
         Ysum = M['Y'][0] + (np.flip(M['Y'][1], axis=0)
                             if cfg["n_directions"] > 1 else 0)
@@ -47,6 +53,10 @@ def network(cfg, inp, tar, W_rec, W_out, b_out, B, adamvars):
     for s in range(cfg["n_directions"]):
 
         for t in range(n_steps):  # TODO: can make more efficient by doing einsums
+            if cfg["Track_state"]:
+                curr_t = t
+            else:
+                curr_t = 0
             M['L'][s, t] = np.dot(B[s], (M['P'][t] - M['T'][t]))
 
             # Calculate gradient and weight update
@@ -57,35 +67,35 @@ def network(cfg, inp, tar, W_rec, W_out, b_out, B, adamvars):
                 if not cfg["update_W_out"] and wtype == "W_out":
                     continue
 
-                M[f'g{wtype}'][s, t] = ut.eprop_gradient(wtype=wtype,
-                                                         L=M['L'][s, t],
-                                                         ETbar=M['ETbar'][s, t],
-                                                         Zbar_last=M['Zbar'][s, t, -1],
+                M[f'g{wtype}'][s, curr_t] = ut.eprop_gradient(wtype=wtype,
+                                                         L=M['L'][s, curr_t],
+                                                         ETbar=M['ETbar'][s, curr_t],
+                                                         Zbar_last=M['Zbar'][s, curr_t, -1],
                                                          P=M['P'][t],
                                                          T=M['T'][t])
 
 
-                M[f'D{wtype}'][s, t] = ut.eprop_DW(cfg=cfg,
+                M[f'D{wtype}'][s, curr_t] = ut.eprop_DW(cfg=cfg,
                                                    wtype=wtype,
                                                    s=s,
                                                    adamvars=adamvars,
-                                                   gradient=M[f'g{wtype}'][s, t],
-                                                   Zs=M['Z'][s, :t],
-                                                   ET=M['ET'][s, t])
+                                                   gradient=M[f'g{wtype}'][s, curr_t],
+                                                   Zs=M['Z'][s, :t],  # TODO: CHECK FOR ONLINE
+                                                   ET=M['ET'][s, curr_t])
 
             if not cfg["update_input_weights"]:
-                    M["DW"][s, t, 0, :, :inp.shape[-1]] = 0
+                    M["DW"][s, curr_t, 0, :, :inp.shape[-1]] = 0
 
             if not cfg["update_dead_weights"]:
-                    M["DW"][s, t, W_rec[s] == 0] = 0
+                    M["DW"][s, curr_t, W_rec[s] == 0] = 0
 
             # symmetric e-prop for last layer, random otherwise
             if cfg["eprop_type"] == "adaptive":
-                M['DB'][s, t, -1] = M['DW_out'][s, t].T
+                M['DB'][s, curr_t, -1] = M['DW_out'][s, curr_t].T
 
             if cfg["plot_graph"]:
                 vis.plot_graph(
-                    cfg=cfg, M=M, s=s, t=t, W_rec=W_rec, W_out=W_out)
+                    cfg=cfg, M=M, s=s, t=curr_t, W_rec=W_rec, W_out=W_out)
                 time.sleep(0.5)
 
     return M
@@ -202,6 +212,15 @@ def main(cfg):
 
     W = ut.initialize_weights(cfg=cfg, tar_size=tars['train'].shape[-1])
     # TODO: Put adam in W?
+
+
+    M = ut.initialize_model(cfg=cfg,
+                            length=cfg["maxlen"]*cfg["Repeats"],
+                            tar_size=tars['train'].shape[-1])
+
+    print("\nTOTAL NETWORK SIZE:",
+          sum([sum([v.size for k, v in D.items()]) for D in [M, W]])//1000)
+    del M
 
     adamvars = ut.init_adam(cfg=cfg, tar_size=tars['train'].shape[-1])
 

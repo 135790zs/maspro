@@ -31,22 +31,22 @@ cfg = {
     "update_dead_weights": False,
     "update_input_weights": False,
 
-    "N_R": 64,
+    "N_R": 400,
     "N_Rec": 1,
 
     "wavs_fname": "../data_wavs",
     "phns_fname": "../data_phns",
 
-    "Epochs": 779,  # def = 80
+    "Epochs": 100,  # def = 80
     "Track_weights": True,
-    "Track_state": True,
+    "Track_state": False,  # Only for synapse vars
     "Repeats": 1,  # ms per epoch, def = 5
-    "batch_size_train": 1,  # def = 32
-    "batch_size_val": 1,  # def = 32
+    "batch_size_train": 8,  # def = 32
+    "batch_size_val": 4,  # def = 32
     "val_every_E": 5,
     "maxlen": 778,  # Don't forget to re-run process_timit.py!
     "n_examples": {'train': 800, 'val': 400, 'test': 400},
-    "plot_interval": 0,  #  State plot; 0 to disable plots
+    "plot_interval": 1,  #  State plot; 0 to disable plots
     "state_save_interval": 1,  #  State plot; 0 to disable plots
     "plot_main": True,
     "plot_state": True,
