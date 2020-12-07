@@ -5,28 +5,26 @@ from matplotlib import rcParams as rc
 rc['mathtext.fontset'] = 'stix'
 rc['font.family'] = 'STIXGeneral'
 
-RESET_FIX = True
+RESET_FIX = False
 ALIF = False
 
 nsteps = 1000
 dt_ref = 20
 thr = 7
 alpha = 0.99
-kappa = 0.5
+kappa = 0.9
 rho = 0.9975
 beta = 0.01
 A = 0.08
 B = 0.10
 C = 0.3
 
-# allvars = ["I", "V", "A", "H", "TZ", "Z", "EVV", "EVA", "ET", "ETbar", "L",
-#            "DW"]
 
 allvars = ["I", "V", "H", "TZ", "Z", "EV", "ET", "ETbar", "L", "DW"]
 if ALIF:
     allvars += ["A", "EVA"]
 
-plotvars = ["V", "Z", "H", "EV", "ET", "ETbar", "DW"]
+plotvars = ["I", "V", "Z", "H", "EV", "ET", "ETbar", "DW"]
 if ALIF:
     plotvars += ["A", "EVA"]
 
@@ -97,11 +95,11 @@ for t in range(nsteps):
 
         M["EV"][t+1] = (
             np.flip(M["Z"][t])   # Spike when orange
-            + alpha * M["EV"][t] * (
+            + alpha * M["EV"][t] * (1 if not RESET_FIX else (
                 1
                 - M["Z"][t]  # Null when blue
                 - (t - np.flip(M["TZ"][t]) <= dt_ref)  # Null=time after orange
-                - (t - M["TZ"][t] == dt_ref)))  # Null=time after blue
+                - (t - M["TZ"][t] == dt_ref))))  # Null=time after blue
 
 fig = plt.figure(constrained_layout=False, figsize=(8, 6))
 gsc = fig.add_gridspec(nrows=len(plotvars),
@@ -114,6 +112,7 @@ lookup = {
     "V":     "$v^t_j$",
     "A":     "$a^t_j$",
     "Z":     "$z^t$",
+    "I":     "$I^t$",
     "ET":    "$e_{{ji}}^t$",
     "ETbar": "$\\bar{{e}}_{{ji}}^t$",
     "EV":    "$\\epsilon_{{v, ji}}^t$",

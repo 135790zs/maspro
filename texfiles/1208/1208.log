@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017/Debian) (preloaded format=pdflatex 2020.11.2)  30 NOV 2020 15:47
+This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017/Debian) (preloaded format=pdflatex 2020.11.2)  7 DEC 2020 11:02
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1344,7 +1344,7 @@ File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 ] (./bellecdiagram.tex) [3
 
 ]
-<eligibility.pdf, id=65, 322.10336pt x 141.51181pt>
+<eligibility.pdf, id=81, 322.10336pt x 141.51181pt>
 File: eligibility.pdf Graphic file (type pdf)
 <use eligibility.pdf>
 Package pdftex.def Info: eligibility.pdf  used on input line 107.
@@ -1353,102 +1353,89 @@ Package pdftex.def Info: eligibility.pdf  used on input line 107.
 
  <./eligibility.pdf>] [5
 
+] [6
+
 ]
-<eprop_demo_bellec.pdf, id=102, 521.74924pt x 386.4839pt>
-File: eprop_demo_bellec.pdf Graphic file (type pdf)
-<use eprop_demo_bellec.pdf>
-Package pdftex.def Info: eprop_demo_bellec.pdf  used on input line 133.
-(pdftex.def)             Requested size: 273.83728pt x 202.854pt.
+<demo_bellec_lif.pdf, id=128, 526.76799pt x 388.13051pt>
+File: demo_bellec_lif.pdf Graphic file (type pdf)
+<use demo_bellec_lif.pdf>
+Package pdftex.def Info: demo_bellec_lif.pdf  used on input line 143.
+(pdftex.def)             Requested size: 273.83728pt x 201.7698pt.
 
-Overfull \vbox (2.30298pt too high) detected at line 133
- []
-
-[6
-
- <./eprop_demo_bellec.pdf>]
-<timitperformance.png, id=138, 1567.8575pt x 1021.8175pt>
-File: timitperformance.png Graphic file (type png)
-<use timitperformance.png>
-Package pdftex.def Info: timitperformance.png  used on input line 143.
-(pdftex.def)             Requested size: 273.83728pt x 178.46213pt.
-
-Overfull \vbox (3.07776pt too high) detected at line 143
+Overfull \vbox (1.21878pt too high) detected at line 143
  []
 
 [7
 
- <./timitperformance.png>]
-<demo_traubfix.pdf, id=147, 522.09428pt x 386.4839pt>
-File: demo_traubfix.pdf Graphic file (type pdf)
-<use demo_traubfix.pdf>
-Package pdftex.def Info: demo_traubfix.pdf  used on input line 153.
-(pdftex.def)             Requested size: 266.98991pt x 197.65262pt.
+ <./demo_bellec_lif.pdf>]
+<timitperformance.png, id=170, 1567.8575pt x 1021.8175pt>
+File: timitperformance.png Graphic file (type png)
+<use timitperformance.png>
+Package pdftex.def Info: timitperformance.png  used on input line 153.
+(pdftex.def)             Requested size: 273.83728pt x 178.46213pt.
 
-Overfull \vbox (22.6016pt too high) detected at line 153
+Overfull \vbox (3.07776pt too high) detected at line 153
  []
 
 [8
 
- <./demo_traubfix.pdf>]
-<BellecDiagramML.pdf, id=185, 495.77219pt x 846.0408pt>
+ <./timitperformance.png>]
+<demo_traub_lif.pdf, id=179, 522.09428pt x 388.13051pt>
+File: demo_traub_lif.pdf Graphic file (type pdf)
+<use demo_traub_lif.pdf>
+Package pdftex.def Info: demo_traub_lif.pdf  used on input line 164.
+(pdftex.def)             Requested size: 266.98991pt x 198.49472pt.
+
+Overfull \vbox (23.4437pt too high) detected at line 164
+ []
+
+[9
+
+ <./demo_traub_lif.pdf>]
+<BellecDiagramML.pdf, id=222, 495.77219pt x 846.0408pt>
 File: BellecDiagramML.pdf Graphic file (type pdf)
 <use BellecDiagramML.pdf>
-Package pdftex.def Info: BellecDiagramML.pdf  used on input line 165.
+Package pdftex.def Info: BellecDiagramML.pdf  used on input line 176.
 (pdftex.def)             Requested size: 213.70601pt x 58.07318pt.
- [9
-
- <./BellecDiagramML.pdf>]
-<BellecDiagramBi.pdf, id=217, 495.77219pt x 846.0408pt>
-File: BellecDiagramBi.pdf Graphic file (type pdf)
-<use BellecDiagramBi.pdf>
-Package pdftex.def Info: BellecDiagramBi.pdf  used on input line 193.
-(pdftex.def)             Requested size: 273.83728pt x 137.28134pt.
  [10
 
- <./BellecDiagramBi.pdf>]
-! Missing { inserted.
-<to be read again> 
-                   \def 
-l.203 \end{frame}
-                 
-A left brace was mandatory here, so I've put one in.
-You might want to delete and/or insert some corrections
-so that I will find a matching right brace soon.
-(If you're confused by all this, try typing `I}' now.)
+ <./BellecDiagramML.pdf>]
+<BellecDiagramBi.pdf, id=253, 495.77219pt x 846.0408pt>
+File: BellecDiagramBi.pdf Graphic file (type pdf)
+<use BellecDiagramBi.pdf>
+Package pdftex.def Info: BellecDiagramBi.pdf  used on input line 205.
+(pdftex.def)             Requested size: 273.83728pt x 137.28134pt.
 
-! Missing } inserted.
-<inserted text> 
-                }
-l.203 \end{frame}
-                 
-I've inserted something that you may have forgotten.
-(See the <inserted text> above.)
-With luck, this will get me unwedged. But if you
-really didn't forget anything, try typing `2' now; then
-my insertion and my current dilemma will both disappear.
-
-! Missing { inserted.
-<to be read again> 
-                   \def 
-l.203 \end{frame}
-                 
-A left brace was mandatory here, so I've put one in.
-You might want to delete and/or insert some corrections
-so that I will find a matching right brace soon.
-(If you're confused by all this, try typing `I}' now.)
-
-! Missing } inserted.
-<inserted text> 
-                }
-l.203 \end{frame}
-                 
-I've inserted something that you may have forgotten.
-(See the <inserted text> above.)
-With luck, this will get me unwedged. But if you
-really didn't forget anything, try typing `2' now; then
-my insertion and my current dilemma will both disappear.
+Overfull \vbox (10.53209pt too high) detected at line 205
+ []
 
 [11
+
+ <./BellecDiagramBi.pdf>] [12
+
+] [13
+
+]
+<STATE_pulsating.pdf, id=318, 540.81265pt x 1052.27443pt>
+File: STATE_pulsating.pdf Graphic file (type pdf)
+<use STATE_pulsating.pdf>
+Package pdftex.def Info: STATE_pulsating.pdf  used on input line 235.
+(pdftex.def)             Requested size: 112.95807pt x 194.82063pt.
+ [14
+
+ <./STATE_pulsating.pdf>]
+<STATE_BellecINIT.pdf, id=416, 551.69412pt x 1052.27443pt>
+File: STATE_BellecINIT.pdf Graphic file (type pdf)
+<use STATE_BellecINIT.pdf>
+Package pdftex.def Info: STATE_BellecINIT.pdf  used on input line 243.
+(pdftex.def)             Requested size: 112.95807pt x 190.97772pt.
+ [15
+
+ <./STATE_BellecINIT.pdf>] [16
+
+] [17
+
+] [18
 
 ]
 \tf@nav=\write6
@@ -1460,46 +1447,49 @@ my insertion and my current dilemma will both disappear.
 \tf@snm=\write8
 \openout8 = `1208.snm'.
 
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 208.
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 208.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 292.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 292.
  (./1208.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 208.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 208.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 292.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 292.
 Package rerunfilecheck Info: File `1208.out' has not changed.
-(rerunfilecheck)             Checksum: EA57F6B15FB37DB03708E603C93D32AA;187.
+(rerunfilecheck)             Checksum: 25F6EA73A45C2D6040A9A80A6EB9058B;407.
  ) 
 Here is how much of TeX's memory you used:
- 33381 strings out of 492982
- 678392 string characters out of 6134896
- 716989 words of memory out of 5000000
- 36354 multiletter control sequences out of 15000+600000
- 547757 words of font info for 87 fonts, out of 8000000 for 9000
+ 33466 strings out of 492982
+ 679438 string characters out of 6134896
+ 717992 words of memory out of 5000000
+ 36408 multiletter control sequences out of 15000+600000
+ 552857 words of font info for 106 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 65i,15n,100p,10378b,749s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 65i,18n,100p,10378b,749s stack positions out of 5000i,500n,10000p,200000b,80000s
 </usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb></us
-r/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx7.pfb></usr/share
-/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb></usr/share/texli
-ve/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/share/texlive/tex
-mf-dist/fonts/type1/public/amsfonts/cm/cmmi5.pfb></usr/share/texlive/texmf-dist
-/fonts/type1/public/amsfonts/cm/cmmi7.pfb></usr/share/texlive/texmf-dist/fonts/
-type1/public/amsfonts/cmextra/cmmib7.pfb></usr/share/texlive/texmf-dist/fonts/t
-ype1/public/amsfonts/cm/cmr10.pfb></usr/share/texlive/texmf-dist/fonts/type1/pu
-blic/amsfonts/cm/cmr7.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/ams
-fonts/cm/cmr8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm
-/cmss10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmss1
-2.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmss8.pfb><
-/usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmss9.pfb></usr/sh
-are/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmssi10.pfb></usr/share/t
-exlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texlive
-/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy5.pfb></usr/share/texlive/texmf-
-dist/fonts/type1/public/amsfonts/cm/cmsy7.pfb></usr/share/texlive/texmf-dist/fo
-nts/type1/public/amsfonts/cm/cmtt9.pfb></usr/share/texlive/texmf-dist/fonts/typ
-e1/public/amsfonts/symbols/msam10.pfb></usr/share/texlive/texmf-dist/fonts/type
-1/urw/zapfding/uzdr.pfb>
-Output written on 1208.pdf (11 pages, 649241 bytes).
+r/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb></usr/shar
+e/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/share/texl
+ive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi12.pfb></usr/share/texlive/te
+xmf-dist/fonts/type1/public/amsfonts/cm/cmmi5.pfb></usr/share/texlive/texmf-dis
+t/fonts/type1/public/amsfonts/cm/cmmi6.pfb></usr/share/texlive/texmf-dist/fonts
+/type1/public/amsfonts/cm/cmmi7.pfb></usr/share/texlive/texmf-dist/fonts/type1/
+public/amsfonts/cm/cmmi9.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/
+amsfonts/cmextra/cmmib7.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/a
+msfonts/cm/cmr10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts
+/cm/cmr6.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr7
+.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></u
+sr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmss10.pfb></usr/sha
+re/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmss12.pfb></usr/share/tex
+live/texmf-dist/fonts/type1/public/amsfonts/cm/cmss8.pfb></usr/share/texlive/te
+xmf-dist/fonts/type1/public/amsfonts/cm/cmss9.pfb></usr/share/texlive/texmf-dis
+t/fonts/type1/public/amsfonts/cm/cmssi10.pfb></usr/share/texlive/texmf-dist/fon
+ts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texlive/texmf-dist/fonts/typ
+e1/public/amsfonts/cm/cmsy5.pfb></usr/share/texlive/texmf-dist/fonts/type1/publ
+ic/amsfonts/cm/cmsy7.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsf
+onts/cm/cmtt10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/c
+m/cmtt9.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/symbols/
+msam10.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/zapfding/uzdr.pfb>
+Output written on 1208.pdf (18 pages, 8425121 bytes).
 PDF statistics:
- 349 PDF objects out of 1000 (max. 8388607)
- 221 compressed objects within 3 object streams
- 27 named destinations out of 1000 (max. 500000)
- 135 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 651 PDF objects out of 1000 (max. 8388607)
+ 356 compressed objects within 4 object streams
+ 45 named destinations out of 1000 (max. 500000)
+ 189 words of extra memory for PDF output out of 10000 (max. 10000000)
 

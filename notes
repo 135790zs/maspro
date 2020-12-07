@@ -5,7 +5,6 @@
 # TODO: Make it possible to use fewer than N_I N_Rs
 # TODO: Make N_R variable per layer
 # TODO: Experiment with reducing randomness a priori
-# TODO: Remove dropped weights entirely. Requires refactor. W_i = (conns, strengths, ...)_n
 
 
 I can maybe use random B for all early layers and adaptive/symmetric B for last layer
@@ -24,3 +23,11 @@ TODAY:
 # TODO: Time complexity!
 # TODO: Comment code
 # TODO: Explore membrane potential reset
+
+
+=========
+
+TODAY: 7 dec
+# TODO: Finish introductory presentation
+# TODO: Run best sweep settings for longer, try obtain good results
+# TODO: Check maths

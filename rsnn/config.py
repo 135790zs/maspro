@@ -1,27 +1,27 @@
 from numpy import exp
 cfg = {
-    "verbose": False,
-    "eprop_type": "adaptive",  # in {random, symmetric, adaptive}
-    "optimizer": 'Adam',
+    "verbose": True,
+    "eprop_type": "symmetric",  # in {random, symmetric, adaptive}
+    "optimizer": 'SGD',
     "traub_trick": False,
-    "fraction_ALIF": 1,  # def 0.25
-    "n_directions": 1,
+    "fraction_ALIF": 0.25,  # def 0.25
+    "n_directions": 2,
     "delay": 0,
 
-    "theta_adaptation": 100,  # Depends on length of task: working memory
+    "theta_adaptation": 200,  # Depends on length of task: working memory
     "theta_membrane": 20,  # TIMIT: 20
-    "theta_output": 5,  # TIMIT: 3
-    "beta": 0.3,    # TIMIT: 0.184
-    "gamma": 0.5,     # Pseudoderivative ET contribution
+    "theta_output": 3,  # TIMIT: 3
+    "beta": 0.184,    # TIMIT: 0.184
+    "gamma": 0.3,     # Pseudoderivative ET contribution
     "eta": 1e-2,      # Learning rate (1e-2 for TIMIT)
-    "thr": 0.8,        # Spike threshold, def = 1.6
-    "weight_scale": 3,
-    "dt_refr": 10,    # Refractory time, def = 2
+    "thr": 1.6,        # Spike threshold, def = 1.6
+    "weight_scale": 1,
+    "dt_refr": 2,    # Refractory time, def = 2
     "dt": 1,
     "weight_decay": 1e-2,  # For W_out and B, only if adaptive. def = 1e-2
     "L2_reg": 1e-5,  # 1e-5 for TIMIT
     "FR_reg": 50,  # 50 for TIMIT
-    "FR_target": 1e-1,  # Desired frequency (mean per ms)
+    "FR_target": 6/1000,  # Desired frequency (mean per ms)
     "dropout": 0,
     "adam_beta1": 0.9,
     "adam_beta2": 0.999,
@@ -32,23 +32,23 @@ cfg = {
     "update_dead_weights": False,
     "update_input_weights": False,
 
-    "N_R": 400,
+    "N_R": 64,
     "N_Rec": 1,
 
     "wavs_fname": "../data_wavs",
     "phns_fname": "../data_phns",
 
-    "Epochs": 50,  # def = 80
+    "Epochs": 80,  # def = 80
     "Track_weights": False,
     "Track_state": False,  # Only for synapse vars
     "Repeats": 1,  # ms per epoch, def = 5
-    "batch_size_train": 8,  # def = 32
-    "batch_size_val": 8,  # def = 32
+    "batch_size_train": 2,  # def = 32
+    "batch_size_val": 1,  # def = 32
     "val_every_E": 5,
     "maxlen": 778,  # Don't forget to re-run process_timit.py!
     "n_examples": {'train': 800, 'val': 400, 'test': 400},
-    "plot_interval": 0,  #  State plot; 0 to disable plots
-    "state_save_interval": 0,  #  State plot; 0 to disable plots
+    "plot_interval": 1,  #  State plot; 0 to disable plots
+    "state_save_interval": 5,  #  State plot; 0 to disable plots
     "plot_main": True,
     "plot_state": True,
     "plot_graph": False,

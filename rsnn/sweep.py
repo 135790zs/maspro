@@ -28,7 +28,6 @@ search_space = [
     Real(0.05, .2, name="FR_target"),
     Real(0, .9, name="dropout"),
     Integer(300, 800, name='N_R'),
-    Integer(300, 800, name='N_R'),
 ]
 
 file_id = datetime.datetime.now().strftime('%Y-%m-%d-%H:%M:%S')

@@ -18,7 +18,6 @@ def weights_to_img(arr, is_binary=False):
     if is_binary:
         arr = np.pad(arr, ((8, 8), (0, 0)))
 
-    # TODO: drop dead weights
     if original_dim == 4:
         # idx = np.argwhere(np.all(arr[..., :] == 0, axis=0))
         # arr_del = np.delete(arr, idx, axis=1)
@@ -67,7 +66,7 @@ def plot_run(terrs, percs_wrong_t, verrs, percs_wrong_v, W, epoch, log_id):
 
     if epoch >= 1:
         for weight_type, weights in W.items():
-            axs.append(fig.add_subplot(gsc[len(axs), :], sharex=axs[0]))
+            axs.append(fig.add_subplot(gsc[len(axs), :]))
             axs[-1].imshow(
                 weights_to_img(weights[:epoch]),
                 aspect='auto',
@@ -82,6 +81,8 @@ def plot_run(terrs, percs_wrong_t, verrs, percs_wrong_v, W, epoch, log_id):
 
     axs[-1].set_xlabel("Epoch $E$", fontsize=fontsize)
     plt.savefig(f"../log/{log_id}/metric.pdf",
+                bbox_inches='tight')
+    plt.savefig(f"../log/latest_metric.pdf",
                 bbox_inches='tight')
 
     plt.close()

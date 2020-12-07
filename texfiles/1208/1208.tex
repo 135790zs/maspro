@@ -77,9 +77,9 @@
 	
 	My own contribution: investigate the benefits of
 	\begin{itemize}[label=--]
-		\item stacking multiple recurrent layers
-		\item using Izhikevich neurons
-		\item various regularization methods
+		\item stacking multiple recurrent layers;
+		\item using Izhikevich neurons;
+		\item various regularization methods.
 	\end{itemize}
 		
 \end{frame}
@@ -106,28 +106,38 @@
 	
 \end{frame}
 
-\begin{frame}{The e-prop learning algorithm -- proof}
+\subsection{Proof}
+\begin{frame}{The e-prop learning algorithm -- proof ($L^t_j$)}
 	
 	\begin{align*}
 		\frac{dE}{dW_{ji}} 
 		&= \sum_tL_j^t \cdot e_{ji}^t
 	\end{align*}
 	
-	\begin{equation*}
-L^t_j \eqdef \frac{dE}{dz^t_j}
-\end{equation*}
-
-	\begin{equation*}
-e^t_{ji} \eqdef \frac{\partial z_j^t}{\partial\mathbf{h}_j^t}\underbrace{\sum_{t'\leq t}\frac{\partial\mathbf{h}^t_j}{\partial\mathbf{h}_j^{t-1}} \cdots \frac{\partial\mathbf{h}_j^{t'+1}}{\partial\mathbf{h}_j^{t'}}\cdot\frac{\partial\mathbf{h}_j^{t'}}{\partial W_{ji}}}_{\eqdef \bm{\varepsilon}_{ji}^t}
-\end{equation*}
+	\begin{align*}
+L^t_j &\eqdef \frac{\partial E}{\partial z^t_j}\\ &= \sum_kB_{jk}\left(\pi^t_k-\pi_k^{*,t}\right)
+\end{align*}
 	
 	
 \end{frame}
 
+\begin{frame}{The e-prop learning algorithm -- proof ($e^t_{ji}$)}
+
+	\begin{align*}
+e^t_{ji} &\eqdef \frac{\partial z_j^t}{\partial\mathbf{h}_j^t}\underbrace{\sum_{t'\leq t}\frac{\partial\mathbf{h}^t_j}{\partial\mathbf{h}_j^{t-1}} \cdots \frac{\partial\mathbf{h}_j^{t'+1}}{\partial\mathbf{h}_j^{t'}}\cdot\frac{\partial\mathbf{h}_j^{t'}}{\partial W_{ji}}}_{\eqdef \bm{\varepsilon}_{ji}^t}\\
+&= \psi_j^t\bar{z}^{t-1}_i\qquad\text{(for LIF neurons in Bellec et al)}
+\end{align*}
+	
+	
+\end{frame}
+
+
+\subsection{Bellec et al}
+
 \begin{frame}{The e-prop learning algorithm -- Original LIF}
 	
 	\begin{figure}[!ht]
-		\includegraphics[width=0.8\linewidth]{eprop_demo_bellec.pdf}
+		\includegraphics[width=0.8\linewidth]{demo_bellec_lif.pdf}
 	\end{figure}
 	
 \end{frame}
@@ -142,12 +152,13 @@ Bellec, G., Scherr, F., Subramoney, A., Hajek, E., Salaj, D., Legenstein, R., \&
 	
 \end{frame}
 
+\subsection{Traub et al}
 \begin{frame}{The e-prop learning algorithm -- STDP-corrected LIF}
 \tiny{
 Traub, M., Butz, M. V., Baayen, R. H., \& Otte, S. (2020, September). Learning Precise Spike Timings with Eligibility Traces. In International Conference on Artificial Neural Networks (pp. 659-669). Springer, Cham.}
 
 	\begin{figure}[!ht]
-		\includegraphics[width=0.78\linewidth]{demo_traubfix.pdf}
+		\includegraphics[width=0.78\linewidth]{demo_traub_lif.pdf}
 	\end{figure}
 	
 \end{frame}
@@ -159,7 +170,7 @@ Traub, M., Butz, M. V., Baayen, R. H., \& Otte, S. (2020, September). Learning P
 	\begin{figure}[!ht]
 		\includegraphics[clip, trim=0cm 25cm 0cm 0cm, width=0.667\linewidth]{BellecDiagramML.pdf}  %lbrt
 	\end{figure}
-\item Examine model desgns such as neuron type (e.g. Izhikevich); synaptic delay; and regularization such as metaplasticity and synaptic scaling.
+\item Evaluate model designs such as neuron type (e.g. Izhikevich); synaptic delay; and regularization such as metaplasticity and synaptic scaling.
 \end{itemize}
 	
 \end{frame}
@@ -179,10 +190,11 @@ Traub, M., Butz, M. V., Baayen, R. H., \& Otte, S. (2020, September). Learning P
     \item Obtain Bellec's performance;
     \item Analyze effects of
     \begin{todolist}
-    	\item N-layered network;
+    	\item[\done] N-layered network;
     \item Izhikevich neurons;
     	\item Metaplasticity;
-    	\item Synaptic scaling;
+    	\item[\done] Synaptic scaling;
+    	\item[\done] Traub's fix;
     	\item Synaptic delays.
     \end{todolist}
   \end{todolist}
@@ -193,16 +205,88 @@ Traub, M., Butz, M. V., Baayen, R. H., \& Otte, S. (2020, September). Learning P
 \end{frame}
 
 
-\begin{frame}{Current observations}
+\begin{frame}{Work since last meeting}
+	\begin{todolist}
 
-\begin{itemize}[label=--]
-\item \[\lim_{e \to \infty} W^e_\textrm{out}  = \mathbf{0}\]
-\[\lim_{e \to \infty} b^e_\textrm{out}  = \mathbf{0}\]
-\item Spike frequency normal but heavily affected by weight initialization. Weights in order of $[0, \frac{2}{N}]$ work well, where $N$ is layer size.
-\end{itemize}
+    \item[\done] Implemented bidirectional network;
+    \item[\done] Exponentially improved space complexity by optionally not tracking synapse variables over time or epochs;
+    \item[\done] Implemented Bayesian hyperparameter optimization using Gaussian processes;
+  \end{todolist}
+  
 \end{frame}
 
 
+\begin{frame}{Current observations}
+
+\begin{itemize}[label=--]
+\item \[\lim_{e\to\infty} W^e_{\textrm{out}} = \mathbf{0}\]
+\[\lim_{e\to\infty} b^e_{\textrm{out}} = \mathbf{0}\]
+\item Spike frequency normal but heavily affected by weight initialization. Weights in uniform range of $[0, \frac{C}{N}]$ work well, where $N$ is number of afferent connections.
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Typical results (Undesired pulsation)}
+
+	\begin{figure}[!ht]
+		\includegraphics[clip, trim=0cm 0cm 0cm 4.2cm, width=0.33\linewidth]{STATE_pulsating.pdf}  %lbrt
+	\end{figure}
+
+\end{frame}
+
+\begin{frame}{Typical results (Bellec initialization)}
+
+	\begin{figure}[!ht]
+		\includegraphics[clip, trim=0cm 0cm 0cm 4.2cm, width=0.33\linewidth]{STATE_BellecINIT.pdf}  %lbrt
+	\end{figure}
+
+\end{frame}
+
+
+
+\begin{frame}{Current configuration toolbox}
+	\renewcommand{\baselinestretch}{0.7}
+	\footnotesize{
+	\begin{itemize}[label=--]
+
+    \item E-prop type (random, symmetric, adaptive) (for updating $B_j^t$)
+    \item Optimizer (Adam, SGD)
+    \item Traub fix
+    \item Fraction ALIF
+    \item Uni- or bidirectional
+    \item Target delay
+    \item Various e-prop model constants
+    \item Initial weight scaling
+    \item Weight decay
+    \item $L^2$ regularization
+    \item Firing rate regularization (strength \& target Hz)
+    \item Weight dropout rate
+    \item Adam optimizer constants
+    \item Number of layers
+    \item Nodes per layer
+    \item Input repeats
+    \item Batch size
+  \end{itemize}
+  }	\renewcommand{\baselinestretch}{1}
+\end{frame}
+
+
+\begin{frame}{Hyperparameter sweep results}
+
+(show results)
+
+\end{frame}
+
+
+\section{Next steps}
+\begin{frame}{My questions}
+\begin{itemize}[label=--]
+\item Thesis template? (\texttt{.tex})
+\item Any questions or suggestions?
+\end{itemize}
+
+
+\end{frame}
 
 
 \end{document}

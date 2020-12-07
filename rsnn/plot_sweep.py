@@ -19,7 +19,6 @@ def process_categoricals(dat):
 
 
 def plot_dfs(df, fname):
-    print(list(df))
     varnames = list(df)
     varnames.remove("V-Error")
     pool = list(combinations(varnames, r=2))
@@ -141,7 +140,7 @@ def plot_regressions(df, fname):
         elif type(x[0]).__name__ == 'int64':
             xticks = np.arange(np.min(x), np.max(x)+1)
             nx = len(xticks)
-            if len(xticks) <= 20:
+            if len(xticks) <= 10:
                 axs[idx // size, idx % size].set_xticks(np.min(x)
                                                         + np.arange(0, nx))
                 axs[idx // size, idx % size].set_xticklabels(xticks)
@@ -181,8 +180,11 @@ if __name__ == "__main__":
             if not filename.endswith('.csv'):
                 continue
             filepath = subdir + os.sep + filename
-            plot_dfs(df=pd.read_csv(filepath),
-                     fname=filename[:-4])
 
-            plot_regressions(df=pd.read_csv(filepath),
-                             fname=filename[:-4])
+            # Don't plot if already plotted
+            if not os.path.isdir(filepath[:-4]):
+                plot_dfs(df=pd.read_csv(filepath),
+                         fname=filename[:-4])
+
+                plot_regressions(df=pd.read_csv(filepath),
+                                 fname=filename[:-4])

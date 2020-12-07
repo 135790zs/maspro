@@ -1,0 +1,19 @@
+STRUCTURE
+* Introduction
+  - Artificial spiking neurons inspired by brain neurons (as in Bellec intro p1). Various theoretical advantages over ANNs.
+  - Unclear how RSNNs can learn. In hope of crudely emulating biological neural circuits, try online, local and bioplausible method.
+  - E-prop uses bio-inspired (which) methods that allow for online, local, bioplausible training and have shown to yield good results.
+  - However, real neurons are stacked in layers. This paper generalizes e-prop to multiple layers. (short parallel to perceptrons vs, MLPs? will need some theoretical analysis like MLPs could nonlinearly separate. Time dynamics maybe?)
+  - ... synaptic scaling, Izhikevich etc will depend on whether it is implemented.
+
+* METHOD
+  - In method, first general top-down formulas (derivatives etc). Derive from RNNs. Explain Traub fix or Bellec reset if applicable.
+* RESULTS
+* DISCUSSION
+* CONCLUSION
+
+* APPENDIX
+
+
+
+#######################################

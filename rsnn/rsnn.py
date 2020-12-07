@@ -31,10 +31,10 @@ def network(cfg, inp, tar, W_rec, W_out, b_out, B, adamvars):
 
 
             M['Y'][s, t] = ut.eprop_Y(cfg=cfg,
-                                           Y=M['Y'][s, prev_t] if t > 0 else 0,
-                                           W_out=W_out[s],
-                                           Z_last=M['Z'][s, t, -1],
-                                           b_out=b_out[s])
+                                      Y=M['Y'][s, prev_t] if t > 0 else 0,
+                                      W_out=W_out[s],
+                                      Z_last=M['Z'][s, t, -1],
+                                      b_out=b_out[s])
 
         Ysum = M['Y'][0] + (np.flip(M['Y'][1], axis=0)
                             if cfg["n_directions"] > 1 else 0)
@@ -51,8 +51,8 @@ def network(cfg, inp, tar, W_rec, W_out, b_out, B, adamvars):
                           B=B)
 
     for s in range(cfg["n_directions"]):
-
         for t in range(n_steps):  # TODO: can make more efficient by doing einsums
+            start = time.time()
             if cfg["Track_state"]:
                 curr_t = t
             else:
@@ -68,30 +68,26 @@ def network(cfg, inp, tar, W_rec, W_out, b_out, B, adamvars):
                     continue
 
                 M[f'g{wtype}'][s, curr_t] = ut.eprop_gradient(wtype=wtype,
-                                                         L=M['L'][s, curr_t],
-                                                         ETbar=M['ETbar'][s, curr_t],
-                                                         Zbar_last=M['Zbar'][s, curr_t, -1],
-                                                         P=M['P'][t],
-                                                         T=M['T'][t])
+                                                              L=M['L'][s, curr_t],
+                                                              ETbar=M['ETbar'][s, curr_t],
+                                                              Zbar_last=M['Zbar'][s, curr_t, -1],
+                                                              P=M['P'][t],
+                                                              T=M['T'][t])
 
 
                 M[f'D{wtype}'][s, curr_t] = ut.eprop_DW(cfg=cfg,
-                                                   wtype=wtype,
-                                                   s=s,
-                                                   adamvars=adamvars,
-                                                   gradient=M[f'g{wtype}'][s, curr_t],
-                                                   Zs=M['Z'][s, :t],  # TODO: CHECK FOR ONLINE
-                                                   ET=M['ET'][s, curr_t])
+                                                        wtype=wtype,
+                                                        s=s,
+                                                        adamvars=adamvars,
+                                                        gradient=M[f'g{wtype}'][s, curr_t],
+                                                        Zs=M['Z'][s, :t],
+                                                        ETbar=M['ETbar'][s, curr_t])
 
             if not cfg["update_input_weights"]:
                     M["DW"][s, curr_t, 0, :, :inp.shape[-1]] = 0
 
             if not cfg["update_dead_weights"]:
                     M["DW"][s, curr_t, W_rec[s] == 0] = 0
-
-            # symmetric e-prop for last layer, random otherwise
-            if cfg["eprop_type"] == "adaptive":
-                M['DB'][s, curr_t, -1] = M['DW_out'][s, curr_t].T
 
             if cfg["plot_graph"]:
                 vis.plot_graph(
@@ -128,6 +124,8 @@ def feed_batch(cfg, inps, tars, W_rec, W_out, b_out, B, epoch, tvt_type, adamvar
     }
 
     for b in range(inps.shape[0]):
+        if not cfg["verbose"]:
+            print(f"ep {e}/{cfg['Epochs']}; \t {tvt_type} {b}/{inps.shape[0]}", end='\r')
         if cfg["verbose"]:
             print((f"({log_id})\tEpoch {epoch}/{cfg['Epochs']-1}\t" if tvt_type != 'test'
                    else '\t'),
@@ -188,6 +186,7 @@ def feed_batch(cfg, inps, tars, W_rec, W_out, b_out, B, epoch, tvt_type, adamvar
 
 
 def main(cfg):
+
     # Load data
     inps = {}
     tars = {}
@@ -214,8 +213,6 @@ def main(cfg):
                               inp_size=inps['train'].shape[-1],
                               tar_size=tars['train'].shape[-1])
 
-
-
     if cfg["verbose"]:
         M = ut.initialize_model(cfg=cfg,
                                 length=cfg["maxlen"]*cfg["Repeats"],
@@ -229,8 +226,6 @@ def main(cfg):
 
     for e in range(0, cfg["Epochs"]):
         ep_curr = e if cfg["Track_weights"] else 0
-        if not cfg["verbose"]:
-            print(f"ep {e}/{cfg['Epochs']}", end='\r')
         # Make batch
         randidxs = np.random.randint(inps['train'].shape[0],
                                      size=cfg["batch_size_train"])
@@ -293,32 +288,58 @@ def main(cfg):
         ep_incr = 1 if cfg["Track_weights"] else 0
         for wtype in W.keys():
             # Update weights
-            W[wtype][ep_curr+ep_incr] = W[wtype][ep_curr] + DW[wtype]
 
             if not cfg["update_bias"] and wtype == "b_out":
                 continue
             if not cfg["update_W_out"] and wtype == "W_out":
                 continue
 
-            # Decay iff adaptive
-            if cfg["eprop_type"] == "adaptive" and wtype in ["W_out", "B"]:
-                W[wtype][ep_curr+ep_incr] -= cfg["weight_decay"] * W[wtype][ep_curr+ep_incr]
+            if wtype == "B":
 
-            # Mirror B <-> W_out if symmetric
-            elif cfg["eprop_type"] == "symmetric" and wtype == "B":
-                for s in range(cfg["n_directions"]):
-                    W[wtype][ep_curr+ep_incr, s] = (W["W_out"][ep_curr, s].T
-                                        + DW['W_out'][s].T
-                                        - (cfg["weight_decay"]
-                                           * W["W_out"][ep_curr, s].T))
-            # Update Adam
-            if wtype != 'B':
+                # Nothing happens for B if eprop_type == random
+
+                if cfg["eprop_type"] == "symmetric":
+                    for s in range(cfg["n_directions"]):
+                        W["B"][ep_curr+ep_incr, s] = (W["B"][ep_curr, s]
+                                                   + DW["W_out"][s].T)
+
+                elif cfg["eprop_type"] == "adaptive":
+                    for s in range(cfg["n_directions"]):
+                        W["B"][ep_curr+ep_incr, s] = (W["W_out"][ep_curr, s]
+                                                      + DW["W_out"][s]).T
+                        W["B"][ep_curr+ep_incr, s] -= (
+                            W["B"][ep_curr+ep_incr, s]
+                            * cfg["weight_decay"])
+
+            else:  # W, W_out, or b_out
+
+                W[wtype][ep_curr+ep_incr] = W[wtype][ep_curr] + DW[wtype]
+
+                # Update Adam
                 adamvars[f'm{wtype}'] = (
                     adamvars["beta2"] * adamvars[f'm{wtype}']
                     + (1 - adamvars["beta2"]) * gW[wtype])
                 adamvars[f'v{wtype}'] = (
                     adamvars["beta2"] * adamvars[f'v{wtype}']
                     + (1 - adamvars["beta2"]) * gW[wtype] ** 2)
+
+                if wtype == "W_out":
+                    W[wtype][ep_curr+ep_incr] -= (W[wtype][ep_curr+ep_incr]
+                                                  * cfg["weight_decay"])
+
+
+            # # Decay iff adaptive
+            # if cfg["eprop_type"] == "adaptive" and wtype in ["W_out", "B"]:
+            #     W[wtype][ep_curr+ep_incr] -= cfg["weight_decay"] * W[wtype][ep_curr+ep_incr]
+
+            # # Mirror B <-> W_out if symmetric
+            # elif cfg["eprop_type"] == "symmetric" and wtype == "B":
+            #     for s in range(cfg["n_directions"]):
+            #         W[wtype][ep_curr+ep_incr, s] = (W["W_out"][ep_curr, s].T
+            #                             + DW['W_out'][s].T
+            #                             - (cfg["weight_decay"]
+            #                                * W["W_out"][ep_curr, s].T))
+
 
     if cfg["verbose"]:
         print("\nTraining complete!\n")

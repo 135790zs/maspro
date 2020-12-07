@@ -1,3 +1,4 @@
+import time
 import os
 import numpy as np
 import datetime
@@ -24,9 +25,9 @@ def initialize_model(cfg, length, tar_size):
         EVV:     Synapse voltage eligibility
         EVU:     Synapse threshold adaptation eligibility
         ET:      Synapse eligibility trace
+        ET:      Loww-pass filter of ynapse eligibility trace
         gW:      Network weights gradient
         DW:      Network weights update
-        DB:      Broadcast weights update
         dW_out:  Output weights update
         gW_out:  Output weights gradient
         db_out:  Bias update
@@ -99,12 +100,6 @@ def initialize_model(cfg, length, tar_size):
                                  cfg["N_Rec"],
                                  cfg["N_R"] * 2,))
 
-    M["DB"] = np.zeros(shape=(cfg["n_directions"],
-                              pruned_length,
-                              cfg["N_Rec"],
-                              cfg["N_R"],
-                              tar_size))
-
     M["Y"] = np.zeros(shape=(cfg["n_directions"], length, tar_size,))
     M["CE"] = np.zeros(shape=(length,))
 
@@ -115,13 +110,6 @@ def initialize_model(cfg, length, tar_size):
     np.random.shuffle(M["is_ALIF"])
 
     M["is_ALIF"] = M["is_ALIF"].reshape(neuron_timeless_shape)
-
-
-    # for k, v in M.items():
-    #     print(k, v.size)
-    # sizes = [v.size for k, v in M.items()]
-    # print(sorted(sizes))
-    # exit()
 
     return M
 
@@ -175,7 +163,7 @@ def initialize_weights(cfg, inp_size, tar_size):
     elif cfg["eprop_type"] == "adaptive":  # Gaussian, variance of 1/N
         W["B"] = rng.normal(size=B_shape, scale=np.sqrt(1 / cfg["N_R"]))
 
-    else:  # Uniform [0, 1]
+    else:  # Symmetric: Uniform [0, 1]. Doesn't matter, because it will be overwritten
         W["B"] = rng.random(size=B_shape)
 
     # Drop all self-looping weights. A neuron cannot be connected with itself.
@@ -406,7 +394,7 @@ def eprop_gradient(wtype, L, ETbar, P, T, Zbar_last):
         return P - T
 
 
-def eprop_DW(cfg, wtype, s, adamvars, gradient, Zs, ET):  # TODO: No ETbar here?
+def eprop_DW(cfg, wtype, s, adamvars, gradient, Zs, ETbar):
     FR_reg = 0
     if wtype == 'W' and Zs.shape[0]:  # Add firing rate reg term
         FR_reg = (
@@ -414,7 +402,7 @@ def eprop_DW(cfg, wtype, s, adamvars, gradient, Zs, ET):  # TODO: No ETbar here?
             * cfg["FR_reg"]
             * np.mean(np.einsum("rj,rji->rji",
                                 cfg["FR_target"] - np.mean(Zs, axis=0),
-                                ET),
+                                ETbar),
                       axis=0))
 
     if cfg["optimizer"] == 'SGD':
@@ -432,6 +420,9 @@ def eprop_DW(cfg, wtype, s, adamvars, gradient, Zs, ET):  # TODO: No ETbar here?
 
 
 def process_layer(cfg, M, t, s, r, W_rec):
+    start = time.time()
+
+
     if cfg["Track_state"]:
         prev_t = t-1
         curr_t = t
@@ -450,6 +441,8 @@ def process_layer(cfg, M, t, s, r, W_rec):
                               is_ALIF=M['is_ALIF'][s, r])
 
     M['TZ'][s, r, M['Z'][s, t, r]==1] = t  # Log spike time
+
+    # print(f"M:\tA: {time.time()-start:.3f}")
 
     # Pad any input with zeros to make it length N_R
     Z_prev = M['Z'][s, t, r-1] if r > 0 else \
@@ -482,6 +475,8 @@ def process_layer(cfg, M, t, s, r, W_rec):
         for var in ["EVV", "EVU", "ET"]:
             M[var][s, curr_t, r, W_rec == 0] = 0
 
+    # print(f"M:\tB: {time.time()-start:.3f}")
+
     M["Z_in"][s, t, r] = np.concatenate((Z_prev, M['Z'][s, t, r]))
     M["TZ_in"][s, r] = np.concatenate((TZ_prev, M['TZ'][s, r]))
 
@@ -500,6 +495,8 @@ def process_layer(cfg, M, t, s, r, W_rec):
                                      x=M['Z'][s, t, r],
                                      factor=cfg["kappa"])
 
+    # print(f"M:\tB: {time.time()-start:.3f}")
+
     if t != M[f"X{s}"].shape[0] - 1:
         M['EVV'][s, next_t, r] = eprop_EVV(cfg=cfg,
                                         EVV=M['EVV'][s, curr_t, r],
@@ -509,7 +506,6 @@ def process_layer(cfg, M, t, s, r, W_rec):
                                         TZ_in=M['TZ_in'][s, r],
                                         t=t)
 
-        # TODO: Can do without M[ET] or M[H] or M[TZ] or M[DW].
         M['EVU'][s, next_t, r] = eprop_EVU(cfg=cfg,
                                         Z_inbar=M['Z_inbar'][s, curr_t, r],
                                         EVU=M['EVU'][s, curr_t, r],

@@ -150,16 +150,6 @@ Effects of $\mathbf{h}$ on $W$:
 \end{align}
 
 
-
-
-
-
-
-
-
-
-
-
 \newpage
 \section{Audio preprocessing}
 Goal: turn a .wav signal consisting of N phones into N chunks.
@@ -298,8 +288,17 @@ Therefore,
 \Delta W^\text{rec}_{ji} &= -\eta\sum_t\left(\sum_kB_{jk}\left(\pi_k^t-\pi_k^{*,t}\right)\right)\bar{e}^t_{ji}
 \]
 
-\section{Bayesian Optimization}
-Black-box function $f(\cdot)$.
+\section{Network equations 20-12-07}
+According to Bellec settings (with ``adaptive'')
+
+
+\begin{align*}
+
+
+y^t_k &= \kappa y^{t-1}_k + \sum_j W^\text{out}_{kj}z^t_j+b^\text{out}_k\\
+E &= -\sum_{t,k}\pi_k^{*,t}\log\pi_k^t\\
+\Delta W^\text{rec}_{ji} &= -\eta\sum_t\left(\sum_kB_{jk}\left(\pi_k^t-\pi_k^{*,t}\right)\right)\bar{e}^t_{ji}\\
+\end{align*}
 
 
 \end{document}
