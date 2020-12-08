@@ -1,11 +1,12 @@
 
 # MUST DO:
+# TODO: Network model t's to Bellec
 
 # LOW PRIORITY:
 # TODO: Make it possible to use fewer than N_I N_Rs
 # TODO: Make N_R variable per layer
 # TODO: Experiment with reducing randomness a priori
-
+# TODO: Only plot weights if tracking them
 
 I can maybe use random B for all early layers and adaptive/symmetric B for last layer
 ALSO note usage of W^out_kj in pE/pz equation in supp equation 20. Needs solution

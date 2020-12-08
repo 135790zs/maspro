@@ -18,7 +18,7 @@ def network(cfg, inp, tar, W_rec, W_out, b_out, B, adamvars):
     for s in range(cfg["n_directions"]):
         M[f"X{s}"] = inp if s == 0 else np.flip(inp, axis=0)
 
-        for t in range(n_steps):
+        for t in range(n_steps-1):
 
             # Input is nonzero for first layer
             for r in range(cfg['N_Rec']):
@@ -117,7 +117,9 @@ def feed_batch(cfg, inps, tars, W_rec, W_out, b_out, B, epoch, tvt_type, adamvar
 
     for b in range(inps.shape[0]):
         if not cfg["verbose"]:
-            print(f"ep {e}/{cfg['Epochs']}; \t {tvt_type} {b}/{inps.shape[0]}", end='\r')
+            print(f"ep {e}/{cfg['Epochs']}; \t "
+                  f"{'  ' if tvt_type == 'val' else ''}"
+                  f"{tvt_type} {b}/{inps.shape[0]}  ", end='\r')
         if cfg["verbose"]:
             print((f"({log_id})\tEpoch {epoch}/{cfg['Epochs']-1}\t" if tvt_type != 'test'
                    else '\t'),

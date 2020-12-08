@@ -140,7 +140,7 @@ def initialize_weights(cfg, inp_size, tar_size):
                               cfg["N_R"] * 2,))
 
     # Decrease weights in first layer
-    W["W"][0, :, 0] /= inp_size + cfg["N_R"]  # Epoch 0, layer 0
+    W["W"][0, :, 0] /= 64  # Epoch 0, layer 0
     # W["W"][0, :, 1] /= cfg["N_R"]/3  # Epoch 0, layer 1
 
     W["W_out"] = rng.random(size=(n_epochs,
@@ -164,7 +164,7 @@ def initialize_weights(cfg, inp_size, tar_size):
     elif cfg["eprop_type"] == "adaptive":  # Gaussian, variance of 1/N
         W["B"] = rng.normal(size=B_shape, scale=np.sqrt(1 / cfg["N_R"]))
 
-    else:  # Symmetric: Uniform [0, 1]. Doesn't matter, because it will be overwritten
+    else:  # Symmetric: Uniform [0, 1]. Irrelevant, as it'll be overwritten
         W["B"] = rng.random(size=B_shape)
 
     # Drop all self-looping weights. A neuron cannot be connected with itself.
@@ -172,6 +172,7 @@ def initialize_weights(cfg, inp_size, tar_size):
         for s in range(cfg["n_directions"]):
             np.fill_diagonal(W['W'][0, s, r, :, cfg["N_R"]:], 0)
 
+    # Randomly dropout a fraction of the (remaining) weights.
     W['W'][0] = np.where(np.random.random(W['W'][0].shape) < cfg["dropout"],
                          0,
                          W['W'][0])
@@ -413,7 +414,10 @@ def eprop_DW(cfg, wtype, s, adamvars, gradient, Zs, ETbar):
 
 
 def process_layer(cfg, M, t, s, r, W_rec):
+    """ Process a single layer of the model at a single time step."""
 
+    # If not tracking state, the time dimensions of synaptic variables have
+    # length 1 and we overwrite those previous time steps at index 0.
     if cfg["Track_state"]:
         prev_t = t-1
         curr_t = t
@@ -423,7 +427,8 @@ def process_layer(cfg, M, t, s, r, W_rec):
         curr_t = 0
         next_t = 0
 
-    # Spike if V >= threshold
+    # Update the spikes Z of the neurons.
+    # Refractory time must have passed and V should reach (ALIF corrected) thr.
     M['Z'][s, t, r] = eprop_Z(cfg=cfg,
                               t=t,
                               TZ=M['TZ'][s, r],
@@ -431,16 +436,21 @@ def process_layer(cfg, M, t, s, r, W_rec):
                               U=M['U'][s, t, r],
                               is_ALIF=M['is_ALIF'][s, r])
 
-    M['TZ'][s, r, M['Z'][s, t, r]==1] = t  # Log spike time
+    # TZ is time of latest spike
+    M['TZ'][s, r, M['Z'][s, t, r]==1] = t
 
-    # Pad any input with zeros to make it length N_R
+    # Z_prev is the spike array of the previous layer (or input if r==0).
+    # Pad any input with zeros to make it length N_R. Used to be able to dot
+    # product with weights.
     Z_prev = M['Z'][s, t, r-1] if r > 0 else \
         np.pad(M[f'X{s}'][t],
                (0, cfg["N_R"] - len(M[f'X{s}'][t])))
 
+    # Input layer always "spikes" (with nonbinary spike values Z=X).
     TZ_prev = M['TZ'][s, r-1] if r > 0 else \
         np.ones(shape=(M['TZ'][s, r].shape)) * t
 
+    # Pseudoderivative
     M['H'][s, t, r] = eprop_H(cfg=cfg,
                               V=M['V'][s, t, r],
                               U=M['U'][s, t, r],
@@ -448,11 +458,12 @@ def process_layer(cfg, M, t, s, r, W_rec):
                               t=t,
                               TZ=M['TZ'][s, r])
 
+    # Eligibility trace
     M['ET'][s, curr_t, r] = eprop_ET(cfg=cfg,
-                                is_ALIF=M['is_ALIF'][s, r],
-                                H=M['H'][s, t, r],
-                                EVV=M['EVV'][s, curr_t, r],
-                                EVU=M['EVU'][s, curr_t, r])
+                                     is_ALIF=M['is_ALIF'][s, r],
+                                     H=M['H'][s, t, r],
+                                     EVV=M['EVV'][s, curr_t, r],
+                                     EVU=M['EVU'][s, curr_t, r])
 
     # Update weights for next epoch
     if not cfg["update_input_weights"]:
@@ -480,8 +491,8 @@ def process_layer(cfg, M, t, s, r, W_rec):
                                      factor=cfg["kappa"])
 
     M['Zbar'][s, t, r] = eprop_lpfK(lpf=M['Zbar'][s, t-1, r] if t > 0 else 0,
-                                     x=M['Z'][s, t, r],
-                                     factor=cfg["kappa"])
+                                    x=M['Z'][s, t, r],
+                                    factor=cfg["kappa"])
 
     if t != M[f"X{s}"].shape[0] - 1:
         M['EVV'][s, next_t, r] = eprop_EVV(cfg=cfg,

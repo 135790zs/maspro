@@ -4,7 +4,7 @@ cfg = {
     "eprop_type": "adaptive",  # in {random, symmetric, adaptive}
     "optimizer": 'Adam',
     "traub_trick": False,
-    "fraction_ALIF": 1,  # def 0.25
+    "fraction_ALIF": 0.25,  # def 0.25
     "n_directions": 2,
     "delay": 0,
 
@@ -13,7 +13,7 @@ cfg = {
     "theta_output": 3,  # TIMIT: 3
     "beta": 0.184,    # TIMIT: 0.184
     "gamma": 0.3,     # Pseudoderivative ET contribution
-    "eta": 1e-4,      # Learning rate (1e-2 for TIMIT)
+    "eta": 1e-2,      # Learning rate (1e-2 for TIMIT)
     "thr": 1.6,        # Spike threshold, def = 1.6
     "weight_scale": 3,
     "dt_refr": 2,    # Refractory time, def = 2
@@ -21,7 +21,7 @@ cfg = {
     "weight_decay": 1e-2,  # For W_out and B, only if adaptive. def = 1e-2
     "L2_reg": 1e-5,  # 1e-5 for TIMIT
     "FR_reg": 50,  # 50 for TIMIT
-    "FR_target": 6/1000,  # Desired frequency (mean per ms)
+    "FR_target": 12/1000,  # Desired frequency (mean per ms)
     "dropout": 0,
     "adam_beta1": 0.9,
     "adam_beta2": 0.999,
@@ -32,7 +32,7 @@ cfg = {
     "update_dead_weights": False,
     "update_input_weights": True,
 
-    "N_R": 64,
+    "N_R": 200,
     "N_Rec": 1,
 
     "wavs_fname": "../data_wavs",
@@ -42,12 +42,12 @@ cfg = {
     "Track_weights": False,
     "Track_state": False,  # Only for synapse vars
     "Repeats": 5,  # ms per epoch, def = 5
-    "batch_size_train": 12,  # def = 32
-    "batch_size_val": 12,  # def = 32
+    "batch_size_train": 32,  # def = 32
+    "batch_size_val": 32,  # def = 32
     "val_every_E": 5,
     "maxlen": 778,  # Don't forget to re-run process_timit.py!
-    "n_examples": {'train': 800, 'val': 400, 'test': 400},
-    "plot_interval": 5,  #  State plot; 0 to disable plots
+    "n_examples": {'train': 3696, 'val': 400, 'test': 192},
+    "plot_interval": 1,  #  State plot; 0 to disable plots
     "state_save_interval": 5,  #  State plot; 0 to disable plots
     "plot_main": True,
     "plot_state": True,

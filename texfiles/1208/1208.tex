@@ -211,6 +211,7 @@ Traub, M., Butz, M. V., Baayen, R. H., \& Otte, S. (2020, September). Learning P
     \item[\done] Implemented bidirectional network;
     \item[\done] Exponentially improved space complexity by optionally not tracking synapse variables over time or epochs;
     \item[\done] Implemented Bayesian hyperparameter optimization using Gaussian processes;
+    \item Worked on synaptic delay but not yet finished.
   \end{todolist}
   
 \end{frame}
@@ -234,18 +235,23 @@ Traub, M., Butz, M. V., Baayen, R. H., \& Otte, S. (2020, September). Learning P
 
 \end{frame}
 
-\begin{frame}{Typical results (Undesired pulsation)}
+\begin{frame}{Typical results (Bellec reproduction attempt)}
 
 	\begin{figure}[!ht]
-		\includegraphics[clip, trim=0cm 0cm 0cm 4.2cm, width=0.33\linewidth]{STATE_pulsating.pdf}  %lbrt
+		\includegraphics[clip, trim=0cm 0cm 0cm 4.2cm, width=0.33\linewidth]{state_195.pdf}  %lbrt
 	\end{figure}
 
 \end{frame}
 
-\begin{frame}{Typical results (Bellec initialization)}
-
+\begin{frame}{Typical results (latest Bellec run)}
 	\begin{figure}[!ht]
-		\includegraphics[clip, trim=0cm 0cm 0cm 4.2cm, width=0.33\linewidth]{STATE_BellecINIT.pdf}  %lbrt
+		Epoch 0\includegraphics[clip, trim=0cm 5.8cm 0cm 28.9cm, width=.6\linewidth]{state_0.pdf}\\  %lbrt
+		Epoch 25\includegraphics[clip, trim=0cm 5.8cm 0cm 28.9cm, width=.6\linewidth]{state_25.pdf}\\  %lbrt
+		Epoch 50\includegraphics[clip, trim=0cm 5.8cm 0cm 28.9cm, width=.6\linewidth]{state_50.pdf}\\  %lbrt
+		Epoch 75\includegraphics[clip, trim=0cm 5.8cm 0cm 28.9cm, width=.6\linewidth]{state_75.pdf}\\  %lbrt
+		Epoch 100\includegraphics[clip, trim=0cm 5.8cm 0cm 28.9cm, width=.6\linewidth]{state_100.pdf}\\  %lbrt
+		Epoch 150\includegraphics[clip, trim=0cm 5.8cm 0cm 28.9cm, width=.6\linewidth]{state_150.pdf}\\  %lbrt
+		Epoch 195\includegraphics[clip, trim=0cm 5.8cm 0cm 28.9cm, width=.6\linewidth]{state_195.pdf}  %lbrt
 	\end{figure}
 
 \end{frame}
@@ -299,9 +305,10 @@ Traub, M., Butz, M. V., Baayen, R. H., \& Otte, S. (2020, September). Learning P
 \section{Next steps}
 \begin{frame}{My questions}
 \begin{itemize}[label=--]
-\item Solving the scaling issue?
+\item Initial weights scaling? Freezing initial weights?
 \item Thesis template? (\texttt{.tex})
 \item Any questions or suggestions?
+\item General evaluation of the project? Further course?
 \end{itemize}
 
 
