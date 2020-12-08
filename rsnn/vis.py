@@ -92,8 +92,7 @@ def plot_state(cfg, M, W_rec, W_out, b_out, e, log_id, plot_weights=False):
     S_plotvars = ["X", "I", "V", "H", "U", "Z", "Y", "L"]
     if cfg["Track_state"]:
         S_plotvars = S_plotvars[:6] + ["EVV", "EVU", "ET"] + S_plotvars[6:]
-    if cfg["Track_state"]:
-        S_plotvars = S_plotvars + ["DW", "DW_out", "Db_out"]
+    S_plotvars = S_plotvars + ["DW", "DW_out", "Db_out"]
 
     M_plotvars = ["P", "Pmax", "T", "CE"]
     if cfg["n_directions"] > 1:
@@ -137,8 +136,8 @@ def plot_state(cfg, M, W_rec, W_out, b_out, e, log_id, plot_weights=False):
                            aspect='auto')
 
             axs[-1].set_ylabel(f"${lookup[var]['label']}$"
-                               f"\n[{np.min(arr):.1f}"
-                               f", {np.max(arr):.1f}]",
+                               f"\n[{np.min(arr):.1e}"
+                               f", {np.max(arr):.1e}]",
                                rotation=0,
                                labelpad=labelpad,
                                fontsize=fontsize)
@@ -173,8 +172,8 @@ def plot_state(cfg, M, W_rec, W_out, b_out, e, log_id, plot_weights=False):
             axs[-1].grid()
 
         axs[-1].set_ylabel(f"${lookup[var]['label']}$"
-                           f"\n[{np.min(arr):.1f}"
-                           f", {np.max(arr):.1f}]",
+                           f"\n[{np.min(arr):.1e}"
+                           f", {np.max(arr):.1e}]",
                            rotation=0,
                            labelpad=labelpad,
                            fontsize=fontsize)
@@ -195,8 +194,8 @@ def plot_state(cfg, M, W_rec, W_out, b_out, e, log_id, plot_weights=False):
                            interpolation='nearest',
                            aspect='auto')
             axs[-1].set_ylabel(f"${lookup[k]['label']}$"
-                               f"\n[{np.min(v):.1f}"
-                               f", {np.max(v):.1f}]",
+                               f"\n[{np.min(v):.1e}"
+                               f", {np.max(v):.1e}]",
                                rotation=0,
                                labelpad=labelpad,
                                fontsize=fontsize)

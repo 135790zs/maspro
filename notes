@@ -1,12 +1,21 @@
 
 # MUST DO:
 # TODO: Network model t's to Bellec
+# TODO: Check ADAM
+# TODO: Check weight update,
+# TODO: Try edge cases
+# TODO: MSE?
+# TODO: Double check error term in softmax. Might interfere?
+# TODO:
 
 # LOW PRIORITY:
 # TODO: Make it possible to use fewer than N_I N_Rs
 # TODO: Make N_R variable per layer
 # TODO: Experiment with reducing randomness a priori
 # TODO: Only plot weights if tracking them
+# TODO: Explore non-uniform synaptic delays
+# TODO: Explore membrane potential reset
+# TODO: Comment code
 
 I can maybe use random B for all early layers and adaptive/symmetric B for last layer
 ALSO note usage of W^out_kj in pE/pz equation in supp equation 20. Needs solution
@@ -14,17 +23,11 @@ ALSO note usage of W^out_kj in pE/pz equation in supp equation 20. Needs solutio
 
 =========
 
-send plot to Jaeger if working
+send plot to Jaeger, Dirk and Marco if working
 may email Bellec et al if concrete question
 
 =========
-
-TODAY:
-# TODO: Explore non-uniform synaptic delays
-# TODO: Time complexity!
-# TODO: Comment code
-# TODO: Explore membrane potential reset
-
+Freezing recurrent weights makes no difference. -> See if training with only recurrents works with very low learning rate. If so, I will need to have 2 different learning rates. Also explore if this is linked to Adam (see if also occurs using SGD).
 
 =========
 

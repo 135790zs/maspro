@@ -60,21 +60,21 @@ def network(cfg, inp, tar, W_rec, W_out, b_out, B, adamvars):
                 if not cfg["update_W_out"] and wtype == "W_out":
                     continue
 
-                M[f'g{wtype}'][s, curr_t] = ut.eprop_gradient(wtype=wtype,
-                                                              L=M['L'][s, t],
-                                                              ETbar=M['ETbar'][s, curr_t],
-                                                              Zbar_last=M['Zbar'][s, t, -1],
-                                                              P=M['P'][t],
-                                                              T=M['T'][t])
+                M[f'g{wtype}'][s, curr_t] += ut.eprop_gradient(wtype=wtype,
+                                                               L=M['L'][s, t],
+                                                               ETbar=M['ETbar'][s, curr_t],
+                                                               Zbar_last=M['Zbar'][s, t, -1],
+                                                               P=M['P'][t],
+                                                               T=M['T'][t])
 
 
-                M[f'D{wtype}'][s, curr_t] = ut.eprop_DW(cfg=cfg,
-                                                        wtype=wtype,
-                                                        s=s,
-                                                        adamvars=adamvars,
-                                                        gradient=M[f'g{wtype}'][s, curr_t],
-                                                        Zs=M['Z'][s, :t],
-                                                        ETbar=M['ETbar'][s, curr_t])
+                M[f'D{wtype}'][s, curr_t] += ut.eprop_DW(cfg=cfg,
+                                                         wtype=wtype,
+                                                         s=s,
+                                                         adamvars=adamvars,
+                                                         gradient=M[f'g{wtype}'][s, curr_t],
+                                                         Zs=M['Z'][s, :t],
+                                                         ETbar=M['ETbar'][s, curr_t])
 
             if not cfg["update_input_weights"]:
                     M["DW"][s, curr_t, 0, :, :inp.shape[-1]] = 0
@@ -285,8 +285,13 @@ def main(cfg):
             # Update weights
 
             if not cfg["update_bias"] and wtype == "b_out":
+                W[wtype][ep_curr+ep_incr] = W[wtype][ep_curr]
                 continue
             if not cfg["update_W_out"] and wtype == "W_out":
+                W[wtype][ep_curr+ep_incr] = W[wtype][ep_curr]
+                continue
+            if not cfg["update_W"] and wtype == "W":
+                W[wtype][ep_curr+ep_incr] = W[wtype][ep_curr]
                 continue
 
             if wtype == "B":

@@ -13,7 +13,7 @@ cfg = {
     "theta_output": 3,  # TIMIT: 3
     "beta": 0.184,    # TIMIT: 0.184
     "gamma": 0.3,     # Pseudoderivative ET contribution
-    "eta": 1e-2,      # Learning rate (1e-2 for TIMIT)
+    "eta": 1e-7,      # Learning rate (1e-2 for TIMIT)
     "thr": 1.6,        # Spike threshold, def = 1.6
     "weight_scale": 3,
     "dt_refr": 2,    # Refractory time, def = 2
@@ -27,23 +27,24 @@ cfg = {
     "adam_beta2": 0.999,
     "adam_eps": 1e-5,
 
-    "update_bias": True,
-    "update_W_out": True,
+    "update_bias": False,
+    "update_W_out": False,
+    "update_W": True,
     "update_dead_weights": False,
     "update_input_weights": True,
 
-    "N_R": 200,
+    "N_R": 64,
     "N_Rec": 1,
 
     "wavs_fname": "../data_wavs",
     "phns_fname": "../data_phns",
 
     "Epochs": 80,  # def = 80
-    "Track_weights": False,
+    "Track_weights": True,
     "Track_state": False,  # Only for synapse vars
     "Repeats": 5,  # ms per epoch, def = 5
-    "batch_size_train": 32,  # def = 32
-    "batch_size_val": 32,  # def = 32
+    "batch_size_train": 2,  # def = 32
+    "batch_size_val": 2,  # def = 32
     "val_every_E": 5,
     "maxlen": 778,  # Don't forget to re-run process_timit.py!
     "n_examples": {'train': 3696, 'val': 400, 'test': 192},
