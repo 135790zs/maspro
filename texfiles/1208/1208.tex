@@ -106,8 +106,8 @@
 	
 \end{frame}
 
-\subsection{Proof}
-\begin{frame}{The e-prop learning algorithm -- proof ($L^t_j$)}
+\subsection{Key equations}
+\begin{frame}{The e-prop learning algorithm -- basic equations ($L^t_j$)}
 	
 	\begin{align*}
 		\frac{dE}{dW_{ji}} 
@@ -117,15 +117,15 @@
 	\begin{align*}
 L^t_j &\eqdef \frac{\partial E}{\partial z^t_j}\\ &= \sum_kB_{jk}\left(\pi^t_k-\pi_k^{*,t}\right)
 \end{align*}
-	
+	(proof omitted for brevity)
 	
 \end{frame}
 
-\begin{frame}{The e-prop learning algorithm -- proof ($e^t_{ji}$)}
+\begin{frame}{The e-prop learning algorithm -- basic equations ($e^t_{ji}$)}
 
 	\begin{align*}
 e^t_{ji} &\eqdef \frac{\partial z_j^t}{\partial\mathbf{h}_j^t}\underbrace{\sum_{t'\leq t}\frac{\partial\mathbf{h}^t_j}{\partial\mathbf{h}_j^{t-1}} \cdots \frac{\partial\mathbf{h}_j^{t'+1}}{\partial\mathbf{h}_j^{t'}}\cdot\frac{\partial\mathbf{h}_j^{t'}}{\partial W_{ji}}}_{\eqdef \bm{\varepsilon}_{ji}^t}\\
-&= \psi_j^t\bar{z}^{t-1}_i\qquad\text{(for LIF neurons in Bellec et al)}
+&= \psi_j^t\bar{z}^{t-1}_i\qquad\text{(for LIF neurons in Bellec et al.)}
 \end{align*}
 	
 	
@@ -221,8 +221,16 @@ Traub, M., Butz, M. V., Baayen, R. H., \& Otte, S. (2020, September). Learning P
 \begin{itemize}[label=--]
 \item \[\lim_{e\to\infty} W^e_{\textrm{out}} = \mathbf{0}\]
 \[\lim_{e\to\infty} b^e_{\textrm{out}} = \mathbf{0}\]
-\item Spike frequency normal but heavily affected by weight initialization. Weights in uniform range of $[0, \frac{C}{N}]$ work well, where $N$ is number of afferent connections.
+\item Spike frequency normal but heavily affected by weight initialization. Currently finding good rule of thumb for good scaling per layer. Weights in uniform range of $[0, \frac{C}{N}]$ work well, where $N$ is number of afferent connections.
 \end{itemize}
+
+\end{frame}
+
+\begin{frame}{Typical results (Undesired pulsation)}
+
+	\begin{figure}[!ht]
+		\includegraphics[clip, trim=0cm 9.28cm 0cm 0cm, width=1\linewidth]{latest_metric.pdf}  %lbrt
+	\end{figure}
 
 \end{frame}
 
@@ -273,7 +281,17 @@ Traub, M., Butz, M. V., Baayen, R. H., \& Otte, S. (2020, September). Learning P
 
 \begin{frame}{Hyperparameter sweep results}
 
-(show results)
+	\begin{figure}[!ht]
+		\includegraphics[clip, trim=0cm 0cm 0cm 2.5cm, width=0.64\linewidth]{scatters.pdf}  %lbrt
+	\end{figure}
+
+\end{frame}
+
+\begin{frame}{}
+
+	\begin{figure}[!ht]
+		\includegraphics[clip, trim=0cm 0cm 0cm 0cm, width=0.6\linewidth]{all.pdf}  %lbrt
+	\end{figure}
 
 \end{frame}
 
@@ -281,6 +299,7 @@ Traub, M., Butz, M. V., Baayen, R. H., \& Otte, S. (2020, September). Learning P
 \section{Next steps}
 \begin{frame}{My questions}
 \begin{itemize}[label=--]
+\item Solving the scaling issue?
 \item Thesis template? (\texttt{.tex})
 \item Any questions or suggestions?
 \end{itemize}

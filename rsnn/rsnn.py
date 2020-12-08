@@ -6,6 +6,7 @@ import vis
 
 
 def network(cfg, inp, tar, W_rec, W_out, b_out, B, adamvars):
+
     inp = np.pad(array=inp, mode='edge', pad_width=((0, cfg["delay"]), (0, 0)))
 
     n_steps = inp.shape[0]
@@ -18,20 +19,13 @@ def network(cfg, inp, tar, W_rec, W_out, b_out, B, adamvars):
         M[f"X{s}"] = inp if s == 0 else np.flip(inp, axis=0)
 
         for t in range(n_steps):
-            if cfg["Track_state"]:
-                prev_t = t-1
-                curr_t = t
-            else:
-                prev_t = 0
-                curr_t = 0
 
             # Input is nonzero for first layer
             for r in range(cfg['N_Rec']):
                 M = ut.process_layer(cfg=cfg, M=M, s=s, t=t, r=r, W_rec=W_rec[s, r])
 
-
             M['Y'][s, t] = ut.eprop_Y(cfg=cfg,
-                                      Y=M['Y'][s, prev_t] if t > 0 else 0,
+                                      Y=M['Y'][s, t-1] if t > 0 else 0,
                                       W_out=W_out[s],
                                       Z_last=M['Z'][s, t, -1],
                                       b_out=b_out[s])
@@ -52,7 +46,6 @@ def network(cfg, inp, tar, W_rec, W_out, b_out, B, adamvars):
 
     for s in range(cfg["n_directions"]):
         for t in range(n_steps):  # TODO: can make more efficient by doing einsums
-            start = time.time()
             if cfg["Track_state"]:
                 curr_t = t
             else:
@@ -68,9 +61,9 @@ def network(cfg, inp, tar, W_rec, W_out, b_out, B, adamvars):
                     continue
 
                 M[f'g{wtype}'][s, curr_t] = ut.eprop_gradient(wtype=wtype,
-                                                              L=M['L'][s, curr_t],
+                                                              L=M['L'][s, t],
                                                               ETbar=M['ETbar'][s, curr_t],
-                                                              Zbar_last=M['Zbar'][s, curr_t, -1],
+                                                              Zbar_last=M['Zbar'][s, t, -1],
                                                               P=M['P'][t],
                                                               T=M['T'][t])
 
@@ -91,9 +84,8 @@ def network(cfg, inp, tar, W_rec, W_out, b_out, B, adamvars):
 
             if cfg["plot_graph"]:
                 vis.plot_graph(
-                    cfg=cfg, M=M, s=s, t=curr_t, W_rec=W_rec, W_out=W_out)
+                    cfg=cfg, M=M, s=s, t=t, W_rec=W_rec, W_out=W_out)
                 time.sleep(0.5)
-
     return M
 
 
@@ -101,7 +93,7 @@ def feed_batch(cfg, inps, tars, W_rec, W_out, b_out, B, epoch, tvt_type, adamvar
     batch_err = 0
     batch_perc_wrong = 0
 
-    # Comb DW gW inits
+    # TODO: Comb DW gW inits
     batch_DW = {
         'W': np.zeros(
             shape=(cfg["n_directions"], cfg["N_Rec"], cfg["N_R"], cfg["N_R"] * 2,)),
@@ -213,6 +205,7 @@ def main(cfg):
                               inp_size=inps['train'].shape[-1],
                               tar_size=tars['train'].shape[-1])
 
+    # Print size of system in memory
     if cfg["verbose"]:
         M = ut.initialize_model(cfg=cfg,
                                 length=cfg["maxlen"]*cfg["Repeats"],

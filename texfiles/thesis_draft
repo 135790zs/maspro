@@ -4,15 +4,31 @@ STRUCTURE
   - Unclear how RSNNs can learn. In hope of crudely emulating biological neural circuits, try online, local and bioplausible method.
   - E-prop uses bio-inspired (which) methods that allow for online, local, bioplausible training and have shown to yield good results.
   - However, real neurons are stacked in layers. This paper generalizes e-prop to multiple layers. (short parallel to perceptrons vs, MLPs? will need some theoretical analysis like MLPs could nonlinearly separate. Time dynamics maybe?)
+  - Increasing relevance for neuromorphic computing
   - ... synaptic scaling, Izhikevich etc will depend on whether it is implemented.
 
 * METHOD
-  - In method, first general top-down formulas (derivatives etc). Derive from RNNs. Explain Traub fix or Bellec reset if applicable.
+  - General top-down formulas (derivatives etc). Derive from RNNs. Explain Traub fix or Bellec reset if applicable.
+  - Actual formulas of implementation (abstract away from bidir & epoch dimension) like Bellec, for LIF, ALIF, Izhikevich. Include derivations as proof.
+  - TIMIT dataset explanation, including preprocessing
+  - Regularization (FR, L2, synscaling, metaplasticity, etc)
+  - Hyperparameter sweep (keep it objective and explain choices.)
+
 * RESULTS
+  - Results of TIMIT. Optionally: initialization & hparam robustness, tradeoffs, comparisons, generalizability, system behavior (e.g. spike freqs, time dynamics, per-phoneme performance), running cost in simulation and in neuromorphics (where only spikes cost energy).
+
 * DISCUSSION
+  -
+
 * CONCLUSION
+  - Short summary, key sentences from all previous. Logical connection to introduction.
+  - Link to R-STDP with Traub fix.
+  - Neuromorphic computing
+  - Maybe: attempt to explain network interpretability. Subgraphs representing features.
 
 * APPENDIX
+  - Explain implementation, sweeping, and all details such that precise replication can be made.
+  - Pseudocode
 
 
 

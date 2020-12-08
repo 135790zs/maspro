@@ -89,10 +89,9 @@ def plot_run(terrs, percs_wrong_t, verrs, percs_wrong_v, W, epoch, log_id):
 
 
 def plot_state(cfg, M, W_rec, W_out, b_out, e, log_id, plot_weights=False):
-    S_plotvars = ["X", "I", "V", "H", "U", "Z",
-                  "Y", "L"]
+    S_plotvars = ["X", "I", "V", "H", "U", "Z", "Y", "L"]
     if cfg["Track_state"]:
-        S_plotvars = S_plotvars[6:] + ["EVV", "EVU", "ET"] + S_plotvars[6:]
+        S_plotvars = S_plotvars[:6] + ["EVV", "EVU", "ET"] + S_plotvars[6:]
     if cfg["Track_state"]:
         S_plotvars = S_plotvars + ["DW", "DW_out", "Db_out"]
 

@@ -140,7 +140,8 @@ def initialize_weights(cfg, inp_size, tar_size):
                               cfg["N_R"] * 2,))
 
     # Decrease weights in first layer
-    W["W"][0, :, 0] *= cfg["weight_scale"] / (cfg["N_R"] + inp_size)  # Epoch 0, layer 0
+    W["W"][0, :, 0] /= inp_size + cfg["N_R"]  # Epoch 0, layer 0
+    # W["W"][0, :, 1] /= cfg["N_R"]/3  # Epoch 0, layer 1
 
     W["W_out"] = rng.random(size=(n_epochs,
                                   cfg["n_directions"],
@@ -174,14 +175,6 @@ def initialize_weights(cfg, inp_size, tar_size):
     W['W'][0] = np.where(np.random.random(W['W'][0].shape) < cfg["dropout"],
                          0,
                          W['W'][0])
-
-    # W['W'][0, 0, 0, 0, 0] = 2  # Input 1 to rec 1: frozen
-    # W['W'][0, 0, 0, 1, 0] = 0  # Input 1 to rec 2
-    # W['W'][0, 0, 0, 0, 1] = 0  # Input 2 to rec 1
-    # W['W'][0, 0, 0, 1, 1] = 0  # Input 2 to rec 2: frozen
-    # W['W'][0, 0, 0, 1, 2] = 2  # Rec 1 to rec 2 (B)
-    # W['W'][0, 0, 0, 0, 3] = 0  # Rec 2 to rec 1 (T)
-
     return W
 
 
@@ -420,8 +413,6 @@ def eprop_DW(cfg, wtype, s, adamvars, gradient, Zs, ETbar):
 
 
 def process_layer(cfg, M, t, s, r, W_rec):
-    start = time.time()
-
 
     if cfg["Track_state"]:
         prev_t = t-1
@@ -441,8 +432,6 @@ def process_layer(cfg, M, t, s, r, W_rec):
                               is_ALIF=M['is_ALIF'][s, r])
 
     M['TZ'][s, r, M['Z'][s, t, r]==1] = t  # Log spike time
-
-    # print(f"M:\tA: {time.time()-start:.3f}")
 
     # Pad any input with zeros to make it length N_R
     Z_prev = M['Z'][s, t, r-1] if r > 0 else \
@@ -475,9 +464,8 @@ def process_layer(cfg, M, t, s, r, W_rec):
         for var in ["EVV", "EVU", "ET"]:
             M[var][s, curr_t, r, W_rec == 0] = 0
 
-    # print(f"M:\tB: {time.time()-start:.3f}")
-
     M["Z_in"][s, t, r] = np.concatenate((Z_prev, M['Z'][s, t, r]))
+
     M["TZ_in"][s, r] = np.concatenate((TZ_prev, M['TZ'][s, r]))
 
     M['Z_inbar'][s, t] = eprop_lpfK(lpf=M['Z_inbar'][s, t-1] if t > 0 else 0,
@@ -494,8 +482,6 @@ def process_layer(cfg, M, t, s, r, W_rec):
     M['Zbar'][s, t, r] = eprop_lpfK(lpf=M['Zbar'][s, t-1, r] if t > 0 else 0,
                                      x=M['Z'][s, t, r],
                                      factor=cfg["kappa"])
-
-    # print(f"M:\tB: {time.time()-start:.3f}")
 
     if t != M[f"X{s}"].shape[0] - 1:
         M['EVV'][s, next_t, r] = eprop_EVV(cfg=cfg,
@@ -519,11 +505,11 @@ def process_layer(cfg, M, t, s, r, W_rec):
                                     TZ=M['TZ'][s, r],
                                     t=t)
 
+
         M['U'][s, t+1, r] = eprop_U(cfg=cfg,
                                     U=M['U'][s, t, r],
                                     Z=M['Z'][s, t, r],
                                     is_ALIF=M['is_ALIF'][s, r])
-
 
     return M
 

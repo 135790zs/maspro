@@ -1,8 +1,8 @@
 \beamer@sectionintoc {1}{Project overview}{2}{0}{1}
 \beamer@sectionintoc {2}{Background}{3}{0}{2}
-\beamer@subsectionintoc {2}{1}{Proof}{5}{0}{2}
+\beamer@subsectionintoc {2}{1}{Key equations}{5}{0}{2}
 \beamer@subsectionintoc {2}{2}{Bellec et al}{7}{0}{2}
 \beamer@subsectionintoc {2}{3}{Traub et al}{9}{0}{2}
 \beamer@sectionintoc {3}{Proposal}{10}{0}{3}
 \beamer@sectionintoc {4}{Current state}{11}{0}{4}
-\beamer@sectionintoc {5}{Next steps}{18}{0}{5}
+\beamer@sectionintoc {5}{Next steps}{20}{0}{5}
