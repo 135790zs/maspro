@@ -34,11 +34,12 @@ def weights_to_img(arr, is_binary=False):
     return arr
 
 
-def plot_run(terrs, percs_wrong_t, verrs, percs_wrong_v, W, epoch, log_id):
+def plot_run(cfg, terrs, percs_wrong_t, verrs, percs_wrong_v, W, epoch, log_id):
     labelpad = 35
     fontsize = 14
     fig = plt.figure(constrained_layout=False, figsize=(8, 8))
-    gsc = fig.add_gridspec(nrows=8, ncols=1, hspace=0.05)
+    gsc = fig.add_gridspec(nrows=8 if cfg["Track_weights"] else 4,
+                           ncols=1, hspace=0.05)
     axs = []
 
     for errs, label in [(terrs, "E_T"), (verrs, "E_V")]:
@@ -64,7 +65,7 @@ def plot_run(terrs, percs_wrong_t, verrs, percs_wrong_v, W, epoch, log_id):
                            labelpad=labelpad,
                            fontsize=fontsize)
 
-    if epoch >= 1:
+    if epoch >= 1 and cfg["Track_weights"]:
         for weight_type, weights in W.items():
             axs.append(fig.add_subplot(gsc[len(axs), :]))
             axs[-1].imshow(
@@ -73,8 +74,8 @@ def plot_run(terrs, percs_wrong_t, verrs, percs_wrong_v, W, epoch, log_id):
                 interpolation='nearest',
                 cmap='coolwarm')
             axs[-1].set_ylabel(f"{weight_type}"
-                               f"\n[{np.min(weights[:epoch]):.1f}"
-                               f", {np.max(weights[:epoch]):.1f}]",
+                               f"\n{np.min(weights[:epoch]):.1e}"
+                               f"\n{np.max(weights[:epoch]):.1e}",
                                rotation=0,
                                labelpad=labelpad,
                                fontsize=fontsize)
@@ -136,8 +137,8 @@ def plot_state(cfg, M, W_rec, W_out, b_out, e, log_id, plot_weights=False):
                            aspect='auto')
 
             axs[-1].set_ylabel(f"${lookup[var]['label']}$"
-                               f"\n[{np.min(arr):.1e}"
-                               f", {np.max(arr):.1e}]",
+                               f"\n{np.min(arr):.1e}"
+                               f"\n{np.max(arr):.1e}",
                                rotation=0,
                                labelpad=labelpad,
                                fontsize=fontsize)
@@ -172,8 +173,8 @@ def plot_state(cfg, M, W_rec, W_out, b_out, e, log_id, plot_weights=False):
             axs[-1].grid()
 
         axs[-1].set_ylabel(f"${lookup[var]['label']}$"
-                           f"\n[{np.min(arr):.1e}"
-                           f", {np.max(arr):.1e}]",
+                           f"\n{np.min(arr):.1e}"
+                           f"\n{np.max(arr):.1e}",
                            rotation=0,
                            labelpad=labelpad,
                            fontsize=fontsize)
@@ -194,9 +195,10 @@ def plot_state(cfg, M, W_rec, W_out, b_out, e, log_id, plot_weights=False):
                            interpolation='nearest',
                            aspect='auto')
             axs[-1].set_ylabel(f"${lookup[k]['label']}$"
-                               f"\n[{np.min(v):.1e}"
-                               f", {np.max(v):.1e}]",
+                               f"\n{np.min(arr):.1e}"
+                               f"\n{np.max(arr):.1e}",
                                rotation=0,
+
                                labelpad=labelpad,
                                fontsize=fontsize)
 

@@ -1,11 +1,11 @@
 from numpy import exp
 cfg = {
-    "verbose": False,
+    "verbose": True,
     "eprop_type": "adaptive",  # in {random, symmetric, adaptive}
     "optimizer": 'Adam',
     "traub_trick": False,
     "fraction_ALIF": 0.25,  # def 0.25
-    "n_directions": 2,
+    "n_directions": 1,
     "delay": 0,
 
     "theta_adaptation": 200,  # Depends on length of task: working memory
@@ -13,9 +13,9 @@ cfg = {
     "theta_output": 3,  # TIMIT: 3
     "beta": 0.184,    # TIMIT: 0.184
     "gamma": 0.3,     # Pseudoderivative ET contribution
-    "eta": 1e-7,      # Learning rate (1e-2 for TIMIT)
+    "eta_rec": 1e-9,      # Learning rate (1e-2 for TIMIT)
+    "eta_out": 1e-9,      # Learning rate (1e-2 for TIMIT)
     "thr": 1.6,        # Spike threshold, def = 1.6
-    "weight_scale": 3,
     "dt_refr": 2,    # Refractory time, def = 2
     "dt": 1,
     "weight_decay": 1e-2,  # For W_out and B, only if adaptive. def = 1e-2
@@ -27,8 +27,8 @@ cfg = {
     "adam_beta2": 0.999,
     "adam_eps": 1e-5,
 
-    "update_bias": False,
-    "update_W_out": False,
+    "update_bias": True,
+    "update_W_out": True,
     "update_W": True,
     "update_dead_weights": False,
     "update_input_weights": True,
@@ -43,13 +43,13 @@ cfg = {
     "Track_weights": True,
     "Track_state": False,  # Only for synapse vars
     "Repeats": 5,  # ms per epoch, def = 5
-    "batch_size_train": 2,  # def = 32
-    "batch_size_val": 2,  # def = 32
-    "val_every_E": 5,
+    "batch_size_train": 6,  # def = 32
+    "batch_size_val": 6,  # def = 32
+    "val_every_E": 2,
     "maxlen": 778,  # Don't forget to re-run process_timit.py!
     "n_examples": {'train': 3696, 'val': 400, 'test': 192},
     "plot_interval": 1,  #  State plot; 0 to disable plots
-    "state_save_interval": 5,  #  State plot; 0 to disable plots
+    "state_save_interval": 1,
     "plot_main": True,
     "plot_state": True,
     "plot_graph": False,

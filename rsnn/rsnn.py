@@ -163,7 +163,8 @@ def feed_batch(cfg, inps, tars, W_rec, W_out, b_out, B, epoch, tvt_type, adamvar
                            e=e,
                            log_id=log_id)
 
-        batch_err += np.mean(final_model["CE"]) / inps.shape[0]
+        # Aggregate the mean batch error to the aggregator.
+        # Dividing by batch size to get batch mean.
         batch_err += np.mean(final_model["CE"]) / inps.shape[0]
         batch_perc_wrong += np.mean(
             np.max(np.abs(final_model["Pmax"]- final_model["T"]),
@@ -265,14 +266,15 @@ def main(cfg):
                 if cfg["verbose"]:
                     print(f"\nLowest val error ({verr:.3f}) found at epoch {e}!\n")
                 optVerr = verr
-                ut.save_weights(W=W, epoch=e if cfg["Track_weights"] else 0, log_id=log_id)
+                ut.save_weights(W=W, epoch=e if cfg["Track_weights"] else 0,
+                                log_id=log_id)
 
             # Interpolate missing verrs
             verrs[:e+1] = ut.interpolate_verrs(verrs[:e+1])
             percs_wrong_t[:e+1] = ut.interpolate_verrs(percs_wrong_t[:e+1])
 
         if cfg["plot_main"]:
-            vis.plot_run(terrs=terrs, percs_wrong_t=percs_wrong_t,
+            vis.plot_run(cfg=cfg, terrs=terrs, percs_wrong_t=percs_wrong_t,
                          verrs=verrs, percs_wrong_v=percs_wrong_t,
                          W=W, epoch=e, log_id=log_id)
 
@@ -317,28 +319,15 @@ def main(cfg):
 
                 # Update Adam
                 adamvars[f'm{wtype}'] = (
-                    adamvars["beta2"] * adamvars[f'm{wtype}']
-                    + (1 - adamvars["beta2"]) * gW[wtype])
+                    cfg["adam_beta1"] * adamvars[f'm{wtype}']
+                    + (1 - cfg["adam_beta1"]) * gW[wtype])
                 adamvars[f'v{wtype}'] = (
-                    adamvars["beta2"] * adamvars[f'v{wtype}']
-                    + (1 - adamvars["beta2"]) * gW[wtype] ** 2)
+                    cfg["adam_beta2"] * adamvars[f'v{wtype}']
+                    + (1 - cfg["adam_beta2"]) * gW[wtype] ** 2)
 
                 if wtype == "W_out":
                     W[wtype][ep_curr+ep_incr] -= (W[wtype][ep_curr+ep_incr]
                                                   * cfg["weight_decay"])
-
-
-            # # Decay iff adaptive
-            # if cfg["eprop_type"] == "adaptive" and wtype in ["W_out", "B"]:
-            #     W[wtype][ep_curr+ep_incr] -= cfg["weight_decay"] * W[wtype][ep_curr+ep_incr]
-
-            # # Mirror B <-> W_out if symmetric
-            # elif cfg["eprop_type"] == "symmetric" and wtype == "B":
-            #     for s in range(cfg["n_directions"]):
-            #         W[wtype][ep_curr+ep_incr, s] = (W["W_out"][ep_curr, s].T
-            #                             + DW['W_out'][s].T
-            #                             - (cfg["weight_decay"]
-            #                                * W["W_out"][ep_curr, s].T))
 
 
     if cfg["verbose"]:

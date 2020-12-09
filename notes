@@ -6,7 +6,7 @@
 # TODO: Try edge cases
 # TODO: MSE?
 # TODO: Double check error term in softmax. Might interfere?
-# TODO:
+# TODO: Why val error lower than training?
 
 # LOW PRIORITY:
 # TODO: Make it possible to use fewer than N_I N_Rs
@@ -35,3 +35,9 @@ TODAY: 7 dec
 # TODO: Finish introductory presentation
 # TODO: Run best sweep settings for longer, try obtain good results
 # TODO: Check maths
+
+
+==========
+Questions for Bellec
+- Target frequency?
+- Synapse weight initialization?

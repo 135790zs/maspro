@@ -93,6 +93,7 @@ def initialize_model(cfg, length, tar_size):
         M[b_out_var] = np.zeros(shape=b_out_shape)
 
     M["U"] = np.ones(shape=neuron_shape) * cfg["thr"]
+    M["V"] = np.random.random(size=neuron_shape) * cfg["thr"]
 
     M["TZ"] = np.ones(shape=neuron_timeless_shape) * -cfg["dt_refr"]
 
@@ -139,10 +140,6 @@ def initialize_weights(cfg, inp_size, tar_size):
                               cfg["N_R"],
                               cfg["N_R"] * 2,))
 
-    # Decrease weights in first layer
-    W["W"][0, :, 0] /= 64  # Epoch 0, layer 0
-    # W["W"][0, :, 1] /= cfg["N_R"]/3  # Epoch 0, layer 1
-
     W["W_out"] = rng.random(size=(n_epochs,
                                   cfg["n_directions"],
                                   tar_size,
@@ -176,6 +173,13 @@ def initialize_weights(cfg, inp_size, tar_size):
     W['W'][0] = np.where(np.random.random(W['W'][0].shape) < cfg["dropout"],
                          0,
                          W['W'][0])
+
+
+
+    # Re-scale weights in first layer (first time step will be transferred
+    # automatically)
+    W["W"][0, :, 0] /= cfg["N_R"] * 1  # Epoch 0, layer 0
+
     return W
 
 
@@ -267,7 +271,6 @@ def eprop_V(cfg, V, I, Z, t, TZ):
     if not cfg["traub_trick"]:
         return cfg["alpha"] * V + I - Z * cfg["thr"]
     else:
-        # print(TZ.shape, (TZ == cfg["dt_refr"]).shape)
         return (cfg["alpha"] * V
                 + I
                 - cfg["alpha"] * Z * V
@@ -365,18 +368,26 @@ def eprop_Y(cfg, Y, W_out, Z_last, b_out):
 
 
 def eprop_P(Y):
-    ex = np.exp(Y - np.max(Y))
-    return ex / np.sum(ex)
+    maxx = np.max(Y, axis=1)
+    m = Y - maxx[:, None]  # TODO: This step may be ineffective
+    ex = np.exp(m)
+    denom = np.sum(ex, axis=1)
+    ret = ex / denom[:, None]
+    return ret
 
 
 def eprop_CE(cfg, T, P, W_rec, W_out, B):
-    # TODO: on which weights?
+
     W = np.concatenate((W_rec.flatten(),
                         W_out.flatten(),
                         B.flatten()))
-    # print((T * np.log(1e-8 + P)).shape, T.shape)
+
     L2norm_W = np.linalg.norm(W) ** 2 * cfg["L2_reg"]
-    return (-np.sum(T * np.log(1e-8 + P), axis=1) + L2norm_W)
+
+    # if True:  # MSE
+    #     return np.mean((T-P)**2, axis=1)
+
+    return -np.sum(T * np.log(1e-30 + P), axis=1) + L2norm_W
 
 
 def eprop_gradient(wtype, L, ETbar, P, T, Zbar_last):
@@ -389,28 +400,34 @@ def eprop_gradient(wtype, L, ETbar, P, T, Zbar_last):
 
 
 def eprop_DW(cfg, wtype, s, adamvars, gradient, Zs, ETbar):
-    FR_reg = 0
-    if wtype == 'W' and Zs.shape[0]:  # Add firing rate reg term
+
+    # Add firing rate reg term, Zs.shape ensures we have some data.
+    if wtype == 'W' and Zs.shape[0]:
         FR_reg = (
-            cfg["eta"]
+            cfg["eta_rec"]
             * cfg["FR_reg"]
             * np.mean(np.einsum("rj,rji->rji",
                                 cfg["FR_target"] - np.mean(Zs, axis=0),
                                 ETbar),
                       axis=0))
+    else:
+        FR_reg = 0
 
     if cfg["optimizer"] == 'SGD':
-        return -cfg["eta"] * gradient + FR_reg
+        ret = ((-cfg["eta_rec"] if wtype == 'W' else -cfg["eta_out"])
+                * gradient + FR_reg)
+        return ret
 
     elif cfg["optimizer"] == 'Adam':
-        m = (adamvars["beta1"] * adamvars[f"m{wtype}"][s]
-             + (1 - adamvars["beta1"]) * gradient)
-        v = (adamvars["beta2"] * adamvars[f"v{wtype}"][s]
-             + (1 - adamvars["beta2"]) * gradient ** 2)
-        f1 = m / ( 1 - adamvars["beta1"])
-        f2 = np.sqrt(v / (1 - adamvars["beta2"])) + adamvars["eps"]
-
-        return cfg["eta"] * (f1 / f2) + FR_reg
+        m = (cfg["adam_beta1"] * adamvars[f"m{wtype}"][s]
+             + (1 - cfg["adam_beta1"]) * gradient)
+        v = (cfg["adam_beta2"] * adamvars[f"v{wtype}"][s]
+             + (1 - cfg["adam_beta2"]) * gradient ** 2)
+        f1 = m / ( 1 - cfg["adam_beta1"])
+        f2 = np.sqrt(v / (1 - cfg["adam_beta2"])) + cfg["adam_eps"]
+        ret = ((cfg["eta_rec"] if wtype == 'W' else cfg["eta_out"])
+               * (f1 / f2) + FR_reg)
+        return ret
 
 
 def process_layer(cfg, M, t, s, r, W_rec):
@@ -480,7 +497,7 @@ def process_layer(cfg, M, t, s, r, W_rec):
     M["TZ_in"][s, r] = np.concatenate((TZ_prev, M['TZ'][s, r]))
 
     M['Z_inbar'][s, t] = eprop_lpfK(lpf=M['Z_inbar'][s, t-1] if t > 0 else 0,
-                                    x=M['Z_in'][s, curr_t],
+                                    x=M['Z_in'][s, t],
                                     factor=cfg["alpha"])
 
     M['I'][s, t, r] = eprop_I(W_rec=W_rec,
@@ -527,9 +544,6 @@ def process_layer(cfg, M, t, s, r, W_rec):
 
 def init_adam(cfg, tar_size):
     return {
-        'beta1': cfg['adam_beta1'],
-        'beta2': cfg['adam_beta2'],
-        'eps': cfg['adam_eps'],
         'mW': np.zeros(shape=(cfg["n_directions"], cfg["N_Rec"], cfg["N_R"], cfg["N_R"] * 2,)),
         'vW': np.zeros(shape=(cfg["n_directions"], cfg["N_Rec"], cfg["N_R"], cfg["N_R"] * 2,)),
         'mW_out': np.zeros(shape=(cfg["n_directions"], tar_size, cfg["N_R"],)),
