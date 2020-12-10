@@ -67,7 +67,6 @@ def network(cfg, inp, tar, W_rec, W_out, b_out, B, adamvars):
                                                                P=M['P'][t],
                                                                T=M['T'][t])
 
-
                 M[f'D{wtype}'][s, curr_t] += ut.eprop_DW(cfg=cfg,
                                                          wtype=wtype,
                                                          s=s,

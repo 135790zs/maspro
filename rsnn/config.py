@@ -13,15 +13,15 @@ cfg = {
     "theta_output": 3,  # TIMIT: 3
     "beta": 0.184,    # TIMIT: 0.184
     "gamma": 0.3,     # Pseudoderivative ET contribution
-    "eta_rec": 1e-9,      # Learning rate (1e-2 for TIMIT)
-    "eta_out": 1e-9,      # Learning rate (1e-2 for TIMIT)
+    "eta_rec": 1e-2,      # Learning rate (1e-2 for TIMIT)
+    "eta_out": 1e-2,      # Learning rate (1e-2 for TIMIT)
     "thr": 1.6,        # Spike threshold, def = 1.6
     "dt_refr": 2,    # Refractory time, def = 2
     "dt": 1,
     "weight_decay": 1e-2,  # For W_out and B, only if adaptive. def = 1e-2
     "L2_reg": 1e-5,  # 1e-5 for TIMIT
     "FR_reg": 50,  # 50 for TIMIT
-    "FR_target": 12/1000,  # Desired frequency (mean per ms)
+    "FR_target": 6/1000,  # Desired frequency (mean per ms)
     "dropout": 0,
     "adam_beta1": 0.9,
     "adam_beta2": 0.999,
@@ -31,7 +31,7 @@ cfg = {
     "update_W_out": True,
     "update_W": True,
     "update_dead_weights": False,
-    "update_input_weights": True,
+    "update_input_weights": True,  # Subset of - and overridden by `update_W'.
 
     "N_R": 64,
     "N_Rec": 1,
@@ -43,9 +43,9 @@ cfg = {
     "Track_weights": True,
     "Track_state": False,  # Only for synapse vars
     "Repeats": 5,  # ms per epoch, def = 5
-    "batch_size_train": 6,  # def = 32
-    "batch_size_val": 6,  # def = 32
-    "val_every_E": 2,
+    "batch_size_train": 4,  # def = 32
+    "batch_size_val": 4,  # def = 32
+    "val_every_E": 5,
     "maxlen": 778,  # Don't forget to re-run process_timit.py!
     "n_examples": {'train': 3696, 'val': 400, 'test': 192},
     "plot_interval": 1,  #  State plot; 0 to disable plots
