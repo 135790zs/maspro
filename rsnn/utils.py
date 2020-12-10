@@ -368,11 +368,11 @@ def eprop_Y(cfg, Y, W_out, Z_last, b_out):
 
 
 def eprop_P(Y):
-    maxx = np.max(Y, axis=1)
-    m = Y - maxx[:, None]  # TODO: This step may be ineffective
+    maxx = np.max(Y)
+    m = Y - maxx  # TODO: This step may be ineffective
     ex = np.exp(m)
-    denom = np.sum(ex, axis=1)
-    ret = ex / denom[:, None]
+    denom = np.sum(ex)
+    ret = ex / denom
     return ret
 
 
@@ -384,10 +384,7 @@ def eprop_CE(cfg, T, P, W_rec, W_out, B):
 
     L2norm_W = np.linalg.norm(W) ** 2 * cfg["L2_reg"]
 
-    # if True:  # MSE
-    #     return np.mean((T-P)**2, axis=1)
-
-    return -np.sum(T * np.log(1e-30 + P), axis=1) + L2norm_W
+    return -np.sum(T * np.log(1e-30 + P)) + L2norm_W
 
 
 def eprop_gradient(wtype, L, ETbar, P, T, Zbar_last):
@@ -401,22 +398,26 @@ def eprop_gradient(wtype, L, ETbar, P, T, Zbar_last):
 
 
 def eprop_DW(cfg, wtype, s, adamvars, gradient, Zs, ETbar):
+    """ GRADIENT must be
+    W:
 
-    # Add firing rate reg term, Zs.shape ensures we have some data.
-    if wtype == 'W' and Zs.shape[0]:
-        FR_reg = (
-            cfg["eta_rec"]
-            * cfg["FR_reg"]
-            * np.mean(np.einsum("rj,rji->rji",
-                                cfg["FR_target"] - np.mean(Zs, axis=0),
-                                ETbar),
-                      axis=0))
-    else:
-        FR_reg = 0
+    """
+
+    # # Add firing rate reg term, Zs.shape ensures we have some data.
+    # if wtype == 'W' and Zs.shape[0]:
+    #     FR_reg = (
+    #         cfg["eta_rec"]
+    #         * cfg["FR_reg"]
+    #         * np.mean(np.einsum("rj,rji->rji",
+    #                             cfg["FR_target"] - np.mean(Zs, axis=0),
+    #                             ETbar),
+    #                   axis=0))
+    # else:
+    #     FR_reg = 0
 
     if cfg["optimizer"] == 'SGD':
         ret = ((-cfg["eta_rec"] if wtype == 'W' else -cfg["eta_out"])
-                * gradient + FR_reg)
+                * gradient)
         return ret
 
     elif cfg["optimizer"] == 'Adam':
@@ -427,8 +428,31 @@ def eprop_DW(cfg, wtype, s, adamvars, gradient, Zs, ETbar):
         f1 = m / ( 1 - cfg["adam_beta1"])
         f2 = np.sqrt(v / (1 - cfg["adam_beta2"])) + cfg["adam_eps"]
         ret = ((cfg["eta_rec"] if wtype == 'W' else cfg["eta_out"])
-               * (f1 / f2) + FR_reg)
+               * (f1 / f2))
         return ret
+
+
+def eprop_DW2(cfg, wtype, L, P, T, Zbar_last, ETbar):
+
+    if cfg["optimizer"] == 'SGD':
+        if wtype == "W":
+            return -cfg["eta_rec"] * np.einsum("rj,rji->rji", L, ETbar)
+        elif wtype == "W_out":
+            return -cfg["eta_out"] * np.outer((P - T), Zbar_last)
+        elif wtype == "b_out":
+            return -cfg["eta_out"] * (P - T)
+        return ret
+
+    # elif cfg["optimizer"] == 'Adam':
+    #     m = (cfg["adam_beta1"] * adamvars[f"m{wtype}"][s]
+    #          + (1 - cfg["adam_beta1"]) * gradient)
+    #     v = (cfg["adam_beta2"] * adamvars[f"v{wtype}"][s]
+    #          + (1 - cfg["adam_beta2"]) * gradient ** 2)
+    #     f1 = m / ( 1 - cfg["adam_beta1"])
+    #     f2 = np.sqrt(v / (1 - cfg["adam_beta2"])) + cfg["adam_eps"]
+    #     ret = ((cfg["eta_rec"] if wtype == 'W' else cfg["eta_out"])
+    #            * (f1 / f2))
+    #     return ret
 
 
 def process_layer(cfg, M, t, s, r, W_rec):
