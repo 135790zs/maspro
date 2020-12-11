@@ -15,7 +15,7 @@ STRUCTURE
   - Hyperparameter sweep (keep it objective and explain choices.)
 
 * RESULTS
-  - Results of TIMIT. Optionally: initialization & hparam robustness, tradeoffs, comparisons, generalizability, system behavior (e.g. spike freqs, time dynamics, per-phoneme performance), running cost in simulation and in neuromorphics (where only spikes cost energy).
+  - Results of TIMIT. Optionally: initialization & hparam robustness, tradeoffs, comparisons, generalizability, system behavior (e.g. spike freqs, time dynamics, per-phoneme performance, effect of MFCC derivatives), running cost in simulation and in neuromorphics (where only spikes cost energy).
 
 * DISCUSSION
   -

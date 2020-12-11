@@ -10,7 +10,7 @@ def initialize_model(cfg, length, tar_size):
 
         These are the variables used in e-prop, and the reason they're
         stored for every time step (rather than overwriting per time step)
-        is so the evolution of the network can be inspected after running.
+        is so the evolution of the state can be inspected after running.
 
         V:       Neuron voltage
         U:       Neuron threshold adaptation factor
@@ -77,7 +77,7 @@ def initialize_model(cfg, length, tar_size):
     for T_var in ["T", "P", "Pmax"]:
         M[T_var] = np.zeros(shape=T_shape)
 
-    for neuronvar in ["V", "Z", "Zbar", "I", "H", "L"]:
+    for neuronvar in ["V", "Z", "Zbar", "I", "H", "L", "Lreg"]:
         M[neuronvar] = np.zeros(shape=neuron_shape)
 
     for weightvar in ["EVV", "EVU", "ET", "DW", "ETbar", 'gW']:
@@ -178,7 +178,7 @@ def initialize_weights(cfg, inp_size, tar_size):
 
     # Re-scale weights in first layer (first time step will be transferred
     # automatically)
-    W["W"][0, :, 0] /= cfg["N_R"] * 1  # Epoch 0, layer 0
+    W["W"][0, :, 0] /= cfg["N_R"] + inp_size  # Epoch 0, layer 0
 
     return W
 
@@ -377,82 +377,35 @@ def eprop_P(Y):
 
 
 def eprop_CE(cfg, T, P, W_rec, W_out, B):
+    """ Has no effect on training, only serves as performance metric. """
 
-    W = np.concatenate((W_rec.flatten(),
-                        W_out.flatten(),
-                        B.flatten()))
-
-    L2norm_W = np.linalg.norm(W) ** 2 * cfg["L2_reg"]
-
-    return -np.sum(T * np.log(1e-30 + P)) + L2norm_W
+    return -np.sum(T * np.log(1e-30 + P))
 
 
 def eprop_gradient(wtype, L, ETbar, P, T, Zbar_last):
     """ Return the gradient of the weights."""
-    if wtype == 'W':
+    if wtype == "W":
         return np.einsum("rj,rji->rji", L, ETbar)
-    elif wtype == 'W_out':
+    elif wtype == "W_out":
         return np.outer((P - T), Zbar_last)
-    elif wtype == 'b_out':
+    elif wtype == "b_out":
         return P - T
 
 
-def eprop_DW(cfg, wtype, s, adamvars, gradient, Zs, ETbar):
-    """ GRADIENT must be
-    W:
+def eprop_DW(cfg, wtype, s, adamvars, gradient):
 
-    """
-
-    # # Add firing rate reg term, Zs.shape ensures we have some data.
-    # if wtype == 'W' and Zs.shape[0]:
-    #     FR_reg = (
-    #         cfg["eta_rec"]
-    #         * cfg["FR_reg"]
-    #         * np.mean(np.einsum("rj,rji->rji",
-    #                             cfg["FR_target"] - np.mean(Zs, axis=0),
-    #                             ETbar),
-    #                   axis=0))
-    # else:
-    #     FR_reg = 0
 
     if cfg["optimizer"] == 'SGD':
-        ret = ((-cfg["eta_rec"] if wtype == 'W' else -cfg["eta_out"])
-                * gradient)
-        return ret
-
+        return -cfg["eta"] * gradient
     elif cfg["optimizer"] == 'Adam':
         m = (cfg["adam_beta1"] * adamvars[f"m{wtype}"][s]
              + (1 - cfg["adam_beta1"]) * gradient)
         v = (cfg["adam_beta2"] * adamvars[f"v{wtype}"][s]
-             + (1 - cfg["adam_beta2"]) * gradient ** 2)
+             + (1 - cfg["adam_beta2"]) * (gradient ** 2))
         f1 = m / ( 1 - cfg["adam_beta1"])
         f2 = np.sqrt(v / (1 - cfg["adam_beta2"])) + cfg["adam_eps"]
-        ret = ((cfg["eta_rec"] if wtype == 'W' else cfg["eta_out"])
-               * (f1 / f2))
+        ret = -cfg["eta"] * (f1 / f2)
         return ret
-
-
-def eprop_DW2(cfg, wtype, L, P, T, Zbar_last, ETbar):
-
-    if cfg["optimizer"] == 'SGD':
-        if wtype == "W":
-            return -cfg["eta_rec"] * np.einsum("rj,rji->rji", L, ETbar)
-        elif wtype == "W_out":
-            return -cfg["eta_out"] * np.outer((P - T), Zbar_last)
-        elif wtype == "b_out":
-            return -cfg["eta_out"] * (P - T)
-        return ret
-
-    # elif cfg["optimizer"] == 'Adam':
-    #     m = (cfg["adam_beta1"] * adamvars[f"m{wtype}"][s]
-    #          + (1 - cfg["adam_beta1"]) * gradient)
-    #     v = (cfg["adam_beta2"] * adamvars[f"v{wtype}"][s]
-    #          + (1 - cfg["adam_beta2"]) * gradient ** 2)
-    #     f1 = m / ( 1 - cfg["adam_beta1"])
-    #     f2 = np.sqrt(v / (1 - cfg["adam_beta2"])) + cfg["adam_eps"]
-    #     ret = ((cfg["eta_rec"] if wtype == 'W' else cfg["eta_out"])
-    #            * (f1 / f2))
-    #     return ret
 
 
 def process_layer(cfg, M, t, s, r, W_rec):
@@ -506,16 +459,16 @@ def process_layer(cfg, M, t, s, r, W_rec):
                                      H=M['H'][s, t, r],
                                      EVV=M['EVV'][s, curr_t, r],
                                      EVU=M['EVU'][s, curr_t, r])
+    # # Update weights for next epoch
+    # if not cfg["update_input_weights"]:
+    #     for var in ["EVV", "EVU", "ET"]:
+    #         M[var][s, curr_t, 0, :, :M[var].shape[4]//2] = 0
+    # print("ET", np.mean(np.abs(M['ET'][s, curr_t, r])))
 
-    # Update weights for next epoch
-    if not cfg["update_input_weights"]:
-        for var in ["EVV", "EVU", "ET"]:
-            M[var][s, curr_t, 0, :, :M[f"X{s}"].shape[-1]] = 0
-
-    # Update weights for next epoch
-    if not cfg["update_dead_weights"]:
-        for var in ["EVV", "EVU", "ET"]:
-            M[var][s, curr_t, r, W_rec == 0] = 0
+    # # Update weights for next epoch
+    # if not cfg["update_dead_weights"]:
+    #     for var in ["EVV", "EVU", "ET"]:
+    #         M[var][s, curr_t, r, W_rec == 0] = 0
 
     M["Z_in"][s, t, r] = np.concatenate((Z_prev, M['Z'][s, t, r]))
 
@@ -528,9 +481,11 @@ def process_layer(cfg, M, t, s, r, W_rec):
     M['I'][s, t, r] = eprop_I(W_rec=W_rec,
                               Z_in=M["Z_in"][s, t, r])
 
-    M['ETbar'][s, curr_t, r] = eprop_lpfK(lpf=M['ETbar'][s, prev_t, r] if t > 0 else 0,
+    M['ETbar'][s, curr_t, r] = eprop_lpfK(
+                                     lpf=M['ETbar'][s, prev_t, r] if t > 0 else 0,
                                      x=M['ET'][s, curr_t, r],
                                      factor=cfg["kappa"])
+
 
     M['Zbar'][s, t, r] = eprop_lpfK(lpf=M['Zbar'][s, t-1, r] if t > 0 else 0,
                                     x=M['Z'][s, t, r],
@@ -538,15 +493,15 @@ def process_layer(cfg, M, t, s, r, W_rec):
 
     if t != M[f"X{s}"].shape[0] - 1:
         M['EVV'][s, next_t, r] = eprop_EVV(cfg=cfg,
-                                        EVV=M['EVV'][s, curr_t, r],
-                                        Z_in=M["Z_in"][s, curr_t, r],
-                                        Z=M['Z'][s, curr_t, r],
-                                        TZ=M['TZ'][s, r],
-                                        TZ_in=M['TZ_in'][s, r],
-                                        t=t)
+                                           EVV=M['EVV'][s, curr_t, r],
+                                           Z_in=M["Z_in"][s, t, r],
+                                           Z=M['Z'][s, t, r],
+                                           TZ=M['TZ'][s, r],
+                                           TZ_in=M['TZ_in'][s, r],
+                                           t=t)
 
         M['EVU'][s, next_t, r] = eprop_EVU(cfg=cfg,
-                                        Z_inbar=M['Z_inbar'][s, curr_t, r],
+                                        Z_inbar=M['Z_inbar'][s, t, r],
                                         EVU=M['EVU'][s, curr_t, r],
                                         H=M['H'][s, curr_t, r],
                                         is_ALIF=M['is_ALIF'][s, r])

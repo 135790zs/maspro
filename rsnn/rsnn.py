@@ -20,6 +20,7 @@ def network(cfg, inp, tar, W_rec, W_out, b_out, B, adamvars):
     M[f"X1"] = np.flip(inp, axis=0)
 
     for t in range(n_steps-1):
+
         for s in range(cfg["n_directions"]):
 
             # Input is nonzero for first layer
@@ -54,7 +55,23 @@ def network(cfg, inp, tar, W_rec, W_out, b_out, B, adamvars):
 
         # Calculate weight updates for all subnetworks
         for s in range(cfg["n_directions"]):
-            M['L'][s, t] = np.dot(B[s], (M['P'][t] - M['T'][t]))
+            L_std = np.dot(B[s], (M['P'][t] - M['T'][t]))
+            if t:  # Can only take a mean if spike train is not empty.
+                rates = np.mean(M['Z'][s, :t], axis=0)
+                L_regFR = (cfg["FR_reg"]
+                         * cfg["eta"]
+                         * (1/n_steps)
+                         * (-1 if cfg["FR_target"] > rates.all() else 1)
+                         * (cfg["FR_target"] - rates))
+            else:
+                L_regFR = 0
+
+
+            L_regL2 = cfg["L2_reg"] * np.linalg.norm(np.concatenate(
+                (W_rec.flatten(),
+                 W_out.flatten(),
+                 b_out.flatten())), ord=2)
+            M['L'][s, t] = L_std + L_regFR + L_regL2
 
             # Calculate gradient and weight update
             # TODO: make into iterable
@@ -64,36 +81,26 @@ def network(cfg, inp, tar, W_rec, W_out, b_out, B, adamvars):
                 if not cfg["update_W_out"] and wtype == "W_out":
                     continue
 
-                # grad = ut.eprop_gradient(wtype=wtype,
-                #                          L=M['L'][s, t],
-                #                          ETbar=M['ETbar'][s, curr_t],
-                #                          Zbar_last=M['Zbar'][s, t, -1],
-                #                          P=M['P'][t],
-                #                          T=M['T'][t])
+                grad = ut.eprop_gradient(wtype=wtype,
+                                         P=M['P'][t],
+                                         T=M['T'][t],
+                                         L=M['L'][s, t],
+                                         ETbar=M['ETbar'][s, curr_t],
+                                         Zbar_last=M['Zbar'][s, t, -1])
 
-                # M[f'g{wtype}'][s, curr_t] += grad
-                # dw = ut.eprop_DW(cfg=cfg,
-                #                  wtype=wtype,
-                #                  s=s,
-                #                  adamvars=adamvars,
-                #                  gradient=grad,
-                #                  Zs=M['Z'][s, :t],
-                #                  ETbar=M['ETbar'][s, curr_t])
-                # M[f'D{wtype}'][s, curr_t] += dw
+                M[f'g{wtype}'][s, curr_t] += grad
 
-                dw = ut.eprop_DW2(cfg=cfg,
+                dw = ut.eprop_DW(cfg=cfg,
+                                 gradient=grad,
                                  wtype=wtype,
-                                 P=M['P'][t],
-                                 T=M['T'][t],
-                                 L=M['L'][s, t],
-                                 ETbar=M['ETbar'][s, curr_t],
-                                 Zbar_last=M['Zbar'][s, t, -1],)
+                                 adamvars=adamvars,
+                                 s=s)
 
                 M[f'D{wtype}'][s, curr_t] += dw
-
             if not cfg["update_input_weights"]:
                     M["DW"][s, curr_t, 0, :, :inp.shape[-1]] = 0
 
+            # print(M["DW"].shape, inp.shape)
             if not cfg["update_dead_weights"]:
                     M["DW"][s, curr_t, W_rec[s] == 0] = 0
 
@@ -102,76 +109,12 @@ def network(cfg, inp, tar, W_rec, W_out, b_out, B, adamvars):
                 cfg=cfg, M=M, s=s, t=t, W_rec=W_rec, W_out=W_out)
             time.sleep(0.5)
 
-    # for s in range(cfg["n_directions"]):
-    #     M[f"X{s}"] = inp if s == 0 else np.flip(inp, axis=0)
+            if not cfg["update_input_weights"]:
+                    M["DW"][s, curr_t, 0, :, :inp.shape[-1]] = 0
 
-    #     for t in range(n_steps-1):
+            if not cfg["update_dead_weights"]:
+                    M["DW"][s, curr_t, W_rec[s] == 0] = 0
 
-    #         # Input is nonzero for first layer
-    #         for r in range(cfg['N_Rec']):
-    #             M = ut.process_layer(cfg=cfg, M=M, s=s, t=t, r=r, W_rec=W_rec[s, r])
-
-    #         M['Y'][s, t] = ut.eprop_Y(cfg=cfg,
-    #                                   Y=M['Y'][s, t-1] if t > 0 else 0,
-    #                                   W_out=W_out[s],
-    #                                   Z_last=M['Z'][s, t, -1],
-    #                                   b_out=b_out[s])
-
-    #     Ysum = M['Y'][0] + (np.flip(M['Y'][1], axis=0)
-    #                         if cfg["n_directions"] > 1 else 0)
-
-    # M['P'] = ut.eprop_P(Y=Ysum)
-    # M['Pmax'][range(M['P'].shape[0]),
-    #           M['P'].argmax(axis=1)] = 1
-
-    # M['CE'] = ut.eprop_CE(cfg=cfg,
-    #                       T=M['T'],
-    #                       P=M['P'],
-    #                       W_rec=W_rec,
-    #                       W_out=W_out,
-    #                       B=B)
-
-    # for s in range(cfg["n_directions"]):
-    #     for t in range(n_steps):  # TODO: can make more efficient by doing einsums
-    #         if cfg["Track_state"]:
-    #             curr_t = t
-    #         else:
-    #             curr_t = 0
-    #         M['L'][s, t] = np.dot(B[s], (M['P'][t] - M['T'][t]))
-
-    #         # Calculate gradient and weight update
-    #         # TODO: make into iterable
-    #         for wtype in ["W", "W_out", "b_out"]:
-    #             if not cfg["update_bias"] and wtype == "b_out":
-    #                 continue
-    #             if not cfg["update_W_out"] and wtype == "W_out":
-    #                 continue
-
-    #             M[f'g{wtype}'][s, curr_t] += ut.eprop_gradient(wtype=wtype,
-    #                                                            L=M['L'][s, t],
-    #                                                            ETbar=M['ETbar'][s, curr_t],
-    #                                                            Zbar_last=M['Zbar'][s, t, -1],
-    #                                                            P=M['P'][t],
-    #                                                            T=M['T'][t])
-
-    #             M[f'D{wtype}'][s, curr_t] += ut.eprop_DW(cfg=cfg,
-    #                                                      wtype=wtype,
-    #                                                      s=s,
-    #                                                      adamvars=adamvars,
-    #                                                      gradient=M[f'g{wtype}'][s, curr_t],
-    #                                                      Zs=M['Z'][s, :t],
-    #                                                      ETbar=M['ETbar'][s, curr_t])
-
-    #         if not cfg["update_input_weights"]:
-    #                 M["DW"][s, curr_t, 0, :, :inp.shape[-1]] = 0
-
-    #         if not cfg["update_dead_weights"]:
-    #                 M["DW"][s, curr_t, W_rec[s] == 0] = 0
-
-    #         if cfg["plot_graph"]:
-    #             vis.plot_graph(
-    #                 cfg=cfg, M=M, s=s, t=t, W_rec=W_rec, W_out=W_out)
-    #             time.sleep(0.5)
     return M
 
 
@@ -257,8 +200,13 @@ def feed_batch(cfg, inps, tars, W_rec, W_out, b_out, B, epoch, tvt_type, adamvar
                    axis=1)) / inps.shape[0]
 
         for w_type in ['W', 'W_out', 'b_out']:
-            batch_DW[w_type] += np.mean(final_model[f'D{w_type}'], axis=1)
-            batch_gW[w_type] += np.mean(final_model[f'g{w_type}'], axis=1)
+            # Summing and dividing because `Track_state' defines if dw's
+            # are accumulated or listed
+            dw = np.sum(final_model[f'D{w_type}'], axis=1) / inps_rep.shape[0]
+            gw = np.sum(final_model[f'g{w_type}'], axis=1) / inps_rep.shape[0]
+            batch_DW[w_type] += dw
+
+            batch_gW[w_type] += gw
 
     if cfg["verbose"]:
         print(f"\t\tCE:      {batch_err:.3f},\n"
@@ -308,9 +256,11 @@ def main(cfg):
 
     for e in range(0, cfg["Epochs"]):
         ep_curr = e if cfg["Track_weights"] else 0
+
         # Make batch
         randidxs = np.random.randint(inps['train'].shape[0],
                                      size=cfg["batch_size_train"])
+
         terr, perc_wrong_t, DW, gW = feed_batch(
             epoch=e,
             tvt_type='train',
@@ -324,6 +274,7 @@ def main(cfg):
             adamvars=adamvars,
             e=e,
             log_id=log_id)
+
         terrs[e] = terr
         percs_wrong_t[e] = perc_wrong_t
 
@@ -400,7 +351,7 @@ def main(cfg):
                             * cfg["weight_decay"])
 
             else:  # W, W_out, or b_out
-
+                print(wtype, np.mean(DW[wtype]))
                 W[wtype][ep_curr+ep_incr] = W[wtype][ep_curr] + DW[wtype]
 
                 # Update Adam
@@ -410,6 +361,7 @@ def main(cfg):
                 adamvars[f'v{wtype}'] = (
                     cfg["adam_beta2"] * adamvars[f'v{wtype}']
                     + (1 - cfg["adam_beta2"]) * gW[wtype] ** 2)
+
 
                 if wtype == "W_out":
                     W[wtype][ep_curr+ep_incr] -= (W[wtype][ep_curr+ep_incr]
