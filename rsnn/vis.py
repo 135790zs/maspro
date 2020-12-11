@@ -93,7 +93,7 @@ def plot_state(cfg, M, W_rec, W_out, b_out, e, log_id, plot_weights=False):
     S_plotvars = ["X", "I", "V", "H", "U", "Z", "Y", "L"]
     if cfg["Track_state"]:
         S_plotvars = S_plotvars[:6] + ["EVV", "EVU", "ET"] + S_plotvars[6:]
-    S_plotvars = S_plotvars + ["DW", "DW_out", "Db_out"]
+        S_plotvars = S_plotvars + ["DW", "DW_out", "Db_out"]
 
     M_plotvars = ["P", "Pmax", "T", "CE"]
     if cfg["n_directions"] > 1:

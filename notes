@@ -31,6 +31,8 @@ Find out why no variation in spike trains even though variation in input?
 Instead of scaling weights at init, scale input given to layer 1? (By dividing by number of inputs?)
 
 Noninput rec weights don't update. Why?
+
+Gradient hard/softcapping for reliable descent?
 =========
 
 TODAY: 7 dec

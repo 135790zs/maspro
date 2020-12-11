@@ -16,11 +16,12 @@
 
 \maketitle
 
-% \tableofcontents
+
+
 \section{Proof: BPTT to E-prop}
 The main equation to be proved:
 \begin{equation}
-\frac{dE}{dW_{ji}} = 
+\frac{dE}{dW_{ji}} =
 \sum_t\frac{dE}{dz_j^t}\cdot\left[\frac{dz_j^t}{dW_{ji}}\right]_\text{local}
 \end{equation}
 
@@ -75,7 +76,7 @@ In LIF, $\{\mathbf{h}^t_j, \mathbf{\epsilon}^t_{ji}\} \subset \mathbb{R}$.
 	\State $y^t_k = \kappa y^{t-1}_k + \sum_j W^\text{out}_{kj} z^t_j + b^\text{out}_k$
 	\vspace{10pt}
 	\State $W \gets W - \eta \sum_t\left(\sum_k B_{jk}\left(y_k^t - y_k^{*,t}\right)\right)e^t_{ji}$
-	
+
 \EndFor
 \end{algorithmic}
 \section{LIF steps}
@@ -261,7 +262,7 @@ $N\times61$ class labels.
 \item Batch size 32, $\gamma = 10^{-2}$. Adaptive $B_{jk}$ initialized as Gaussian with $\mu = 0$ and $\sigma = 1/n$ with $n$ being neurons in LSNN.
 \item L2 regularization with additional term $10^{-5} \cdot \|W\|^2$.
 \item In adaptive $B$, L2 weight decay on output and broadcast neurons according to [2] using $c_\text{decay} = 10^{-2}$.
-\item Fire rate regularization with $c_\text{reg} = 50$. 
+\item Fire rate regularization with $c_\text{reg} = 50$.
 \end{itemize}
 \newpage
 \section{Optimizer}
@@ -285,7 +286,7 @@ We now derive:
 \end{align}
 Therefore,
 \[
-\Delta W^\text{rec}_{ji} &= -\eta\sum_t\left(\sum_kB_{jk}\left(\pi_k^t-\pi_k^{*,t}\right)\right)\bar{e}^t_{ji}
+\Delta W^\text{rec}_{ji} = -\eta\sum_t\left(\sum_kB_{jk}\left(\pi_k^t-\pi_k^{*,t}\right)\right)\bar{e}^t_{ji}
 \]
 
 \section{Network equations 20-12-07}
@@ -293,8 +294,6 @@ According to Bellec settings (with ``adaptive'')
 
 
 \begin{align*}
-
-
 y^t_k &= \kappa y^{t-1}_k + \sum_j W^\text{out}_{kj}z^t_j+b^\text{out}_k\\
 E &= -\sum_{t,k}\pi_k^{*,t}\log\pi_k^t\\
 \Delta W^\text{rec}_{ji} &= -\eta\sum_t\left(\sum_kB_{jk}\left(\pi_k^t-\pi_k^{*,t}\right)\right)\bar{e}^t_{ji}\\

@@ -1,0 +1,57 @@
+%************************************************
+\chapter{Method}\label{ch:method}
+%************************************************
+\section{Data Preprocessing}
+
+	\subsection{The TIMIT speech corpus}
+		TIMIT is a speech corpus that contains phonemically transcribed speech~\citep{garofolo1993darpa}.
+		It contains 6300 sentences, 10 spoken by each of the 630 speakers.
+		The male and female speakers lived in 8 different geographical regions in the United States during their childhood years, see Table~\ref{tab:dialects}.
+
+		\begin{table}[h]
+		    \myfloatalign
+		    \begin{tabularx}{\textwidth}{lrrr} \toprule
+		        \tableheadline{Dialect region} & \tableheadline{\#Male}
+		        & \tableheadline{\#Female} & \tableheadline{Total} \\ \midrule
+		        % Phantoms take care of right-alignment (works iff monospaced digits)
+		        1 (New England)   & 31 (63\%) & 18 (27\%) &  49  \phantom{0}(8\%)  \\
+		        2 (Northern)      & 71 (70\%) & 31 (30\%) & 102 (16\%) \\
+		        3 (North Midland) & 79 (67\%) & 23 (23\%) & 102 (16\%) \\
+		        4 (South Midland) & 69 (69\%) & 31 (31\%) & 100 (16\%) \\
+		        5 (Southern)      & 62 (63\%) & 36 (37\%) &  98 (16\%) \\
+		        6 (New York City) & 30 (65\%) & 16 (35\%) &  46  \phantom{0}(7\%)  \\
+		        7 (Western)       & 74 (74\%) & 26 (26\%) & 100 (16\%) \\
+		        8                 & 22 (67\%) & 11 (33\%) &  33  \phantom{0}(5\%)  \\
+		        \midrule
+		        All  & 438 (70\%) & 192 (30\%) & 630 (100\%) \\
+		        \bottomrule
+		    \end{tabularx}
+		    \caption[TIMIT Dialect Regions]{Distibution of speakers' dialect regions and sexes. Speakers of dialect region 8 moved around a lot during their childhood.}  \label{tab:dialects}
+		\end{table}
+
+		The sentence text can be categorized into 2 \emph{dialect} sentences, 450 \emph{phonetically compact} sentences, and 1890 \emph{phonetically-diverse} sentences.
+
+		The dialect sentences, which are spoken by all speakers, are designed to expose the dialectical variants of the speakers.
+		The phonetically compact sentences are designed to include many pairs of phones.
+		The phonetically diverse sentences are taken from the Brown Corpus~\citep{kucera1967computational} and the Playwrights Dialog~\citep{hultzsch1964tables} in order to maximize the number of allophones (\ie, different phones used to pronounce the same phoneme).
+		Table~\ref{tab:types} lists an overview of the distribution of the number of speakers per sentence type.
+
+		\begin{table}[h]
+		    \myfloatalign
+		    \begin{tabularx}{\textwidth}{lrrrr} \toprule
+		        \tableheadline{Sentence type} & \tableheadline{\#Sentences}
+		        & \tableheadline{\#Speakers} & \tableheadline{Total} \\ \midrule
+		        % Phantoms take care of right-alignment (works iff monospaced digits)
+		        Dialect & 2    & 630 & 1260\\
+		        Compact & 450  & 7   & 3150 \\
+		        Diverse & 1890 & 1   & 1890 \\
+		        \midrule
+		        Total   & 2342 &     & 6300 \\
+		        \bottomrule
+		    \end{tabularx}
+		    \caption[TIMIT Sentence Types]{Distribution of sentence types.}  \label{tab:types}
+		\end{table}
+
+		Each of the sentences is encoded in wavefile (\texttt{.wav}) format, and comes with \todo{synonym} a corresponding text file indicating what phones are pronounced in the wavefile, and between which sample points.
+
+	\subsection{Engineering features}

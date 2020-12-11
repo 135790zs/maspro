@@ -1,0 +1,127 @@
+\RequirePackage{silence} % :-\
+    \WarningFilter{scrreprt}{Usage of package `titlesec'}
+    \WarningFilter{scrreprt}{Activating an ugly workaround}
+    \WarningFilter{titlesec}{Non standard sectioning command detected}
+\documentclass[ twoside,openright,titlepage,numbers=noenddot,%1headlines,
+                headinclude,footinclude,cleardoublepage=empty,abstract=on,
+                BCOR=5mm,paper=a4,fontsize=11pt
+                ]{scrreprt}
+
+\input{classicthesis-config}
+
+\addbibresource{Bibliography.bib}
+
+\usepackage{todonotes} %
+%\hyphenation{put special hyphenation here}
+
+\begin{document}
+\frenchspacing
+\raggedbottom
+\selectlanguage{american} % american ngerman
+%\renewcommand*{\bibname}{new name}
+\setbibpreamble{}
+\pagenumbering{roman}
+\pagestyle{plain}
+
+%********************************************************************
+% Frontmatter
+%*******************************************************
+% \include{FrontBackmatter/DirtyTitlepage}
+\include{FrontBackmatter/Titlepage}
+\include{FrontBackmatter/Titleback}
+% \cleardoublepage\include{FrontBackmatter/Dedication}
+
+% \cleardoublepage\include{FrontBackmatter/Foreword}
+
+% \cleardoublepage\include{FrontBackmatter/Abstract}
+% \cleardoublepage\include{FrontBackmatter/Publications}
+% \cleardoublepage\include{FrontBackmatter/Acknowledgments}
+\cleardoublepage\include{FrontBackmatter/Contents}
+
+%********************************************************************
+% Mainmatter
+%*******************************************************
+\cleardoublepage
+\pagestyle{scrheadings}
+\pagenumbering{arabic}
+\cleardoublepage
+
+
+% \include{Chapters/Chapter01}
+\include{Chapters/Chapter02}
+% \include{Chapters/Chapter03}
+% \include{Chapters/Chapter04}
+% \include{Chapters/Chapter05}
+
+
+% ********************************************************************
+% Backmatter
+%*******************************************************
+\appendix
+%\renewcommand{\thechapter}{\alph{chapter}}
+\cleardoublepage
+\include{Chapters/Chapter0A}
+
+%********************************************************************
+% Other Stuff in the Back
+%*******************************************************
+\cleardoublepage\include{FrontBackmatter/Bibliography}
+% \cleardoublepage\include{FrontBackmatter/Declaration}
+% \cleardoublepage\include{FrontBackmatter/Colophon}
+% ************************************************************
+\end{document}
+% ********************************************************************
+
+STRUCTURE
+* Introduction
+  - Artificial spiking neurons inspired by brain neurons (as in Bellec intro p1). Various theoretical advantages over ANNs.
+  - Unclear how RSNNs can learn. In hope of crudely emulating biological neural circuits, try online, local and bioplausible method.
+  - E-prop uses bio-inspired (which) methods that allow for online, local, bioplausible training and have shown to yield good results.
+  - However, real neurons are stacked in layers. This paper generalizes e-prop to multiple layers. (short parallel to perceptrons vs, MLPs? will need some theoretical analysis like MLPs could nonlinearly separate. Time dynamics maybe?)
+  - Increasing relevance for neuromorphic computing
+  - ... synaptic scaling, Izhikevich etc will depend on whether it is implemented.
+
+* METHOD
+  - General top-down formulas (derivatives etc). Derive from RNNs. Explain Traub fix or Bellec reset if applicable.
+  - Actual formulas of implementation (abstract away from bidir & epoch dimension) like Bellec, for LIF, ALIF, Izhikevich. Include derivations as proof.
+  - TIMIT dataset explanation, including preprocessing
+  - Regularization (FR, L2, synscaling, metaplasticity, etc)
+  - Hyperparameter sweep (keep it objective and explain choices.)
+
+* RESULTS
+  - Results of TIMIT. Optionally: initialization & hparam robustness, tradeoffs, comparisons, generalizability, system behavior (e.g. spike freqs, time dynamics, per-phoneme performance, effect of MFCC derivatives), running cost in simulation and in neuromorphics (where only spikes cost energy).
+
+* DISCUSSION
+  -
+
+* CONCLUSION
+  - Short summary, key sentences from all previous. Logical connection to introduction.
+  - Link to R-STDP with Traub fix.
+  - Neuromorphic computing
+  - Maybe: attempt to explain network interpretability. Subgraphs representing features.
+
+* APPENDIX
+  - Explain implementation, sweeping, and all details such that precise replication can be made.
+  - Pseudocode
+
+
+=================
+
+METHOD
+- Data Preprocessing
+  - TIMIT overview
+  - Audio to features
+- Eligibility Propagation (basics, as in Bellec)
+  - Network model
+  - E-prop algorithm (LIF or ALIF depends on what's used in final model)
+  - Derivation from RNN and backprop.
+  - Regularization
+    - FR (if applicable)
+    - L2 (if applicable)
+  - Adam (if applicable)
+  - Bidirectional network (if applicable)
+  - Traub or Bellec reset (if applicable)
+- Extending the E-prop framework
+  - Generalizing to multiple layers
+  - Using Izhikevich neurons
+- Hyperparameter optimization procedure

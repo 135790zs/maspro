@@ -204,8 +204,8 @@ def feed_batch(cfg, inps, tars, W_rec, W_out, b_out, B, epoch, tvt_type, adamvar
             # are accumulated or listed
             dw = np.sum(final_model[f'D{w_type}'], axis=1) / inps_rep.shape[0]
             gw = np.sum(final_model[f'g{w_type}'], axis=1) / inps_rep.shape[0]
-            batch_DW[w_type] += dw
 
+            batch_DW[w_type] += dw
             batch_gW[w_type] += gw
 
     if cfg["verbose"]:
@@ -350,10 +350,9 @@ def main(cfg):
                             W["B"][ep_curr+ep_incr, s]
                             * cfg["weight_decay"])
 
-            else:  # W, W_out, or b_out
-                print(wtype, np.mean(DW[wtype]))
+            else:  # W, W_out, or b_out (depending on update cfg)
                 W[wtype][ep_curr+ep_incr] = W[wtype][ep_curr] + DW[wtype]
-
+                print(wtype, np.mean(adamvars[f'm{wtype}']))
                 # Update Adam
                 adamvars[f'm{wtype}'] = (
                     cfg["adam_beta1"] * adamvars[f'm{wtype}']

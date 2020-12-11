@@ -174,11 +174,14 @@ def initialize_weights(cfg, inp_size, tar_size):
                          0,
                          W['W'][0])
 
-
-
     # Re-scale weights in first layer (first time step will be transferred
     # automatically)
-    W["W"][0, :, 0] /= cfg["N_R"] + inp_size  # Epoch 0, layer 0
+    """
+    N_R     Effective
+    64      103
+    200     100-150
+    """
+    W["W"][0, :, 0] /= 120  # Epoch 0, layer 0
 
     return W
 
@@ -459,16 +462,15 @@ def process_layer(cfg, M, t, s, r, W_rec):
                                      H=M['H'][s, t, r],
                                      EVV=M['EVV'][s, curr_t, r],
                                      EVU=M['EVU'][s, curr_t, r])
-    # # Update weights for next epoch
-    # if not cfg["update_input_weights"]:
-    #     for var in ["EVV", "EVU", "ET"]:
-    #         M[var][s, curr_t, 0, :, :M[var].shape[4]//2] = 0
-    # print("ET", np.mean(np.abs(M['ET'][s, curr_t, r])))
+    # Update weights for next epoch
+    if not cfg["update_input_weights"]:
+        for var in ["EVV", "EVU", "ET"]:
+            M[var][s, curr_t, 0, :, :M[var].shape[4]//2] = 0
 
-    # # Update weights for next epoch
-    # if not cfg["update_dead_weights"]:
-    #     for var in ["EVV", "EVU", "ET"]:
-    #         M[var][s, curr_t, r, W_rec == 0] = 0
+    # Update weights for next epoch
+    if not cfg["update_dead_weights"]:
+        for var in ["EVV", "EVU", "ET"]:
+            M[var][s, curr_t, r, W_rec == 0] = 0
 
     M["Z_in"][s, t, r] = np.concatenate((Z_prev, M['Z'][s, t, r]))
 

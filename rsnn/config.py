@@ -2,10 +2,10 @@ from numpy import exp
 cfg = {
     "verbose": True,
     "eprop_type": "adaptive",  # in {random, symmetric, adaptive}
-    "optimizer": 'Adam',  # TODO: Adam
+    "optimizer": 'SGD',  # TODO: Adam
     "traub_trick": False,
     "fraction_ALIF": 0.25,  # def 0.25
-    "n_directions": 1,
+    "n_directions": 2,
     "delay": 0,
 
     "rho": .995,  # Depends on length of task: working memory. TIMIT= .995
@@ -25,13 +25,13 @@ cfg = {
     "adam_beta2": 0.999,
     "adam_eps": 1e-5,
 
-    "update_bias": False,
-    "update_W_out": False,
+    "update_bias": True,
+    "update_W_out": True,
     "update_W": True,
     "update_dead_weights": False,
-    "update_input_weights": False,  # Subset of - and overridden by `update_W'.
+    "update_input_weights": True,  # Subset of - and overridden by `update_W'.
 
-    "N_R": 64,
+    "N_R": 200,
     "N_Rec": 1,
 
     "wavs_fname": "../data_wavs",
@@ -41,8 +41,8 @@ cfg = {
     "Track_weights": True,
     "Track_state": False,  # Only for synapse vars
     "Repeats": 5,  # ms per epoch, def = 5
-    "batch_size_train": 1,  # def = 32
-    "batch_size_val": 1,  # def = 32
+    "batch_size_train": 32,  # def = 32
+    "batch_size_val": 32,  # def = 32
     "val_every_E": 5,
     "maxlen": 778,  # Don't forget to re-run process_timit.py!
     "n_examples": {'train': 3696, 'val': 400, 'test': 192},

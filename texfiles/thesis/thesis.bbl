@@ -1,0 +1,161 @@
+% $ biblatex auxiliary file $
+% $ biblatex bbl format version 2.9 $
+% Do not modify the above lines!
+%
+% This is an auxiliary file used by the 'biblatex' package.
+% This file may safely be deleted. It will be recreated by
+% biber as required.
+%
+\begingroup
+\makeatletter
+\@ifundefined{ver@biblatex.sty}
+  {\@latex@error
+     {Missing 'biblatex' package}
+     {The bibliography requires the 'biblatex' package.}
+      \aftergroup\endinput}
+  {}
+\endgroup
+
+
+\refsection{0}
+  \datalist[entry]{nyt/global//global/global}
+    \entry{garofolo1993darpa}{article}{}
+      \name{author}{5}{}{%
+        {{uniquename=0,uniquepart=base,hash=3041e850499ccd58c4ef210dbebad9e0}{%
+           family={Garofolo},
+           familyi={G\bibinitperiod},
+           given={John\bibnamedelima S},
+           giveni={J\bibinitperiod\bibinitdelim S\bibinitperiod},
+           givenun=0}}%
+        {{uniquename=0,uniquepart=base,hash=bd2f122b1a98c30aebd52014a18b981d}{%
+           family={Lamel},
+           familyi={L\bibinitperiod},
+           given={Lori\bibnamedelima F},
+           giveni={L\bibinitperiod\bibinitdelim F\bibinitperiod},
+           givenun=0}}%
+        {{uniquename=0,uniquepart=base,hash=cd80d941aa13fb0713ed829cdf7137af}{%
+           family={Fisher},
+           familyi={F\bibinitperiod},
+           given={William\bibnamedelima M},
+           giveni={W\bibinitperiod\bibinitdelim M\bibinitperiod},
+           givenun=0}}%
+        {{uniquename=0,uniquepart=base,hash=ecf28c4bc54e45959246506856f1ac89}{%
+           family={Fiscus},
+           familyi={F\bibinitperiod},
+           given={Jonathan\bibnamedelima G},
+           giveni={J\bibinitperiod\bibinitdelim G\bibinitperiod},
+           givenun=0}}%
+        {{uniquename=0,uniquepart=base,hash=8841a669f1453d59ca8a2972670d740f}{%
+           family={Pallett},
+           familyi={P\bibinitperiod},
+           given={David\bibnamedelima S},
+           giveni={D\bibinitperiod\bibinitdelim S\bibinitperiod},
+           givenun=0}}%
+      }
+      \strng{namehash}{fe78966249193f7d40d3f950a22d4be3}
+      \strng{fullhash}{f6141175765faf1075ffdb0992e974ce}
+      \strng{bibnamehash}{fe78966249193f7d40d3f950a22d4be3}
+      \strng{authorbibnamehash}{fe78966249193f7d40d3f950a22d4be3}
+      \strng{authornamehash}{fe78966249193f7d40d3f950a22d4be3}
+      \strng{authorfullhash}{f6141175765faf1075ffdb0992e974ce}
+      \field{sortinit}{G}
+      \field{sortinithash}{5e8d2bf9d38de41b1528bd307546008f}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{year}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{STIN}
+      \field{title}{DARPA TIMIT acoustic-phonetic continous speech corpus CD-ROM. NIST speech disc 1-1.1}
+      \field{volume}{93}
+      \field{year}{1993}
+      \field{pages}{27403}
+      \range{pages}{1}
+    \endentry
+    \entry{hultzsch1964tables}{book}{}
+      \name{author}{4}{}{%
+        {{uniquename=0,uniquepart=base,hash=6dc65f59df643bc4632549a07bf7c430}{%
+           family={Hultzsch},
+           familyi={H\bibinitperiod},
+           given={Eugen},
+           giveni={E\bibinitperiod},
+           givenun=0}}%
+        {{uniquename=0,uniquepart=base,hash=3d5f402d7e91e5474c4505630d4cdf9a}{%
+           family={Hultz{é}n},
+           familyi={H\bibinitperiod},
+           given={Lee\bibnamedelima Sisson},
+           giveni={L\bibinitperiod\bibinitdelim S\bibinitperiod},
+           givenun=0}}%
+        {{uniquename=0,uniquepart=base,hash=51367b03be86b08dc4a57a013f0ed3e0}{%
+           family={Allen},
+           familyi={A\bibinitperiod},
+           given={Joseph\bibnamedelimb Heatly\bibnamedelima Dulles},
+           giveni={J\bibinitperiod\bibinitdelim H\bibinitperiod\bibinitdelim D\bibinitperiod},
+           givenun=0}}%
+        {{uniquename=0,uniquepart=base,hash=d6fdf69955f18e1f80d09bef4371b76b}{%
+           family={Miron},
+           familyi={M\bibinitperiod},
+           given={Murray\bibnamedelima S},
+           giveni={M\bibinitperiod\bibinitdelim S\bibinitperiod},
+           givenun=0}}%
+      }
+      \list{publisher}{1}{%
+        {Urbana: University of Illinois Press}%
+      }
+      \strng{namehash}{056b8c3c707a00dbbfe66f182c3946f3}
+      \strng{fullhash}{74d64be7f95d21f44b6543ccc7096285}
+      \strng{bibnamehash}{056b8c3c707a00dbbfe66f182c3946f3}
+      \strng{authorbibnamehash}{056b8c3c707a00dbbfe66f182c3946f3}
+      \strng{authornamehash}{056b8c3c707a00dbbfe66f182c3946f3}
+      \strng{authorfullhash}{74d64be7f95d21f44b6543ccc7096285}
+      \field{sortinit}{H}
+      \field{sortinithash}{5f15a7bc777ad49ff15aa4d2831b1681}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{year}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Tables of transitional frequencies of English phonemes}
+      \field{year}{1964}
+    \endentry
+    \entry{kucera1967computational}{book}{}
+      \name{author}{3}{}{%
+        {{uniquename=0,uniquepart=base,hash=ef73e445d2fca9bdab69b4f5e03862bf}{%
+           family={Kucera},
+           familyi={K\bibinitperiod},
+           given={Henry},
+           giveni={H\bibinitperiod},
+           givenun=0}}%
+        {{uniquename=0,uniquepart=base,hash=bf3831e394bc39d6f247924653f7a365}{%
+           family={Ku{č}era},
+           familyi={K\bibinitperiod},
+           given={Henry},
+           giveni={H\bibinitperiod},
+           givenun=0}}%
+        {{uniquename=0,uniquepart=base,hash=8199a6ff7921d1caaa7c7bf3d604907b}{%
+           family={Francis},
+           familyi={F\bibinitperiod},
+           given={Winthrop\bibnamedelima Nelson},
+           giveni={W\bibinitperiod\bibinitdelim N\bibinitperiod},
+           givenun=0}}%
+      }
+      \list{publisher}{1}{%
+        {Brown university press}%
+      }
+      \strng{namehash}{2c1c320052caf189a132824c9570395e}
+      \strng{fullhash}{2c1c320052caf189a132824c9570395e}
+      \strng{bibnamehash}{2c1c320052caf189a132824c9570395e}
+      \strng{authorbibnamehash}{2c1c320052caf189a132824c9570395e}
+      \strng{authornamehash}{2c1c320052caf189a132824c9570395e}
+      \strng{authorfullhash}{2c1c320052caf189a132824c9570395e}
+      \field{sortinit}{K}
+      \field{sortinithash}{9fd838a31ba64d981e8f44562bd33f89}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{year}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Computational analysis of present-day American English}
+      \field{year}{1967}
+    \endentry
+  \enddatalist
+\endrefsection
+\endinput
+
