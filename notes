@@ -33,6 +33,8 @@ Instead of scaling weights at init, scale input given to layer 1? (By dividing b
 Noninput rec weights don't update. Why?
 
 Gradient hard/softcapping for reliable descent?
+
+Learning rate scheduler?
 =========
 
 TODAY: 7 dec
@@ -47,3 +49,6 @@ Questions for Bellec
 - Synapse weight initialization?
 - How adam if no gradient?
 
+==========
+
+ADAM has a one-off bias. See which optimizer this now is. Or fix it later for correctness. To do that, wait until appyling DWs until the point where ADAM is updated. Just accumulate gradients. Drawback: can't see weight updates in state plot anymore. But I probably won't need to, and the resulting code is better.

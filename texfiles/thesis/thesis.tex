@@ -74,6 +74,12 @@
 
 STRUCTURE
 * Introduction
+  - Introduction in the field
+    - Start with something human and concrete: learning in the brain.
+  - SOTA
+    - Brief walk-through of most relevant papers, look into my own lit review
+  -
+
   - Artificial spiking neurons inspired by brain neurons (as in Bellec intro p1). Various theoretical advantages over ANNs.
   - Unclear how RSNNs can learn. In hope of crudely emulating biological neural circuits, try online, local and bioplausible method.
   - E-prop uses bio-inspired (which) methods that allow for online, local, bioplausible training and have shown to yield good results.
@@ -81,22 +87,52 @@ STRUCTURE
   - Increasing relevance for neuromorphic computing
   - ... synaptic scaling, Izhikevich etc will depend on whether it is implemented.
 
+* RELATED WORK
+  - Boltzmann machines
+  -
+  - Eligibility Propagation (basics, as in Bellec)
+    - Network model
+    - E-prop algorithm (LIF or ALIF depends on what's used in final model). Only describe what I use (e.g. no symmetric eprop or SGD)
+    - Derivation from RNN and backprop.
+  - Traub's STDP-LIF
+  - Traub's Izhikevich (if applicable)
+
 * METHOD
-  - General top-down formulas (derivatives etc). Derive from RNNs. Explain Traub fix or Bellec reset if applicable.
-  - Actual formulas of implementation (abstract away from bidir & epoch dimension) like Bellec, for LIF, ALIF, Izhikevich. Include derivations as proof.
-  - TIMIT dataset explanation, including preprocessing
-  - Regularization (FR, L2, synscaling, metaplasticity, etc)
-  - Hyperparameter sweep (keep it objective and explain choices.)
+  - Data Preprocessing
+    - TIMIT overview
+    - Audio to features
+  - Extending the E-prop framework
+    - Generalizing to multiple layers
+    - Using Izhikevich neurons
+  - Hyperparameter optimization procedure
+  - Regularization
+    - FR (if applicable)
+    - L2 (if applicable)
+  - Adam (if applicable)
+  - Bidirectional network (if applicable)
+  - Traub or Bellec reset (if applicable)
+
 
 * RESULTS
-  - Results of TIMIT. Optionally: initialization & hparam robustness, tradeoffs, comparisons, generalizability, system behavior (e.g. spike freqs, time dynamics, per-phoneme performance, effect of MFCC derivatives), running cost in simulation and in neuromorphics (where only spikes cost energy).
+  - Comparing single-layer and multilayer architecture. Some of the following. Explain and visualize!
+    - Accuracy
+    - Tradeoffs between network size and accuracy (not necessarily same hparams)
+    - Time dynamics
+    - Manifold dynamics
+    - Energy
+    - Robustness (initialization, data, and hparam).
+    - Practicality (e.g. running cost in-sim or in-mat, AER options)
 
 * DISCUSSION
-  -
+  - Try link/explain results with existing research. Show knowledge of the field.
+  - Link to R-STDP with Traub fix -> section on biological plausibility and analogies. Three-factor Hebbian learning.
+  - Neuromorphic computing applications for benefits (parallelization, energy cost).
+  - Maybe: if manifolds of phones, then hypothesize on self-symbolizing (as in Hofstadter). Try to link my own hypotheses to scientific evidence. Keep it relevant to the rest of the paper.
+  - Future research (also ask Herbert)
 
 * CONCLUSION
+  - Powerful and engaging!
   - Short summary, key sentences from all previous. Logical connection to introduction.
-  - Link to R-STDP with Traub fix.
   - Neuromorphic computing
   - Maybe: attempt to explain network interpretability. Subgraphs representing features.
 

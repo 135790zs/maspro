@@ -5,7 +5,7 @@ import utils as ut
 import vis
 
 
-def network(cfg, inp, tar, W_rec, W_out, b_out, B, adamvars):
+def network(cfg, inp, tar, W_rec, W_out, b_out, B, adamvars, eta):
 
     inp = np.pad(array=inp, mode='edge', pad_width=((0, cfg["delay"]), (0, 0)))
 
@@ -59,7 +59,7 @@ def network(cfg, inp, tar, W_rec, W_out, b_out, B, adamvars):
             if t:  # Can only take a mean if spike train is not empty.
                 rates = np.mean(M['Z'][s, :t], axis=0)
                 L_regFR = (cfg["FR_reg"]
-                         * cfg["eta"]
+                         * eta
                          * (1/n_steps)
                          * (-1 if cfg["FR_target"] > rates.all() else 1)
                          * (cfg["FR_target"] - rates))
@@ -93,6 +93,7 @@ def network(cfg, inp, tar, W_rec, W_out, b_out, B, adamvars):
                 dw = ut.eprop_DW(cfg=cfg,
                                  gradient=grad,
                                  wtype=wtype,
+                                 eta=eta,
                                  adamvars=adamvars,
                                  s=s)
 
@@ -118,7 +119,7 @@ def network(cfg, inp, tar, W_rec, W_out, b_out, B, adamvars):
     return M
 
 
-def feed_batch(cfg, inps, tars, W_rec, W_out, b_out, B, epoch, tvt_type, adamvars, e, log_id):
+def feed_batch(cfg, inps, tars, W_rec, W_out, b_out, eta, B, epoch, tvt_type, adamvars, e, log_id):
     batch_err = 0
     batch_perc_wrong = 0
 
@@ -180,7 +181,8 @@ def feed_batch(cfg, inps, tars, W_rec, W_out, b_out, B, epoch, tvt_type, adamvar
             W_out=W_out,
             b_out=b_out,
             B=B,
-            adamvars=adamvars)
+            adamvars=adamvars,
+            eta=eta)
 
         if (cfg['plot_state'] and b == 0 and tvt_type == "train"
             and cfg["plot_interval"] and e % cfg["plot_interval"] == 0):
@@ -233,6 +235,7 @@ def main(cfg):
 
     terrs = np.zeros(shape=(cfg["Epochs"]))
     verrs = np.ones(shape=(cfg["Epochs"])) * -1
+    verr = None
     percs_wrong_t = np.zeros(shape=(cfg["Epochs"]))
     percs_wrong_v = np.ones(shape=(cfg["Epochs"])) * -1
 
@@ -255,6 +258,12 @@ def main(cfg):
     adamvars = ut.init_adam(cfg=cfg, tar_size=tars['train'].shape[-1])
 
     for e in range(0, cfg["Epochs"]):
+        if verr is None or cfg["eta_init_loss"] <= 0:
+            eta = cfg["eta_init"]
+        else:
+            eta = min(cfg["eta_init"],
+                      cfg["eta_init"] * (verr   / cfg["eta_init_loss"]))
+
         ep_curr = e if cfg["Track_weights"] else 0
 
         # Make batch
@@ -273,7 +282,8 @@ def main(cfg):
             B=W['B'][ep_curr],
             adamvars=adamvars,
             e=e,
-            log_id=log_id)
+            log_id=log_id,
+            eta=eta)
 
         terrs[e] = terr
         percs_wrong_t[e] = perc_wrong_t
@@ -293,7 +303,8 @@ def main(cfg):
                 B=W['B'][ep_curr],
                 adamvars=adamvars,
                 e=e,
-                log_id=log_id)
+                log_id=log_id,
+                eta=eta)
             verrs[e] = verr
             percs_wrong_v[e] = perc_wrong_v
 
@@ -351,8 +362,8 @@ def main(cfg):
                             * cfg["weight_decay"])
 
             else:  # W, W_out, or b_out (depending on update cfg)
+
                 W[wtype][ep_curr+ep_incr] = W[wtype][ep_curr] + DW[wtype]
-                print(wtype, np.mean(adamvars[f'm{wtype}']))
                 # Update Adam
                 adamvars[f'm{wtype}'] = (
                     cfg["adam_beta1"] * adamvars[f'm{wtype}']
@@ -388,7 +399,8 @@ def main(cfg):
         B=optW['B'],
         adamvars=adamvars,
         e=e,
-        log_id=log_id)
+        log_id=log_id,
+        eta=eta)
 
     print(f"\nTesting complete with CE loss {total_testerr:.3f} and error "
           f"rate {100*perc_wrong_test:.1f}%!\n")

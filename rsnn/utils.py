@@ -181,7 +181,7 @@ def initialize_weights(cfg, inp_size, tar_size):
     64      103
     200     100-150
     """
-    W["W"][0, :, 0] /= 120  # Epoch 0, layer 0
+    W["W"][0, :, 0] /= cfg["N_R"] + inp_size  # Epoch 0, layer 0
 
     return W
 
@@ -395,11 +395,11 @@ def eprop_gradient(wtype, L, ETbar, P, T, Zbar_last):
         return P - T
 
 
-def eprop_DW(cfg, wtype, s, adamvars, gradient):
+def eprop_DW(cfg, wtype, s, adamvars, gradient, eta):
 
 
     if cfg["optimizer"] == 'SGD':
-        return -cfg["eta"] * gradient
+        return -eta * gradient
     elif cfg["optimizer"] == 'Adam':
         m = (cfg["adam_beta1"] * adamvars[f"m{wtype}"][s]
              + (1 - cfg["adam_beta1"]) * gradient)
@@ -407,7 +407,7 @@ def eprop_DW(cfg, wtype, s, adamvars, gradient):
              + (1 - cfg["adam_beta2"]) * (gradient ** 2))
         f1 = m / ( 1 - cfg["adam_beta1"])
         f2 = np.sqrt(v / (1 - cfg["adam_beta2"])) + cfg["adam_eps"]
-        ret = -cfg["eta"] * (f1 / f2)
+        ret = -eta * (f1 / f2)
         return ret
 
 

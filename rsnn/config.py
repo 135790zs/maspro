@@ -2,24 +2,25 @@ from numpy import exp
 cfg = {
     "verbose": True,
     "eprop_type": "adaptive",  # in {random, symmetric, adaptive}
-    "optimizer": 'SGD',  # TODO: Adam
+    "optimizer": 'SGD',  # in {Adam, SGD}
     "traub_trick": False,
     "fraction_ALIF": 0.25,  # def 0.25
     "n_directions": 2,
     "delay": 0,
 
-    "rho": .995,  # Depends on length of task: working memory. TIMIT= .995
+    "rho": .9987,  # Depends on length of task: working memory. TIMIT= .995
     "alpha": 0.95,  # TIMIT: .95
-    "kappa": 2/3,  # TIMIT: .717
-    "beta": 0.184,    # TIMIT: 0.184
-    "gamma": 0.3,     # Pseudoderivative ET contribution
-    "eta": 1e-2,      # Learning rate (1e-2 for TIMIT)
+    "kappa": 0.4,  # TIMIT: .717
+    "beta": 0.73,    # TIMIT: 0.184
+    "gamma": 0.45,     # Pseudoderivative ET contribution
+    "eta_init": 0.05,      # Initial learning rate (1e-2 for TIMIT)
+    "eta_init_loss": 5,  # 0 to disable annealing. This is the cap below which annealing to 0 takes place linearly.
     "thr": 1.6,        # Spike threshold, def = 1.6
     "dt_refr": 2,    # Refractory time, def = 2
-    "weight_decay": 1e-2,  # For W_out and B, only if adaptive. def = 1e-2
-    "L2_reg": 1e-5,  # 1e-5 for TIMIT
-    "FR_reg": 50,  # 50 for TIMIT
-    "FR_target": 10/1000,  # Desired frequency (mean spike per ms)
+    "weight_decay": 0.04,  # For W_out and B, only if adaptive. def = 1e-2
+    "L2_reg": 4e-5,  # 1e-5 for TIMIT
+    "FR_target": 0.055,  # Desired frequency (mean spike per ms)
+    "FR_reg": 100,  # 50 for TIMIT
     "dropout": 0,
     "adam_beta1": 0.9,
     "adam_beta2": 0.999,
@@ -31,19 +32,19 @@ cfg = {
     "update_dead_weights": False,
     "update_input_weights": True,  # Subset of - and overridden by `update_W'.
 
-    "N_R": 200,
+    "N_R": 64,
     "N_Rec": 1,
 
     "wavs_fname": "../data_wavs",
     "phns_fname": "../data_phns",
 
-    "Epochs": 200,  # def = 80
+    "Epochs": 60,  # def = 80
     "Track_weights": True,
     "Track_state": False,  # Only for synapse vars
     "Repeats": 5,  # ms per epoch, def = 5
-    "batch_size_train": 32,  # def = 32
-    "batch_size_val": 32,  # def = 32
-    "val_every_E": 5,
+    "batch_size_train": 5,  # def = 32
+    "batch_size_val": 5,  # def = 32
+    "val_every_E": 2,
     "maxlen": 778,  # Don't forget to re-run process_timit.py!
     "n_examples": {'train': 3696, 'val': 400, 'test': 192},
     "plot_interval": 1,  #  State plot; 0 to disable plots
