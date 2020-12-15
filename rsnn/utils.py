@@ -177,11 +177,14 @@ def initialize_weights(cfg, inp_size, tar_size):
     # Re-scale weights in first layer (first time step will be transferred
     # automatically)
     """
-    N_R     Effective
-    64      103
-    200     100-150
+    N_R     inp     Effective
+    12      12      30-55,
+    42      12      50,
+    200     12      55
+    64      39      103,
+    200     39      100-150,
     """
-    W["W"][0, :, 0] /= cfg["N_R"] + inp_size  # Epoch 0, layer 0
+    W["W"][0, :, 0] /= 50 #cfg["N_R"] + inp_size  # Epoch 0, layer 0
 
     return W
 

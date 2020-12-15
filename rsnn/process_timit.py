@@ -1,11 +1,116 @@
 import os
 import soundfile as sf
 import numpy as np
+from scipy.fftpack import dct
 import matplotlib.pyplot as plt
-from python_speech_features import mfcc
 from python_speech_features import delta
 from config import cfg
 
+def my_mfcc(signal, sample_rate):
+    if not os.path.isfile("../vis/signal.pdf"):
+        plt.plot(signal)
+        plt.savefig("../vis/signal.pdf")
+        plt.clf()
+
+    emphasized_signal = np.append(signal[0],
+                                  signal[1:] - cfg["pre_emphasis"] * signal[:-1])
+
+    if not os.path.isfile("../vis/signalemph.pdf"):
+        plt.plot(emphasized_signal)
+        plt.savefig("../vis/signalemph.pdf")
+        plt.clf()
+
+    frame_length = cfg["frame_size"] * sample_rate
+    frame_step = cfg["frame_stride"] * sample_rate  # Convert from seconds to samples
+
+    signal_length = len(emphasized_signal)
+    frame_length = int(round(frame_length))
+    frame_step = int(round(frame_step))
+    num_frames = int(np.ceil(
+        float(np.abs(
+            signal_length - frame_length)) / frame_step))  # Make sure that we have at least 1 frame
+
+    pad_signal_length = num_frames * frame_step + frame_length
+    z = np.zeros((pad_signal_length - signal_length))
+    pad_signal = np.append(emphasized_signal, z) # Pad Signal to make sure that all frames have equal number of samples without truncating any samples from the original signal
+
+    indices = np.tile(np.arange(0, frame_length), (num_frames, 1)) + np.tile(np.arange(0, num_frames * frame_step, frame_step), (frame_length, 1)).T
+    frames = pad_signal[indices.astype(np.int32, copy=False)]
+    # frames *= np.hamming(frame_length)
+    frames *= 0.53836 - 0.46164 * np.cos((2 * np.pi * frame_length) / (frame_length - 1))  # Explicit Implementation **
+
+    mag_frames = np.absolute(np.fft.rfft(frames, cfg["NFFT"]))  # Magnitude of the FFT
+    if not os.path.isfile("../vis/magframes.pdf"):
+        plt.imshow(mag_frames, interpolation='none', cmap='jet')
+        plt.xlabel("Frame")
+        plt.colorbar()
+        plt.savefig("../vis/magframes.pdf")
+        plt.clf()
+
+    pow_frames = ((1.0 / cfg["NFFT"]) * ((mag_frames) ** 2))  # Power Spectrum
+
+    if not os.path.isfile("../vis/powframes.pdf"):
+        plt.imshow(pow_frames, interpolation='none', cmap='jet')
+        plt.xlabel("Frame")
+        plt.colorbar()
+        plt.savefig("../vis/powframes.pdf")
+        plt.clf()
+
+    low_freq_mel = 0
+    high_freq_mel = (2595 * np.log10(1 + (sample_rate / 2) / 700))  # Convert Hz to Mel
+    mel_points = np.linspace(low_freq_mel, high_freq_mel, cfg["nfilt"] + 2)  # Equally spaced in Mel scale
+    hz_points = (700 * (10**(mel_points / 2595) - 1))  # Convert Mel to Hz
+    bin = np.floor((cfg["NFFT"] + 1) * hz_points / sample_rate)
+
+    fbank = np.zeros((cfg["nfilt"], int(np.floor(cfg["NFFT"] / 2 + 1))))
+    for m in range(1, cfg["nfilt"] + 1):
+        f_m_minus = int(bin[m - 1])   # left
+        f_m = int(bin[m])             # center
+        f_m_plus = int(bin[m + 1])    # right
+
+        for k in range(f_m_minus, f_m):
+            fbank[m - 1, k] = (k - bin[m - 1]) / (bin[m] - bin[m - 1])
+        for k in range(f_m, f_m_plus):
+            fbank[m - 1, k] = (bin[m + 1] - k) / (bin[m + 1] - bin[m])
+
+    if not os.path.isfile("../vis/fbanks.pdf"):
+        for bank in fbank:
+            plt.plot(bank, color='black')
+        plt.savefig("../vis/fbanks.pdf")
+        plt.clf()
+
+    filter_banks = np.dot(pow_frames, fbank.T)
+    filter_banks = np.where(filter_banks == 0, np.finfo(float).eps, filter_banks)  # Numerical Stability
+    filter_banks = 20 * np.log10(filter_banks)  # dB
+    if not os.path.isfile("../vis/spectrogram.pdf"):
+        plt.imshow(filter_banks.T, interpolation='none', cmap='jet', aspect='auto')
+        plt.savefig("../vis/spectrogram.pdf")
+        plt.clf()
+
+    mfcc = dct(filter_banks, type=2, axis=1, norm='ortho')[:, 1 : (cfg["num_ceps"] + 1)] # Keep 2-13
+    (nframes, ncoeff) = mfcc.shape
+    n = np.arange(ncoeff)
+    lift = 1 + (cfg["cep_lifter"] / 2) * np.sin(np.pi * n / cfg["cep_lifter"])
+    mfcc *= lift  #*
+
+    if not os.path.isfile("../vis/mfcc.pdf"):
+        plt.imshow(mfcc.T, interpolation='none', cmap='jet', aspect='auto')
+        plt.savefig("../vis/mfcc.pdf")
+        plt.clf()
+    filter_banks -= np.mean(filter_banks, axis=0)
+
+    if not os.path.isfile("../vis/norm_fbanks.pdf"):
+        plt.imshow(filter_banks.T, interpolation='none', cmap='jet', aspect='auto')
+        plt.savefig("../vis/norm_fbanks.pdf")
+        plt.clf()
+
+    mfcc -= np.mean(mfcc, axis=0)
+
+    if not os.path.isfile("../vis/norm_mfcc.pdf"):
+        plt.imshow(mfcc.T, interpolation='none', cmap='jet', aspect='auto')
+        plt.savefig("../vis/norm_mfcc.pdf")
+        plt.clf()
+    return mfcc
 
 def read_phonelines(phonelines_):
     def to_ohv(p):
@@ -49,25 +154,33 @@ def align_phones(phones_):
 
 def read_sound(fname):
     """Returns as [(start, end, soundarr)] tuple list."""
-    mfcc_feat = mfcc(*sf.read(fname))
+    mfcc_feat = my_mfcc(*sf.read(fname))
+    if cfg["TIMIT_derivative"] == 0:
+        return mfcc_feat
     delta1 = delta(feat=mfcc_feat, N=2)
+    conc = np.concatenate((mfcc_feat, delta1), axis=1)
+
+    if cfg["TIMIT_derivative"] == 1:
+        return conc
+
     delta2 = delta(feat=delta1, N=2)
-    conc = np.concatenate((mfcc_feat, delta1, delta2), axis=1)
+    conc = np.concatenate((mfcc_feat, conc), axis=1)
+
     return conc
 
 
 if __name__ == "__main__":
 
     sampling_rate = 16000
-    windur = 25
-    stepdur = 10
-    winlen = sampling_rate * windur / 1000
-    steplen = sampling_rate * stepdur / 1000
+    ohv_len = 61
+
+    nfeat = cfg["num_ceps"] * (cfg["TIMIT_derivative"] + 1)
+    winlen = sampling_rate * cfg["frame_size"]
+    steplen = sampling_rate * cfg["frame_stride"]
 
     maxnframes = cfg["maxlen"]  # def: 778
 
     known_phones = []
-    ohv_len = 61
 
     for tvt_type in ['train', 'test']:
         idx = 0
@@ -78,12 +191,12 @@ if __name__ == "__main__":
             nwavs = cfg["n_examples"]['train'] + cfg["n_examples"]['val']
             print(f"\nReading {nwavs} train & val files...")
 
-        plotidx = np.random.default_rng().integers(nwavs)
-        wavdata = np.zeros(shape=(nwavs, maxnframes, 39))
+        # plotidx = np.random.default_rng().integers(nwavs)
+        wavdata = np.zeros(shape=(nwavs, maxnframes, nfeat))
         phonedata = np.zeros(shape=(nwavs, maxnframes, 61))
-        fig = plt.figure(constrained_layout=False, figsize=(14, 9))
-        gsc = fig.add_gridspec(nrows=3, ncols=1, hspace=0.2)
-        axs = [fig.add_subplot(gsc[r, :]) for r in range(3)]
+        # fig = plt.figure(constrained_layout=False, figsize=(14, 9))
+        # gsc = fig.add_gridspec(nrows=3, ncols=1, hspace=0.2)
+        # axs = [fig.add_subplot(gsc[r, :]) for r in range(3)]
 
         directory = tvt_type.upper()
         for subdir, dirs, files in os.walk(f'../TIMIT/{directory}'):
@@ -97,13 +210,13 @@ if __name__ == "__main__":
                     sig, _ = sf.read(filepath)
                     c = read_sound(filepath)
                     wavdata[idx, :c.shape[0], :] = c[:maxnframes]
-                    if idx == plotidx:
-                        axs[0].plot(sig[:int(steplen*maxnframes)])
-                        axs[0].margins(0)
-                        axs[1].imshow(wavdata[idx, :c.shape[0]].T,
-                                      interpolation='nearest',
-                                      aspect='auto',
-                                      cmap='coolwarm')
+                    # if idx == plotidx:
+                    #     axs[0].plot(sig[:int(steplen*maxnframes)])
+                    #     axs[0].margins(0)
+                    #     axs[1].imshow(wavdata[idx, :c.shape[0]].T,
+                    #                   interpolation='nearest',
+                    #                   aspect='auto',
+                    #                   cmap='coolwarm')
 
                     with open(f"{filepath[:-4]}.PHN") as f:
                         phonelines = f.readlines()
@@ -112,23 +225,23 @@ if __name__ == "__main__":
                     phones = read_phonelines(phonelines)
                     aligned, maxframe = align_phones(phones)
                     phonedata[idx, :, :] = aligned
-                    if idx == plotidx:
-                        plt.suptitle(' '.join(textline.split(' ')[2:]))
-                        axs[2].imshow(aligned[:c.shape[0]].T,
-                                      interpolation='nearest',
-                                      aspect='auto',
-                                      cmap='gray')
-                        for line in phonelines:
-                            start, end, phone = line.split(' ')
-                            if int(start) >= maxnframes * steplen:
-                                break
-                            axs[0].axvline(int(start),
-                                           color='black',
-                                           label=phone)
-                            axs[0].axis('off')
-                            axs[0].text(x=(int(start) + int(end)) // 2,
-                                        y=np.min(sig)*1.4,
-                                        s=phone)
+                    # if idx == plotidx:
+                        # plt.suptitle(' '.join(textline.split(' ')[2:]))
+                        # axs[2].imshow(aligned[:c.shape[0]].T,
+                        #               interpolation='nearest',
+                        #               aspect='auto',
+                        #               cmap='gray')
+                        # for line in phonelines:
+                        #     start, end, phone = line.split(' ')
+                        #     if int(start) >= maxnframes * steplen:
+                        #         break
+                            # axs[0].axvline(int(start),
+                            #                color='black',
+                            #                label=phone)
+                            # axs[0].axis('off')
+                            # axs[0].text(x=(int(start) + int(end)) // 2,
+                            #             y=np.min(sig)*1.4,
+                            #             s=phone)
 
 
                     idx += 1
@@ -147,10 +260,10 @@ if __name__ == "__main__":
                     wavdata[cfg['n_examples']['val']:])
             np.save(f'{cfg["phns_fname"]}_val.npy',
                     phonedata[cfg['n_examples']['val']:])
-        plt.subplots_adjust(wspace=0, hspace=0)
+        # plt.subplots_adjust(wspace=0, hspace=0)
 
-        plt.savefig(f"../vis/exampleTIMIT_{tvt_type}.pdf",
-                    bbox_inches='tight')
+        # plt.savefig(f"../vis/exampleTIMIT_{tvt_type}.pdf",
+        #             bbox_inches='tight')
 
-        plt.close()
+        # plt.close()
     print("\nDone parsing TIMIT dataset!")

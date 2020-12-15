@@ -60,9 +60,11 @@ def network(cfg, inp, tar, W_rec, W_out, b_out, B, adamvars, eta):
                 rates = np.mean(M['Z'][s, :t], axis=0)
                 L_regFR = (cfg["FR_reg"]
                          * eta
-                         * (1/n_steps)
-                         * (-1 if cfg["FR_target"] > rates.all() else 1)
-                         * (cfg["FR_target"] - rates))
+                         * (t/n_steps)
+                         # * (-1 if cfg["FR_target"] > rates.all() else 1)
+                         * (cfg["FR_target"] - rates)
+                         * -1)
+                # print(f"Rates: {1000*np.mean(rates):.2f}")
             else:
                 L_regFR = 0
 
@@ -72,6 +74,9 @@ def network(cfg, inp, tar, W_rec, W_out, b_out, B, adamvars, eta):
                  W_out.flatten(),
                  b_out.flatten())), ord=2)
             M['L'][s, t] = L_std + L_regFR + L_regL2
+            # print(f"std: {np.mean(L_std):.4f}, "
+            #       f"\tFR: {np.mean(L_regFR):.4f}, "
+            #         f"\tL2: {np.mean(L_regL2):.4f}")
 
             # Calculate gradient and weight update
             # TODO: make into iterable
@@ -262,7 +267,8 @@ def main(cfg):
             eta = cfg["eta_init"]
         else:
             eta = min(cfg["eta_init"],
-                      cfg["eta_init"] * (verr   / cfg["eta_init_loss"]))
+                      cfg["eta_init"] * (verr / cfg["eta_init_loss"]) ** cfg["eta_slope"])
+            print(f"Loss: {verr:.3f}, \tEta: {eta:.4f}")
 
         ep_curr = e if cfg["Track_weights"] else 0
 

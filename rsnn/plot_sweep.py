@@ -26,7 +26,7 @@ def plot_dfs(df, fname):
     size = int(np.ceil(np.sqrt(len(pool))))
     fig, axs = plt.subplots(nrows=size, ncols=size, figsize=(3*size, 3*size))
 
-    plt.set_cmap('cool')
+    plt.set_cmap('gist_ncar')
 
     def jitter(arr, strength=0.02):
         stdev = strength * (max(arr) - min(arr))

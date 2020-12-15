@@ -170,6 +170,7 @@ def plot_state(cfg, M, W_rec, W_out, b_out, e, log_id, plot_weights=False):
 
         elif var == 'CE':  # not as image but line plot
             axs[-1].plot(arr)
+            axs[-1].margins(0)
             axs[-1].grid()
 
         axs[-1].set_ylabel(f"${lookup[var]['label']}$"

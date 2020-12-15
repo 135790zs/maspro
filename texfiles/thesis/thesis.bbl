@@ -19,6 +19,36 @@
 
 \refsection{0}
   \datalist[entry]{nyt/global//global/global}
+    \entry{fayek2016}{misc}{}
+      \name{author}{1}{}{%
+        {{uniquename=0,uniquepart=base,hash=02bf21efbaa9133205a5997f384dc5ab}{%
+           family={Fayek},
+           familyi={F\bibinitperiod},
+           given={Haytham\bibnamedelima M.},
+           giveni={H\bibinitperiod\bibinitdelim M\bibinitperiod},
+           givenun=0}}%
+      }
+      \strng{namehash}{02bf21efbaa9133205a5997f384dc5ab}
+      \strng{fullhash}{02bf21efbaa9133205a5997f384dc5ab}
+      \strng{bibnamehash}{02bf21efbaa9133205a5997f384dc5ab}
+      \strng{authorbibnamehash}{02bf21efbaa9133205a5997f384dc5ab}
+      \strng{authornamehash}{02bf21efbaa9133205a5997f384dc5ab}
+      \strng{authorfullhash}{02bf21efbaa9133205a5997f384dc5ab}
+      \field{sortinit}{F}
+      \field{sortinithash}{669c706c6f1fbf3b5a83d26f1d9e9e72}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{year}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Speech Processing for Machine Learning: Filter banks, Mel-Frequency Cepstral Coefficients (MFCCs) and What's In-Between}
+      \field{year}{2016}
+      \verb{urlraw}
+      \verb https://haythamfayek.com/2016/04/21/speech-processing-for-machine-learning.html
+      \endverb
+      \verb{url}
+      \verb https://haythamfayek.com/2016/04/21/speech-processing-for-machine-learning.html
+      \endverb
+    \endentry
     \entry{garofolo1993darpa}{article}{}
       \name{author}{5}{}{%
         {{uniquename=0,uniquepart=base,hash=3041e850499ccd58c4ef210dbebad9e0}{%
@@ -154,6 +184,78 @@
       \field{labeltitlesource}{title}
       \field{title}{Computational analysis of present-day American English}
       \field{year}{1967}
+    \endentry
+    \entry{SASPWEB2011}{book}{}
+      \name{author}{1}{}{%
+        {{uniquename=0,uniquepart=base,hash=d4e614c8bb031ace758f4e6e9f538f89}{%
+           family={Smith},
+           familyi={S\bibinitperiod},
+           given={Julius\bibnamedelima O.},
+           giveni={J\bibinitperiod\bibinitdelim O\bibinitperiod},
+           givenun=0}}%
+      }
+      \list{publisher}{1}{%
+        {\htmladdnormallink{\texttt{http:}}{http://ccrma.stanford.edu/~jos/sasp/}\texttt{//\-ccrma.stanford.edu/\-\~{}jos/\-sasp/}}%
+      }
+      \strng{namehash}{d4e614c8bb031ace758f4e6e9f538f89}
+      \strng{fullhash}{d4e614c8bb031ace758f4e6e9f538f89}
+      \strng{bibnamehash}{d4e614c8bb031ace758f4e6e9f538f89}
+      \strng{authorbibnamehash}{d4e614c8bb031ace758f4e6e9f538f89}
+      \strng{authornamehash}{d4e614c8bb031ace758f4e6e9f538f89}
+      \strng{authorfullhash}{d4e614c8bb031ace758f4e6e9f538f89}
+      \field{sortinit}{S}
+      \field{sortinithash}{322b1d5276f2f6c1bccdcd15920dbee6}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{year}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{note}{online book, 2011 edition}
+      \field{title}{Spectral Audio Signal Processing}
+      \field{year}{accessed <date>}
+    \endentry
+    \entry{stevens1937scale}{article}{}
+      \name{author}{3}{}{%
+        {{uniquename=0,uniquepart=base,hash=16debd1e7d982ded7c26a0628f8b5890}{%
+           family={Stevens},
+           familyi={S\bibinitperiod},
+           given={Stanley\bibnamedelima Smith},
+           giveni={S\bibinitperiod\bibinitdelim S\bibinitperiod},
+           givenun=0}}%
+        {{uniquename=0,uniquepart=base,hash=7c4b6edf5517851b2f23a3ebe69f2a7d}{%
+           family={Volkmann},
+           familyi={V\bibinitperiod},
+           given={John},
+           giveni={J\bibinitperiod},
+           givenun=0}}%
+        {{uniquename=0,uniquepart=base,hash=c27dc31748f5836df1fd58fbab5ad20f}{%
+           family={Newman},
+           familyi={N\bibinitperiod},
+           given={Edwin\bibnamedelima B},
+           giveni={E\bibinitperiod\bibinitdelim B\bibinitperiod},
+           givenun=0}}%
+      }
+      \list{publisher}{1}{%
+        {Acoustical Society of America}%
+      }
+      \strng{namehash}{bb3fc3977ac5fd70d77c967f017aff43}
+      \strng{fullhash}{bb3fc3977ac5fd70d77c967f017aff43}
+      \strng{bibnamehash}{bb3fc3977ac5fd70d77c967f017aff43}
+      \strng{authorbibnamehash}{bb3fc3977ac5fd70d77c967f017aff43}
+      \strng{authornamehash}{bb3fc3977ac5fd70d77c967f017aff43}
+      \strng{authorfullhash}{bb3fc3977ac5fd70d77c967f017aff43}
+      \field{sortinit}{S}
+      \field{sortinithash}{322b1d5276f2f6c1bccdcd15920dbee6}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{year}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{The Journal of the Acoustical Society of America}
+      \field{number}{3}
+      \field{title}{A scale for the measurement of the psychological magnitude pitch}
+      \field{volume}{8}
+      \field{year}{1937}
+      \field{pages}{185\bibrangedash 190}
+      \range{pages}{6}
     \endentry
   \enddatalist
 \endrefsection
