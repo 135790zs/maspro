@@ -164,7 +164,7 @@ def read_sound(fname):
         return conc
 
     delta2 = delta(feat=delta1, N=2)
-    conc = np.concatenate((mfcc_feat, conc), axis=1)
+    conc = np.concatenate((conc, delta2), axis=1)
 
     return conc
 

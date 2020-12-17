@@ -19,6 +19,8 @@ ALSO note usage of W^out_kj in pE/pz equation in supp equation 20. Needs solutio
 
 send plot to Jaeger, Dirk and Marco if working
 may email Bellec et al if concrete question
+INCLUDING:
+Elaborate on the sentence "Note also that the weight updates derived in the following for the recurrent weights W^rec_ji also apply to the inputs weights W^in_ji". Do the input weights have eligibility traces? If so, what is the nature of their spike train? Is a spike on an input connection simply the value of x?
 
 =========
 Freezing recurrent weights makes no difference. -> See if training with only recurrents works with very low learning rate. If so, I will need to have 2 different learning rates. Also explore if this is linked to Adam (see if also occurs using SGD).
@@ -64,3 +66,6 @@ Conclusion: sweep has no result, no good params. Will need to change functionali
 * Maybe apply global broadcast
 * L is positive if larger than 1/N_out else negative
 * Doublecheck if broadcast taking place correctly.
+
+==========
+When L_j, then update all incoming synapses to j (ALSO W_IN) by L

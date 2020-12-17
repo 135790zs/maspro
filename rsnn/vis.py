@@ -34,11 +34,11 @@ def weights_to_img(arr, is_binary=False):
     return arr
 
 
-def plot_run(cfg, terrs, percs_wrong_t, verrs, percs_wrong_v, W, epoch, log_id):
+def plot_run(cfg, terrs, percs_wrong_t, verrs, percs_wrong_v, W, epoch, log_id, inp_size):
     labelpad = 35
     fontsize = 14
-    fig = plt.figure(constrained_layout=False, figsize=(8, 8))
-    gsc = fig.add_gridspec(nrows=8 if cfg["Track_weights"] else 4,
+    fig = plt.figure(constrained_layout=False, figsize=(8, 12))
+    gsc = fig.add_gridspec(nrows=14 if cfg["Track_weights"] else 4,
                            ncols=1, hspace=0.05)
     axs = []
 
@@ -68,17 +68,96 @@ def plot_run(cfg, terrs, percs_wrong_t, verrs, percs_wrong_v, W, epoch, log_id):
     if epoch >= 1 and cfg["Track_weights"]:
         for weight_type, weights in W.items():
             axs.append(fig.add_subplot(gsc[len(axs), :]))
-            axs[-1].imshow(
-                weights_to_img(weights[:epoch]),
-                aspect='auto',
-                interpolation='nearest',
-                cmap='coolwarm')
-            axs[-1].set_ylabel(f"{weight_type}"
-                               f"\n{np.min(weights[:epoch]):.1e}"
-                               f"\n{np.max(weights[:epoch]):.1e}",
-                               rotation=0,
-                               labelpad=labelpad,
-                               fontsize=fontsize)
+            if weight_type != 'W':
+
+                # W_out, B, b_out
+                if weight_type == "B":
+                    weights = np.mean(weights, axis=3)
+                elif weight_type == "W_out":
+                    weights = np.mean(weights, axis=2)
+                axs[-1].imshow(
+                    weights_to_img(weights[:epoch]),
+                    aspect='auto',
+                    interpolation='nearest',
+                    cmap='coolwarm')
+                axs[-1].set_ylabel(f"{weight_type}"
+                                   f"\n{np.min(weights[:epoch]):.1e}"
+                                   f"\n{np.max(weights[:epoch]):.1e}",
+                                   rotation=0,
+                                   labelpad=labelpad,
+                                   fontsize=fontsize)
+                axs.append(fig.add_subplot(gsc[len(axs), :]))
+                axs[-1].imshow(
+                    weights_to_img(weights[1:epoch+1] - weights[:epoch]),
+                    aspect='auto',
+                    interpolation='nearest',
+                    cmap='coolwarm')
+                axs[-1].set_ylabel(f"D{weight_type}"
+                                   f"\n{np.min(weights[1:epoch+1] - weights[:epoch]):.1e}"
+                                   f"\n{np.max(weights[1:epoch+1] - weights[:epoch]):.1e}",
+                                   rotation=0,
+                                   labelpad=labelpad,
+                                   fontsize=fontsize)
+            else:
+                # W_in
+                axs[-1].imshow(
+                    weights_to_img(np.mean(weights[:epoch, :, 0, :, :inp_size], axis=3)),
+                    aspect='auto',
+                    interpolation='nearest',
+                    cmap='coolwarm')
+                axs[-1].set_ylabel(f"W_in"
+                                   f"\n{np.min(weights[:epoch, :, 0, :, :inp_size]):.1e}"
+                                   f"\n{np.max(weights[:epoch, :, 0, :, :inp_size]):.1e}",
+                                   rotation=0,
+                                   labelpad=labelpad,
+                                   fontsize=fontsize)
+
+                axs.append(fig.add_subplot(gsc[len(axs), :]))
+                axs[-1].imshow(
+                    weights_to_img(np.mean(weights[1:epoch+1, :, 0, :, :inp_size], axis=3) -
+                                   np.mean(weights[:epoch, :, 0, :, :inp_size], axis=3)),
+                    aspect='auto',
+                    interpolation='nearest',
+                    cmap='coolwarm')
+                axs[-1].set_ylabel(f"DW_in"
+                                   f"\n{np.min(weights[1:epoch+1, :, 0, :, :inp_size] - weights[:epoch, :, 0, :, :inp_size]):.1e}"
+                                   f"\n{np.max(weights[1:epoch+1, :, 0, :, :inp_size] - weights[:epoch, :, 0, :, :inp_size]):.1e}",
+                                   rotation=0,
+                                   labelpad=labelpad,
+                                   fontsize=fontsize)
+
+                # W_rec
+                axs.append(fig.add_subplot(gsc[len(axs), :]))
+                W_rec0 = np.mean(weights[:epoch, :, 0, :, inp_size:], axis=3).reshape(epoch, -1)
+                if cfg["N_Rec"] > 1:
+                    W_rec0 = np.concatenate((W_rec0, weights[:epoch, :, 1:].reshape(epoch, -1)), axis=1)
+                W_rec1 = np.mean(weights[1:epoch+1, :, 0, :, inp_size:], axis=3).reshape(epoch, -1)
+                if cfg["N_Rec"] > 1:
+                    W_rec1 = np.concatenate((W_rec1, weights[1:epoch+1, :, 1:].reshape(epoch, -1)), axis=1)
+                axs[-1].imshow(
+                    weights_to_img(W_rec0),
+                    aspect='auto',
+                    interpolation='nearest',
+                    cmap='coolwarm')
+                axs[-1].set_ylabel(f"W_rec"
+                                   f"\n{np.min(W_rec0):.1e}"
+                                   f"\n{np.max(W_rec0):.1e}",
+                                   rotation=0,
+                                   labelpad=labelpad,
+                                   fontsize=fontsize)
+
+                axs.append(fig.add_subplot(gsc[len(axs), :]))
+                axs[-1].imshow(
+                    weights_to_img(W_rec1 - W_rec0),
+                    aspect='auto',
+                    interpolation='nearest',
+                    cmap='coolwarm')
+                axs[-1].set_ylabel(f"DW_rec"
+                                   f"\n{np.min(W_rec1 - W_rec0):.1e}"
+                                   f"\n{np.max(W_rec1 - W_rec0):.1e}",
+                                   rotation=0,
+                                   labelpad=labelpad,
+                                   fontsize=fontsize)
 
     axs[-1].set_xlabel("Epoch $E$", fontsize=fontsize)
     plt.savefig(f"../log/{log_id}/metric.pdf",
@@ -89,17 +168,17 @@ def plot_run(cfg, terrs, percs_wrong_t, verrs, percs_wrong_v, W, epoch, log_id):
     plt.close()
 
 
-def plot_state(cfg, M, W_rec, W_out, b_out, e, log_id, plot_weights=False):
+def plot_state(cfg, M, B, W_rec, W_out, b_out, e, log_id, plot_weights=True):
     S_plotvars = ["X", "I", "V", "H", "U", "Z", "Y", "L"]
     if cfg["Track_state"]:
         S_plotvars = S_plotvars[:6] + ["EVV", "EVU", "ET"] + S_plotvars[6:]
         S_plotvars = S_plotvars + ["DW", "DW_out", "Db_out"]
 
-    M_plotvars = ["P", "Pmax", "T", "CE"]
+    M_plotvars = ["P", "D", "Pmax", "T", "CE"]
     if cfg["n_directions"] > 1:
         M_plotvars = ["X", "Y"] + M_plotvars  # Show combined/corrected in, out
 
-    W = {"W_rec": W_rec, "W_out": W_out, "b_out": b_out}
+    W = {"B": B, "W_rec": W_rec, "W_out": W_out, "b_out": b_out}
 
     fig = plt.figure(constrained_layout=False, figsize=(8, 16))
     gsc = fig.add_gridspec(nrows=(len(M_plotvars)
@@ -125,8 +204,13 @@ def plot_state(cfg, M, W_rec, W_out, b_out, e, log_id, plot_weights=False):
             axs.append(fig.add_subplot(gsc[row_idx, s]))
             if var == "X":
                 arr = M[f"X{s}"]
+
             else:
                 arr = M[var][s]
+            # For synapses, plot mean of set with shared receiving.
+            if arr.ndim == 4:
+                arr = np.mean(arr, axis=3)
+
             axs[-1].imshow(weights_to_img(arr,
                                           is_binary=lookup[var]["binary"]),
                            cmap=('copper' if lookup[var]["binary"]
@@ -182,9 +266,13 @@ def plot_state(cfg, M, W_rec, W_out, b_out, e, log_id, plot_weights=False):
 
     if plot_weights:
         for k, v in W.items():
+            if k in ["W_rec", "B"]:
+                v = np.mean(v, axis=3)
+            if k == "W_out":
+                v = np.mean(v, axis=2)
             v = v.flatten()
             v = np.expand_dims(v, axis=0)
-            v = np.repeat(v, M['X'].shape[0], axis=0)
+            v = np.repeat(v, M['X0'].shape[0], axis=0)
 
             axs.append(fig.add_subplot(gsc[row_idx, :],
                                        sharex=axs[0] if axs else None))
@@ -196,10 +284,9 @@ def plot_state(cfg, M, W_rec, W_out, b_out, e, log_id, plot_weights=False):
                            interpolation='nearest',
                            aspect='auto')
             axs[-1].set_ylabel(f"${lookup[k]['label']}$"
-                               f"\n{np.min(arr):.1e}"
-                               f"\n{np.max(arr):.1e}",
+                               f"\n{np.min(v):.1e}"
+                               f"\n{np.max(v):.1e}",
                                rotation=0,
-
                                labelpad=labelpad,
                                fontsize=fontsize)
 

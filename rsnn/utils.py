@@ -35,6 +35,7 @@ def initialize_model(cfg, length, tar_size):
         T:       Timestep target
         Y:       Timestep output
         P:       Timestep probability vector
+        D:       Timestep probability minus target
         Pmax:    Timestep prediction
         CE:      Timestep cross-entropy loss
         L:       Timestep learning signal
@@ -74,7 +75,7 @@ def initialize_model(cfg, length, tar_size):
 
     T_shape = (length, tar_size,)
 
-    for T_var in ["T", "P", "Pmax"]:
+    for T_var in ["T", "P", "Pmax", "D"]:
         M[T_var] = np.zeros(shape=T_shape)
 
     for neuronvar in ["Z", "Zbar", "I", "L", "Lreg"]:
@@ -139,12 +140,12 @@ def initialize_weights(cfg, inp_size, tar_size):
                               cfg["n_directions"],
                               cfg["N_Rec"],
                               cfg["N_R"],
-                              cfg["N_R"] * 2,))
+                              cfg["N_R"] * 2,)) * 2 - 1
 
     W["W_out"] = rng.random(size=(n_epochs,
                                   cfg["n_directions"],
                                   tar_size,
-                                  cfg["N_R"],))
+                                  cfg["N_R"],)) * 2 - 1
 
     if cfg["one_to_one_output"]:
         for s in range(cfg["n_directions"]):
@@ -153,7 +154,7 @@ def initialize_weights(cfg, inp_size, tar_size):
 
     W["b_out"] = np.zeros(shape=(n_epochs,
                                  cfg["n_directions"],
-                                 tar_size,))
+                                 tar_size,)) * 2 - 1
 
     B_shape = (n_epochs,
                cfg["n_directions"],
@@ -165,7 +166,7 @@ def initialize_weights(cfg, inp_size, tar_size):
         W["B"] = rng.normal(size=B_shape, scale=1)
 
     elif cfg["eprop_type"] == "global":  # Gaussian, variance of 1
-        W["B"] = np.ones(shape=B_shape)
+        W["B"] = np.ones(shape=B_shape) * (1/np.sqrt(cfg["N_R"]*cfg["N_Rec"]))
 
     elif cfg["eprop_type"] == "adaptive":  # Gaussian, variance of 1/N
         W["B"] = rng.normal(size=B_shape, scale=np.sqrt(1 / cfg["N_R"]))
@@ -178,10 +179,12 @@ def initialize_weights(cfg, inp_size, tar_size):
         for s in range(cfg["n_directions"]):
             np.fill_diagonal(W['W'][0, s, r, :, cfg["N_R"]:], 0)
 
-    # Randomly dropout a fraction of the (remaining) weights.
+    # Randomly dropout a fraction of the (remaining) recurrent weights.
+    inps = W['W'][0, :, 0, :, :inp_size]
     W['W'][0] = np.where(np.random.random(W['W'][0].shape) < cfg["dropout"],
                          0,
                          W['W'][0])
+    W['W'][0, :, 0, :, :inp_size] = inps
 
     # Re-scale weights in first layer (first time step will be transferred
     # automatically)
@@ -199,11 +202,11 @@ def initialize_weights(cfg, inp_size, tar_size):
         for s in range(cfg["n_directions"]):
             np.fill_diagonal(W['W'][0, s, 0, :, :inp_size], 1)
 
-    #Inputs
-    W["W"][0, :, 0, :, :inp_size] *= (1/1)/inp_size # Epoch 0, layer 0
+    # #Inputs
+    # W["W"][0, :, 0, :, :inp_size] *= (0/3)/inp_size # Epoch 0, layer 0
 
-    # Recurrent
-    W["W"][0, :, 0, :, inp_size:] *= (1/10)/(cfg["N_R"]) #cfg["N_R"] + inp_size  # Epoch 0, layer 0
+    # # Recurrent
+    # W["W"][0, :, 0, :, inp_size:] *= (0/1)/(cfg["N_R"]) #cfg["N_R"] + inp_size  # Epoch 0, layer 0
 
     return W
 
@@ -415,18 +418,18 @@ def eprop_CE(cfg, T, P, W_rec, W_out, B):
     return -np.sum(T * np.log(1e-30 + P))
 
 
-def eprop_gradient(wtype, L, ETbar, P, T, Zbar_last):
-    """ Return the gradient of the weights."""
+def eprop_gradient(wtype, L, ETbar, D, Zbar_last):
+    """ Return the gradient of the weights. """
     if wtype == "W":
         return np.einsum("rj,rji->rji", L, ETbar)
     elif wtype == "W_out":
-        return np.outer((P - T), Zbar_last)
+        return np.outer(D, Zbar_last)
     elif wtype == "b_out":
-        return P - T
+        return D
 
 
 def eprop_DW(cfg, wtype, s, adamvars, gradient, eta):
-
+    eta = cfg["eta_b_out"] if wtype == "b_out" else eta
 
     if cfg["optimizer"] == 'SGD':
         return -eta * gradient

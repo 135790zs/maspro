@@ -54,21 +54,16 @@ def network(cfg, inp, tar, W_rec, W_out, b_out, B, adamvars, eta):
 
         # Calculate weight updates for all subnetworks
         for s in range(cfg["n_directions"]):
-            if cfg["eprop_type"] == "global":
-                L_std = np.mean(M['P'][t] - M['T'][t])
-            else:
-                L_std = np.dot(B[s], (M['P'][t] - M['T'][t]))
-            if t:  # Can only take a mean if spike train is not empty.
+            M['D'][t] = M['P'][t] - M['T'][t]
+            L_std = np.dot(B[s], M['D'][t])
+            if t == n_steps-2:  # Compute at end
                 rates = np.mean(M['Z'][s, :t], axis=0)
                 L_regFR = (cfg["FR_reg"]
-                         * eta
-                         * (t/n_steps)
+                         # * (t / n_steps) / 2
                          # * (-1 if cfg["FR_target"] > rates.all() else 1)
-                         * (cfg["FR_target"] - rates)
-                         * -1)
+                         * np.mean((cfg["FR_target"] - rates) ** 2))
             else:
                 L_regFR = 0
-
 
             L_regL2 = cfg["L2_reg"] * np.linalg.norm(np.concatenate(
                 (W_rec.flatten(),
@@ -85,8 +80,7 @@ def network(cfg, inp, tar, W_rec, W_out, b_out, B, adamvars, eta):
                     continue
 
                 grad = ut.eprop_gradient(wtype=wtype,
-                                         P=M['P'][t],
-                                         T=M['T'][t],
+                                         D=M['D'][t],
                                          L=M['L'][s, t],
                                          ETbar=M['ETbar'][s, curr_t],
                                          Zbar_last=M['Zbar'][s, t, -1])
@@ -191,6 +185,7 @@ def feed_batch(cfg, inps, tars, W_rec, W_out, b_out, eta, B, epoch, tvt_type, ad
             and cfg["plot_interval"] and e % cfg["plot_interval"] == 0):
             vis.plot_state(cfg=cfg,
                            M=final_model,
+                           B=B,
                            W_rec=W_rec,
                            W_out=W_out,
                            b_out=b_out,
@@ -328,7 +323,7 @@ def main(cfg):
         if cfg["plot_main"]:
             vis.plot_run(cfg=cfg, terrs=terrs, percs_wrong_t=percs_wrong_t,
                          verrs=verrs, percs_wrong_v=percs_wrong_t,
-                         W=W, epoch=e, log_id=log_id)
+                         W=W, epoch=e, log_id=log_id, inp_size=inps['train'].shape[-1])
 
         if e == cfg['Epochs'] - 1:
             break
@@ -350,10 +345,11 @@ def main(cfg):
 
             if wtype == "B":
 
-                # Nothing happens for B if eprop_type == random
+                if cfg["eprop_type"] == "random":
+                    W["B"][ep_curr+ep_incr, :] = W["B"][ep_curr, :]
 
-                if cfg["eprop_type"] == "symmetric":
-                    for s in range(cfg["n_directions"]):
+                elif cfg["eprop_type"] == "symmetric":
+                    for s in range(cfg["n_directions"]):  # TODO: Get rid of s?
                         W["B"][ep_curr+ep_incr, s] = (W["B"][ep_curr, s]
                                                    + DW["W_out"][s].T)
 
