@@ -1,28 +1,29 @@
 from numpy import exp
 cfg = {
     "verbose": True,
-    "eprop_type": "adaptive",  # in {random, symmetric, adaptive}
+    "eprop_type": "adaptive",  # in {global, random, symmetric, adaptive}
     "optimizer": 'SGD',  # in {Adam, SGD}
     "traub_trick": False,
-    "fraction_ALIF": 0.25,  # def 0.25
+    "fraction_ALIF": 1,  # def 0.25
     "n_directions": 1,
     "delay": 0,
 
     "rho": .995,  # Depends on length of task: working memory. TIMIT= .995
     "alpha": 0.95,  # TIMIT: .95
-    "kappa": 0.717,  # TIMIT: .717
-    "beta": 0.184,    # TIMIT: 0.184
-    "gamma": 0.45,     # Pseudoderivative ET contribution
+    "kappa": 0.7,  # TIMIT: .717
+    "beta": 0.2,    # TIMIT: 0.184
+    "gamma": 0.3,     # Pseudoderivative ET contribution
     "eta_init": 1e-2,   # Initial learning rate (1e-2 for TIMIT)
     "eta_slope": 2,      # Slope defining relation between Verr and eta (1e-2 for TIMIT)
     "eta_init_loss": 0,  # 0 to disable annealing. This is the cap below which annealing to 0 takes place linearly.
-    "thr": 1.6,        # Spike threshold, def = 1.6
+    "thr": 1,        # Spike threshold, def = 1.6
     "dt_refr": 2,    # Refractory time, def = 2
-    "weight_decay": 1e-2,  # For W_out and B, only if adaptive. def = 1e-2
-    "L2_reg": 1e-5,  # 1e-5 for TIMIT
-    "FR_target": 0.01,  # Desired frequency (mean spike per ms)
-    "FR_reg": 50,  # 50 for TIMIT
+    "weight_decay": 0,  # For W_out and B, only if adaptive. def = 1e-2
+    "L2_reg": 0,  # 1e-5 for TIMIT
+    "FR_target": 0.1,  # Desired frequency (mean spike per ms)
+    "FR_reg": 0,  # 50 for TIMIT
     "dropout": 0,
+    "softmax_factor": 1,
     "adam_beta1": 0.9,
     "adam_beta2": 0.999,
     "adam_eps": 1e-5,
@@ -31,27 +32,30 @@ cfg = {
     "update_W_out": False,
     "update_W": True,
     "update_dead_weights": False,
+    "one_to_one_input": False,
+    "one_to_one_output": False,
     "update_input_weights": True,  # Subset of - and overridden by `update_W'.
 
-    "N_R": 64,
+    "N_R": 32,
     "N_Rec": 1,
 
+    "task": "BIN",
     "wavs_fname": "../data_wavs",
     "phns_fname": "../data_phns",
 
-    "Epochs": 40,  # def = 80
+    "Epochs": 100,  # def = 80
     "Track_weights": True,
     "Track_state": False,  # Only for synapse vars
     "Repeats": 5,  # ms per epoch, def = 5
     "TIMIT_derivative": 0,
-    "batch_size_train": 6,  # def = 32
-    "batch_size_val": 6,  # def = 32
-    "val_every_E": 2,
-    "maxlen": 778,  # Don't forget to re-run process_timit.py!
+    "batch_size_train": 4,  # def = 32
+    "batch_size_val": 4,  # def = 32
+    "val_every_E": 5,
+    "maxlen": 50,  # Don't forget to re-run process_timit.py!
     "n_examples": {'train': 3696, 'val': 400, 'test': 192},
     # "n_examples": {'train': 30, 'val': 30, 'test': 30},
     "plot_interval": 1,  #  State plot; 0 to disable plots
-    "state_save_interval": 5,
+    "state_save_interval": 1,
     "plot_main": True,
     "plot_state": True,
     "plot_graph": False,

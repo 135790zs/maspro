@@ -249,16 +249,16 @@ if __name__ == "__main__":
                         break
 
         if tvt_type == 'test':
-            np.save(f'{cfg["wavs_fname"]}_{tvt_type}.npy', wavdata)
-            np.save(f'{cfg["phns_fname"]}_{tvt_type}.npy', phonedata)
+            np.save(f'{cfg["wavs_fname"]}_{tvt_type}_TIMIT.npy', wavdata)
+            np.save(f'{cfg["phns_fname"]}_{tvt_type}_TIMIT.npy', phonedata)
         elif tvt_type == 'train':
-            np.save(f'{cfg["wavs_fname"]}_train.npy',
+            np.save(f'{cfg["wavs_fname"]}_train_TIMIT.npy',
                     wavdata[:cfg['n_examples']['train']])
-            np.save(f'{cfg["phns_fname"]}_train.npy',
+            np.save(f'{cfg["phns_fname"]}_train_TIMIT.npy',
                     phonedata[:cfg['n_examples']['train']])
-            np.save(f'{cfg["wavs_fname"]}_val.npy',
+            np.save(f'{cfg["wavs_fname"]}_val_TIMIT.npy',
                     wavdata[cfg['n_examples']['val']:])
-            np.save(f'{cfg["phns_fname"]}_val.npy',
+            np.save(f'{cfg["phns_fname"]}_val_TIMIT.npy',
                     phonedata[cfg['n_examples']['val']:])
         # plt.subplots_adjust(wspace=0, hspace=0)
 

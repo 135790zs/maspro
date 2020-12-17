@@ -52,3 +52,15 @@ Questions for Bellec
 ==========
 
 ADAM has a one-off bias. See which optimizer this now is. Or fix it later for correctness. To do that, wait until appyling DWs until the point where ADAM is updated. Just accumulate gradients. Drawback: can't see weight updates in state plot anymore. But I probably won't need to, and the resulting code is better.
+
+
+==========
+
+Conclusion: sweep has no result, no good params. Will need to change functionality. Increase threshold first (to 1?), because now it's too low?
+
+==========
+* Read other eprop papers
+* Broadcast malfunctioning for one-to-one output?
+* Maybe apply global broadcast
+* L is positive if larger than 1/N_out else negative
+* Doublecheck if broadcast taking place correctly.

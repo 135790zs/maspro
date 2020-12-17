@@ -36,7 +36,6 @@ def network(cfg, inp, tar, W_rec, W_out, b_out, B, adamvars, eta):
         # Shared output layer, so step out of subnetwork loop.
         Ysum = np.sum(M['Y'][:, t], axis=0)
 
-
         M['P'][t] = ut.eprop_P(Y=Ysum)
 
         M['Pmax'][t, M['P'][t].argmax()] = 1
@@ -55,7 +54,10 @@ def network(cfg, inp, tar, W_rec, W_out, b_out, B, adamvars, eta):
 
         # Calculate weight updates for all subnetworks
         for s in range(cfg["n_directions"]):
-            L_std = np.dot(B[s], (M['P'][t] - M['T'][t]))
+            if cfg["eprop_type"] == "global":
+                L_std = np.mean(M['P'][t] - M['T'][t])
+            else:
+                L_std = np.dot(B[s], (M['P'][t] - M['T'][t]))
             if t:  # Can only take a mean if spike train is not empty.
                 rates = np.mean(M['Z'][s, :t], axis=0)
                 L_regFR = (cfg["FR_reg"]
@@ -64,7 +66,6 @@ def network(cfg, inp, tar, W_rec, W_out, b_out, B, adamvars, eta):
                          # * (-1 if cfg["FR_target"] > rates.all() else 1)
                          * (cfg["FR_target"] - rates)
                          * -1)
-                # print(f"Rates: {1000*np.mean(rates):.2f}")
             else:
                 L_regFR = 0
 
@@ -74,9 +75,6 @@ def network(cfg, inp, tar, W_rec, W_out, b_out, B, adamvars, eta):
                  W_out.flatten(),
                  b_out.flatten())), ord=2)
             M['L'][s, t] = L_std + L_regFR + L_regL2
-            # print(f"std: {np.mean(L_std):.4f}, "
-            #       f"\tFR: {np.mean(L_regFR):.4f}, "
-            #         f"\tL2: {np.mean(L_regL2):.4f}")
 
             # Calculate gradient and weight update
             # TODO: make into iterable
@@ -228,11 +226,11 @@ def main(cfg):
     tars = {}
 
     for tvt_type in cfg['n_examples'].keys():
-        inps[tvt_type] = np.load(f'{cfg["wavs_fname"]}_{tvt_type}.npy')
+        inps[tvt_type] = np.load(f"{cfg['wavs_fname']}_{tvt_type}_{cfg['task']}.npy")
         # Normalize [0, 1]
         inps[tvt_type] = ((inps[tvt_type] - np.min(inps[tvt_type]))
                           / np.ptp(inps[tvt_type]))
-        tars[tvt_type] = np.load(f'{cfg["phns_fname"]}_{tvt_type}.npy')
+        tars[tvt_type] = np.load(f"{cfg['phns_fname']}_{tvt_type}_{cfg['task']}.npy")
 
     log_id = ut.get_log_id()
 

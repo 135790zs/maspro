@@ -77,7 +77,7 @@ def initialize_model(cfg, length, tar_size):
     for T_var in ["T", "P", "Pmax"]:
         M[T_var] = np.zeros(shape=T_shape)
 
-    for neuronvar in ["V", "Z", "Zbar", "I", "H", "L", "Lreg"]:
+    for neuronvar in ["Z", "Zbar", "I", "L", "Lreg"]:
         M[neuronvar] = np.zeros(shape=neuron_shape)
 
     for weightvar in ["EVV", "EVU", "ET", "DW", "ETbar", 'gW']:
@@ -94,6 +94,7 @@ def initialize_model(cfg, length, tar_size):
 
     M["U"] = np.ones(shape=neuron_shape) * cfg["thr"]
     M["V"] = np.random.random(size=neuron_shape) * cfg["thr"]
+    M["H"] = np.random.random(size=neuron_shape) * cfg["gamma"]
 
     M["TZ"] = np.ones(shape=neuron_timeless_shape) * -cfg["dt_refr"]
 
@@ -145,6 +146,11 @@ def initialize_weights(cfg, inp_size, tar_size):
                                   tar_size,
                                   cfg["N_R"],))
 
+    if cfg["one_to_one_output"]:
+        for s in range(cfg["n_directions"]):
+            W["W_out"][0, s] = 0
+            np.fill_diagonal(W["W_out"][0, s, :, :tar_size], 1)
+
     W["b_out"] = np.zeros(shape=(n_epochs,
                                  cfg["n_directions"],
                                  tar_size,))
@@ -157,6 +163,9 @@ def initialize_weights(cfg, inp_size, tar_size):
 
     if cfg["eprop_type"] == "random":  # Gaussian, variance of 1
         W["B"] = rng.normal(size=B_shape, scale=1)
+
+    elif cfg["eprop_type"] == "global":  # Gaussian, variance of 1
+        W["B"] = np.ones(shape=B_shape)
 
     elif cfg["eprop_type"] == "adaptive":  # Gaussian, variance of 1/N
         W["B"] = rng.normal(size=B_shape, scale=np.sqrt(1 / cfg["N_R"]))
@@ -184,7 +193,17 @@ def initialize_weights(cfg, inp_size, tar_size):
     64      39      103,
     200     39      100-150,
     """
-    W["W"][0, :, 0] /= 50 #cfg["N_R"] + inp_size  # Epoch 0, layer 0
+
+    if cfg["one_to_one_input"]:
+        W['W'][0, :, 0, :, :inp_size] = 0
+        for s in range(cfg["n_directions"]):
+            np.fill_diagonal(W['W'][0, s, 0, :, :inp_size], 1)
+
+    #Inputs
+    W["W"][0, :, 0, :, :inp_size] *= (1/1)/inp_size # Epoch 0, layer 0
+
+    # Recurrent
+    W["W"][0, :, 0, :, inp_size:] *= (1/10)/(cfg["N_R"]) #cfg["N_R"] + inp_size  # Epoch 0, layer 0
 
     return W
 
@@ -374,11 +393,19 @@ def eprop_Y(cfg, Y, W_out, Z_last, b_out):
 
 
 def eprop_P(Y):
+    # Y = np.array([-5, 51])
     maxx = np.max(Y)
-    m = Y - maxx  # TODO: This step may be ineffective
+    m = Y - maxx
     ex = np.exp(m)
     denom = np.sum(ex)
     ret = ex / denom
+    # print()
+    # print("Y", Y)
+    # print("maxx", maxx)
+    # print("m", m)
+    # print("ex", ex)
+    # print("denom", denom)
+    # print("ret", ret)
     return ret
 
 
