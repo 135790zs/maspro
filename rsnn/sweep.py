@@ -11,26 +11,27 @@ from config import cfg
 search_space = [
     # Categorical(("random", "symmetric", "adaptive"), name='eprop_type'),
     Categorical(("Adam", "SGD"), name='optimizer'),
-    Categorical((False, True), name='update_input_weights'),
+    # Categorical((False, True), name='update_input_weights'),
     # Categorical((False, True), name='traub_trick'),
     # Integer(1, 2, name='n_directions'),
     # Integer(1, 20, name="dt_refr"),
     # Integer(0, 5, name="delay"),
-    Real(0.1, 1, name="fraction_ALIF"),
-    Real(1e-4, 1e-2, name='eta_init'),
+    Real(0, 1, name="fraction_ALIF"),
+    Real(1e-4, 5e-1, name='eta_init'),
+    Real(1e-4, 1e-2, name='eta_b_out'),
     Real(0.7, 3, name='eta_slope'),
     Real(0, 10, name='eta_init_loss'),
     # Real(0.5, 2.5, name='thr'),
     Real(0.9, 0.99, name="alpha"),
-    Real(0, 1, name="beta"),
-    Real(0.1, 0.95, name="kappa"),
-    Real(0.99, 0.9999, name="rho"),
-    Real(0.1, 0.7, name="gamma"),
-    Real(0, 1e-1, name="weight_decay"),
-    Real(0, 1e-4, name="L2_reg"),
-    Real(0, .2, name="FR_target"),
-    Real(0, 400, name="FR_reg"),
-    Real(0, .4, name="dropout"),
+    Real(0.5, 2.5, name="beta"),
+    Real(0.5, 0.95, name="kappa"),
+    Real(0.95, 1.1, name="rho"),
+    # Real(0.1, 0.7, name="gamma"),
+    # Real(0, 1e-1, name="weight_decay"),
+    # Real(0, 1e-4, name="L2_reg"),
+    # Real(0, .2, name="FR_target"),
+    Real(0, 100, name="FR_reg"),
+    Real(.5, .95, name="dropout"),
     # Integer(64, 600, name='N_R'),
 ]
 
@@ -72,7 +73,7 @@ if __name__ == "__main__":
     result = gp_minimize(evaluate_model,
                          search_space,
                          n_calls=1000,
-                         n_initial_points=20)
+                         n_initial_points=8)
     # summarizing finding:
     print(result)
     print(f'Best Accuracy: {result.fun:.3f}')

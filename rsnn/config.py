@@ -20,11 +20,11 @@ cfg = {
     "thr": 0.61,        # Spike threshold, def = 1.6 or 0.61
     "dt_refr": 2,    # Refractory time, def = 2
     "weight_decay": 0,  # For W_out and B, only if adaptive. def = 1e-2
-    "L2_reg": 0,  # 1e-5 for TIMIT
-    "FR_target": 0.01,  # 0.01 for TIMIT
-    "FR_reg": 0.5,  # 50 for TIMIT (or 0.5?)
+    # "L2_reg": 0,  # 1e-5 for TIMIT
+    "FR_target": 0.10,  # 0.01 for TIMIT
+    "FR_reg": 5,  # 50 for TIMIT (or 0.5?)
     "dropout": 0.8,  # of recurrent (excl inputs)
-    "softmax_factor": 1,  # TODO
+    # "softmax_factor": 1,  # TODO
     "adam_beta1": 0.9,
     "adam_beta2": 0.999,
     "adam_eps": 1e-5,
@@ -41,12 +41,12 @@ cfg = {
     "N_Rec": 1,
 
     "task": "TIMIT",
-    "wavs_fname": "../data_wavs",
-    "phns_fname": "../data_phns",
+    "wavs_fname": "../data/data_wavs",
+    "phns_fname": "../data/data_phns",
 
     "Epochs": 80,  # def = 80
-    "Track_weights": False,
-    "Track_state": False,  # Only for synapse vars
+    "Track_weights": True,
+    "Track_synapse": False,  # Only for synapse vars
     "Repeats": 5,  # ms per epoch, def = 5
     "TIMIT_derivative": 2,
     "batch_size_train": 32,  # def = 32
@@ -54,9 +54,9 @@ cfg = {
     "val_every_E": 5,
     "maxlen": 778,  #def 778, Don't forget to re-run process_timit.py!
     "n_examples": {'train': 3696, 'val': 400, 'test': 192},
-    # "n_examples": {'train': 30, 'val': 30, 'test': 30},
-    "plot_interval": 5,  #  State plot; 0 to disable plots
-    "state_save_interval": 5,
+    # "n_examples": {'train': 1000, 'val': 200, 'test': 10},
+    "plot_interval": 1,  #  State plot; 0 to disable plots
+    "state_save_interval": 10,
     "plot_main": True,
     "plot_state": True,
     "plot_graph": False,
@@ -103,4 +103,5 @@ lookup = {
     "DW":      {"scalar": False, "binary":False, "label": "\\Delta W"},
     "Db_out":  {"scalar": False, "binary":False, "label": "\\Delta b_{{out}}"},
     "DW_out":  {"scalar": False, "binary":False, "label": "\\Delta W_{{out}}"},
+    "DW_reg":  {"scalar": False, "binary":False, "label": "\\Delta W_{{reg}}"},
 }

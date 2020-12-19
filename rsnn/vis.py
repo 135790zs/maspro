@@ -168,11 +168,11 @@ def plot_run(cfg, terrs, percs_wrong_t, verrs, percs_wrong_v, W, epoch, log_id, 
     plt.close()
 
 
-def plot_state(cfg, M, B, W_rec, W_out, b_out, e, log_id, plot_weights=True):
+def plot_state(cfg, M, B, W_rec, W_out, b_out, e, log_id, plot_weights=False):
     S_plotvars = ["X", "I", "V", "H", "U", "Z", "Y", "L"]
-    if cfg["Track_state"]:
+    if cfg["Track_synapse"]:
         S_plotvars = S_plotvars[:6] + ["EVV", "EVU", "ET"] + S_plotvars[6:]
-        S_plotvars = S_plotvars + ["DW", "DW_out", "Db_out"]
+        S_plotvars = S_plotvars + ["DW", "DW_reg", "DW_out", "Db_out"]
 
     M_plotvars = ["P", "D", "Pmax", "T", "CE"]
     if cfg["n_directions"] > 1:

@@ -3,6 +3,7 @@ import os
 import numpy as np
 import datetime
 import json
+# import cupy as cp
 
 
 def initialize_model(cfg, length, tar_size):
@@ -42,7 +43,7 @@ def initialize_model(cfg, length, tar_size):
         is_ALIF: Mask determining which neurons have adaptive thresholds
     """
 
-    pruned_length = length if cfg["Track_state"] else 1
+    pruned_length = length if cfg["Track_synapse"] else 1
 
     M = {}
     neuron_shape = (cfg["n_directions"],
@@ -78,10 +79,10 @@ def initialize_model(cfg, length, tar_size):
     for T_var in ["T", "P", "Pmax", "D"]:
         M[T_var] = np.zeros(shape=T_shape)
 
-    for neuronvar in ["Z", "Zbar", "I", "L", "Lreg"]:
+    for neuronvar in ["Z", "Zbar", "I", "L", "Lreg", "spikerate"]:
         M[neuronvar] = np.zeros(shape=neuron_shape)
 
-    for weightvar in ["EVV", "EVU", "ET", "DW", "ETbar", 'gW']:
+    for weightvar in ["EVV", "EVU", "ET", "DW", "DW_reg", "ETbar", 'gW']:
         M[weightvar] = np.zeros(shape=weight_shape)
 
     for z_in_var in ["Z_in", "Z_inbar"]:
@@ -113,7 +114,6 @@ def initialize_model(cfg, length, tar_size):
     np.random.shuffle(M["is_ALIF"])
 
     M["is_ALIF"] = M["is_ALIF"].reshape(neuron_timeless_shape)
-
     return M
 
 
@@ -342,10 +342,10 @@ def eprop_EVU(cfg, is_ALIF, H, Z_inbar, EVU):
                         axis=1)
 
     Hp = cfg["rho"] - H * cfg["beta"]
-
-    return np.where(is_ALIF,
-                    np.outer(H, Z_inbar) + np.einsum("j, ji -> ji", Hp, EVU),
-                    EVU)
+    ret = np.where(is_ALIF,
+                   np.outer(H, Z_inbar) + np.einsum("j, ji -> ji", Hp, EVU),
+                   EVU)
+    return ret
 
 
 def eprop_H(cfg, V, U, t, TZ, is_ALIF):  # TODO: 1/thr here? Traub and Bellec differ
@@ -380,13 +380,11 @@ def eprop_ET(cfg, is_ALIF, H, EVV, EVU):
                         repeats=is_ALIF.size*2,
                         axis=1)
 
-    return np.where(is_ALIF,
-                    np.einsum("j, ji->ji", H, EVV - cfg["beta"] * EVU),
-                    np.einsum("j, ji->ji", H, EVV))
+    ret = np.where(is_ALIF,  # Timesink!
+                   np.einsum("j, ji->ji", H, EVV - cfg["beta"] * EVU),
+                   np.einsum("j, ji->ji", H, EVV))
 
-
-def eprop_lpfK(lpf, x, factor):
-    return (factor * lpf) + x
+    return ret
 
 
 def eprop_Y(cfg, Y, W_out, Z_last, b_out):
@@ -396,19 +394,11 @@ def eprop_Y(cfg, Y, W_out, Z_last, b_out):
 
 
 def eprop_P(Y):
-    # Y = np.array([-5, 51])
     maxx = np.max(Y)
     m = Y - maxx
     ex = np.exp(m)
     denom = np.sum(ex)
     ret = ex / denom
-    # print()
-    # print("Y", Y)
-    # print("maxx", maxx)
-    # print("m", m)
-    # print("ex", ex)
-    # print("denom", denom)
-    # print("ret", ret)
     return ret
 
 
@@ -449,7 +439,7 @@ def process_layer(cfg, M, t, s, r, W_rec):
 
     # If not tracking state, the time dimensions of synaptic variables have
     # length 1 and we overwrite those previous time steps at index 0.
-    if cfg["Track_state"]:
+    if cfg["Track_synapse"]:
         prev_t = t-1
         curr_t = t
         next_t = t+1
@@ -489,44 +479,45 @@ def process_layer(cfg, M, t, s, r, W_rec):
                               t=t,
                               TZ=M['TZ'][s, r])
 
-    # Eligibility trace
     M['ET'][s, curr_t, r] = eprop_ET(cfg=cfg,
                                      is_ALIF=M['is_ALIF'][s, r],
                                      H=M['H'][s, t, r],
                                      EVV=M['EVV'][s, curr_t, r],
                                      EVU=M['EVU'][s, curr_t, r])
+
     # Update weights for next epoch
     if not cfg["update_input_weights"]:
         for var in ["EVV", "EVU", "ET"]:
             M[var][s, curr_t, 0, :, :M[var].shape[4]//2] = 0
 
-    # Update weights for next epoch
-    if not cfg["update_dead_weights"]:
-        for var in ["EVV", "EVU", "ET"]:
-            M[var][s, curr_t, r, W_rec == 0] = 0
+    # # Update weights for next epoch. COSTLY
+    # if not cfg["update_dead_weights"]:
+    #     for var in ["EVV", "EVU", "ET"]:
+    #         M[var][s, curr_t, r, W_rec == 0] = 0
+    # mid = time.time()
+    # print("midAFTER", mid-start)
 
     M["Z_in"][s, t, r] = np.concatenate((Z_prev, M['Z'][s, t, r]))
 
+
     M["TZ_in"][s, r] = np.concatenate((TZ_prev, M['TZ'][s, r]))
 
-    M['Z_inbar'][s, t] = eprop_lpfK(lpf=M['Z_inbar'][s, t-1] if t > 0 else 0,
-                                    x=M['Z_in'][s, t],
-                                    factor=cfg["alpha"])
+
+    M['Z_inbar'][s, t] = (cfg["alpha"] * (M['Z_inbar'][s, t-1] if t > 0 else 0)) + M['Z_in'][s, t]
+
 
     M['I'][s, t, r] = eprop_I(W_rec=W_rec,
                               Z_in=M["Z_in"][s, t, r])
 
-    M['ETbar'][s, curr_t, r] = eprop_lpfK(
-                                     lpf=M['ETbar'][s, prev_t, r] if t > 0 else 0,
-                                     x=M['ET'][s, curr_t, r],
-                                     factor=cfg["kappa"])
+    M['ETbar'][s, curr_t, r] = cfg["kappa"] * (M['ETbar'][s, prev_t, r] if t > 0 else 0) + M['ET'][s, curr_t, r]
 
-
-    M['Zbar'][s, t, r] = eprop_lpfK(lpf=M['Zbar'][s, t-1, r] if t > 0 else 0,
-                                    x=M['Z'][s, t, r],
-                                    factor=cfg["kappa"])
+    # M['Zbar'][s, t, r] = eprop_lpfK(lpf=M['Zbar'][s, t-1, r] if t > 0 else 0,
+    #                                 x=M['Z'][s, t, r],
+    #                                 factor=cfg["kappa"])
+    M['Zbar'][s, t, r] = cfg["kappa"] * (M['Zbar'][s, t-1, r] if t > 0 else 0) + M['Z'][s, t, r]
 
     if t != M[f"X{s}"].shape[0] - 1:
+        # Eligibility trace
         M['EVV'][s, next_t, r] = eprop_EVV(cfg=cfg,
                                            EVV=M['EVV'][s, curr_t, r],
                                            Z_in=M["Z_in"][s, t, r],
@@ -534,6 +525,7 @@ def process_layer(cfg, M, t, s, r, W_rec):
                                            TZ=M['TZ'][s, r],
                                            TZ_in=M['TZ_in'][s, r],
                                            t=t)
+
 
         M['EVU'][s, next_t, r] = eprop_EVU(cfg=cfg,
                                         Z_inbar=M['Z_inbar'][s, t, r],
@@ -606,3 +598,27 @@ def get_log_id():
         id_append = f"_{count}"
         count += 1
     return log_id + id_append
+
+
+def get_elapsed_time(cfg, start_time, e, b, batch_size):
+    plustime = time.strftime('%H:%M:%S',
+                             time.gmtime(time.time()-start_time))
+    remtime = ''
+    if e:
+        timeperbatch = ((time.time() - start_time)
+                        / (e * batch_size + b))
+
+        remainingbatches = (cfg["Epochs"] - e) * batch_size + (batch_size - b)
+
+        if cfg["val_every_E"]:
+            remainingbatches += remainingbatches * (1/cfg["val_every_E"])
+
+        remtime = '\t-' + time.strftime('%H:%M:%S', time.gmtime(
+            timeperbatch * remainingbatches))
+
+    return plustime, remtime
+
+
+def eprop_FR_reg(cfg, rates, ETbar, t):
+    ret = eta * cfg["FR_reg"] * np.sum()
+    return ret

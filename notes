@@ -1,55 +1,26 @@
 
 # MUST DO:
 
-
 # LOW PRIORITY:
+# TODO: Print time elapsed after every sample
 # TODO: Make it possible to use fewer than N_I N_Rs
 # TODO: Make N_R variable per layer
 # TODO: Experiment with reducing randomness a priori
-# TODO: Only plot weights if tracking them
 # TODO: Explore non-uniform synaptic delays
 # TODO: Explore membrane potential reset
 # TODO: Comment code
 
-I can maybe use random B for all early layers and adaptive/symmetric B for last layer
-ALSO note usage of W^out_kj in pE/pz equation in supp equation 20. Needs solution
+note usage of W^out_kj in pE/pz equation in supp equation 20. Needs solution
 
 
 =========
 
 send plot to Jaeger, Dirk and Marco if working
 may email Bellec et al if concrete question
-INCLUDING:
-Elaborate on the sentence "Note also that the weight updates derived in the following for the recurrent weights W^rec_ji also apply to the inputs weights W^in_ji". Do the input weights have eligibility traces? If so, what is the nature of their spike train? Is a spike on an input connection simply the value of x?
 
 =========
-Freezing recurrent weights makes no difference. -> See if training with only recurrents works with very low learning rate. If so, I will need to have 2 different learning rates. Also explore if this is linked to Adam (see if also occurs using SGD).
 
-Find out how to escape no-spike vacuums. Noise?
-
-Find out why no variation in spike trains even though variation in input?
-
-
-Instead of scaling weights at init, scale input given to layer 1? (By dividing by number of inputs?)
-
-Noninput rec weights don't update. Why?
-
-Gradient hard/softcapping for reliable descent?
-
-Learning rate scheduler?
-=========
-
-TODAY: 7 dec
-# TODO: Finish introductory presentation
-# TODO: Run best sweep settings for longer, try obtain good results
-# TODO: Check maths
-
-
-==========
-Questions for Bellec
-- Target frequency?
-- Synapse weight initialization?
-- How adam if no gradient?
+Gradient hard/softcapping for reliable descent
 
 ==========
 
@@ -58,14 +29,8 @@ ADAM has a one-off bias. See which optimizer this now is. Or fix it later for co
 
 ==========
 
-Conclusion: sweep has no result, no good params. Will need to change functionality. Increase threshold first (to 1?), because now it's too low?
-
 ==========
 * Read other eprop papers
-* Broadcast malfunctioning for one-to-one output?
-* Maybe apply global broadcast
 * L is positive if larger than 1/N_out else negative
-* Doublecheck if broadcast taking place correctly.
 
 ==========
-When L_j, then update all incoming synapses to j (ALSO W_IN) by L

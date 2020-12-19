@@ -13,7 +13,6 @@ def network(cfg, inp, tar, W_rec, W_out, b_out, B, adamvars, eta):
     M = ut.initialize_model(cfg=cfg, length=n_steps, tar_size=tar.shape[-1])
 
     M["T"] = tar
-    # M['T'][:, 2] = 1
     M["T"] = np.pad(array=M["T"], mode='edge', pad_width=((cfg["delay"], 0), (0, 0)))
 
     M[f"X0"] = inp
@@ -47,7 +46,7 @@ def network(cfg, inp, tar, W_rec, W_out, b_out, B, adamvars, eta):
                                   W_out=W_out,
                                   B=B)
 
-        if cfg["Track_state"]:
+        if cfg["Track_synapse"]:
             curr_t = t
         else:
             curr_t = 0
@@ -56,20 +55,8 @@ def network(cfg, inp, tar, W_rec, W_out, b_out, B, adamvars, eta):
         for s in range(cfg["n_directions"]):
             M['D'][t] = M['P'][t] - M['T'][t]
             L_std = np.dot(B[s], M['D'][t])
-            if t == n_steps-2:  # Compute at end
-                rates = np.mean(M['Z'][s, :t], axis=0)
-                L_regFR = (cfg["FR_reg"]
-                         # * (t / n_steps) / 2
-                         # * (-1 if cfg["FR_target"] > rates.all() else 1)
-                         * np.mean((cfg["FR_target"] - rates) ** 2))
-            else:
-                L_regFR = 0
 
-            L_regL2 = cfg["L2_reg"] * np.linalg.norm(np.concatenate(
-                (W_rec.flatten(),
-                 W_out.flatten(),
-                 b_out.flatten())), ord=2)
-            M['L'][s, t] = L_std + L_regFR + L_regL2
+            M['L'][s, t] = L_std
 
             # Calculate gradient and weight update
             # TODO: make into iterable
@@ -85,6 +72,7 @@ def network(cfg, inp, tar, W_rec, W_out, b_out, B, adamvars, eta):
                                          ETbar=M['ETbar'][s, curr_t],
                                          Zbar_last=M['Zbar'][s, t, -1])
 
+
                 M[f'g{wtype}'][s, curr_t] += grad
 
                 dw = ut.eprop_DW(cfg=cfg,
@@ -95,6 +83,21 @@ def network(cfg, inp, tar, W_rec, W_out, b_out, B, adamvars, eta):
                                  s=s)
 
                 M[f'D{wtype}'][s, curr_t] += dw
+
+                if wtype == "W" and t:
+                    rates = np.mean(M['Z'][s, :t], axis=0)
+                    M['spikerate'][s, t] = rates
+
+                    dw_fr_reg = (eta
+                                 * cfg["FR_reg"]
+                                 * (t/n_steps) * 0.5
+                                 * np.einsum("rj, rji -> rji",
+                                             cfg["FR_target"] - rates,
+                                             M["ETbar"][s, curr_t]))
+
+                    M[f'DW_reg'][s, curr_t] += dw_fr_reg
+                    M[f'D{wtype}'][s, curr_t] += dw_fr_reg
+
             if not cfg["update_input_weights"]:
                     M["DW"][s, curr_t, 0, :, :inp.shape[-1]] = 0
 
@@ -116,7 +119,7 @@ def network(cfg, inp, tar, W_rec, W_out, b_out, B, adamvars, eta):
     return M
 
 
-def feed_batch(cfg, inps, tars, W_rec, W_out, b_out, eta, B, epoch, tvt_type, adamvars, e, log_id):
+def feed_batch(cfg, inps, tars, W_rec, W_out, b_out, eta, B, epoch, tvt_type, adamvars, e, log_id, start_time=None):
     batch_err = 0
     batch_perc_wrong = 0
 
@@ -148,7 +151,10 @@ def feed_batch(cfg, inps, tars, W_rec, W_out, b_out, eta, B, epoch, tvt_type, ad
                   f"{'  ' if tvt_type == 'val' else ''}"
                   f"{tvt_type} {b}/{inps.shape[0]}  ", end='\r')
         if cfg["verbose"]:
-            print((f"({log_id})\tEpoch {epoch}/{cfg['Epochs']-1}\t" if tvt_type != 'test'
+            plustime, remtime = ut.get_elapsed_time(cfg=cfg, b=b, start_time=start_time, batch_size=inps.shape[0], e=e)
+
+            print((f"({log_id})\t+{plustime}{remtime}\t"
+                   f"Epoch {epoch}/{cfg['Epochs']-1}\t" if tvt_type != 'test'
                    else '\t'),
                   f"{'  ' if tvt_type == 'val' else ''}{tvt_type} "
                   f"sample {b+1}/{inps.shape[0]}",
@@ -200,7 +206,7 @@ def feed_batch(cfg, inps, tars, W_rec, W_out, b_out, eta, B, epoch, tvt_type, ad
                    axis=1)) / inps.shape[0]
 
         for w_type in ['W', 'W_out', 'b_out']:
-            # Summing and dividing because `Track_state' defines if dw's
+            # Summing and dividing because `Track_synapse' defines if dw's
             # are accumulated or listed
             dw = np.sum(final_model[f'D{w_type}'], axis=1) / inps_rep.shape[0]
             gw = np.sum(final_model[f'g{w_type}'], axis=1) / inps_rep.shape[0]
@@ -215,6 +221,8 @@ def feed_batch(cfg, inps, tars, W_rec, W_out, b_out, eta, B, epoch, tvt_type, ad
 
 
 def main(cfg):
+
+    start_time = time.time()
 
     # Load data
     inps = {}
@@ -282,7 +290,8 @@ def main(cfg):
             adamvars=adamvars,
             e=e,
             log_id=log_id,
-            eta=eta)
+            eta=eta,
+            start_time=start_time)
 
         terrs[e] = terr
         percs_wrong_t[e] = perc_wrong_t
@@ -303,7 +312,8 @@ def main(cfg):
                 adamvars=adamvars,
                 e=e,
                 log_id=log_id,
-                eta=eta)
+                eta=eta,
+                start_time=start_time)
             verrs[e] = verr
             percs_wrong_v[e] = perc_wrong_v
 
@@ -400,7 +410,8 @@ def main(cfg):
         adamvars=adamvars,
         e=e,
         log_id=log_id,
-        eta=eta)
+        eta=eta,
+        start_time=start_time)
 
     print(f"\nTesting complete with CE loss {total_testerr:.3f} and error "
           f"rate {100*perc_wrong_test:.1f}%!\n")

@@ -185,6 +185,45 @@
       \field{title}{Computational analysis of present-day American English}
       \field{year}{1967}
     \endentry
+    \entry{labov2008atlas}{book}{}
+      \name{author}{3}{}{%
+        {{uniquename=0,uniquepart=base,hash=5af22306b3a9a09d07b03f4b6c265c99}{%
+           family={Labov},
+           familyi={L\bibinitperiod},
+           given={William},
+           giveni={W\bibinitperiod},
+           givenun=0}}%
+        {{uniquename=0,uniquepart=base,hash=99c08ea54d9223695c4536221c8bdf26}{%
+           family={Ash},
+           familyi={A\bibinitperiod},
+           given={Sharon},
+           giveni={S\bibinitperiod},
+           givenun=0}}%
+        {{uniquename=0,uniquepart=base,hash=dc5618c242d1c9e985aee064eb23c2ed}{%
+           family={Boberg},
+           familyi={B\bibinitperiod},
+           given={Charles},
+           giveni={C\bibinitperiod},
+           givenun=0}}%
+      }
+      \list{publisher}{1}{%
+        {Walter de Gruyter}%
+      }
+      \strng{namehash}{cd8ea622f2e47d24265acedaaf44457f}
+      \strng{fullhash}{cd8ea622f2e47d24265acedaaf44457f}
+      \strng{bibnamehash}{cd8ea622f2e47d24265acedaaf44457f}
+      \strng{authorbibnamehash}{cd8ea622f2e47d24265acedaaf44457f}
+      \strng{authornamehash}{cd8ea622f2e47d24265acedaaf44457f}
+      \strng{authorfullhash}{cd8ea622f2e47d24265acedaaf44457f}
+      \field{sortinit}{L}
+      \field{sortinithash}{2c7981aaabc885868aba60f0c09ee20f}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{year}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{The atlas of North American English: Phonetics, phonology and sound change}
+      \field{year}{2008}
+    \endentry
     \entry{SASPWEB2011}{book}{}
       \name{author}{1}{}{%
         {{uniquename=0,uniquepart=base,hash=d4e614c8bb031ace758f4e6e9f538f89}{%

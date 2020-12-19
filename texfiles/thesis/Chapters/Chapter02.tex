@@ -4,8 +4,9 @@
 \section{Data Preprocessing}
 
 	\subsection{The TIMIT speech corpus}
-		TIMIT is a speech corpus that contains phonemically transcribed speech~\citep{garofolo1993darpa}, consisting of 6300 sentences, 10 spoken by each of the 630 speakers.
-		The male and female speakers lived in 8 different geographical regions in the United States during their childhood years, see Table~\ref{tab:dialects}.
+		TIMIT is a speech corpus that contains phonemically transcribed speech~\citep{garofolo1993darpa}, comprising 6300 sentences, 10 spoken by each of the 630 speakers.
+		To include a broad range of dialects all speakers lived in 8 different geographical regions in the United States (as categorized in \cite{labov2008atlas}) during their childhood years.
+		Table~\ref{tab:dialects} breaks down the precise composition of the dialect distribution.
 
 		\begin{table}[ht]
 		    \myfloatalign
@@ -25,7 +26,7 @@
 		        All  & 438 (70\%) & 192 (30\%) & 630 (100\%) \\
 		        \bottomrule
 		    \end{tabularx}
-		    \caption[TIMIT Dialect Regions]{Distibution of speakers' dialect regions and sexes. Speakers of dialect region 8 moved around a lot during their childhood.}  \label{tab:dialects}
+		    \caption[TIMIT Dialect Regions]{Distibution of speakers' dialect regions and sexes. Speakers of the innominate dialect region 8 relocated often during their childhood.}  \label{tab:dialects}
 		\end{table}
 
 		The sentence text can be categorized into 2 \emph{dialect} sentences, 450 \emph{phonetically compact} sentences, and 1890 \emph{phonetically-diverse} sentences.
@@ -51,22 +52,35 @@
 		    \caption[TIMIT Sentence Types]{Distribution of sentence types.}  \label{tab:types}
 		\end{table}
 
-		Each of the sentences is encoded in as a waveform signal in \texttt{.wav}format, and is accompanied by a corresponding text file indicating what phones are pronounced in the waveform, and between which pair of sample points.
+		Each of the sentences is encoded in as a waveform signal in \texttt{.wav} format, and is accompanied by a corresponding text file indicating which phones are pronounced in the waveform, and between which pairs of sample points.
 
 	\subsection{Engineering features}
 
 		In this subsection, we describe the preprocessing pipeline as in \cite{fayek2016}, which can be summarized by applying a pre-emphasis filter on the waveforms, then slicing the waveform in short frames, taking their short-term power spectra, computing 26 filterbanks, and finally obtain 12 Mel-Frequency Cepstrum Coefficients (MFCCs).
 		We align these MFCCs with the phones found in the TIMIT dataset.
-		An example of a waveform signal is given in Figure \ref{fig:waveform}.
+		An example of a waveform signal is given in Figure \ref{fig:signal}.
+			\begin{figure}[ht]
+				\centering
+			    \includegraphics[width=.45\linewidth]{gfx/signal}
+			    \label{fig:signal}
+			    \caption{A raw waveform signal from the TIMIT dataset.}
+			\end{figure}
 
 		\paragraph{Pre-emphasis}
 
 			In speech signals, high frequencies generally have smaller magnitudes than lower frequencies.
-			To balance the magnitudes over the range of frequencies in the signal, we apply a pre-emphasis filter $y(t)$ on the waveform signal $x(t)$:
-			\begin{equation}
-				y(t) = x(t) - 0.97x(t-1).
+			To balance the magnitudes over the range of frequencies in the signal, we apply a pre-emphasis filter $y(t)$ on the waveform signal $x(t)$ defined in Equation \ref{eq:pre_emphasis}.
+			\begin{equation}\label{eq:pre_emphasis}
+				y(t) = x(t) - 0.97x(t-1)
 			\end{equation}
 			This procedure yields the additional benefit of improving the signal-to-noise ratio.
+			An example of a pre-emphasized signal is given in Figure \ref{fig:signalemph}.
+			\begin{figure}[ht]
+				\centering
+			    \includegraphics[width=.45\linewidth]{gfx/signalemph}
+			    \label{fig:signalemph}
+			    \caption[Pre-emphasis]{A signal after the pre-emphasis filter of Equation \ref{eq:pre_emphasis} was applied to it.}
+			\end{figure}
 
 		\paragraph{Framing}
 			The waveforms, which are sampled at a rate $f_s$ of \SI{16}{\kHz}, cannot be directly used as input to the model, because they are too long---a typical sentence waveform contains in the order of tens of thousands of samples.
@@ -100,7 +114,7 @@
 
 		\paragraph{Short-term power spectra}
 
-			We obtain the power spectra $P_i$ for each frame by first taking the absolute $K$-point discrete Fourier transform (DFT) of the frame samples $x_i(n)$
+			We obtain the power spectra $P_i$ for each frame by first taking the absolute $K$-point discrete Fourier transform (DFT) of the frame samples $x_i(n)$\todo{don't bother with eqn, just call mathbb(F)}
 			\begin{equation}\label{eq:magframes}
 				X_k = \left|\sum_{n=0}^{N-1}x_i(n)\cdot e^{-\frac{i2\pi}{N}kn}\right|,
 			\end{equation}
@@ -157,7 +171,7 @@
 
 			The resulting 40 filterbanks with their corresponding Mels and frequencies are listed in Table \ref{tab:mels}.
 
-			The $i\textsuperscript{th}$ filter in filterbank $H_i$ is a triangular filter that has its lower boundary at $b_{i}$ \SI{}{\Hz}, its peak at $b_{i+1}$ \SI{}{\Hz}, and its upper boundary at $b_{i+2}$ \SI{}{\Hz}.
+			The $i\textsuperscript{th}$ filter in filterbank $H_i$ is a triangular filter that has its lower boundary at $b_{i}$ \SI{}{\Hz}, its peak at $b_{i+1}$ \SI{}{\Hz}, and its upper boundary at $b_{i+2}$ \SI{}{\Hz}.\todo{not sure}
 			For other frequencies, they are 0.
 			Therefore, the filterbank can be described by
 			\begin{equation}
@@ -170,7 +184,7 @@
 				\end{cases},
 			\end{equation}
 			where $0 \leq k \leq \frac{K}{2}$.
-			These Mel-spaced filters is shown in Figure \ref{fig:filterbank}.
+			These Mel-spaced filters are shown in Figure \ref{fig:filterbank}.
 			\begin{figure}[ht]
 				\centering
 			    \includegraphics[width=.45\linewidth]{gfx/fbanks}
@@ -191,14 +205,14 @@
 
 			We observe that the coefficients in the spectrograms are strongly correlated, which would negatively impact the learning performance of the model \todo{why?}.
 
-			Therefore, we apply the DCT again to decorrelate the coefficients and obtain the power cepstrum $C$ of the speech frame:
+			Therefore, we apply the DCT again to decorrelate the coefficients and obtain the power cepstrum $C$ of the speech frame:\todo{do we take absolute?}
 
 			\begin{equation}\label{eq:magframes}
 				C(n) = \left|\sum_{n=0}^{N-1}S(n)\cdot e^{-\frac{i2\pi}{N}kn}\right|.
 			\end{equation}
 
 			We discard the first coefficient in $C$, because it is the average power of the input signal and therefore carries little meaning.
-			We also discard coefficients higher than 13, because they represent only fast changes in the spectrogram and increase the complexity of the input signal while adding increasingly less meaning to it.\todo{source?}
+			We also discard coefficients higher than 13, because they represent only fast changes in the spectrogram and increase the complexity of the input signal while adding increasingly less meaning to it. \todo{source?}
 			An example of the remaining MFCC components is shown in Figure \ref{fig:mfccs}.
 
 			\begin{figure}[ht]
