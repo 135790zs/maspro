@@ -301,10 +301,17 @@ def normalize(arr):
 
 
 def eprop_Z(cfg, t, TZ, V, U, is_ALIF):
+    if cfg["fraction_ALIF"] == 1:
+        thr = cfg["thr"] + cfg["beta"] * U
+    elif cfg["fraction_ALIF"] == 0:
+        thr = cfg["thr"]
+    else:
+        thr = np.where(is_ALIF,
+                       cfg["thr"] + cfg["beta"] * U,
+                       cfg["thr"])
+
     return np.where(np.logical_and(t - TZ >= cfg["dt_refr"],
-                                   V >= np.where(is_ALIF,
-                                                 cfg["thr"] + cfg["beta"] * U,
-                                                 cfg["thr"])),
+                                   V >= thr),
                     1,
                     0)
 
@@ -324,6 +331,10 @@ def eprop_V(cfg, V, I, Z, t, TZ):
 
 
 def eprop_U(cfg, U, Z, is_ALIF):
+    if cfg["fraction_ALIF"] == 1:
+        return cfg["rho"] * U + Z
+    elif cfg["fraction_ALIF"] == 0:
+        return U
     return np.where(is_ALIF,
                     cfg["rho"] * U + Z,
                     U)
@@ -355,11 +366,17 @@ def eprop_EVU(cfg, is_ALIF, H, Z_inbar, EVU):
     LIF: N/A
     checked
     """
+    Hp = cfg["rho"] - H * cfg["beta"]
+
+    if cfg["fraction_ALIF"] == 1:
+        return np.outer(H, Z_inbar) + np.einsum("j, ji -> ji", Hp, EVU)
+    elif cfg["fraction_ALIF"] == 0:
+        return EVU
+
     is_ALIF = np.repeat(a=is_ALIF[:, np.newaxis],
                         repeats=is_ALIF.size*2,
                         axis=1)
 
-    Hp = cfg["rho"] - H * cfg["beta"]
     ret = np.where(is_ALIF,
                    np.outer(H, Z_inbar) + np.einsum("j, ji -> ji", Hp, EVU),
                    EVU)
@@ -367,22 +384,25 @@ def eprop_EVU(cfg, is_ALIF, H, Z_inbar, EVU):
 
 
 def eprop_H(cfg, V, U, t, TZ, is_ALIF):  # TODO: 1/thr here? Traub and Bellec differ
+    if cfg["fraction_ALIF"] == 1:
+        thr = cfg["thr"] + cfg["beta"] * U
+    elif cfg["fraction_ALIF"] == 0:
+        thr = cfg["thr"]
+    else:
+        thr = np.where(is_ALIF,
+                       cfg["thr"] + cfg["beta"] * U,
+                       cfg["thr"])
+
     if cfg["traub_trick"]:
         return np.where(t - TZ < cfg["dt_refr"],
             -cfg["gamma"],
             cfg["gamma"] * np.clip(
-            a=1 - (abs(V - np.where(is_ALIF,
-                                    cfg["thr"] + cfg["beta"] * U,
-                                    cfg["thr"]))
-                       / cfg["thr"]),
+            a=1 - (abs(V - thr) / cfg["thr"]),
             a_min=0,
             a_max=None))
     else:
         return 1 / cfg["thr"] * cfg["gamma"] * np.clip(
-            a=1 - (abs(V - np.where(is_ALIF,
-                                    cfg["thr"] + cfg["beta"] * U,
-                                    cfg["thr"]))
-                       / cfg["thr"]),
+            a=1 - (abs(V - thr) / cfg["thr"]),
             a_min=0,
             a_max=None)
 
@@ -394,6 +414,12 @@ def eprop_ET(cfg, is_ALIF, H, EVV, EVU):
 
     checked for LIF and ALIF!
     """
+
+    if cfg["fraction_ALIF"] == 1:
+        return np.einsum("j, ji->ji", H, EVV - cfg["beta"] * EVU)
+    elif cfg["fraction_ALIF"] == 0:
+        return np.einsum("j, ji->ji", H, EVV)
+
     is_ALIF = np.repeat(a=is_ALIF[:, np.newaxis],
                         repeats=is_ALIF.size*2,
                         axis=1)
@@ -594,7 +620,7 @@ def prepare_log(cfg, log_id):
         if 'numpy' in str(type(v)):
             cfg0[k] = v.item()
 
-    with open('config.json', 'w+') as fp:
+    with open(f'../log/{log_id}/config.json', 'w+') as fp:
         json.dump(cfg0, fp)
 
     # folder = f"../vis/states/"

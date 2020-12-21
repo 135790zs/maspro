@@ -39,7 +39,7 @@ def plot_run(cfg, terrs, percs_wrong_t, verrs, percs_wrong_v, W, epoch, log_id, 
     labelpad = 35
     fontsize = 14
     fig = plt.figure(constrained_layout=False, figsize=(8, 12))
-    gsc = fig.add_gridspec(nrows=14 if cfg["Track_weights"] else 4,
+    gsc = fig.add_gridspec(nrows=15 if cfg["Track_weights"] else 5,
                            ncols=1, hspace=0.05)
     axs = []
 
@@ -161,6 +161,7 @@ def plot_run(cfg, terrs, percs_wrong_t, verrs, percs_wrong_v, W, epoch, log_id, 
                                    fontsize=fontsize)
 
     axs[-1].set_xlabel("Epoch $E$", fontsize=fontsize)
+
     plt.savefig(f"../log/{log_id}/metric.pdf",
                 bbox_inches='tight')
     plt.savefig(f"../log/latest_metric.pdf",

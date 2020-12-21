@@ -96,9 +96,6 @@ def network(cfg, inp, tar, W_rec, W_out, b_out, B, adamvars, eta):
                 cfg=cfg, M=M, s=s, t=t, W_rec=W_rec, W_out=W_out)
             time.sleep(0.5)
 
-    print(f"\nRates: {1000*np.mean(M['spikerate']):.2f}"
-          f" ({1000*np.var(M['spikerate']):.2f}) Hz")
-
     return M
 
 
@@ -303,7 +300,7 @@ def main(cfg):
 
             # Interpolate missing verrs
             verrs[:e+1] = ut.interpolate_verrs(verrs[:e+1])
-            percs_wrong_t[:e+1] = ut.interpolate_verrs(percs_wrong_t[:e+1])
+            percs_wrong_v[:e+1] = ut.interpolate_verrs(percs_wrong_v[:e+1])
 
         if cfg["plot_main"]:
             vis.plot_run(cfg=cfg, terrs=terrs, percs_wrong_t=percs_wrong_t,
