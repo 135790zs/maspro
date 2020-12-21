@@ -79,7 +79,7 @@ def initialize_model(cfg, length, tar_size):
     for T_var in ["T", "P", "Pmax", "D"]:
         M[T_var] = np.zeros(shape=T_shape)
 
-    for neuronvar in ["Z", "Zbar", "I", "L", "Lreg", "spikerate"]:
+    for neuronvar in ["Z", "Zbar", "I", "L_std", "L_reg", "spikerate"]:
         M[neuronvar] = np.zeros(shape=neuron_shape)
 
     for weightvar in ["EVV", "EVU", "ET", "DW", "DW_reg", "ETbar", 'gW']:
@@ -202,6 +202,8 @@ def initialize_weights(cfg, inp_size, tar_size):
         for s in range(cfg["n_directions"]):
             np.fill_diagonal(W['W'][0, s, 0, :, :inp_size], 1)
 
+    W['W'][0, :, 0] *= cfg["weight_scaling"]
+
     # #Inputs
     # W["W"][0, :, 0, :, :inp_size] *= (0/3)/inp_size # Epoch 0, layer 0
 
@@ -209,6 +211,22 @@ def initialize_weights(cfg, inp_size, tar_size):
     # W["W"][0, :, 0, :, inp_size:] *= (0/1)/(cfg["N_R"]) #cfg["N_R"] + inp_size  # Epoch 0, layer 0
 
     return W
+
+
+def initialize_DWs(cfg, inp_size, tar_size):
+    DW = {}
+    DW["W"] = np.zeros(shape=(cfg["n_directions"],
+                              cfg["N_Rec"],
+                              cfg["N_R"],
+                              cfg["N_R"] * 2,))
+
+    DW["W_out"] = np.zeros(shape=(cfg["n_directions"],
+                                  tar_size,
+                                  cfg["N_R"],))
+
+    DW["b_out"] = np.zeros(shape=(cfg["n_directions"],
+                                 tar_size,))
+    return DW
 
 
 def save_weights(W, epoch, log_id):
@@ -408,10 +426,10 @@ def eprop_CE(cfg, T, P, W_rec, W_out, B):
     return -np.sum(T * np.log(1e-30 + P))
 
 
-def eprop_gradient(wtype, L, ETbar, D, Zbar_last):
+def eprop_gradient(wtype, L_std, L_reg, ETbar, D, Zbar_last):
     """ Return the gradient of the weights. """
     if wtype == "W":
-        return np.einsum("rj,rji->rji", L, ETbar)
+        return np.einsum("rj,rji->rji", L_std+L_reg, ETbar)
     elif wtype == "W_out":
         return np.outer(D, Zbar_last)
     elif wtype == "b_out":

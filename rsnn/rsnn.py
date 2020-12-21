@@ -56,7 +56,21 @@ def network(cfg, inp, tar, W_rec, W_out, b_out, B, adamvars, eta):
             M['D'][t] = M['P'][t] - M['T'][t]
             L_std = np.dot(B[s], M['D'][t])
 
-            M['L'][s, t] = L_std
+            if t:
+                rates = np.mean(M['Z'][s, :t], axis=0)
+                M['spikerate'][s, t] = rates
+
+                L_reg = (cfg["FR_reg"]
+                         * (t/n_steps) * 0.5
+                         * np.einsum("rj, rji -> rj",
+                                     cfg["FR_target"] - rates,
+                                     M["ETbar"][s, curr_t]))
+
+            else:
+                L_reg = 0
+
+            M['L_std'][s, t] = L_std
+            M['L_reg'][s, t] = L_reg
 
             # Calculate gradient and weight update
             # TODO: make into iterable
@@ -66,55 +80,39 @@ def network(cfg, inp, tar, W_rec, W_out, b_out, B, adamvars, eta):
                 if not cfg["update_W_out"] and wtype == "W_out":
                     continue
 
+
                 grad = ut.eprop_gradient(wtype=wtype,
                                          D=M['D'][t],
-                                         L=M['L'][s, t],
+                                         L_std=M['L_std'][s, t],
+                                         L_reg=M['L_reg'][s, t],
                                          ETbar=M['ETbar'][s, curr_t],
                                          Zbar_last=M['Zbar'][s, t, -1])
 
-
                 M[f'g{wtype}'][s, curr_t] += grad
 
-                dw = ut.eprop_DW(cfg=cfg,
-                                 gradient=grad,
-                                 wtype=wtype,
-                                 eta=eta,
-                                 adamvars=adamvars,
-                                 s=s)
+                # dw = ut.eprop_DW(cfg=cfg,
+                #                  gradient=grad,
+                #                  wtype=wtype,
+                #                  eta=eta,
+                #                  adamvars=adamvars,
+                #                  s=s)
 
-                M[f'D{wtype}'][s, curr_t] += dw
+                # M[f'D{wtype}'][s, curr_t] += dw
 
-                if wtype == "W" and t:
-                    rates = np.mean(M['Z'][s, :t], axis=0)
-                    M['spikerate'][s, t] = rates
 
-                    dw_fr_reg = (eta
-                                 * cfg["FR_reg"]
-                                 * (t/n_steps) * 0.5
-                                 * np.einsum("rj, rji -> rji",
-                                             cfg["FR_target"] - rates,
-                                             M["ETbar"][s, curr_t]))
-
-                    M[f'DW_reg'][s, curr_t] += dw_fr_reg
-                    M[f'D{wtype}'][s, curr_t] += dw_fr_reg
-
-            if not cfg["update_input_weights"]:
-                    M["DW"][s, curr_t, 0, :, :inp.shape[-1]] = 0
-
-            # print(M["DW"].shape, inp.shape)
-            if not cfg["update_dead_weights"]:
-                    M["DW"][s, curr_t, W_rec[s] == 0] = 0
 
         if cfg["plot_graph"]:
             vis.plot_graph(
                 cfg=cfg, M=M, s=s, t=t, W_rec=W_rec, W_out=W_out)
             time.sleep(0.5)
 
-            if not cfg["update_input_weights"]:
-                    M["DW"][s, curr_t, 0, :, :inp.shape[-1]] = 0
+            # if not cfg["update_input_weights"]:
+            #         M["DW"][s, curr_t, 0, :, :inp.shape[-1]] = 0
 
-            if not cfg["update_dead_weights"]:
-                    M["DW"][s, curr_t, W_rec[s] == 0] = 0
+            # if not cfg["update_dead_weights"]:
+            #         M["DW"][s, curr_t, W_rec[s] == 0] = 0
+
+    print(f"\nRates: {1000*np.mean(M['spikerate']):.2f} Hz")
 
     return M
 
@@ -208,16 +206,14 @@ def feed_batch(cfg, inps, tars, W_rec, W_out, b_out, eta, B, epoch, tvt_type, ad
         for w_type in ['W', 'W_out', 'b_out']:
             # Summing and dividing because `Track_synapse' defines if dw's
             # are accumulated or listed
-            dw = np.sum(final_model[f'D{w_type}'], axis=1) / inps_rep.shape[0]
             gw = np.sum(final_model[f'g{w_type}'], axis=1) / inps_rep.shape[0]
 
-            batch_DW[w_type] += dw
             batch_gW[w_type] += gw
 
     if cfg["verbose"]:
         print(f"\t\tCE:      {batch_err:.3f},\n"
               f"\t\t% wrong: {100*batch_perc_wrong:.1f}%")
-    return batch_err, batch_perc_wrong, batch_DW, batch_gW
+    return batch_err, batch_perc_wrong, batch_gW
 
 
 def main(cfg):
@@ -251,17 +247,22 @@ def main(cfg):
                               inp_size=inps['train'].shape[-1],
                               tar_size=tars['train'].shape[-1])
 
+    DW = ut.initialize_DWs(cfg=cfg,
+                           inp_size=inps['train'].shape[-1],
+                           tar_size=tars['train'].shape[-1])
+
+    adamvars = ut.init_adam(cfg=cfg, tar_size=tars['train'].shape[-1])
+
     # Print size of system in memory
     if cfg["verbose"]:
         M = ut.initialize_model(cfg=cfg,
                                 length=cfg["maxlen"]*cfg["Repeats"],
                                 tar_size=tars['train'].shape[-1])
         print("\nTOTAL NETWORK SIZE:",
-              sum([sum([v.size for k, v in D.items()]) for D in [M, W]])//1000)
+              sum([sum([v.size for k, v in D.items()])
+                   for D in [M, W, DW, adamvars]]))
         del M
 
-    # TODO: Put adam in W?
-    adamvars = ut.init_adam(cfg=cfg, tar_size=tars['train'].shape[-1])
 
     for e in range(0, cfg["Epochs"]):
         if verr is None or cfg["eta_init_loss"] <= 0:
@@ -277,7 +278,7 @@ def main(cfg):
         randidxs = np.random.randint(inps['train'].shape[0],
                                      size=cfg["batch_size_train"])
 
-        terr, perc_wrong_t, DW, gW = feed_batch(
+        terr, perc_wrong_t, gW = feed_batch(
             epoch=e,
             tvt_type='train',
             cfg=cfg,
@@ -299,7 +300,7 @@ def main(cfg):
         if e % cfg["val_every_E"] == 0:
             randidxs = np.random.randint(inps['val'].shape[0],
                                          size=cfg["batch_size_val"])
-            verr, perc_wrong_v, _, _ = feed_batch(
+            verr, perc_wrong_v, _ = feed_batch(
                 epoch=e,
                 tvt_type='val',
                 cfg=cfg,
@@ -338,11 +339,42 @@ def main(cfg):
         if e == cfg['Epochs'] - 1:
             break
 
-        # Update weights
-        ep_incr = 1 if cfg["Track_weights"] else 0
-        for wtype in W.keys():
-            # Update weights
+        if cfg["Track_weights"]:
+            ep_curr = e
+            ep_incr = 1
+        else:
+            ep_curr = 0
+            ep_incr = 0
 
+        if not cfg["update_input_weights"]:
+            DW['W'][:, 0, :, :inp.shape[-1]] = 0
+
+        if not cfg["update_dead_weights"]:
+            DW['W'][W["W"][ep_curr] == 0] = 0
+
+        # Calculate DWs
+        for wtype in W.keys():
+            if wtype == "B":
+                continue
+
+            # Update Adam for W, W_out, b_out
+            adamvars[f'm{wtype}'] = (
+                cfg["adam_beta1"] * adamvars[f'm{wtype}']
+                + (1 - cfg["adam_beta1"]) * gW[wtype])
+            adamvars[f'v{wtype}'] = (
+                cfg["adam_beta2"] * adamvars[f'v{wtype}']
+                + (1 - cfg["adam_beta2"]) * gW[wtype] ** 2)
+
+            # Calculate DWs
+            DW[wtype] = ((eta if wtype != "b_out" else cfg["eta_b_out"])
+                         * (adamvars[f'm{wtype}']
+                            / (np.sqrt(adamvars[f'v{wtype}'])
+                               + cfg["adam_eps"])))
+
+        # Apply DWs
+        for wtype in W.keys():
+
+            # Update weights
             if not cfg["update_bias"] and wtype == "b_out":
                 W[wtype][ep_curr+ep_incr] = W[wtype][ep_curr]
                 continue
@@ -355,7 +387,9 @@ def main(cfg):
 
             if wtype == "B":
 
-                if cfg["eprop_type"] == "random":
+                # "Global" is already next by definition.
+
+                if cfg["eprop_type"] in "random":
                     W["B"][ep_curr+ep_incr, :] = W["B"][ep_curr, :]
 
                 elif cfg["eprop_type"] == "symmetric":
@@ -374,15 +408,8 @@ def main(cfg):
             else:  # W, W_out, or b_out (depending on update cfg)
 
                 W[wtype][ep_curr+ep_incr] = W[wtype][ep_curr] + DW[wtype]
-                # Update Adam
-                adamvars[f'm{wtype}'] = (
-                    cfg["adam_beta1"] * adamvars[f'm{wtype}']
-                    + (1 - cfg["adam_beta1"]) * gW[wtype])
-                adamvars[f'v{wtype}'] = (
-                    cfg["adam_beta2"] * adamvars[f'v{wtype}']
-                    + (1 - cfg["adam_beta2"]) * gW[wtype] ** 2)
 
-
+                # Decay W_out
                 if wtype == "W_out":
                     W[wtype][ep_curr+ep_incr] -= (W[wtype][ep_curr+ep_incr]
                                                   * cfg["weight_decay"])
@@ -397,7 +424,7 @@ def main(cfg):
 
     optW = ut.load_weights(log_id=log_id)
 
-    total_testerr, perc_wrong_test, _, _ = feed_batch(
+    total_testerr, perc_wrong_test, _ = feed_batch(
         epoch=1,
         tvt_type='test',
         cfg=cfg,
