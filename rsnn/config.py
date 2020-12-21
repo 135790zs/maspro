@@ -2,9 +2,9 @@ from numpy import exp
 cfg = {
     "verbose": True,
     "eprop_type": "random",  # in {global, random, symmetric, adaptive}
-    "optimizer": 'SGD',  # in {Adam, SGD}
+    "optimizer": 'Adam',  # in {Adam, SGD}
     "traub_trick": False,
-    "fraction_ALIF": 0.25,  # def 0.25
+    "fraction_ALIF": 1,  # def 0.25
     "n_directions": 1,
     "delay": 0,
 
@@ -13,19 +13,19 @@ cfg = {
     "kappa": 0.717,  # TIMIT: .717
     "beta": 1.8,    # TIMIT: 0.184
     "gamma": 0.3,     # Pseudoderivative ET contribution
-    "eta_b_out": 1e-3,  # Initial learning rate (1e-2 for TIMIT)
-    "eta_init": 1e-3,   # Initial learning rate (1e-2 for TIMIT)
+    "eta_b_out": 5e-2,  # Initial learning rate (1e-2 for TIMIT)
+    "eta_init": 5e-2,   # Initial learning rate (1e-2 for TIMIT)
     "eta_slope": 4,      # Slope defining relation between Verr and eta (1e-2 for TIMIT)
     "eta_init_loss": 0,  # 0 to disable annealing. This is the cap below which annealing to 0 takes place linearly.
-    "thr": 1,        # Spike threshold, def = 1.6 or 0.61
+    "thr": 0.61,        # Spike threshold, def = 1.6 or 0.61
     "dt_refr": 2,    # Refractory time, def = 2
     "weight_decay": 0,  # For W_out and B, only if adaptive. def = 1e-2
     # "L2_reg": 0,  # 1e-5 for TIMIT
-    "FR_target": 0.10,  # 0.01 for TIMIT
+    "FR_target": 0.01,  # 0.01 for TIMIT
     "FR_reg": 5,  # 50 for TIMIT (or 0.5?)
-    "dropout": 0.9,  # of recurrent (excl inputs)
+    "dropout": 0.8,  # of recurrent (excl inputs)
     # "softmax_factor": 1,  # TODO
-    "weight_scaling": 0.1,
+    "weight_scaling": 1,
     "adam_beta1": 0.95,
     "adam_beta2": 0.999,
     "adam_eps": 1e-5,
@@ -33,8 +33,8 @@ cfg = {
     "one_to_one_input": False,
     "update_input_weights": True,  # Subset of - and overridden by `update_W'.
     "update_W": True,
-    "update_bias": False,  # Confirmed working for lower etas (Adam 1e-4)
-    "update_W_out": False,  # Confirmed working (Adam 1e-2)
+    "update_bias": True,  # Confirmed working for lower etas (Adam 1e-4)
+    "update_W_out": True,  # Confirmed working (Adam 1e-2)
     "one_to_one_output": False,
     "update_dead_weights": False,
 
@@ -47,14 +47,14 @@ cfg = {
 
     "Epochs": 300,  # def = 80
     "Track_weights": True,
-    "Track_synapse": False,  # Only for synapse vars
+    "Track_synapse": True,  # Only for synapse vars
     "Repeats": 5,  # ms per epoch, def = 5
     "batch_size_train": 1,  # def = 32
     "batch_size_val": 1,  # def = 32
     "val_every_E": 5,
     "maxlen": 778,  #def 778, Don't forget to re-run process_timit.py!
-    "n_examples": {'train': 3696, 'val': 400, 'test': 192},
-    # "n_examples": {'train': 1000, 'val': 200, 'test': 10},
+    # "n_examples": {'train': 3696, 'val': 400, 'test': 192},
+    "n_examples": {'train': 1, 'val': 1, 'test': 1},
     "TIMIT_derivative": 0,
     "plot_interval": 1,  #  State plot; 0 to disable plots
     "state_save_interval": 10,

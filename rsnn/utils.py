@@ -429,7 +429,8 @@ def eprop_CE(cfg, T, P, W_rec, W_out, B):
 def eprop_gradient(wtype, L_std, L_reg, ETbar, D, Zbar_last):
     """ Return the gradient of the weights. """
     if wtype == "W":
-        return np.einsum("rj,rji->rji", L_std+L_reg, ETbar)
+        return (np.einsum("rj,rji->rji", L_std, ETbar)
+                + np.einsum("rj,rji->rji", L_reg, np.ones(shape=ETbar.shape)))
     elif wtype == "W_out":
         return np.outer(D, Zbar_last)
     elif wtype == "b_out":

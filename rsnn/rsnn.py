@@ -55,16 +55,16 @@ def network(cfg, inp, tar, W_rec, W_out, b_out, B, adamvars, eta):
         for s in range(cfg["n_directions"]):
             M['D'][t] = M['P'][t] - M['T'][t]
             L_std = np.dot(B[s], M['D'][t])
-
             if t:
                 rates = np.mean(M['Z'][s, :t], axis=0)
                 M['spikerate'][s, t] = rates
 
                 L_reg = (cfg["FR_reg"]
                          * (t/n_steps) * 0.5
-                         * np.einsum("rj, rji -> rj",
-                                     cfg["FR_target"] - rates,
-                                     M["ETbar"][s, curr_t]))
+                         * rates - cfg["FR_target"])
+                         # * np.einsum("rj, rji -> rj",
+                         #             cfg["FR_target"] - rates,
+                         #             M["ETbar"][s, curr_t]))
 
             else:
                 L_reg = 0
@@ -90,29 +90,14 @@ def network(cfg, inp, tar, W_rec, W_out, b_out, B, adamvars, eta):
 
                 M[f'g{wtype}'][s, curr_t] += grad
 
-                # dw = ut.eprop_DW(cfg=cfg,
-                #                  gradient=grad,
-                #                  wtype=wtype,
-                #                  eta=eta,
-                #                  adamvars=adamvars,
-                #                  s=s)
-
-                # M[f'D{wtype}'][s, curr_t] += dw
-
-
 
         if cfg["plot_graph"]:
             vis.plot_graph(
                 cfg=cfg, M=M, s=s, t=t, W_rec=W_rec, W_out=W_out)
             time.sleep(0.5)
 
-            # if not cfg["update_input_weights"]:
-            #         M["DW"][s, curr_t, 0, :, :inp.shape[-1]] = 0
-
-            # if not cfg["update_dead_weights"]:
-            #         M["DW"][s, curr_t, W_rec[s] == 0] = 0
-
-    print(f"\nRates: {1000*np.mean(M['spikerate']):.2f} Hz")
+    print(f"\nRates: {1000*np.mean(M['spikerate']):.2f}"
+          f" ({1000*np.var(M['spikerate']):.2f}) Hz")
 
     return M
 
@@ -121,17 +106,6 @@ def feed_batch(cfg, inps, tars, W_rec, W_out, b_out, eta, B, epoch, tvt_type, ad
     batch_err = 0
     batch_perc_wrong = 0
 
-    # TODO: Comb DW gW inits
-    batch_DW = {
-        'W': np.zeros(
-            shape=(cfg["n_directions"], cfg["N_Rec"], cfg["N_R"], cfg["N_R"] * 2,)),
-        'W_out': np.zeros(
-            shape=(cfg["n_directions"], tars.shape[-1], cfg["N_R"],)),
-        'b_out': np.zeros(
-            shape=(cfg["n_directions"], tars.shape[-1],)),
-        'B': np.zeros(
-            shape=(cfg["n_directions"], cfg["N_Rec"], cfg["N_R"], tars.shape[-1],)),
-    }
     batch_gW = {
         'W': np.zeros(
             shape=(cfg["n_directions"], cfg["N_Rec"], cfg["N_R"], cfg["N_R"] * 2,)),
@@ -333,7 +307,7 @@ def main(cfg):
 
         if cfg["plot_main"]:
             vis.plot_run(cfg=cfg, terrs=terrs, percs_wrong_t=percs_wrong_t,
-                         verrs=verrs, percs_wrong_v=percs_wrong_t,
+                         verrs=verrs, percs_wrong_v=percs_wrong_v,
                          W=W, epoch=e, log_id=log_id, inp_size=inps['train'].shape[-1])
 
         if e == cfg['Epochs'] - 1:
@@ -356,20 +330,23 @@ def main(cfg):
         for wtype in W.keys():
             if wtype == "B":
                 continue
+            if cfg["optimizer"] == "Adam":
+                # Update Adam for W, W_out, b_out
+                adamvars[f'm{wtype}'] = (
+                    cfg["adam_beta1"] * adamvars[f'm{wtype}']
+                    + (1 - cfg["adam_beta1"]) * gW[wtype])
+                adamvars[f'v{wtype}'] = (
+                    cfg["adam_beta2"] * adamvars[f'v{wtype}']
+                    + (1 - cfg["adam_beta2"]) * gW[wtype] ** 2)
 
-            # Update Adam for W, W_out, b_out
-            adamvars[f'm{wtype}'] = (
-                cfg["adam_beta1"] * adamvars[f'm{wtype}']
-                + (1 - cfg["adam_beta1"]) * gW[wtype])
-            adamvars[f'v{wtype}'] = (
-                cfg["adam_beta2"] * adamvars[f'v{wtype}']
-                + (1 - cfg["adam_beta2"]) * gW[wtype] ** 2)
-
-            # Calculate DWs
-            DW[wtype] = ((eta if wtype != "b_out" else cfg["eta_b_out"])
-                         * (adamvars[f'm{wtype}']
-                            / (np.sqrt(adamvars[f'v{wtype}'])
-                               + cfg["adam_eps"])))
+                # Calculate DWs
+                DW[wtype] = (-(eta if wtype != "b_out" else cfg["eta_b_out"])
+                             * (adamvars[f'm{wtype}']
+                                / (np.sqrt(adamvars[f'v{wtype}'])
+                                   + cfg["adam_eps"])))
+            elif cfg["optimizer"] == "SGD":
+                DW[wtype] = (-(eta if wtype != "b_out" else cfg["eta_b_out"])
+                             * gW[wtype])
 
         # Apply DWs
         for wtype in W.keys():

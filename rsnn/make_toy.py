@@ -2,13 +2,13 @@ import numpy as np
 import matplotlib.pyplot as plt
 from config import cfg
 
-TYPE = "BIN"  # in {"STDP", "XOR", "BIN"}
+assert cfg["task"] in ["BIN", "STDP", "XOR"]
 
 for tvt_type in ["train", "val", "test"]:
     n_examples = cfg['n_examples'][tvt_type]
     S_len = cfg['maxlen']
-    Si = 4
-    So = 2 if TYPE != "BIN" else 2 ** Si
+    Si = 2
+    So = 2 if cfg["task"] != "BIN" else 2 ** Si
     plotidx = 0
 
     rng = np.random.default_rng()
@@ -16,40 +16,40 @@ for tvt_type in ["train", "val", "test"]:
     tar = np.zeros(shape=(n_examples, S_len, So))
 
     for s in range(n_examples):
-        if TYPE in ["XOR", "BIN"]:
+        if cfg["task"] in ["XOR", "BIN"]:
             A = (1,) * Si
             dur = [rng.integers(1, 4) for _ in range(Si)]
             gap = [rng.integers(1, 5) for _ in range(Si)]
             off = [rng.integers(4) for _ in range(Si)]
-        elif TYPE == "STDP":
+        elif cfg["task"] == "STDP":
             int1 = rng.integers(8, 14)
             offset2 = rng.integers(3, int1//2)
 
         for t in range(S_len):
-            if TYPE in ["XOR", "BIN"]:
+            if cfg["task"] in ["XOR", "BIN"]:
                 for n in range(Si):
                     inp[s, t, n] = (A[n] * ((t - off[n])
                                             % (dur[n] + gap[n]) < dur[n]))
-            elif TYPE == "STDP":
+            elif cfg["task"] == "STDP":
                 inp[s, t, 0] = t % int1 == 0
                 inp[s, t, 1] = (t - offset2) % int1 == 0
         for t in range(S_len):  # classidx is XOR
-            if TYPE == "XOR":
+            if cfg["task"] == "XOR":
                 for n in range(So):
                     ix = int(1-abs(inp[s, t, 0] - inp[s, t, 1]))
                     tar[s, t, ix] = 1
-            elif TYPE == "STDP":
+            elif cfg["task"] == "STDP":
                 tar[s, t, 0] = 1
                 tar[s, t, 1] = 0
-            elif TYPE == "BIN":
+            elif cfg["task"] == "BIN":
                 # print([inp[s,t,n] for n in range(Si)])
                 ix = int(sum([2**n*inp[s,t,n] for n in range(Si)]))
                 # print(ix)
                 # ix = int(inp[s, t, 0] + 2*inp[s, t, 1])
                 tar[s, t, ix] = 1
 
-    np.save(f'{cfg["wavs_fname"]}_{tvt_type}_{TYPE}.npy', inp)
-    np.save(f'{cfg["phns_fname"]}_{tvt_type}_{TYPE}.npy', tar)
+    np.save(f'{cfg["wavs_fname"]}_{tvt_type}_{cfg["task"]}.npy', inp)
+    np.save(f'{cfg["phns_fname"]}_{tvt_type}_{cfg["task"]}.npy', tar)
 
 fig = plt.figure(constrained_layout=False, figsize=(10, 5))
 gsc = fig.add_gridspec(nrows=2, ncols=1, hspace=0.15)
@@ -58,9 +58,9 @@ axs = [fig.add_subplot(gsc[r, :]) for r in range(2)]
 axs[0].imshow(inp[plotidx].T, aspect='auto', cmap='gray')
 axs[1].imshow(tar[plotidx].T, aspect='auto', cmap='gray')
 
-plt.savefig(f"../vis/example{TYPE}.pdf",
+plt.savefig(f"../vis/example{cfg['task']}.pdf",
             bbox_inches='tight')
 
 plt.close()
 
-print(f"Made {TYPE} dataset!")
+print(f"Made {cfg['task']} dataset!")

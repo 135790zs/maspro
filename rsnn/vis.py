@@ -16,7 +16,8 @@ def weights_to_img(arr, is_binary=False):
 
     # Pad to prevent spike trains disappearing on plot edge
     if is_binary:
-        arr = np.pad(arr, ((8, 8), (0, 0)))
+        padsize = arr.shape[0]//10
+        arr = np.pad(arr, ((padsize, padsize), (0, 0)))
 
     if original_dim == 4:
         # idx = np.argwhere(np.all(arr[..., :] == 0, axis=0))
@@ -171,8 +172,7 @@ def plot_run(cfg, terrs, percs_wrong_t, verrs, percs_wrong_v, W, epoch, log_id, 
 def plot_state(cfg, M, B, W_rec, W_out, b_out, e, log_id, plot_weights=False):
     S_plotvars = ["X", "I", "V", "H", "U", "Z", "Y", "L_std", "L_reg"]
     if cfg["Track_synapse"]:
-        S_plotvars = S_plotvars[:6] + ["EVV", "EVU", "ET"] + S_plotvars[6:]
-        S_plotvars = S_plotvars + ["DW", "DW_reg", "DW_out", "Db_out"]
+        S_plotvars = S_plotvars[:6] + ["EVV", "EVU", "ETbar"] + S_plotvars[6:]
 
     M_plotvars = ["P", "D", "Pmax", "T", "CE"]
     if cfg["n_directions"] > 1:

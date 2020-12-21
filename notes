@@ -34,3 +34,11 @@ ADAM has a one-off bias. See which optimizer this now is. Or fix it later for co
 * L is positive if larger than 1/N_out else negative
 
 ==========
+
+* Check how Bellec aggregates DWs and such. Mean vs sum?
+* Check Bellec's code to check peripherals.
+* Fix Adam
+* Online w/ low LR?
+* Try get good initial performance.
+* Try reduce spike rate initially, using dropout and weight scaling.
+* Analyze behavior on simple data/net
