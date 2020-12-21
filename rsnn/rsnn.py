@@ -15,8 +15,13 @@ def network(cfg, inp, tar, W_rec, W_out, b_out, B, adamvars, eta):
     M["T"] = tar
     M["T"] = np.pad(array=M["T"], mode='edge', pad_width=((cfg["delay"], 0), (0, 0)))
 
+    # X0 is the regular input sequence (T ✕ N_I)
     M[f"X0"] = inp
-    M[f"X1"] = np.flip(inp, axis=0)
+
+    # In a bidirectional network, X1 is the time-reversed sequence for
+    # the second network.
+    if cfg["n_directions"] == 2:
+        M[f"X1"] = np.flip(inp, axis=0)
 
     for t in range(n_steps-1):
 
@@ -24,7 +29,12 @@ def network(cfg, inp, tar, W_rec, W_out, b_out, B, adamvars, eta):
 
             # Input is nonzero for first layer
             for r in range(cfg['N_Rec']):
-                M = ut.process_layer(cfg=cfg, M=M, s=s, t=t, r=r, W_rec=W_rec[s, r])
+                M = ut.process_layer(cfg=cfg,
+                                     M=M,
+                                     s=s,
+                                     t=t,
+                                     r=r,
+                                     W_rec=W_rec[s, r])
 
             M['Y'][s, t] = ut.eprop_Y(cfg=cfg,
                                       Y=M['Y'][s, t-1] if t > 0 else 0,
@@ -40,11 +50,11 @@ def network(cfg, inp, tar, W_rec, W_out, b_out, B, adamvars, eta):
         M['Pmax'][t, M['P'][t].argmax()] = 1
 
         M['CE'][t] = ut.eprop_CE(cfg=cfg,
-                                  T=M['T'][t],
-                                  P=M['P'][t],
-                                  W_rec=W_rec,
-                                  W_out=W_out,
-                                  B=B)
+                                 T=M['T'][t],
+                                 P=M['P'][t],
+                                 W_rec=W_rec,
+                                 W_out=W_out,
+                                 B=B)
 
         if cfg["Track_synapse"]:
             curr_t = t
@@ -142,13 +152,14 @@ def feed_batch(cfg, inps, tars, W_rec, W_out, b_out, eta, B, epoch, tvt_type, ad
 
         this_inps = inps[b, :this_tars.shape[0]]
 
-        inps_rep = np.repeat(this_inps, cfg["Repeats"], axis=0)
-        tars_rep = np.repeat(this_tars, cfg["Repeats"], axis=0)
+        this_inps, this_tars = ut.interpolate_inputs(inp=this_inps,
+                                                     tar=this_tars,
+                                                     stretch=cfg["Repeats"])
 
         final_model = network(
             cfg=cfg,
-            inp=inps_rep,
-            tar=tars_rep,
+            inp=this_inps,
+            tar=this_tars,
             W_rec=W_rec,
             W_out=W_out,
             b_out=b_out,
@@ -171,15 +182,21 @@ def feed_batch(cfg, inps, tars, W_rec, W_out, b_out, eta, B, epoch, tvt_type, ad
         # Dividing by batch size to get batch mean.
         batch_err += np.mean(final_model["CE"]) / inps.shape[0]
         batch_perc_wrong += np.mean(
-            np.max(np.abs(final_model["Pmax"]- final_model["T"]),
+            np.max(np.abs(final_model["Pmax"] - final_model["T"]),
                    axis=1)) / inps.shape[0]
+
+
+        L2_reg = cfg["L2_reg"] * np.linalg.norm(np.concatenate((
+            W_rec.flatten(),
+            W_out.flatten(),
+            b_out.flatten())))
 
         for w_type in ['W', 'W_out', 'b_out']:
             # Summing and dividing because `Track_synapse' defines if dw's
             # are accumulated or listed
-            gw = np.sum(final_model[f'g{w_type}'], axis=1) / inps_rep.shape[0]
+            gw = np.sum(final_model[f'g{w_type}'], axis=1) / this_inps.shape[0]
 
-            batch_gW[w_type] += gw
+            batch_gW[w_type] += gw + L2_reg
 
     if cfg["verbose"]:
         print(f"\t\tCE:      {batch_err:.3f},\n"
@@ -337,12 +354,12 @@ def main(cfg):
                     + (1 - cfg["adam_beta2"]) * gW[wtype] ** 2)
 
                 # Calculate DWs
-                DW[wtype] = (-(eta if wtype != "b_out" else cfg["eta_b_out"])
+                DW[wtype] = (-(eta if wtype != "b_out" or cfg["eta_b_out"] is None else cfg["eta_b_out"])
                              * (adamvars[f'm{wtype}']
                                 / (np.sqrt(adamvars[f'v{wtype}'])
                                    + cfg["adam_eps"])))
             elif cfg["optimizer"] == "SGD":
-                DW[wtype] = (-(eta if wtype != "b_out" else cfg["eta_b_out"])
+                DW[wtype] = (-(eta if wtype != "b_out" or cfg["eta_b_out"] is None else cfg["eta_b_out"])
                              * gW[wtype])
 
         # Apply DWs
@@ -394,7 +411,7 @@ def main(cfg):
 
     # Make test batch
     randidxs = np.random.randint(inps['val'].shape[0],
-                                 size=cfg["batch_size_val"])
+                                 size=cfg["batch_size_test"])
 
     optW = ut.load_weights(log_id=log_id)
 

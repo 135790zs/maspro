@@ -29,7 +29,7 @@
 		    \caption[TIMIT Dialect Regions]{Distibution of speakers' dialect regions and sexes. Speakers of the innominate dialect region 8 relocated often during their childhood.}  \label{tab:dialects}
 		\end{table}
 
-		The sentence text can be categorized into 2 \emph{dialect} sentences, 450 \emph{phonetically compact} sentences, and 1890 \emph{phonetically-diverse} sentences.
+		The sentence text can be categorized into 2 \emph{dialect} sentences, 450 \emph{phonetically compact} sentences, and 1890 \emph{phonetically diverse} sentences.
 
 		The dialect sentences, which are spoken by all speakers, are designed to expose the dialectical variants of the speakers.
 		The phonetically compact sentences are designed to include many pairs of phones.
@@ -53,6 +53,27 @@
 		\end{table}
 
 		Each of the sentences is encoded in as a waveform signal in \texttt{.wav} format, and is accompanied by a corresponding text file indicating which phones are pronounced in the waveform, and between which pairs of sample points.
+
+	\subsection{Data splitting}
+		The TIMIT dataset is split into a training, validation and testing set as in \cite{graves2005framewise} and \cite{bellec2020solution}.
+		The training set is used to train the network synaptic weights according to the e-prop algorithm.
+		The validation set is used to obtain a well-performing set of hyperparameters, and to anneal the learning rate (see Section \ref{sec:lr_annealing}).
+		The testing set is used to evaluate the performance of the network after the hyperparameters are obtained.
+
+		The TIMIT corpus documentation offers a suggested partitioning of the training and testing data, which is based on the following criteria:
+		\begin{enumerate}
+			\item 70\%--80\% of the data is used for training, and the remaining 20\%--30\% for testing.
+			\item No speaker appears in both the training and testing portions.
+			\item Both subsets include at least 1 male and 1 female speaker from every dialect region.
+			\item There is a minimal overlap of text material in the two subsets.
+			\item The test set should contain all phonemes in as many allophonic contexts as possible.
+		\end{enumerate}
+		In accordance with these criteria, the TIMIT corpus includes a ``core'' test set that contains 2 male speakers and 1 female speaker from each dialect, summing up to 24 speakers.
+		Each of these speakers read a different set of 5 phonetically compact sentences, and 3 phonetically diverse sentences that were unique for each speaker.
+		Consequently, the test set comprises 192 sentences ($24\times(5+3)$) and was selected such that it contains at least one occurrence of each phoneme.
+		In this report, the TIMIT core test set is used, thereby meeting the criteria listed above.
+
+		The remaining 4096 sentences are randomly partitioned into 3696 training sentences and 400 validation sentences.
 
 	\subsection{Engineering features}
 
@@ -248,5 +269,4 @@
 		    \label{fig:source_mfcc_target}
 		    \caption{An alignment of a sample signal with its MFCCs and target phones.}
 		\end{figure}
-
 

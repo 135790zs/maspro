@@ -3,6 +3,7 @@ import os
 import numpy as np
 import datetime
 import json
+from scipy.interpolate import interp1d
 # import cupy as cp
 
 
@@ -464,7 +465,7 @@ def eprop_gradient(wtype, L_std, L_reg, ETbar, D, Zbar_last):
 
 
 def eprop_DW(cfg, wtype, s, adamvars, gradient, eta):
-    eta = cfg["eta_b_out"] if wtype == "b_out" else eta
+    eta = cfg["eta_b_out"] if wtype == "b_out" and cfg["eta_b_out"] is not None else eta
 
     if cfg["optimizer"] == 'SGD':
         return -eta * gradient
@@ -667,3 +668,25 @@ def get_elapsed_time(cfg, start_time, e, b, batch_size):
 def eprop_FR_reg(cfg, rates, ETbar, t):
     ret = eta * cfg["FR_reg"] * np.sum()
     return ret
+
+
+
+def interpolate_inputs(inp, tar, stretch):
+    inp = inp.T
+    tar = tar.T
+
+    itp_inp = interp1d(np.arange(inp.shape[-1]),
+                   inp,
+                   kind='linear')
+
+    itp_tar = interp1d(np.arange(tar.shape[-1]),
+                   tar,
+                   kind='nearest')
+
+    inp = itp_inp(np.linspace(0, inp.shape[-1]-1, int(inp.shape[-1]*stretch)))
+    tar = itp_tar(np.linspace(0, tar.shape[-1]-1, int(tar.shape[-1]*stretch)))
+
+    return inp.T, tar.T
+
+    # this_inps = np.repeat(this_inps, cfg["Repeats"], axis=0)
+    # this_tars = np.repeat(this_tars, cfg["Repeats"], axis=0)

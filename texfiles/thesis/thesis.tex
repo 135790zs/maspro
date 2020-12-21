@@ -80,7 +80,6 @@ STRUCTURE
     - Start with something human and concrete: learning in the brain.
   - SOTA
     - Brief walk-through of most relevant papers, look into my own lit review
-  -
 
   - Artificial spiking neurons inspired by brain neurons (as in Bellec intro p1). Various theoretical advantages over ANNs.
   - Unclear how RSNNs can learn. In hope of crudely emulating biological neural circuits, try online, local and bioplausible method.
@@ -90,30 +89,34 @@ STRUCTURE
   - ... synaptic scaling, Izhikevich etc will depend on whether it is implemented.
 
 * RELATED WORK
-  - Boltzmann machines
-  -
   - Eligibility Propagation (basics, as in Bellec)
-    - Network model
+    - Three-factor Hebbian Learning
+      - Learning signal
+        - Biological plausilibity, (how does it happen in brain?)
+      - Broadcasting methods
+      - Eligibility trace
+        - Why?
+        - Bioplausibility
     - Derivation from RNN and backprop.
     - E-prop algorithm (LIF or ALIF depends on what's used in final model). Only describe what I use (e.g. no symmetric eprop or SGD)
-    - Deeper maths
-  - Traub's STDP-LIF
-  - Traub's Izhikevich (if applicable)
 
 * METHOD
   - Data Preprocessing
     - TIMIT overview
+    - Data splitting
     - Audio to features
       - MFCCs
-    - Data splitting
   - Extending the E-prop framework
     - Generalizing to multiple layers
     - Using Izhikevich neurons
+    - Using STDP-LIF
   - Hyperparameter optimization procedure
   - Regularization
-    - FR (if applicable)
-    - L2 (if applicable)
-  - Adam (if applicable)
+    - FR
+    - L2
+    - Weight decay
+  - Adam
+  - Learning rate annealing
   - Bidirectional network (if applicable)
   - Traub or Bellec reset (if applicable)
 
@@ -123,6 +126,7 @@ STRUCTURE
     - Accuracy
     - Tradeoffs between network size and accuracy (not necessarily same hparams)
     - Time dynamics
+    - Effects of parameter changes and freezing of certain weights.
     - Manifold dynamics
     - Energy
     - Robustness (initialization, data, and hparam).
@@ -147,22 +151,3 @@ STRUCTURE
 
 
 =================
-
-METHOD
-- Data Preprocessing
-  - TIMIT overview
-  - Audio to features
-- Eligibility Propagation (basics, as in Bellec)
-  - Network model
-  - E-prop algorithm (LIF or ALIF depends on what's used in final model)
-  - Derivation from RNN and backprop.
-  - Regularization
-    - FR (if applicable)
-    - L2 (if applicable)
-  - Adam (if applicable)
-  - Bidirectional network (if applicable)
-  - Traub or Bellec reset (if applicable)
-- Extending the E-prop framework
-  - Generalizing to multiple layers
-  - Using Izhikevich neurons
-- Hyperparameter optimization procedure
