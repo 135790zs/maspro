@@ -6,6 +6,8 @@ import seaborn as sns
 import pandas as pd
 import numpy as np
 
+METRIC = "T-Wrongs"
+
 
 def process_categoricals(dat):
     catdict = {}
@@ -21,6 +23,7 @@ def process_categoricals(dat):
 def plot_dfs(df, fname):
     varnames = list(df)
     varnames.remove("V-Error")
+    varnames.remove("T-Wrongs")
     pool = list(combinations(varnames, r=2))
 
     size = int(np.ceil(np.sqrt(len(pool))))
@@ -35,7 +38,7 @@ def plot_dfs(df, fname):
     for idx, comb in enumerate(pool):
         x = df[comb[0]].to_numpy()
         y = df[comb[1]].to_numpy()
-        z = df["V-Error"].to_numpy()
+        z = df[METRIC].to_numpy()
 
         if not os.path.exists(f"../sweeps/{fname}"):
             os.makedirs(f"../sweeps/{fname}")
@@ -123,6 +126,7 @@ def plot_dfs(df, fname):
 def plot_regressions(df, fname):
     valid_varnames = [n for n in df]
     valid_varnames.remove("V-Error")
+    valid_varnames.remove("T-Wrongs")
 
     size = int(np.ceil(np.sqrt(len(valid_varnames))))
     _, axs = plt.subplots(nrows=size, ncols=size, figsize=(3*size, 3*size))
@@ -130,7 +134,7 @@ def plot_regressions(df, fname):
     for idx, var in enumerate(valid_varnames):
 
         x = df[var].to_numpy()
-        y = df["V-Error"].to_numpy()
+        y = df[METRIC].to_numpy()
 
         if type(x[0]).__name__ in ['str', 'bool_']:
             x, nx, xticks = process_categoricals(dat=x)
@@ -152,7 +156,7 @@ def plot_regressions(df, fname):
         if idx % size:
             axs[idx // size, idx % size].get_yaxis().set_visible(False)
         else:
-            axs[idx // size, idx % size].set_ylabel("V-Error")
+            axs[idx // size, idx % size].set_ylabel(METRIC)
         sns.regplot(ax=axs[idx // size, idx % size],
                     x=x,
                     y=y,

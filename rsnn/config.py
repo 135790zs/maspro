@@ -10,7 +10,7 @@ cfg = {
 
     "alpha": exp(-1/20),  # Bellec1: 20 = 0.951
     "rho": exp(-1/200),  # Bellec1: 200 = 0.995
-    "kappa": exp(-1/3),  # Bellec1: 3 = 0.717
+    "kappa": exp(-1/2),  # Bellec1: 3 = 0.717
     "beta": 1.8,    # Bellec1: 1.8. Bellec2: "order of 0.07"
     "gamma": 0.3,     # Bellecs: 0.3.
     "eta_b_out": None,  # Constant
@@ -18,13 +18,13 @@ cfg = {
     "eta_slope": 2,      # Slope defining relation between Verr and eta (1e-2 for TIMIT)
     "eta_init_loss": 6,  # 0 to disable annealing. This is the cap below which annealing to 0 takes place linearly.
     "thr": 1,        # Bellec1: unknown. Bellec2:
-    "dt_refr": 2,    # Bellec1: 2
+    "dt_refr": 10,    # Bellec1: 2
     "weight_decay": 0,  # Bellec1: 0. Bellec2: 1e-2. For W_out and B, only if adaptive.
     "L2_reg": 1e-5,  # Bellec1: 0. Bellec2: 1e-5
     "FR_target": 0.01,  # Bellecs: 0.01
     "FR_reg": 20,  # Bellec1: 1. Bellec2: 50.
     "dropout": 0.8,  # of recurrent (excl inputs)
-    "softmax_factor": 1,  # Bellecs: 1
+    "softmax_factor": 0.5,  # Bellecs: 1
     "weight_scaling": 1,  # Bellecs: 1
     "adam_beta1": 0.95,
     "adam_beta2": 0.999,
@@ -38,26 +38,26 @@ cfg = {
     "one_to_one_output": False,
     "update_dead_weights": False,
 
-    "N_R": 128,
+    "N_R": 39,
     "N_Rec": 1,
 
     "task": "TIMIT",
     "wavs_fname": "../data/data_wavs",
     "phns_fname": "../data/data_phns",
 
-    "Epochs": 20,  # def = 80
+    "Epochs": 150,  # def = 80
     "Track_weights": True,
     "Track_synapse": False,  # Only for synapse vars
     "Repeats": 5,  # ms per epoch, def = 5
-    "batch_size_train": 4,  # def = 32
-    "batch_size_val": 4,  # def = 32
+    "batch_size_train": 1,  # def = 32
+    "batch_size_val": 1,  # def = 32
     "batch_size_test": 32,  # def = 32
     "val_every_E": 8,
     "maxlen": 778,  #def 778, Don't forget to re-run process_timit.py!
     "TIMIT_derivative": 2,
     "n_examples": {'train': 3696, 'val': 400, 'test': 192},
     # "n_examples": {'train': 1, 'val': 1, 'test': 1},
-    "plot_interval": 10,  #  State plot; 0 to disable plots
+    "plot_interval": 1,  #  State plot; 0 to disable plots
     "state_save_interval": 10,
     "plot_main": True,
     "plot_state": True,

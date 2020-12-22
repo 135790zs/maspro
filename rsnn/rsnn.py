@@ -334,12 +334,6 @@ def main(cfg):
             ep_curr = 0
             ep_incr = 0
 
-        if not cfg["update_input_weights"]:
-            DW['W'][:, 0, :, :inp.shape[-1]] = 0
-
-        if not cfg["update_dead_weights"]:
-            DW['W'][W["W"][ep_curr] == 0] = 0
-
         # Calculate DWs
         for wtype in W.keys():
             if wtype == "B":
@@ -361,6 +355,12 @@ def main(cfg):
             elif cfg["optimizer"] == "SGD":
                 DW[wtype] = (-(eta if wtype != "b_out" or cfg["eta_b_out"] is None else cfg["eta_b_out"])
                              * gW[wtype])
+
+        if not cfg["update_input_weights"]:
+            DW['W'][:, 0, :, :inp.shape[-1]] = 0
+
+        if not cfg["update_dead_weights"]:
+            DW['W'][W["W"][ep_curr] == 0] = 0
 
         # Apply DWs
         for wtype in W.keys():
