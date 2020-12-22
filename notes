@@ -24,3 +24,11 @@ Gradient hard/softcapping for reliable descent?
 ==========
 
 L2 weight decay?
+
+
+=========
+
+Today:
+* Work on thesis (mainly overview but also draft a bit)
+* Identify shortcomings in reproducing Bellec. Maybe it's the algo?
+* Implement logging learning data (e.g. errs, LR, etc)

@@ -438,10 +438,11 @@ def eprop_Y(cfg, Y, W_out, Z_last, b_out):
             + b_out)
 
 
-def eprop_P(Y):
+def eprop_P(cfg, Y):
+    """ Softmax"""
     maxx = np.max(Y)
     m = Y - maxx
-    ex = np.exp(m)
+    ex = np.exp(cfg["softmax_factor"] * m)
     denom = np.sum(ex)
     ret = ex / denom
     return ret

@@ -19,6 +19,72 @@
 
 \refsection{0}
   \datalist[entry]{nyt/global//global/global}
+    \entry{bellec2020solution}{article}{}
+      \name{author}{7}{}{%
+        {{uniquename=0,uniquepart=base,hash=2b9b631384f8ec77cc43dcf66984cd5c}{%
+           family={Bellec},
+           familyi={B\bibinitperiod},
+           given={Guillaume},
+           giveni={G\bibinitperiod},
+           givenun=0}}%
+        {{uniquename=0,uniquepart=base,hash=211f02679f7f7913be407f41fbfd953a}{%
+           family={Scherr},
+           familyi={S\bibinitperiod},
+           given={Franz},
+           giveni={F\bibinitperiod},
+           givenun=0}}%
+        {{uniquename=0,uniquepart=base,hash=b983f97fa32b0609743c23cef3abca55}{%
+           family={Subramoney},
+           familyi={S\bibinitperiod},
+           given={Anand},
+           giveni={A\bibinitperiod},
+           givenun=0}}%
+        {{uniquename=0,uniquepart=base,hash=6ccbe52bc81a4bb825a59dd84e31d3c5}{%
+           family={Hajek},
+           familyi={H\bibinitperiod},
+           given={Elias},
+           giveni={E\bibinitperiod},
+           givenun=0}}%
+        {{uniquename=0,uniquepart=base,hash=213bf36666ad0c29b642ac8b0c7727b4}{%
+           family={Salaj},
+           familyi={S\bibinitperiod},
+           given={Darjan},
+           giveni={D\bibinitperiod},
+           givenun=0}}%
+        {{uniquename=0,uniquepart=base,hash=b10a7d017c66a7852a2ced8998379999}{%
+           family={Legenstein},
+           familyi={L\bibinitperiod},
+           given={Robert},
+           giveni={R\bibinitperiod},
+           givenun=0}}%
+        {{uniquename=0,uniquepart=base,hash=1b7071d23a59fcc869863e969ca2e992}{%
+           family={Maass},
+           familyi={M\bibinitperiod},
+           given={Wolfgang},
+           giveni={W\bibinitperiod},
+           givenun=0}}%
+      }
+      \list{publisher}{1}{%
+        {Cold Spring Harbor Laboratory}%
+      }
+      \strng{namehash}{07c87a77464aa6deb5a8a3c373c521e2}
+      \strng{fullhash}{abd33dc860fad2834e45fc40cbd7372c}
+      \strng{bibnamehash}{07c87a77464aa6deb5a8a3c373c521e2}
+      \strng{authorbibnamehash}{07c87a77464aa6deb5a8a3c373c521e2}
+      \strng{authornamehash}{07c87a77464aa6deb5a8a3c373c521e2}
+      \strng{authorfullhash}{abd33dc860fad2834e45fc40cbd7372c}
+      \field{sortinit}{B}
+      \field{sortinithash}{276475738cc058478c1677046f857703}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{year}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{bioRxiv}
+      \field{title}{A solution to the learning dilemma for recurrent networks of spiking neurons}
+      \field{year}{2020}
+      \field{pages}{738385}
+      \range{pages}{1}
+    \endentry
     \entry{fayek2016}{misc}{}
       \name{author}{1}{}{%
         {{uniquename=0,uniquepart=base,hash=02bf21efbaa9133205a5997f384dc5ab}{%
@@ -100,6 +166,114 @@
       \field{year}{1993}
       \field{pages}{27403}
       \range{pages}{1}
+    \endentry
+    \entry{graves2005framewise}{article}{}
+      \name{author}{2}{}{%
+        {{uniquename=0,uniquepart=base,hash=dfca94b0427da7f9088af596e23b46c0}{%
+           family={Graves},
+           familyi={G\bibinitperiod},
+           given={Alex},
+           giveni={A\bibinitperiod},
+           givenun=0}}%
+        {{uniquename=0,uniquepart=base,hash=1bcbd82d7c2dc8000e44f70ed775668f}{%
+           family={Schmidhuber},
+           familyi={S\bibinitperiod},
+           given={J{ü}rgen},
+           giveni={J\bibinitperiod},
+           givenun=0}}%
+      }
+      \list{publisher}{1}{%
+        {Elsevier}%
+      }
+      \strng{namehash}{6498f716d4a086fa977121709be9ac15}
+      \strng{fullhash}{6498f716d4a086fa977121709be9ac15}
+      \strng{bibnamehash}{6498f716d4a086fa977121709be9ac15}
+      \strng{authorbibnamehash}{6498f716d4a086fa977121709be9ac15}
+      \strng{authornamehash}{6498f716d4a086fa977121709be9ac15}
+      \strng{authorfullhash}{6498f716d4a086fa977121709be9ac15}
+      \field{sortinit}{G}
+      \field{sortinithash}{5e8d2bf9d38de41b1528bd307546008f}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{year}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{Neural networks}
+      \field{number}{5-6}
+      \field{title}{Framewise phoneme classification with bidirectional LSTM and other neural network architectures}
+      \field{volume}{18}
+      \field{year}{2005}
+      \field{pages}{602\bibrangedash 610}
+      \range{pages}{9}
+    \endentry
+    \entry{hopfield1982neural}{article}{}
+      \name{author}{1}{}{%
+        {{uniquename=0,uniquepart=base,hash=61fb5a0bf559ecdf258615fb7fe0e649}{%
+           family={Hopfield},
+           familyi={H\bibinitperiod},
+           given={John\bibnamedelima J},
+           giveni={J\bibinitperiod\bibinitdelim J\bibinitperiod},
+           givenun=0}}%
+      }
+      \list{publisher}{1}{%
+        {National Acad Sciences}%
+      }
+      \strng{namehash}{61fb5a0bf559ecdf258615fb7fe0e649}
+      \strng{fullhash}{61fb5a0bf559ecdf258615fb7fe0e649}
+      \strng{bibnamehash}{61fb5a0bf559ecdf258615fb7fe0e649}
+      \strng{authorbibnamehash}{61fb5a0bf559ecdf258615fb7fe0e649}
+      \strng{authornamehash}{61fb5a0bf559ecdf258615fb7fe0e649}
+      \strng{authorfullhash}{61fb5a0bf559ecdf258615fb7fe0e649}
+      \field{sortinit}{H}
+      \field{sortinithash}{5f15a7bc777ad49ff15aa4d2831b1681}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{year}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{Proceedings of the national academy of sciences}
+      \field{number}{8}
+      \field{title}{Neural networks and physical systems with emergent collective computational abilities}
+      \field{volume}{79}
+      \field{year}{1982}
+      \field{pages}{2554\bibrangedash 2558}
+      \range{pages}{5}
+    \endentry
+    \entry{hubel1968receptive}{article}{}
+      \name{author}{2}{}{%
+        {{uniquename=0,uniquepart=base,hash=ef1cf54b3dd47533c335360701d44376}{%
+           family={Hubel},
+           familyi={H\bibinitperiod},
+           given={David\bibnamedelima H},
+           giveni={D\bibinitperiod\bibinitdelim H\bibinitperiod},
+           givenun=0}}%
+        {{uniquename=0,uniquepart=base,hash=6fd186cf41a1dd6feb1964146d18a3c5}{%
+           family={Wiesel},
+           familyi={W\bibinitperiod},
+           given={Torsten\bibnamedelima N},
+           giveni={T\bibinitperiod\bibinitdelim N\bibinitperiod},
+           givenun=0}}%
+      }
+      \list{publisher}{1}{%
+        {Wiley Online Library}%
+      }
+      \strng{namehash}{b61026f392e3b6ea6663b1c55f3d5bb9}
+      \strng{fullhash}{b61026f392e3b6ea6663b1c55f3d5bb9}
+      \strng{bibnamehash}{b61026f392e3b6ea6663b1c55f3d5bb9}
+      \strng{authorbibnamehash}{b61026f392e3b6ea6663b1c55f3d5bb9}
+      \strng{authornamehash}{b61026f392e3b6ea6663b1c55f3d5bb9}
+      \strng{authorfullhash}{b61026f392e3b6ea6663b1c55f3d5bb9}
+      \field{sortinit}{H}
+      \field{sortinithash}{5f15a7bc777ad49ff15aa4d2831b1681}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{year}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{The Journal of physiology}
+      \field{number}{1}
+      \field{title}{Receptive fields and functional architecture of monkey striate cortex}
+      \field{volume}{195}
+      \field{year}{1968}
+      \field{pages}{215\bibrangedash 243}
+      \range{pages}{29}
     \endentry
     \entry{hultzsch1964tables}{book}{}
       \name{author}{4}{}{%
@@ -224,6 +398,147 @@
       \field{title}{The atlas of North American English: Phonetics, phonology and sound change}
       \field{year}{2008}
     \endentry
+    \entry{raffel2019exploring}{article}{}
+      \name{author}{9}{}{%
+        {{uniquename=0,uniquepart=base,hash=81a5a94e2388c149a73a86381db45e07}{%
+           family={Raffel},
+           familyi={R\bibinitperiod},
+           given={Colin},
+           giveni={C\bibinitperiod},
+           givenun=0}}%
+        {{uniquename=0,uniquepart=base,hash=62efade83d70f0323fe248755e6c90c5}{%
+           family={Shazeer},
+           familyi={S\bibinitperiod},
+           given={Noam},
+           giveni={N\bibinitperiod},
+           givenun=0}}%
+        {{uniquename=0,uniquepart=base,hash=243c03e5ae8031582d6af9fcbc70f629}{%
+           family={Roberts},
+           familyi={R\bibinitperiod},
+           given={Adam},
+           giveni={A\bibinitperiod},
+           givenun=0}}%
+        {{uniquename=0,uniquepart=base,hash=bfca12eba160cc79988e61b7fb6ded42}{%
+           family={Lee},
+           familyi={L\bibinitperiod},
+           given={Katherine},
+           giveni={K\bibinitperiod},
+           givenun=0}}%
+        {{uniquename=0,uniquepart=base,hash=a2da348cbbad750c6fe76dda9c35ffcd}{%
+           family={Narang},
+           familyi={N\bibinitperiod},
+           given={Sharan},
+           giveni={S\bibinitperiod},
+           givenun=0}}%
+        {{uniquename=0,uniquepart=base,hash=2ce97dc1ae3d554bd748423ad06453df}{%
+           family={Matena},
+           familyi={M\bibinitperiod},
+           given={Michael},
+           giveni={M\bibinitperiod},
+           givenun=0}}%
+        {{uniquename=0,uniquepart=base,hash=83a9e81d976cada23775106b303c4247}{%
+           family={Zhou},
+           familyi={Z\bibinitperiod},
+           given={Yanqi},
+           giveni={Y\bibinitperiod},
+           givenun=0}}%
+        {{uniquename=0,uniquepart=base,hash=be6f1b6df7f1ddfafad18806238fa391}{%
+           family={Li},
+           familyi={L\bibinitperiod},
+           given={Wei},
+           giveni={W\bibinitperiod},
+           givenun=0}}%
+        {{uniquename=0,uniquepart=base,hash=0036e6d3cc81ea25ad9f66ff19391e3b}{%
+           family={Liu},
+           familyi={L\bibinitperiod},
+           given={Peter\bibnamedelima J},
+           giveni={P\bibinitperiod\bibinitdelim J\bibinitperiod},
+           givenun=0}}%
+      }
+      \strng{namehash}{93aba8e9bb746e2d8ac216494b952014}
+      \strng{fullhash}{6374f41959aaa30f4ea6b209fc1611b3}
+      \strng{bibnamehash}{93aba8e9bb746e2d8ac216494b952014}
+      \strng{authorbibnamehash}{93aba8e9bb746e2d8ac216494b952014}
+      \strng{authornamehash}{93aba8e9bb746e2d8ac216494b952014}
+      \strng{authorfullhash}{6374f41959aaa30f4ea6b209fc1611b3}
+      \field{sortinit}{R}
+      \field{sortinithash}{da6b42bd3ab22fee61abed031ee405f7}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{year}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{arXiv preprint arXiv:1910.10683}
+      \field{title}{Exploring the limits of transfer learning with a unified text-to-text transformer}
+      \field{year}{2019}
+    \endentry
+    \entry{schmidhuber2015deep}{article}{}
+      \name{author}{1}{}{%
+        {{uniquename=0,uniquepart=base,hash=1bcbd82d7c2dc8000e44f70ed775668f}{%
+           family={Schmidhuber},
+           familyi={S\bibinitperiod},
+           given={J{ü}rgen},
+           giveni={J\bibinitperiod},
+           givenun=0}}%
+      }
+      \list{publisher}{1}{%
+        {Elsevier}%
+      }
+      \strng{namehash}{1bcbd82d7c2dc8000e44f70ed775668f}
+      \strng{fullhash}{1bcbd82d7c2dc8000e44f70ed775668f}
+      \strng{bibnamehash}{1bcbd82d7c2dc8000e44f70ed775668f}
+      \strng{authorbibnamehash}{1bcbd82d7c2dc8000e44f70ed775668f}
+      \strng{authornamehash}{1bcbd82d7c2dc8000e44f70ed775668f}
+      \strng{authorfullhash}{1bcbd82d7c2dc8000e44f70ed775668f}
+      \field{sortinit}{S}
+      \field{sortinithash}{322b1d5276f2f6c1bccdcd15920dbee6}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{year}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{Neural networks}
+      \field{title}{Deep learning in neural networks: An overview}
+      \field{volume}{61}
+      \field{year}{2015}
+      \field{pages}{85\bibrangedash 117}
+      \range{pages}{33}
+    \endentry
+    \entry{sharir2020cost}{article}{}
+      \name{author}{3}{}{%
+        {{uniquename=0,uniquepart=base,hash=87e1c472f5276321c3882f78a97c8c91}{%
+           family={Sharir},
+           familyi={S\bibinitperiod},
+           given={Or},
+           giveni={O\bibinitperiod},
+           givenun=0}}%
+        {{uniquename=0,uniquepart=base,hash=c5a17bf0e2d3db0f009db795a9dc0ef7}{%
+           family={Peleg},
+           familyi={P\bibinitperiod},
+           given={Barak},
+           giveni={B\bibinitperiod},
+           givenun=0}}%
+        {{uniquename=0,uniquepart=base,hash=774e2e16526f33f383bed004b13bf326}{%
+           family={Shoham},
+           familyi={S\bibinitperiod},
+           given={Yoav},
+           giveni={Y\bibinitperiod},
+           givenun=0}}%
+      }
+      \strng{namehash}{834ff398879df3e075790fdd14f9a4cf}
+      \strng{fullhash}{834ff398879df3e075790fdd14f9a4cf}
+      \strng{bibnamehash}{834ff398879df3e075790fdd14f9a4cf}
+      \strng{authorbibnamehash}{834ff398879df3e075790fdd14f9a4cf}
+      \strng{authornamehash}{834ff398879df3e075790fdd14f9a4cf}
+      \strng{authorfullhash}{834ff398879df3e075790fdd14f9a4cf}
+      \field{sortinit}{S}
+      \field{sortinithash}{322b1d5276f2f6c1bccdcd15920dbee6}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{year}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{arXiv preprint arXiv:2004.08900}
+      \field{title}{The Cost of Training NLP Models: A Concise Overview}
+      \field{year}{2020}
+    \endentry
     \entry{SASPWEB2011}{book}{}
       \name{author}{1}{}{%
         {{uniquename=0,uniquepart=base,hash=d4e614c8bb031ace758f4e6e9f538f89}{%
@@ -251,6 +566,34 @@
       \field{note}{online book, 2011 edition}
       \field{title}{Spectral Audio Signal Processing}
       \field{year}{accessed <date>}
+    \endentry
+    \entry{sokoloff1960metabolism}{article}{}
+      \name{author}{1}{}{%
+        {{uniquename=0,uniquepart=base,hash=ea76196def1cbd714ea5b13d9ff97678}{%
+           family={Sokoloff},
+           familyi={S\bibinitperiod},
+           given={Louis},
+           giveni={L\bibinitperiod},
+           givenun=0}}%
+      }
+      \strng{namehash}{ea76196def1cbd714ea5b13d9ff97678}
+      \strng{fullhash}{ea76196def1cbd714ea5b13d9ff97678}
+      \strng{bibnamehash}{ea76196def1cbd714ea5b13d9ff97678}
+      \strng{authorbibnamehash}{ea76196def1cbd714ea5b13d9ff97678}
+      \strng{authornamehash}{ea76196def1cbd714ea5b13d9ff97678}
+      \strng{authorfullhash}{ea76196def1cbd714ea5b13d9ff97678}
+      \field{sortinit}{S}
+      \field{sortinithash}{322b1d5276f2f6c1bccdcd15920dbee6}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{year}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{Handbook of Physiology, section, I, Neurophysiology}
+      \field{title}{The metabolism of the central nervous system in vivo}
+      \field{volume}{3}
+      \field{year}{1960}
+      \field{pages}{1843\bibrangedash 64}
+      \range{pages}{22}
     \endentry
     \entry{stevens1937scale}{article}{}
       \name{author}{3}{}{%

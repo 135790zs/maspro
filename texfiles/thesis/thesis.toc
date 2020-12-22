@@ -3,16 +3,51 @@
 \defcounter {refsection}{0}\relax 
 \vspace {-\cftbeforepartskip }
 \babel@toc {american}{}
-\contentsline {chapter}{\numberline {1}{Method}}{1}{chapter.1}
-\contentsline {section}{\numberline {1.1}{Data Preprocessing}}{1}{section.1.1}
-\contentsline {subsection}{\numberline {1.1.1}{The TIMIT speech corpus}}{1}{subsection.1.1.1}
-\contentsline {subsection}{\numberline {1.1.2}{Engineering features}}{2}{subsection.1.1.2}
-\contentsline {paragraph}{{Pre-emphasis}}{2}{paragraph*.4}
-\contentsline {paragraph}{{Framing}}{2}{paragraph*.6}
-\contentsline {paragraph}{{Short-term power spectra}}{4}{paragraph*.9}
-\contentsline {paragraph}{{Mel filterbank}}{4}{paragraph*.13}
-\contentsline {paragraph}{{Mel-frequency cepstral coefficients}}{5}{paragraph*.16}
-\contentsline {paragraph}{{Target output}}{6}{paragraph*.20}
-\contentsline {chapter}{\numberline {A}{Appendix}}{9}{appendix.A}
+\contentsline {chapter}{\numberline {1}{Introduction}}{1}{chapter.1}
+\contentsline {chapter}{\numberline {2}{Related work}}{5}{chapter.2}
+\contentsline {section}{\numberline {2.1}{Three-factor Hebbian learning}}{5}{section.2.1}
+\contentsline {subsection}{\numberline {2.1.1}{Spike-timing dependent plasticity}}{6}{subsection.2.1.1}
+\contentsline {subsection}{\numberline {2.1.2}{Learning signal}}{7}{subsection.2.1.2}
+\contentsline {subsubsection}{\numberline {2.1.2.1}{Broadcasting}}{7}{subsubsection.2.1.2.1}
+\contentsline {subsection}{\numberline {2.1.3}{Eligibility traces}}{8}{subsection.2.1.3}
+\contentsline {section}{\numberline {2.2}{Eligibility Propagation}}{9}{section.2.2}
+\contentsline {subsection}{\numberline {2.2.1}{Network model}}{9}{subsection.2.2.1}
+\contentsline {subsection}{\numberline {2.2.2}{Neuron models}}{10}{subsection.2.2.2}
+\contentsline {subsection}{\numberline {2.2.3}{Learning procedure}}{11}{subsection.2.2.3}
+\contentsline {subsection}{\numberline {2.2.4}{Deriving e-prop from RNNs}}{12}{subsection.2.2.4}
+\contentsline {section}{\numberline {2.3}{Synaptic scaling}}{13}{section.2.3}
+\contentsline {section}{\numberline {2.4}{Metaplasticity}}{14}{section.2.4}
+\contentsline {section}{\numberline {2.5}{Network topology}}{15}{section.2.5}
+\contentsline {chapter}{\numberline {3}{Method}}{17}{chapter.3}
+\contentsline {section}{\numberline {3.1}{Data Preprocessing}}{17}{section.3.1}
+\contentsline {subsection}{\numberline {3.1.1}{The TIMIT speech corpus}}{17}{subsection.3.1.1}
+\contentsline {subsection}{\numberline {3.1.2}{Data splitting}}{18}{subsection.3.1.2}
+\contentsline {subsection}{\numberline {3.1.3}{Engineering features}}{18}{subsection.3.1.3}
+\contentsline {paragraph}{{Pre-emphasis}}{19}{paragraph*.4}
+\contentsline {paragraph}{{Framing}}{19}{paragraph*.6}
+\contentsline {paragraph}{{Short-term power spectra}}{20}{paragraph*.9}
+\contentsline {paragraph}{{Mel filterbank}}{21}{paragraph*.13}
+\contentsline {paragraph}{{Mel-frequency cepstral coefficients}}{22}{paragraph*.17}
+\contentsline {paragraph}{{Target output}}{23}{paragraph*.23}
+\contentsline {section}{\numberline {3.2}{Enhancing e-prop}}{24}{section.3.2}
+\contentsline {subsection}{\numberline {3.2.1}{Multilayer architecture}}{25}{subsection.3.2.1}
+\contentsline {subsection}{\numberline {3.2.2}{Other neuron types}}{26}{subsection.3.2.2}
+\contentsline {subsubsection}{\numberline {3.2.2.1}{STDP-LIF}}{27}{subsubsection.3.2.2.1}
+\contentsline {subsubsection}{\numberline {3.2.2.2}{Izhikevich neuron}}{28}{subsubsection.3.2.2.2}
+\contentsline {section}{\numberline {3.3}{Regularization}}{29}{section.3.3}
+\contentsline {subsection}{\numberline {3.3.1}{Firing rate regularization}}{30}{subsection.3.3.1}
+\contentsline {subsection}{\numberline {3.3.2}{Ridge regression}}{31}{subsection.3.3.2}
+\contentsline {subsection}{\numberline {3.3.3}{Weight decay}}{31}{subsection.3.3.3}
+\contentsline {subsection}{\numberline {3.3.4}{Synaptic scaling}}{32}{subsection.3.3.4}
+\contentsline {subsection}{\numberline {3.3.5}{Metaplasticity}}{32}{subsection.3.3.5}
+\contentsline {section}{\numberline {3.4}{Synaptic delay}}{33}{section.3.4}
+\contentsline {section}{\numberline {3.5}{Bidirectional network}}{34}{section.3.5}
+\contentsline {section}{\numberline {3.6}{Optimizer}}{35}{section.3.6}
+\contentsline {section}{\numberline {3.7}{Learning rate annealing}}{36}{section.3.7}
+\contentsline {section}{\numberline {3.8}{Hyperparameter optimization}}{37}{section.3.8}
+\contentsline {chapter}{\numberline {4}{Results}}{40}{chapter.4}
+\contentsline {chapter}{\numberline {5}{Discussion}}{46}{chapter.5}
+\contentsline {chapter}{\numberline {6}{Conclusion}}{52}{chapter.6}
+\contentsline {chapter}{\numberline {A}{Appendix}}{55}{appendix.A}
 \vspace {\beforebibskip }
-\contentsline {chapter}{\numberline {}{Bibliography}}{11}{section*.24}
+\contentsline {chapter}{\numberline {}{Bibliography}}{57}{section*.27}

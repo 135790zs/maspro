@@ -5,27 +5,27 @@ cfg = {
     "optimizer": 'Adam',  # in {Adam, SGD}
     "traub_trick": False,
     "fraction_ALIF": 1,  # def 0.25
-    "n_directions": 2,
+    "n_directions": 1,
     "delay": 0,
 
-    "rho": .995,  # Depends on length of task: working memory. TIMIT= .995
-    "alpha": 0.95,  # TIMIT: .95
-    "kappa": 0.717,  # TIMIT: .717
-    "beta": 0.184,    # TIMIT: 0.184
-    "gamma": 0.3,     # Pseudoderivative ET contribution
-    "eta_b_out": None,  # Initial learning rate (1e-2 for TIMIT)
-    "eta_init": 1e-2,   # Initial learning rate (1e-2 for TIMIT)
-    "eta_slope": 1/4,      # Slope defining relation between Verr and eta (1e-2 for TIMIT)
-    "eta_init_loss": 5,  # 0 to disable annealing. This is the cap below which annealing to 0 takes place linearly.
-    "thr": 1.6,        # Spike threshold, def = 1.6 or 0.61
-    "dt_refr": 2,    # Refractory time, def = 2
-    "weight_decay": 1e-2,  # For W_out and B, only if adaptive. def = 1e-2
-    "L2_reg": 1e-5,  # 1e-5 for TIMIT
-    "FR_target": 0.01,  # 0.01 for TIMIT
-    "FR_reg": 50,  # 50 for TIMIT (or 0.5?)
+    "alpha": exp(-1/20),  # Bellec1: 20 = 0.951
+    "rho": exp(-1/200),  # Bellec1: 200 = 0.995
+    "kappa": exp(-1/3),  # Bellec1: 3 = 0.717
+    "beta": 1.8,    # Bellec1: 1.8. Bellec2: "order of 0.07"
+    "gamma": 0.3,     # Bellecs: 0.3.
+    "eta_b_out": None,  # Constant
+    "eta_init": 1e-2,   # Bellecs: 1e-2
+    "eta_slope": 2,      # Slope defining relation between Verr and eta (1e-2 for TIMIT)
+    "eta_init_loss": 6,  # 0 to disable annealing. This is the cap below which annealing to 0 takes place linearly.
+    "thr": 1,        # Bellec1: unknown. Bellec2:
+    "dt_refr": 2,    # Bellec1: 2
+    "weight_decay": 0,  # Bellec1: 0. Bellec2: 1e-2. For W_out and B, only if adaptive.
+    "L2_reg": 1e-5,  # Bellec1: 0. Bellec2: 1e-5
+    "FR_target": 0.01,  # Bellecs: 0.01
+    "FR_reg": 20,  # Bellec1: 1. Bellec2: 50.
     "dropout": 0.8,  # of recurrent (excl inputs)
-    # "softmax_factor": 1,  # TODO
-    "weight_scaling": 1,
+    "softmax_factor": 1,  # Bellecs: 1
+    "weight_scaling": 1,  # Bellecs: 1
     "adam_beta1": 0.95,
     "adam_beta2": 0.999,
     "adam_eps": 1e-5,
@@ -38,26 +38,26 @@ cfg = {
     "one_to_one_output": False,
     "update_dead_weights": False,
 
-    "N_R": 400,
+    "N_R": 128,
     "N_Rec": 1,
 
     "task": "TIMIT",
     "wavs_fname": "../data/data_wavs",
     "phns_fname": "../data/data_phns",
 
-    "Epochs": 200,  # def = 80
+    "Epochs": 20,  # def = 80
     "Track_weights": True,
     "Track_synapse": False,  # Only for synapse vars
     "Repeats": 5,  # ms per epoch, def = 5
-    "batch_size_train": 16,  # def = 32
-    "batch_size_val": 16,  # def = 32
+    "batch_size_train": 4,  # def = 32
+    "batch_size_val": 4,  # def = 32
     "batch_size_test": 32,  # def = 32
-    "val_every_E": 5,
+    "val_every_E": 8,
     "maxlen": 778,  #def 778, Don't forget to re-run process_timit.py!
+    "TIMIT_derivative": 2,
     "n_examples": {'train': 3696, 'val': 400, 'test': 192},
     # "n_examples": {'train': 1, 'val': 1, 'test': 1},
-    "TIMIT_derivative": 2,
-    "plot_interval": 2,  #  State plot; 0 to disable plots
+    "plot_interval": 10,  #  State plot; 0 to disable plots
     "state_save_interval": 10,
     "plot_main": True,
     "plot_state": True,
@@ -68,7 +68,7 @@ cfg = {
     "pre_emphasis": 0.97,
     "nfilt": 26,
     "NFFT": 512,
-    "num_ceps": 12,
+    "num_ceps": 13,
     "cep_lifter": 22,
 }
 

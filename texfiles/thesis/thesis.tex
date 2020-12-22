@@ -14,6 +14,7 @@
 \usepackage{todonotes} %
 \usepackage{siunitx} %
 \usepackage{amssymb} %
+\usepackage{tcolorbox} %
 %\hyphenation{put special hyphenation here}
 
 \begin{document}
@@ -49,11 +50,12 @@
 \cleardoublepage
 
 
-% \include{Chapters/Chapter01}
+\include{Chapters/Chapter01}
 \include{Chapters/Chapter02}
-% \include{Chapters/Chapter03}
-% \include{Chapters/Chapter04}
-% \include{Chapters/Chapter05}
+\include{Chapters/Chapter03}
+\include{Chapters/Chapter04}
+\include{Chapters/Chapter05}
+\include{Chapters/Chapter06}
 
 
 % ********************************************************************
@@ -75,30 +77,50 @@
 % ********************************************************************
 
 STRUCTURE
-* Introduction
-  - Introduction in the field
-    - Start with something human and concrete: learning in the brain.
-  - SOTA
-    - Brief walk-through of most relevant papers, look into my own lit review
+* INTRODUCTION (no maths/explanation in this section, just overview/intuition)
+  - Long goal to emulate human intelligence in artificial substrates. (keep this brief! Only for grabbing attention)
+    - Trend from symbolic/behaviorist to bioplausible.
+  - Comparison ANNs/SNNs
+    - DL approximates human performance in some areas
+    - However, it's based on implausible learning methods.
+    - It also comes with high energy and data costs, unlike the human brain.
+    - Small intuitive explanation of BPTT.
+    - Human brain uses recurrent spiking networks.
+    - Neuromorphic computing is parallel, material-based. Logical next step in bioplausibility trend. Brief explanation.
+    - However, no learning algorithm exists that approximates human performance. Neuromorphic computing also has no good learning algorithm yet.
+  - Brief historical overview of 3F-Hebbian (use my own literature trace)
+    - Explain 3F-Hebbian (mention bioplausibility: online & local)
+  - E-prop approximates BPTT using RSNNs by using eligibility traces and learning signals. Also mathematical link (only intuition!)
+  - This paper examines the effects of enhancements that may improve the performance of e-prop. Some of these are used succesfully in DL. (Argue scientifically why these might improve performance)
+    - Multilayer. Mention how MLPs were breakthrough on perceptrons.
+    - Other neuron types
+    - Regularization that's also observed in brain (e.g. synaptic scaling)
 
-  - Artificial spiking neurons inspired by brain neurons (as in Bellec intro p1). Various theoretical advantages over ANNs.
-  - Unclear how RSNNs can learn. In hope of crudely emulating biological neural circuits, try online, local and bioplausible method.
-  - E-prop uses bio-inspired (which) methods that allow for online, local, bioplausible training and have shown to yield good results.
-  - However, real neurons are stacked in layers. This paper generalizes e-prop to multiple layers. (short parallel to perceptrons vs, MLPs? will need some theoretical analysis like MLPs could nonlinearly separate. Time dynamics maybe?)
-  - Increasing relevance for neuromorphic computing
-  - ... synaptic scaling, Izhikevich etc will depend on whether it is implemented.
 
-* RELATED WORK
-  - Eligibility Propagation (basics, as in Bellec)
-    - Three-factor Hebbian Learning
-      - Learning signal
-        - Biological plausilibity, (how does it happen in brain?)
-      - Broadcasting methods
-      - Eligibility trace
-        - Why?
-        - Bioplausibility
+* RELATED WORK (maths/explanation of existing things)
+  - Three-factor Hebbian Learning
+    - STDP
+      - Clopath rule
+      - R-STDP
+    - Learning signal
+      - Biological plausilibity, (how does it happen in brain?)
+      - Error-related negativity (see Bellec1)
+    - Broadcasting methods
+      - Broadcast alignment (see Bellec1)
+    - Eligibility trace
+      - Why?
+      - Bioplausibility
+  - E-prop algorithm (only what's used)
+    - Network model (formal, see Bellec)
+    - Neuron models
+    - Learning procedure
+      - Neuron variables
+      - Synapse variables
     - Derivation from RNN and backprop.
-    - E-prop algorithm (LIF or ALIF depends on what's used in final model). Only describe what I use (e.g. no symmetric eprop or SGD)
+  - Synaptic Scaling (in brain, if applicable)
+  - Metaplasticity (in brain, if applicable)
+  - Network topology (but keep relevant)
+
 
 * METHOD
   - Data Preprocessing
@@ -108,35 +130,38 @@ STRUCTURE
       - MFCCs
   - Extending the E-prop framework
     - Generalizing to multiple layers
-    - Using Izhikevich neurons
     - Using STDP-LIF
-  - Hyperparameter optimization procedure
+    - Using Izhikevich neurons
   - Regularization
     - FR
     - L2
     - Weight decay
   - Adam
-  - Learning rate annealing
+  - Synaptic delay (if applicable)
   - Bidirectional network (if applicable)
-  - Traub or Bellec reset (if applicable)
+  - Learning rate annealing
+  - Hyperparameter optimization procedure
+    - Explanation of Bayesian optimization (with illustration, preferably of own data)
 
 
 * RESULTS
   - Comparing single-layer and multilayer architecture. Some of the following. Explain and visualize!
     - Accuracy
     - Tradeoffs between network size and accuracy (not necessarily same hparams)
-    - Time dynamics
+    - Time/manifold dynamics
     - Effects of parameter changes and freezing of certain weights.
-    - Manifold dynamics
     - Energy
     - Robustness (initialization, data, and hparam).
     - Practicality (e.g. running cost in-sim or in-mat, AER options)
 
 * DISCUSSION
   - Try link/explain results with existing research. Show knowledge of the field.
+  - Advantages of e-prop RSNN
+    - Computational cost of backprop vs BA.
   - Link to R-STDP with Traub fix -> section on biological plausibility and analogies. Three-factor Hebbian learning.
   - Neuromorphic computing applications for benefits (parallelization, energy cost).
   - Maybe: if manifolds of phones, then hypothesize on self-symbolizing (as in Hofstadter). Try to link my own hypotheses to scientific evidence. Keep it relevant to the rest of the paper.
+  - Trend to bioplausibility -?-> artificial consciousness? Cite!
   - Future research (also ask Herbert)
 
 * CONCLUSION
@@ -151,3 +176,17 @@ STRUCTURE
 
 
 =================
+
+[Direct proof]
+<Indirect proof>
+(Only assert)
+
+TALKING POINTS I COULD USE:
+
+* INTRODUCTION
+  - Brain is different from deep ANNs <Bellec1>
+  - RNNs superior for temporal dimension (Bellec1)
+  - BPTT is implausible for neuromorphic (Bellec1)
+  - Three-factor Hebbian learning in RSNN is competitive with BPTT [Bellec1]
+  - E-prop better RSNN learning performance than previously known methods [Bellec1]
+  -

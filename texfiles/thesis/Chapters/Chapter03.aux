@@ -1,29 +1,119 @@
 \relax 
 \providecommand\hyper@newdestlabel[2]{}
-\@writefile{lof}{\defcounter {refsection}{0}\relax }\@writefile{lof}{\ttl@tocsep }
-\@writefile{lot}{\defcounter {refsection}{0}\relax }\@writefile{lot}{\ttl@tocsep }
-\def\mph@nr{1}
-\@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {chapter}{\numberline {1}{Results}}{1}{chapter.1}}
-\newlabel{ch:results}{{1}{1}{}{chapter.1}{}}
-\mph@setcol{ii:1}{\mph@nr}
+\mph@setcol{ii:16}{\mph@nr}
+\@writefile{lof}{\ttl@tocsep }
+\@writefile{lot}{\ttl@tocsep }
+\def\mph@nr{3}
+\@writefile{toc}{\contentsline {chapter}{\numberline {3}{Method}}{17}{chapter.3}}
+\newlabel{ch:method}{{3}{17}{Network topology}{chapter.3}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {3.1}{Data Preprocessing}}{17}{section.3.1}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.1.1}{The TIMIT speech corpus}}{17}{subsection.3.1.1}}
+\@writefile{lot}{\contentsline {table}{\numberline {3.1}{\ignorespaces TIMIT Dialect Regions}}{17}{table.caption.1}}
+\providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
+\newlabel{tab:dialects}{{3.1}{17}{TIMIT Dialect Regions}{table.caption.1}{}}
+\mph@setcol{ii:17}{\mph@nr}
+\@writefile{lot}{\contentsline {table}{\numberline {3.2}{\ignorespaces TIMIT Sentence Types}}{18}{table.caption.2}}
+\newlabel{tab:types}{{3.2}{18}{TIMIT Sentence Types}{table.caption.2}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.1.2}{Data splitting}}{18}{subsection.3.1.2}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.1.3}{Engineering features}}{18}{subsection.3.1.3}}
+\mph@setcol{ii:18}{\mph@nr}
+\newlabel{fig:signal}{{\caption@xref {fig:signal}{ on input line 86}}{19}{Engineering features}{figure.caption.3}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3.1}{\ignorespaces A raw waveform signal from the TIMIT dataset.\relax }}{19}{figure.caption.3}}
+\@writefile{toc}{\contentsline {paragraph}{{Pre-emphasis}}{19}{paragraph*.4}}
+\newlabel{eq:pre_emphasis}{{3.1}{19}{Pre-emphasis}{equation.3.1.1}{}}
+\newlabel{fig:signalemph}{{\caption@xref {fig:signalemph}{ on input line 102}}{19}{Pre-emphasis}{figure.caption.5}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3.2}{\ignorespaces Pre-emphasis}}{19}{figure.caption.5}}
+\@writefile{toc}{\contentsline {paragraph}{{Framing}}{19}{paragraph*.6}}
+\mph@setcol{ii:19}{\mph@nr}
+\newlabel{fig:hamming}{{\caption@xref {fig:hamming}{ on input line 130}}{20}{Framing}{figure.caption.7}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3.3}{\ignorespaces The magnitudes of the DFT of a frame.\relax }}{20}{figure.caption.7}}
+\@writefile{tdo}{\contentsline {todo}{plot for illustration}{20}{section*.8}}
+\def\mph@nr{4}
+\@writefile{toc}{\contentsline {paragraph}{{Short-term power spectra}}{20}{paragraph*.9}}
+\@writefile{tdo}{\contentsline {todo}{don't bother with eqn, just call mathbb(F)}{20}{section*.10}}
+\def\mph@nr{5}
+\newlabel{eq:magframes}{{3.3}{20}{Short-term power spectra}{equation.3.1.3}{}}
+\newlabel{eq:powframes}{{3.4}{20}{Short-term power spectra}{equation.3.1.4}{}}
+\mph@setcol{ii:20}{\mph@nr}
+\newlabel{fig:magframes}{{\caption@xref {fig:magframes}{ on input line 147}}{21}{Short-term power spectra}{figure.caption.11}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3.4}{\ignorespaces The magnitudes of the DFT of a frame.\relax }}{21}{figure.caption.11}}
+\newlabel{fig:powframes}{{\caption@xref {fig:powframes}{ on input line 161}}{21}{Short-term power spectra}{figure.caption.12}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3.5}{\ignorespaces A power spectrum of a frame.\relax }}{21}{figure.caption.12}}
+\@writefile{toc}{\contentsline {paragraph}{{Mel filterbank}}{21}{paragraph*.13}}
+\mph@setcol{ii:21}{\mph@nr}
+\@writefile{tdo}{\contentsline {todo}{not sure}{22}{section*.14}}
+\def\mph@nr{6}
+\newlabel{fig:filterbank}{{\caption@xref {fig:filterbank}{ on input line 212}}{22}{Mel filterbank}{figure.caption.15}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3.6}{\ignorespaces The Mel-spaced filterbanks.\relax }}{22}{figure.caption.15}}
+\newlabel{fig:spectrogram}{{\caption@xref {fig:spectrogram}{ on input line 221}}{22}{Mel filterbank}{figure.caption.16}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3.7}{\ignorespaces An example of a spectrogram.\relax }}{22}{figure.caption.16}}
+\@writefile{toc}{\contentsline {paragraph}{{Mel-frequency cepstral coefficients}}{22}{paragraph*.17}}
+\@writefile{tdo}{\contentsline {todo}{why?}{22}{section*.18}}
+\def\mph@nr{7}
+\mph@setcol{ii:22}{\mph@nr}
+\@writefile{tdo}{\contentsline {todo}{do we take absolute?}{23}{section*.19}}
+\def\mph@nr{8}
+\newlabel{eq:magframes}{{3.9}{23}{Mel-frequency cepstral coefficients}{equation.3.1.9}{}}
+\@writefile{tdo}{\contentsline {todo}{source?}{23}{section*.20}}
+\def\mph@nr{9}
+\newlabel{fig:mfccs}{{\caption@xref {fig:mfccs}{ on input line 242}}{23}{Mel-frequency cepstral coefficients}{figure.caption.21}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3.8}{\ignorespaces An example of Mel-frequency cepstral coefficients that are given as input to the system.\relax }}{23}{figure.caption.21}}
+\@writefile{tdo}{\contentsline {todo}{better wording: re-approximate?}{23}{section*.22}}
+\def\mph@nr{10}
+\@writefile{toc}{\contentsline {paragraph}{{Target output}}{23}{paragraph*.23}}
+\@writefile{tdo}{\contentsline {todo}{side-by-side with original text and phonemes, label as fig:source\_mfcc\_target}{23}{section*.24}}
+\def\mph@nr{11}
+\mph@setcol{ii:23}{\mph@nr}
+\newlabel{fig:source_mfcc_target}{{\caption@xref {fig:source_mfcc_target}{ on input line 272}}{24}{Target output}{figure.caption.25}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3.9}{\ignorespaces An alignment of a sample signal with its MFCCs and target phones.\relax }}{24}{figure.caption.25}}
+\@writefile{toc}{\contentsline {section}{\numberline {3.2}{Enhancing e-prop}}{24}{section.3.2}}
+\mph@setcol{ii:24}{\mph@nr}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.2.1}{Multilayer architecture}}{25}{subsection.3.2.1}}
+\mph@setcol{ii:25}{\mph@nr}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.2.2}{Other neuron types}}{26}{subsection.3.2.2}}
+\mph@setcol{ii:26}{\mph@nr}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.2.2.1}{STDP-LIF}}{27}{subsubsection.3.2.2.1}}
+\mph@setcol{ii:27}{\mph@nr}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.2.2.2}{Izhikevich neuron}}{28}{subsubsection.3.2.2.2}}
+\mph@setcol{ii:28}{\mph@nr}
+\@writefile{toc}{\contentsline {section}{\numberline {3.3}{Regularization}}{29}{section.3.3}}
+\mph@setcol{ii:29}{\mph@nr}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.3.1}{Firing rate regularization}}{30}{subsection.3.3.1}}
+\mph@setcol{ii:30}{\mph@nr}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.3.2}{Ridge regression}}{31}{subsection.3.3.2}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.3.3}{Weight decay}}{31}{subsection.3.3.3}}
+\mph@setcol{ii:31}{\mph@nr}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.3.4}{Synaptic scaling}}{32}{subsection.3.3.4}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.3.5}{Metaplasticity}}{32}{subsection.3.3.5}}
+\mph@setcol{ii:32}{\mph@nr}
+\@writefile{toc}{\contentsline {section}{\numberline {3.4}{Synaptic delay}}{33}{section.3.4}}
+\mph@setcol{ii:33}{\mph@nr}
+\@writefile{toc}{\contentsline {section}{\numberline {3.5}{Bidirectional network}}{34}{section.3.5}}
+\mph@setcol{ii:34}{\mph@nr}
+\@writefile{toc}{\contentsline {section}{\numberline {3.6}{Optimizer}}{35}{section.3.6}}
+\mph@setcol{ii:35}{\mph@nr}
+\@writefile{toc}{\contentsline {section}{\numberline {3.7}{Learning rate annealing}}{36}{section.3.7}}
+\mph@setcol{ii:36}{\mph@nr}
+\@writefile{toc}{\contentsline {section}{\numberline {3.8}{Hyperparameter optimization}}{37}{section.3.8}}
+\mph@setcol{ii:37}{\mph@nr}
 \@setckpt{Chapters/Chapter03}{
-\setcounter{page}{2}
-\setcounter{equation}{0}
-\setcounter{enumi}{0}
+\setcounter{page}{38}
+\setcounter{equation}{9}
+\setcounter{enumi}{5}
 \setcounter{enumii}{0}
 \setcounter{enumiii}{0}
 \setcounter{enumiv}{0}
 \setcounter{footnote}{0}
 \setcounter{mpfootnote}{0}
 \setcounter{part}{0}
-\setcounter{chapter}{1}
-\setcounter{section}{0}
+\setcounter{chapter}{3}
+\setcounter{section}{8}
 \setcounter{subsection}{0}
 \setcounter{subsubsection}{0}
 \setcounter{paragraph}{0}
 \setcounter{subparagraph}{0}
-\setcounter{figure}{0}
-\setcounter{table}{0}
+\setcounter{figure}{9}
+\setcounter{table}{2}
 \setcounter{tabx@nest}{0}
 \setcounter{listtotal}{0}
 \setcounter{listcount}{0}
@@ -33,7 +123,7 @@
 \setcounter{citetotal}{0}
 \setcounter{multicitecount}{0}
 \setcounter{multicitetotal}{0}
-\setcounter{instcount}{0}
+\setcounter{instcount}{16}
 \setcounter{maxnames}{3}
 \setcounter{minnames}{1}
 \setcounter{maxitems}{3}
@@ -133,8 +223,6 @@
 \setcounter{smartand}{1}
 \setcounter{bbx:relatedcount}{0}
 \setcounter{bbx:relatedtotal}{0}
-\setcounter{cbx@tempcnta}{0}
-\setcounter{cbx@tempcntb}{0}
 \setcounter{parentequation}{0}
 \setcounter{ContinuedFloat}{0}
 \setcounter{KVtest}{0}
@@ -147,9 +235,11 @@
 \setcounter{lstnumber}{1}
 \setcounter{listings}{0}
 \setcounter{loldepth}{1}
-\setcounter{Item}{0}
-\setcounter{bookmark@seq@number}{6}
-\setcounter{@todonotes@numberoftodonotes}{0}
+\setcounter{Item}{5}
+\setcounter{bookmark@seq@number}{38}
+\setcounter{@todonotes@numberoftodonotes}{8}
+\setcounter{tcbbreakpart}{1}
+\setcounter{tcblayer}{0}
 \setcounter{lstlisting}{0}
 \setcounter{section@level}{0}
 }

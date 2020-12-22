@@ -1924,13 +1924,22 @@
     <bcf:datasource type="file" datatype="bibtex">Bibliography.bib</bcf:datasource>
   </bcf:bibdata>
   <bcf:section number="0">
-    <bcf:citekey order="1">garofolo1993darpa</bcf:citekey>
-    <bcf:citekey order="2">labov2008atlas</bcf:citekey>
-    <bcf:citekey order="3">kucera1967computational</bcf:citekey>
-    <bcf:citekey order="4">hultzsch1964tables</bcf:citekey>
-    <bcf:citekey order="5">fayek2016</bcf:citekey>
-    <bcf:citekey order="6">SASPWEB2011</bcf:citekey>
-    <bcf:citekey order="7">stevens1937scale</bcf:citekey>
+    <bcf:citekey order="1">schmidhuber2015deep</bcf:citekey>
+    <bcf:citekey order="2">hubel1968receptive</bcf:citekey>
+    <bcf:citekey order="3">raffel2019exploring</bcf:citekey>
+    <bcf:citekey order="4">sharir2020cost</bcf:citekey>
+    <bcf:citekey order="5">sokoloff1960metabolism</bcf:citekey>
+    <bcf:citekey order="6">hopfield1982neural</bcf:citekey>
+    <bcf:citekey order="7">bellec2020solution</bcf:citekey>
+    <bcf:citekey order="8">garofolo1993darpa</bcf:citekey>
+    <bcf:citekey order="9">labov2008atlas</bcf:citekey>
+    <bcf:citekey order="10">kucera1967computational</bcf:citekey>
+    <bcf:citekey order="11">hultzsch1964tables</bcf:citekey>
+    <bcf:citekey order="12">graves2005framewise</bcf:citekey>
+    <bcf:citekey order="13">bellec2020solution</bcf:citekey>
+    <bcf:citekey order="14">fayek2016</bcf:citekey>
+    <bcf:citekey order="15">SASPWEB2011</bcf:citekey>
+    <bcf:citekey order="16">stevens1937scale</bcf:citekey>
   </bcf:section>
   <!-- SORTING TEMPLATES -->
   <bcf:sortingtemplate name="nyt">

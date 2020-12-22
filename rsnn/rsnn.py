@@ -45,7 +45,7 @@ def network(cfg, inp, tar, W_rec, W_out, b_out, B, adamvars, eta):
         # Shared output layer, so step out of subnetwork loop.
         Ysum = np.sum(M['Y'][:, t], axis=0)
 
-        M['P'][t] = ut.eprop_P(Y=Ysum)
+        M['P'][t] = ut.eprop_P(cfg=cfg, Y=Ysum)
 
         M['Pmax'][t, M['P'][t].argmax()] = 1
 
@@ -71,7 +71,7 @@ def network(cfg, inp, tar, W_rec, W_out, b_out, B, adamvars, eta):
 
                 L_reg = (cfg["FR_reg"]
                          * (t/n_steps) * 0.5
-                         * rates - cfg["FR_target"])
+                         * (rates - cfg["FR_target"]))
                          # * np.einsum("rj, rji -> rj",
                          #             cfg["FR_target"] - rates,
                          #             M["ETbar"][s, curr_t]))
@@ -434,7 +434,7 @@ def main(cfg):
     print(f"\nTesting complete with CE loss {total_testerr:.3f} and error "
           f"rate {100*perc_wrong_test:.1f}%!\n")
 
-    return optVerr
+    return optVerr, perc_wrong_test
 
 
 if __name__ == "__main__":
