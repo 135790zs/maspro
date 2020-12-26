@@ -155,7 +155,7 @@ def initialize_weights(cfg, inp_size, tar_size):
 
     W["b_out"] = np.zeros(shape=(n_epochs,
                                  cfg["n_directions"],
-                                 tar_size,)) * 2 - 1
+                                 tar_size,))
 
     B_shape = (n_epochs,
                cfg["n_directions"],
@@ -532,18 +532,6 @@ def process_layer(cfg, M, t, s, r, W_rec):
                                      EVV=M['EVV'][s, curr_t, r],
                                      EVU=M['EVU'][s, curr_t, r])
 
-    # Update weights for next epoch
-    if not cfg["update_input_weights"]:
-        for var in ["EVV", "EVU", "ET"]:
-            M[var][s, curr_t, 0, :, :M[var].shape[4]//2] = 0
-
-    # # Update weights for next epoch. COSTLY
-    # if not cfg["update_dead_weights"]:
-    #     for var in ["EVV", "EVU", "ET"]:
-    #         M[var][s, curr_t, r, W_rec == 0] = 0
-    # mid = time.time()
-    # print("midAFTER", mid-start)
-
     M["Z_in"][s, t, r] = np.concatenate((Z_prev, M['Z'][s, t, r]))
 
 
@@ -558,13 +546,11 @@ def process_layer(cfg, M, t, s, r, W_rec):
 
     M['ETbar'][s, curr_t, r] = cfg["kappa"] * (M['ETbar'][s, prev_t, r] if t > 0 else 0) + M['ET'][s, curr_t, r]
 
-    # M['Zbar'][s, t, r] = eprop_lpfK(lpf=M['Zbar'][s, t-1, r] if t > 0 else 0,
-    #                                 x=M['Z'][s, t, r],
-    #                                 factor=cfg["kappa"])
     M['Zbar'][s, t, r] = cfg["kappa"] * (M['Zbar'][s, t-1, r] if t > 0 else 0) + M['Z'][s, t, r]
 
     if t != M[f"X{s}"].shape[0] - 1:
-        # Eligibility trace
+
+        # Eligibility vector
         M['EVV'][s, next_t, r] = eprop_EVV(cfg=cfg,
                                            EVV=M['EVV'][s, curr_t, r],
                                            Z_in=M["Z_in"][s, t, r],

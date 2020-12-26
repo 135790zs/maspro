@@ -112,6 +112,7 @@ def network(cfg, inp, tar, W_rec, W_out, b_out, B, adamvars, eta):
 def feed_batch(cfg, inps, tars, W_rec, W_out, b_out, eta, B, epoch, tvt_type, adamvars, e, log_id, start_time=None):
     batch_err = 0
     batch_perc_wrong = 0
+    spikerate = 0
 
     batch_gW = {
         'W': np.zeros(
@@ -180,6 +181,7 @@ def feed_batch(cfg, inps, tars, W_rec, W_out, b_out, eta, B, epoch, tvt_type, ad
 
         # Aggregate the mean batch error to the aggregator.
         # Dividing by batch size to get batch mean.
+        spikerate += np.mean(final_model["spikerate"]) / inps.shape[0]
         batch_err += np.mean(final_model["CE"]) / inps.shape[0]
         batch_perc_wrong += np.mean(
             np.max(np.abs(final_model["Pmax"] - final_model["T"]),
@@ -200,7 +202,8 @@ def feed_batch(cfg, inps, tars, W_rec, W_out, b_out, eta, B, epoch, tvt_type, ad
 
     if cfg["verbose"]:
         print(f"\t\tCE:      {batch_err:.3f},\n"
-              f"\t\t% wrong: {100*batch_perc_wrong:.1f}%")
+              f"\t\t% wrong: {100*batch_perc_wrong:.1f}%\n"
+              f"\t\tRate:    {1000*spikerate:.1f} Hz")
     return batch_err, batch_perc_wrong, batch_gW
 
 
