@@ -36,6 +36,7 @@ def weights_to_img(arr, is_binary=False):
 
 
 def plot_run(cfg, terrs, percs_wrong_t, verrs, percs_wrong_v, W, epoch, log_id, inp_size):
+
     labelpad = 35
     fontsize = 14
     fig = plt.figure(constrained_layout=False, figsize=(8, 16))
@@ -43,29 +44,32 @@ def plot_run(cfg, terrs, percs_wrong_t, verrs, percs_wrong_v, W, epoch, log_id, 
                            ncols=1, hspace=0.05)
     axs = []
 
-    for errs, label in [(terrs, "E_T"), (verrs, "E_V")]:
-        axs.append(fig.add_subplot(gsc[len(axs), :],
-                                   sharex=axs[0] if axs else None))
-        axs[-1].plot(errs[errs >= 0][:epoch])
-        axs[-1].grid()
-        axs[-1].set_yscale('log')
-        # axs[-1].set_ylim(0, np.max(errs[errs >= 0]) * 1.1)
-        axs[-1].set_ylabel(f"${label}$",
-                           rotation=0,
-                           labelpad=labelpad,
-                           fontsize=fontsize)
+    axs.append(fig.add_subplot(gsc[len(axs), :]))
 
-    for percs_wrong, label in [(percs_wrong_t, "% wrong T"),
-                               (percs_wrong_v, "% wrong V")]:
-        axs.append(fig.add_subplot(gsc[len(axs), :],
-                                   sharex=axs[0] if axs else None))
-        axs[-1].plot(percs_wrong[percs_wrong >= 0][:epoch]*100)
-        axs[-1].grid()
-        axs[-1].set_ylim(0, 120)
-        axs[-1].set_ylabel(label,
-                           rotation=0,
-                           labelpad=labelpad,
-                           fontsize=fontsize)
+    for errs, label in [(terrs, "Train"), (verrs, "Val")]:
+        axs[-1].plot(errs[errs >= 0][:epoch], label=label)
+        # axs[-1].set_ylim(0, np.max(errs[errs >= 0]) * 1.1)
+
+    axs[-1].set_ylabel(f"Cross-entropy",
+                       rotation=0,
+                       labelpad=labelpad,
+                       fontsize=fontsize)
+    axs[-1].grid()
+    axs[-1].legend()
+    axs[-1].set_yscale('log')
+
+    axs.append(fig.add_subplot(gsc[len(axs), :], sharex=axs[0]))
+    for percs_wrong, label in [(percs_wrong_t, "Train"),
+                               (percs_wrong_v, "Val")]:
+
+        axs[-1].plot(percs_wrong[percs_wrong >= 0][:epoch]*100, label=label)
+
+    axs[-1].set_ylabel(f"% mislabeled",
+                       rotation=0,
+                       labelpad=labelpad,
+                       fontsize=fontsize)
+    axs[-1].grid()
+    axs[-1].set_ylim(0, 120)
 
     if epoch >= 1 and cfg["Track_weights"]:
         for weight_type, weights in W.items():
@@ -171,10 +175,10 @@ def plot_run(cfg, terrs, percs_wrong_t, verrs, percs_wrong_v, W, epoch, log_id, 
     plt.close()
 
 
-def plot_state(cfg, M, B, W_rec, W_out, b_out, e, log_id, plot_weights=False):
+def plot_state(cfg, M, B, W_rec, W_out, b_out, e, log_id, plot_weights=True):
     S_plotvars = ["X", "I", "V", "H", "U", "Z", "Y", "L_std", "L_reg"]
     if cfg["Track_synapse"]:
-        S_plotvars = S_plotvars[:6] + ["EVV", "EVU", "ETbar"] + S_plotvars[6:]
+        S_plotvars = S_plotvars[:6] + ["EVV", "EVU", "ETbar", "gW"] + S_plotvars[6:]
 
     M_plotvars = ["P", "D", "Pmax", "T", "CE"]
     if cfg["n_directions"] > 1:

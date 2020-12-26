@@ -6,7 +6,6 @@ import vis
 
 
 def network(cfg, inp, tar, W_rec, W_out, b_out, B, adamvars, eta):
-
     inp = np.pad(array=inp, mode='edge', pad_width=((0, cfg["delay"]), (0, 0)))
 
     n_steps = inp.shape[0]
@@ -64,7 +63,15 @@ def network(cfg, inp, tar, W_rec, W_out, b_out, B, adamvars, eta):
         # Calculate weight updates for all subnetworks
         for s in range(cfg["n_directions"]):
             M['D'][t] = M['P'][t] - M['T'][t]
+            # print(B[s].shape, M['D'][t].shape)
             L_std = np.dot(B[s], M['D'][t])
+            # if t == 3:
+            #     print(B[s, 0, 0])
+            # print(np.mean(M['D'][t]), np.min(M['D'][t]), np.max(M['D'][t]))
+            #     print(L_std)
+            # print(M['D'][t])
+            # L_std = np.einsum("rjk, k -> rj", B[s], M['D'][t])
+
             if t:
                 rates = np.mean(M['Z'][s, :t], axis=0)
                 M['spikerate'][s, t] = rates
@@ -383,7 +390,7 @@ def main(cfg):
 
                 # "Global" is already next by definition.
 
-                if cfg["eprop_type"] in "random":
+                if cfg["eprop_type"] in ["global", "random"]:
                     W["B"][ep_curr+ep_incr, :] = W["B"][ep_curr, :]
 
                 elif cfg["eprop_type"] == "symmetric":

@@ -1,34 +1,32 @@
 
-# MUST DO:
+# TO DO (priority order):
+	# Reproduce Bellec  (37.1 wrongs on test)
+		* Identify weakness.
+	# Sweep (intelligently, and with low-capacity) only after reproducing
+	# Implement optional L2 weight decay
+	# Work on thesis
+	# Implement Izhikevich neurons
+	# Explore non-uniform synaptic delays
+	# Explore membrane potential reset (Bellec Reset)
+	# Make it possible to use fewer than N_I N_Rs
+	# Make N_R variable per layer
+	# Implement logging learning data (e.g. errs, LR, etc)
+	# Change into online learning rather than batch based.
+	# Refactor
+	# Comment code
 
-# LOW PRIORITY:
-# TODO: Print time elapsed after every sample
-# TODO: Make it possible to use fewer than N_I N_Rs
-# TODO: Make N_R variable per layer
-# TODO: Experiment with reducing randomness a priori
-# TODO: Explore non-uniform synaptic delays
-# TODO: Explore membrane potential reset
-# TODO: Comment code
+# IDEAS/NOTES
+	# Gradient capping?
+	# L2 weight decay
+	# Different way to initialize model neurons (voltage etc?) Try eliminate onset chaos.
 
+========
 
-=========
-
-send plot to Jaeger, Dirk and Marco if working
-may email Bellec et al if concrete question
-
-=========
-
-Gradient hard/softcapping for reliable descent?
-
-
-==========
-
-L2 weight decay?
-
-
-=========
-
-Today:
-* Work on thesis (mainly overview but also draft a bit)
-* Identify shortcomings in reproducing Bellec. Maybe it's the algo?
-* Implement logging learning data (e.g. errs, LR, etc)
+Correctly overfitting on small sets
+- Requires some capacity -> maybe 2x400 isn't enough for full dataset
+- Firing rate reg breaks performance at creg=50.
+  - Leads to chaotic bursts
+  - Increase refr instead?
+  - Trains to bias mostly
+  - May need to sweep over lower (0 to ~10) range
+-

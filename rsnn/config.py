@@ -10,22 +10,22 @@ cfg = {
 
     "alpha": exp(-1/20),  # Bellec1: 20 = 0.951
     "rho": exp(-1/200),  # Bellec1: 200 = 0.995
-    "kappa": exp(-1/30),  # Bellec1: 3 = 0.717
-    "beta": 1.8,    # Bellec1: 1.8. Bellec2: "order of 0.07"
-    "gamma": 0.3,     # Bellecs: 0.3.
-    "eta_b_out": 1e-2,  # Constant
+    "kappa": exp(-1/3),  # Bellec1: 3 = 0.717
+    "beta": 1,    # Bellec1: 1.8. Bellec2: "order of 0.07". Adaptive strength. 0 = LIF
+    "gamma": 1,     # Bellecs: 0.3.
+    "eta_b_out": None,  # Constant
     "eta_init": 1e-2,   # Bellecs: 1e-2
     "eta_slope": 1,      # Slope defining relation between Verr and eta (1e-2 for TIMIT)
-    "eta_init_loss": 0,  # 0 to disable annealing. This is the cap below which annealing to 0 takes place linearly.
-    "thr": 1.6,        # Bellec1: unknown. Bellec2: 1.6?
-    "dt_refr": 2,    # Bellec1: 2
+    "eta_init_loss": 4,  # 0 to disable annealing. This is the cap below which annealing to 0 takes place linearly.
+    "thr": 1,        # Bellec1: unknown. Bellec2: 1.6?
+    "dt_refr": 5,    # Bellec1: 2
     "weight_decay": 0,  # Bellec1: 0. Bellec2: 1e-2. For W_out and B, only if adaptive.
     "L2_reg": 0,  # Bellec1: 0. Bellec2: 1e-5
     "FR_target": 1e-2,  # Bellecs: 1e-2
-    "FR_reg": 50,  # Bellec1: 1. Bellec2: 50.
+    "FR_reg": 10,  # Bellec1: 1. Bellec2: 50.
     "dropout": 0.8,  # of recurrent (excl inputs)
     "softmax_factor": 1,  # Bellecs: 1
-    "weight_scaling": 1,  # Bellecs: 1
+    "weight_scaling": 0.5,  # Bellecs: 1
     "adam_beta1": 0.9,
     "adam_beta2": 0.999,
     "adam_eps": 1e-5,
@@ -33,31 +33,31 @@ cfg = {
     "one_to_one_input": False,
     "update_input_weights": True,  # Subset of - and overridden by `update_W'.
     "update_W": True,
-    "update_bias": False,
-    "update_W_out": False,
+    "update_bias": True,
+    "update_W_out": True,
     "one_to_one_output": False,
     "update_dead_weights": False,
 
-    "N_R": 13,
+    "N_R": 92,
     "N_Rec": 1,
 
     "task": "TIMIT_small",
     "wavs_fname": "../data/data_wavs",
     "phns_fname": "../data/data_phns",
 
-    "Epochs": 30,  # def = 80
+    "Epochs": 100,  # def = 80
     "Track_weights": True,
-    "Track_synapse": True,  # Only for synapse vars
+    "Track_synapse": False,  # Only for synapse vars
     "Repeats": 5,  # ms per epoch, def = 5
-    "batch_size_train": 1,  # def = 32
-    "batch_size_val": 1,  # def = 32
+    "batch_size_train": 2,  # def = 32
+    "batch_size_val": 5,  # def = 32
     "batch_size_test": 32,  # def = 32
     "val_every_E": 5,
     "maxlen": 778,  #def 778, Don't forget to re-run process_timit.py!
     "TIMIT_derivative": 0,
-    "n_examples": {'train': 1, 'val': 1, 'test': 1},
-    # "n_examples": {'train': 1, 'val': 1, 'test': 1},
-    "plot_interval": 1,  #  State plot; 0 to disable plots
+    "n_examples": {'train': 2, 'val': 5, 'test': 1},
+    # "n_examples": {'train': 3696, 'val': 400, 'test': 192},
+    "plot_interval": 2,  #  State plot; 0 to disable plots
     "state_save_interval": 5,
     "plot_main": True,
     "plot_state": True,
@@ -93,7 +93,7 @@ lookup = {
     "B":       {"scalar": False, "binary":False, "label": "B"},
     "Y":       {"scalar": False, "binary":False, "label": "Y"},
     "P":       {"scalar": False, "binary":False, "label": "\\pi"},
-    "D":       {"scalar": False, "binary":False, "label": "D"},
+    "D":       {"scalar": False, "binary":True,  "label": "D"},
     "Pmax":    {"scalar": False, "binary":True,  "label": "\\pi_{{max}}"},
     "CE":      {"scalar": True,  "binary":False, "label": "CE"},
     "loss":    {"scalar": False, "binary":False, "label": "loss"},
@@ -104,6 +104,7 @@ lookup = {
     "W_out":   {"scalar": False, "binary":False, "label": "W_{{out}}"},
     "b_out":   {"scalar": False, "binary":False, "label": "b_{{out}}"},
     "DW":      {"scalar": False, "binary":False, "label": "\\Delta W"},
+    "gW":      {"scalar": False, "binary":False, "label": "\\nabla W"},
     "Db_out":  {"scalar": False, "binary":False, "label": "\\Delta b_{{out}}"},
     "DW_out":  {"scalar": False, "binary":False, "label": "\\Delta W_{{out}}"},
     "DW_reg":  {"scalar": False, "binary":False, "label": "\\Delta W_{{reg}}"},

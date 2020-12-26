@@ -83,16 +83,16 @@ def initialize_model(cfg, length, tar_size):
     for neuronvar in ["Z", "Zbar", "I", "L_std", "L_reg", "spikerate"]:
         M[neuronvar] = np.zeros(shape=neuron_shape)
 
-    for weightvar in ["EVV", "EVU", "ET", "DW", "DW_reg", "ETbar", 'gW']:
+    for weightvar in ["EVV", "EVU", "ET", "ETbar", 'gW']:
         M[weightvar] = np.zeros(shape=weight_shape)
 
     for z_in_var in ["Z_in", "Z_inbar"]:
         M[z_in_var] = np.zeros(shape=Z_in_shape)
 
-    for W_out_var in ["DW_out", "gW_out"]:
+    for W_out_var in ["gW_out"]:
         M[W_out_var] = np.zeros(shape=W_out_shape)
 
-    for b_out_var in ["Db_out", "gb_out"]:
+    for b_out_var in ["gb_out"]:
         M[b_out_var] = np.zeros(shape=b_out_shape)
 
     M["U"] = np.ones(shape=neuron_shape) * cfg["thr"]
@@ -173,7 +173,7 @@ def initialize_weights(cfg, inp_size, tar_size):
         W["B"] = rng.normal(size=B_shape, scale=np.sqrt(1 / cfg["N_R"]))
 
     else:  # Symmetric: Uniform [0, 1]. Irrelevant, as it'll be overwritten
-        W["B"] = rng.random(size=B_shape)
+        W["B"] = rng.random(size=B_shape) * 2 - 1
 
     # Drop all self-looping weights. A neuron cannot be connected with itself.
     for r in range(cfg["N_Rec"]):
@@ -187,29 +187,12 @@ def initialize_weights(cfg, inp_size, tar_size):
                          W['W'][0])
     W['W'][0, :, 0, :, :inp_size] = inps
 
-    # Re-scale weights in first layer (first time step will be transferred
-    # automatically)
-    """
-    N_R     inp     Effective
-    12      12      30-55,
-    42      12      50,
-    200     12      55
-    64      39      103,
-    200     39      100-150,
-    """
-
     if cfg["one_to_one_input"]:
         W['W'][0, :, 0, :, :inp_size] = 0
         for s in range(cfg["n_directions"]):
             np.fill_diagonal(W['W'][0, s, 0, :, :inp_size], 1)
 
     W['W'][0, :, 0] *= cfg["weight_scaling"]
-
-    # #Inputs
-    # W["W"][0, :, 0, :, :inp_size] *= (0/3)/inp_size # Epoch 0, layer 0
-
-    # # Recurrent
-    # W["W"][0, :, 0, :, inp_size:] *= (0/1)/(cfg["N_R"]) #cfg["N_R"] + inp_size  # Epoch 0, layer 0
 
     return W
 
