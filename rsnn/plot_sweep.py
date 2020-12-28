@@ -161,7 +161,7 @@ def plot_regressions(df, fname):
                     x=x,
                     y=y,
                     marker='+',
-                    order=1,
+                    order=2,
                     color='black')
         axs[idx // size, idx % size].set_xlabel(var, fontsize=14)
         # axs[idx // size, idx % size].set_title(var)

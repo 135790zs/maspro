@@ -11,21 +11,22 @@ cfg = {
     "alpha": exp(-1/20),  # Bellec1: 20 = 0.951
     "rho": exp(-1/200),  # Bellec1: 200 = 0.995
     "kappa": exp(-1/3),  # Bellec1: 3 = 0.717
-    "beta": 1,    # Bellec1: 1.8. Bellec2: "order of 0.07". Adaptive strength. 0 = LIF
-    "gamma": 1,     # Bellecs: 0.3.
+    "beta": 1,    # Bellecs: 1.8. Adaptive strength. 0 = LIF
+    "gamma": 0.3,     # Bellecs: 0.3.
     "eta_b_out": None,  # Constant
     "eta_init": 1e-2,   # Bellecs: 1e-2
     "eta_slope": 1,      # Slope defining relation between Verr and eta (1e-2 for TIMIT)
-    "eta_init_loss": 4,  # 0 to disable annealing. This is the cap below which annealing to 0 takes place linearly.
-    "thr": 1,        # Bellec1: unknown. Bellec2: 1.6?
-    "dt_refr": 5,    # Bellec1: 2
+    "eta_init_loss": 0,  # 0 to disable annealing. This is the cap below which annealing to 0 takes place.
+    "ramping": 3,  # Ramps eta linearly from 0 to init between epoch 0 and this one. 0 to disable.
+    "thr": 5,        # Bellec1: unknown. Bellec2: 1.6?
+    "dt_refr": 2,    # Bellec1: 2
     "weight_decay": 0,  # Bellec1: 0. Bellec2: 1e-2. For W_out and B, only if adaptive.
     "L2_reg": 0,  # Bellec1: 0. Bellec2: 1e-5
     "FR_target": 1e-2,  # Bellecs: 1e-2
-    "FR_reg": 10,  # Bellec1: 1. Bellec2: 50.
+    "FR_reg": 50,  # Bellec1: 1. Bellec2: 50.
     "dropout": 0.8,  # of recurrent (excl inputs)
     "softmax_factor": 1,  # Bellecs: 1
-    "weight_scaling": 0.5,  # Bellecs: 1
+    "weight_scaling": 1,  # Bellecs: 1
     "adam_beta1": 0.9,
     "adam_beta2": 0.999,
     "adam_eps": 1e-5,
@@ -45,20 +46,20 @@ cfg = {
     "wavs_fname": "../data/data_wavs",
     "phns_fname": "../data/data_phns",
 
-    "Epochs": 100,  # def = 80
+    "Epochs": 150,  # def = 80
     "Track_weights": True,
     "Track_synapse": False,  # Only for synapse vars
     "Repeats": 5,  # ms per epoch, def = 5
-    "batch_size_train": 2,  # def = 32
+    "batch_size_train": 5,  # def = 32
     "batch_size_val": 5,  # def = 32
     "batch_size_test": 32,  # def = 32
     "val_every_E": 5,
     "maxlen": 778,  #def 778, Don't forget to re-run process_timit.py!
     "TIMIT_derivative": 0,
-    "n_examples": {'train': 2, 'val': 5, 'test': 1},
+    "n_examples": {'train': 10, 'val': 10, 'test': 2},
     # "n_examples": {'train': 3696, 'val': 400, 'test': 192},
-    "plot_interval": 2,  #  State plot; 0 to disable plots
-    "state_save_interval": 5,
+    "plot_interval": 1,  #  State plot; 0 to disable plots
+    "state_save_interval": 20,
     "plot_main": True,
     "plot_state": True,
     "plot_graph": False,
@@ -78,7 +79,9 @@ lookup = {
     "X2":      {"scalar": False, "binary":False, "label": "x_{{rev}}"},
     "V":       {"scalar": False, "binary":False, "label": "v"},
     "Z":       {"scalar": False, "binary":True,  "label": "z"},
+    "TZ":      {"scalar": False, "binary":False, "label": "TZ"},
     "Z_in":    {"scalar": False, "binary":True,  "label": "z_{{in}}"},
+    "TZ_in":   {"scalar": False, "binary":False, "label": "TZ_{{in}}"},
     "Z_inbar": {"scalar": False, "binary":False, "label": "\\bar{{z}}_{{in}}"},
     "Zbar":    {"scalar": False, "binary":False, "label": "\\bar{{z}}_\\kappa"},
     "I":       {"scalar": False, "binary":False, "label": "I"},

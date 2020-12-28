@@ -2,8 +2,13 @@
 # TO DO (priority order):
 	# Reproduce Bellec  (37.1 wrongs on test)
 		* Identify weakness.
+		  * Track everything top-down in BIN task. Get intuition
+		  * Check TZ_in
+		  * Rate might be wrong because input is also counted.
 	# Sweep (intelligently, and with low-capacity) only after reproducing
 	# Implement optional L2 weight decay
+	# Track all run-based in own dict (etas, adam, weights, rates, metrics, etc). Subdict for train/val if applicable?
+	# Read literature, catalogue relevant information
 	# Work on thesis
 	# Implement Izhikevich neurons
 	# Explore non-uniform synaptic delays
@@ -28,5 +33,13 @@ Correctly overfitting on small sets
   - Leads to chaotic bursts
   - Increase refr instead?
   - Trains to bias mostly
-  - May need to sweep over lower (0 to ~10) range
+  - creg of 1 same thing, and no good FR reg. Why?
+  - May need to sweep over lower (0 to ~10) range. If all equal, over 0-30.
 -
+
+
+=========
+Bellec reads out from all layers in multi-layer setup!!!!!!
+=========
+
+Global doesn't work well because of mean approx 0

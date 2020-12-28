@@ -151,7 +151,7 @@ def initialize_weights(cfg, inp_size, tar_size):
     if cfg["one_to_one_output"]:
         for s in range(cfg["n_directions"]):
             W["W_out"][0, s] = 0
-            np.fill_diagonal(W["W_out"][0, s, :, :tar_size], 1)
+            np.fill_diagonal(W["W_out"][0, s, :, tar_size:], 1)
 
     W["b_out"] = np.zeros(shape=(n_epochs,
                                  cfg["n_directions"],
@@ -181,11 +181,11 @@ def initialize_weights(cfg, inp_size, tar_size):
             np.fill_diagonal(W['W'][0, s, r, :, cfg["N_R"]:], 0)
 
     # Randomly dropout a fraction of the (remaining) recurrent weights.
-    inps = W['W'][0, :, 0, :, :inp_size]
+    # inps = W['W'][0]
     W['W'][0] = np.where(np.random.random(W['W'][0].shape) < cfg["dropout"],
                          0,
                          W['W'][0])
-    W['W'][0, :, 0, :, :inp_size] = inps
+    # W['W'][0] = inps
 
     if cfg["one_to_one_input"]:
         W['W'][0, :, 0, :, :inp_size] = 0
@@ -466,7 +466,7 @@ def eprop_DW(cfg, wtype, s, adamvars, gradient, eta):
 
 def process_layer(cfg, M, t, s, r, W_rec):
     """ Process a single layer of the model at a single time step."""
-
+    # print(f"\nTime={t}")
     # If not tracking state, the time dimensions of synaptic variables have
     # length 1 and we overwrite those previous time steps at index 0.
     if cfg["Track_synapse"]:
@@ -486,20 +486,10 @@ def process_layer(cfg, M, t, s, r, W_rec):
                               V=M['V'][s, t, r],
                               U=M['U'][s, t, r],
                               is_ALIF=M['is_ALIF'][s, r])
+    # print(f"Zj ({M['Z'][s, t, r].shape}) = {M['Z'][s, t, r]}")
 
     # TZ is time of latest spike
     M['TZ'][s, r, M['Z'][s, t, r]==1] = t
-
-    # Z_prev is the spike array of the previous layer (or input if r==0).
-    # Pad any input with zeros to make it length N_R. Used to be able to dot
-    # product with weights.
-    Z_prev = M['Z'][s, t, r-1] if r > 0 else \
-        np.pad(M[f'X{s}'][t],
-               (0, cfg["N_R"] - len(M[f'X{s}'][t])))
-
-    # Input layer always "spikes" (with nonbinary spike values Z=X).
-    TZ_prev = M['TZ'][s, r-1] if r > 0 else \
-        np.ones(shape=(M['TZ'][s, r].shape)) * t
 
     # Pseudoderivative
     M['H'][s, t, r] = eprop_H(cfg=cfg,
@@ -508,6 +498,7 @@ def process_layer(cfg, M, t, s, r, W_rec):
                               is_ALIF=M['is_ALIF'][s, r],
                               t=t,
                               TZ=M['TZ'][s, r])
+    # print(f"Hj ({M['H'][s, t, r].shape}) = {M['H'][s, t, r]}")
 
     M['ET'][s, curr_t, r] = eprop_ET(cfg=cfg,
                                      is_ALIF=M['is_ALIF'][s, r],
@@ -515,10 +506,28 @@ def process_layer(cfg, M, t, s, r, W_rec):
                                      EVV=M['EVV'][s, curr_t, r],
                                      EVU=M['EVU'][s, curr_t, r])
 
-    M["Z_in"][s, t, r] = np.concatenate((Z_prev, M['Z'][s, t, r]))
+    # print(f"e_ji ({M['ET'][s, curr_t, r].shape}) = {M['ET'][s, curr_t, r]}")
+    # print("Z_prev", Z_prev)
+    # print("Z", M['Z'][s, t, r])
+    # Z_prev is the spike array of the previous layer (or input if r==0).
+    # Pad any input with zeros to make it length N_R. Used to be able to dot
+    # product with weights.
+    Z_prev = M['Z'][s, t, r-1] if r > 0 else \
+        np.pad(M[f'X{s}'][t],
+               (0, cfg["N_R"] - len(M[f'X{s}'][t])))
+    M["Z_in"][s, t, r] = np.concatenate((Z_prev, M['Z'][s, t-1, r]))
+    # print("Dot", np.dot(W_rec, conc))
+    # print("W_rec", W_rec)
+    # M["Z_in"][s, t, r] = np.dot(W_rec, conc) != 0
+    # print("Z", M["Z_in"][s, t, r])
+    # print(f"Zi ({M['Z_in'][s, t, r].shape}) = {M['Z_in'][s, t, r]}")
+    # print()
 
+    # Input layer always "spikes" (with nonbinary spike values Z=X).
+    TZ_prev = M['TZ'][s, r-1] if r > 0 else \
+        np.ones(shape=(M['TZ'][s, r].shape)) * t
 
-    M["TZ_in"][s, r] = np.concatenate((TZ_prev, M['TZ'][s, r]))
+    M["TZ_in"][s, r] = np.concatenate((TZ_prev, M['TZ'][s, r]-1))
 
 
     M['Z_inbar'][s, t] = (cfg["alpha"] * (M['Z_inbar'][s, t-1] if t > 0 else 0)) + M['Z_in'][s, t]
@@ -526,12 +535,13 @@ def process_layer(cfg, M, t, s, r, W_rec):
 
     M['I'][s, t, r] = eprop_I(W_rec=W_rec,
                               Z_in=M["Z_in"][s, t, r])
+    # print(f"I ({M['I'][s, t, r].shape}) = {M['I'][s, t, r]}")
 
     M['ETbar'][s, curr_t, r] = cfg["kappa"] * (M['ETbar'][s, prev_t, r] if t > 0 else 0) + M['ET'][s, curr_t, r]
 
     M['Zbar'][s, t, r] = cfg["kappa"] * (M['Zbar'][s, t-1, r] if t > 0 else 0) + M['Z'][s, t, r]
 
-    if t != M[f"X{s}"].shape[0] - 1:
+    if t < M[f"X{s}"].shape[0] - 1:
 
         # Eligibility vector
         M['EVV'][s, next_t, r] = eprop_EVV(cfg=cfg,
@@ -542,12 +552,11 @@ def process_layer(cfg, M, t, s, r, W_rec):
                                            TZ_in=M['TZ_in'][s, r],
                                            t=t)
 
-
         M['EVU'][s, next_t, r] = eprop_EVU(cfg=cfg,
-                                        Z_inbar=M['Z_inbar'][s, t, r],
-                                        EVU=M['EVU'][s, curr_t, r],
-                                        H=M['H'][s, curr_t, r],
-                                        is_ALIF=M['is_ALIF'][s, r])
+                                           Z_inbar=M['Z_inbar'][s, t, r],
+                                           EVU=M['EVU'][s, curr_t, r],
+                                           H=M['H'][s, curr_t, r],
+                                           is_ALIF=M['is_ALIF'][s, r])
 
         M['V'][s, t+1, r] = eprop_V(cfg=cfg,
                                     V=M['V'][s, t, r],

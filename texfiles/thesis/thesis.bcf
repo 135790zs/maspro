@@ -1928,18 +1928,23 @@
     <bcf:citekey order="2">hubel1968receptive</bcf:citekey>
     <bcf:citekey order="3">raffel2019exploring</bcf:citekey>
     <bcf:citekey order="4">sharir2020cost</bcf:citekey>
-    <bcf:citekey order="5">sokoloff1960metabolism</bcf:citekey>
-    <bcf:citekey order="6">hopfield1982neural</bcf:citekey>
-    <bcf:citekey order="7">bellec2020solution</bcf:citekey>
-    <bcf:citekey order="8">garofolo1993darpa</bcf:citekey>
-    <bcf:citekey order="9">labov2008atlas</bcf:citekey>
-    <bcf:citekey order="10">kucera1967computational</bcf:citekey>
-    <bcf:citekey order="11">hultzsch1964tables</bcf:citekey>
-    <bcf:citekey order="12">graves2005framewise</bcf:citekey>
-    <bcf:citekey order="13">bellec2020solution</bcf:citekey>
-    <bcf:citekey order="14">fayek2016</bcf:citekey>
-    <bcf:citekey order="15">SASPWEB2011</bcf:citekey>
-    <bcf:citekey order="16">stevens1937scale</bcf:citekey>
+    <bcf:citekey order="5">azevedo2009equal</bcf:citekey>
+    <bcf:citekey order="6">drachman2005we</bcf:citekey>
+    <bcf:citekey order="7">sokoloff1960metabolism</bcf:citekey>
+    <bcf:citekey order="8">a2017parallel</bcf:citekey>
+    <bcf:citekey order="9">bear2020neuroscience</bcf:citekey>
+    <bcf:citekey order="10">lecun2015deep</bcf:citekey>
+    <bcf:citekey order="11">hopfield1982neural</bcf:citekey>
+    <bcf:citekey order="12">bellec2020solution</bcf:citekey>
+    <bcf:citekey order="13">garofolo1993darpa</bcf:citekey>
+    <bcf:citekey order="14">labov2008atlas</bcf:citekey>
+    <bcf:citekey order="15">kucera1967computational</bcf:citekey>
+    <bcf:citekey order="16">hultzsch1964tables</bcf:citekey>
+    <bcf:citekey order="17">graves2005framewise</bcf:citekey>
+    <bcf:citekey order="18">bellec2020solution</bcf:citekey>
+    <bcf:citekey order="19">fayek2016</bcf:citekey>
+    <bcf:citekey order="20">SASPWEB2011</bcf:citekey>
+    <bcf:citekey order="21">stevens1937scale</bcf:citekey>
   </bcf:section>
   <!-- SORTING TEMPLATES -->
   <bcf:sortingtemplate name="nyt">

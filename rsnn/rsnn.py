@@ -63,14 +63,7 @@ def network(cfg, inp, tar, W_rec, W_out, b_out, B, adamvars, eta):
         # Calculate weight updates for all subnetworks
         for s in range(cfg["n_directions"]):
             M['D'][t] = M['P'][t] - M['T'][t]
-            # print(B[s].shape, M['D'][t].shape)
             L_std = np.dot(B[s], M['D'][t])
-            # if t == 3:
-            #     print(B[s, 0, 0])
-            # print(np.mean(M['D'][t]), np.min(M['D'][t]), np.max(M['D'][t]))
-            #     print(L_std)
-            # print(M['D'][t])
-            # L_std = np.einsum("rjk, k -> rj", B[s], M['D'][t])
 
             if t:
                 rates = np.mean(M['Z'][s, :t], axis=0)
@@ -79,9 +72,6 @@ def network(cfg, inp, tar, W_rec, W_out, b_out, B, adamvars, eta):
                 L_reg = (cfg["FR_reg"]
                          * (t/n_steps) * 0.5
                          * (rates - cfg["FR_target"]))
-                         # * np.einsum("rj, rji -> rj",
-                         #             cfg["FR_target"] - rates,
-                         #             M["ETbar"][s, curr_t]))
 
             else:
                 L_reg = 0
@@ -119,7 +109,7 @@ def network(cfg, inp, tar, W_rec, W_out, b_out, B, adamvars, eta):
 def feed_batch(cfg, inps, tars, W_rec, W_out, b_out, eta, B, epoch, tvt_type, adamvars, e, log_id, start_time=None):
     batch_err = 0
     batch_perc_wrong = 0
-    spikerate = 0
+    batch_spikerate = 0
 
     batch_gW = {
         'W': np.zeros(
@@ -188,7 +178,7 @@ def feed_batch(cfg, inps, tars, W_rec, W_out, b_out, eta, B, epoch, tvt_type, ad
 
         # Aggregate the mean batch error to the aggregator.
         # Dividing by batch size to get batch mean.
-        spikerate += np.mean(final_model["spikerate"]) / inps.shape[0]
+        batch_spikerate += np.mean(final_model["spikerate"]) / inps.shape[0]
         batch_err += np.mean(final_model["CE"]) / inps.shape[0]
         batch_perc_wrong += np.mean(
             np.max(np.abs(final_model["Pmax"] - final_model["T"]),
@@ -210,8 +200,8 @@ def feed_batch(cfg, inps, tars, W_rec, W_out, b_out, eta, B, epoch, tvt_type, ad
     if cfg["verbose"]:
         print(f"\t\tCE:      {batch_err:.3f},\n"
               f"\t\t% wrong: {100*batch_perc_wrong:.1f}%\n"
-              f"\t\tRate:    {1000*spikerate:.1f} Hz")
-    return batch_err, batch_perc_wrong, batch_gW
+              f"\t\tRate:    {1000*batch_spikerate:.1f} Hz")
+    return batch_err, batch_perc_wrong, batch_gW, batch_spikerate
 
 
 def main(cfg):
@@ -238,6 +228,8 @@ def main(cfg):
     verr = None
     percs_wrong_t = np.zeros(shape=(cfg["Epochs"]))
     percs_wrong_v = np.ones(shape=(cfg["Epochs"])) * -1
+    etas = np.ones(shape=(cfg["Epochs"])) * -1
+    spikerates = np.ones(shape=(cfg["Epochs"])) * -1
 
     optVerr = None
 
@@ -268,7 +260,12 @@ def main(cfg):
         else:
             eta = min(cfg["eta_init"],
                       cfg["eta_init"] * (verr / cfg["eta_init_loss"]) ** cfg["eta_slope"])
-            print(f"Loss: {verr:.3f}, \tEta: {eta:.4f}")
+        if e+1 < cfg["ramping"]:
+            eta *= (e+1)/cfg["ramping"]
+
+        etas[e] = eta
+
+        print(f"Loss: {verr if verr else -1:.3f}, \tEta: {eta:.4f}")
 
         ep_curr = e if cfg["Track_weights"] else 0
 
@@ -276,7 +273,7 @@ def main(cfg):
         randidxs = np.random.randint(inps['train'].shape[0],
                                      size=cfg["batch_size_train"])
 
-        terr, perc_wrong_t, gW = feed_batch(
+        terr, perc_wrong_t, gW, spikerate = feed_batch(
             epoch=e,
             tvt_type='train',
             cfg=cfg,
@@ -294,11 +291,12 @@ def main(cfg):
 
         terrs[e] = terr
         percs_wrong_t[e] = perc_wrong_t
+        spikerates[e] = spikerate
 
         if e % cfg["val_every_E"] == 0:
             randidxs = np.random.randint(inps['val'].shape[0],
                                          size=cfg["batch_size_val"])
-            verr, perc_wrong_v, _ = feed_batch(
+            verr, perc_wrong_v, _, _ = feed_batch(
                 epoch=e,
                 tvt_type='val',
                 cfg=cfg,
@@ -332,6 +330,7 @@ def main(cfg):
         if cfg["plot_main"]:
             vis.plot_run(cfg=cfg, terrs=terrs, percs_wrong_t=percs_wrong_t,
                          verrs=verrs, percs_wrong_v=percs_wrong_v,
+                         etas=etas, spikerates=spikerates,
                          W=W, epoch=e, log_id=log_id, inp_size=inps['train'].shape[-1])
 
         if e == cfg['Epochs'] - 1:
@@ -367,7 +366,7 @@ def main(cfg):
                              * gW[wtype])
 
         if not cfg["update_input_weights"]:
-            DW['W'][:, 0, :, :inp.shape[-1]] = 0
+            DW['W'][:, 0, :, :inps['train'].shape[-1]] = 0
 
         if not cfg["update_dead_weights"]:
             DW['W'][W["W"][ep_curr] == 0] = 0
@@ -425,7 +424,7 @@ def main(cfg):
 
     optW = ut.load_weights(log_id=log_id)
 
-    total_testerr, perc_wrong_test, _ = feed_batch(
+    total_testerr, perc_wrong_test, _, _ = feed_batch(
         epoch=1,
         tvt_type='test',
         cfg=cfg,

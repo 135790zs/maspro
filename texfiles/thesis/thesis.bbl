@@ -19,6 +19,175 @@
 
 \refsection{0}
   \datalist[entry]{nyt/global//global/global}
+    \entry{a2017parallel}{article}{}
+      \name{author}{4}{}{%
+        {{uniquename=0,uniquepart=base,hash=dbcf08d334cf41e78a54684e66d7a875}{%
+           family={A\bibnamedelima Pastur-Romay},
+           familyi={A\bibinitperiod\bibinitdelim P\bibinithyphendelim R\bibinitperiod},
+           given={L},
+           giveni={L\bibinitperiod},
+           givenun=0}}%
+        {{uniquename=0,uniquepart=base,hash=b7aa7a0b5fd34b99e8634024dac5774a}{%
+           family={B\bibnamedelima Porto-Pazos},
+           familyi={B\bibinitperiod\bibinitdelim P\bibinithyphendelim P\bibinitperiod},
+           given={A},
+           giveni={A\bibinitperiod},
+           givenun=0}}%
+        {{uniquename=0,uniquepart=base,hash=0b0d8e8b913bba9b0b702681dd5314e6}{%
+           family={Cedr{ó}n},
+           familyi={C\bibinitperiod},
+           given={Francisco},
+           giveni={F\bibinitperiod},
+           givenun=0}}%
+        {{uniquename=0,uniquepart=base,hash=833a9e5f402facd44acf0828ad83c785}{%
+           family={Pazos},
+           familyi={P\bibinitperiod},
+           given={A},
+           giveni={A\bibinitperiod},
+           givenun=0}}%
+      }
+      \list{publisher}{1}{%
+        {Bentham Science Publishers}%
+      }
+      \strng{namehash}{43286bf3c13769171de09e131109953c}
+      \strng{fullhash}{6ad64d097ca9b4609696dac00e856b09}
+      \strng{bibnamehash}{43286bf3c13769171de09e131109953c}
+      \strng{authorbibnamehash}{43286bf3c13769171de09e131109953c}
+      \strng{authornamehash}{43286bf3c13769171de09e131109953c}
+      \strng{authorfullhash}{6ad64d097ca9b4609696dac00e856b09}
+      \field{sortinit}{A}
+      \field{sortinithash}{d77c7cdd82ff690d4c3ef13216f92f0b}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{year}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{Current topics in medicinal chemistry}
+      \field{number}{14}
+      \field{title}{Parallel computing for brain simulation}
+      \field{volume}{17}
+      \field{year}{2017}
+      \field{pages}{1646\bibrangedash 1668}
+      \range{pages}{23}
+    \endentry
+    \entry{azevedo2009equal}{article}{}
+      \name{author}{9}{}{%
+        {{uniquename=0,uniquepart=base,hash=951e3fc6558584936843afac83452f4b}{%
+           family={Azevedo},
+           familyi={A\bibinitperiod},
+           given={Frederico\bibnamedelima AC},
+           giveni={F\bibinitperiod\bibinitdelim A\bibinitperiod},
+           givenun=0}}%
+        {{uniquename=0,uniquepart=base,hash=6562090b07c84abd0b252327c3d86c15}{%
+           family={Carvalho},
+           familyi={C\bibinitperiod},
+           given={Ludmila\bibnamedelima RB},
+           giveni={L\bibinitperiod\bibinitdelim R\bibinitperiod},
+           givenun=0}}%
+        {{uniquename=0,uniquepart=base,hash=f0227ee86f2c3fb329d702ffed8b10b2}{%
+           family={Grinberg},
+           familyi={G\bibinitperiod},
+           given={Lea\bibnamedelima T},
+           giveni={L\bibinitperiod\bibinitdelim T\bibinitperiod},
+           givenun=0}}%
+        {{uniquename=0,uniquepart=base,hash=5d60e1443d19426a9ba67fb5ef59e685}{%
+           family={Farfel},
+           familyi={F\bibinitperiod},
+           given={Jos{é}\bibnamedelima Marcelo},
+           giveni={J\bibinitperiod\bibinitdelim M\bibinitperiod},
+           givenun=0}}%
+        {{uniquename=0,uniquepart=base,hash=2327852266d68b6297a3053661cc0ae9}{%
+           family={Ferretti},
+           familyi={F\bibinitperiod},
+           given={Renata\bibnamedelima EL},
+           giveni={R\bibinitperiod\bibinitdelim E\bibinitperiod},
+           givenun=0}}%
+        {{uniquename=0,uniquepart=base,hash=27480bdbf057bd467b81b561f9f96c35}{%
+           family={Leite},
+           familyi={L\bibinitperiod},
+           given={Renata\bibnamedelima EP},
+           giveni={R\bibinitperiod\bibinitdelim E\bibinitperiod},
+           givenun=0}}%
+        {{uniquename=0,uniquepart=base,hash=79213d7c2b1d9c07e954c11fbe71408d}{%
+           family={Filho},
+           familyi={F\bibinitperiod},
+           given={Wilson\bibnamedelima Jacob},
+           giveni={W\bibinitperiod\bibinitdelim J\bibinitperiod},
+           givenun=0}}%
+        {{uniquename=0,uniquepart=base,hash=615fb5571d8674c335287e434e03cdd5}{%
+           family={Lent},
+           familyi={L\bibinitperiod},
+           given={Roberto},
+           giveni={R\bibinitperiod},
+           givenun=0}}%
+        {{uniquename=0,uniquepart=base,hash=844747f22b37db160509d1c43124abcb}{%
+           family={Herculano-Houzel},
+           familyi={H\bibinithyphendelim H\bibinitperiod},
+           given={Suzana},
+           giveni={S\bibinitperiod},
+           givenun=0}}%
+      }
+      \list{publisher}{1}{%
+        {Wiley Online Library}%
+      }
+      \strng{namehash}{10735c96daf3f9106e97215dcc7e0457}
+      \strng{fullhash}{aa7094ac794a98e909c7f85366cf99fe}
+      \strng{bibnamehash}{10735c96daf3f9106e97215dcc7e0457}
+      \strng{authorbibnamehash}{10735c96daf3f9106e97215dcc7e0457}
+      \strng{authornamehash}{10735c96daf3f9106e97215dcc7e0457}
+      \strng{authorfullhash}{aa7094ac794a98e909c7f85366cf99fe}
+      \field{sortinit}{A}
+      \field{sortinithash}{d77c7cdd82ff690d4c3ef13216f92f0b}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{year}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{Journal of Comparative Neurology}
+      \field{number}{5}
+      \field{title}{Equal numbers of neuronal and nonneuronal cells make the human brain an isometrically scaled-up primate brain}
+      \field{volume}{513}
+      \field{year}{2009}
+      \field{pages}{532\bibrangedash 541}
+      \range{pages}{10}
+    \endentry
+    \entry{bear2020neuroscience}{book}{}
+      \name{author}{3}{}{%
+        {{uniquename=0,uniquepart=base,hash=43b2b06bec33a8f2a007b5ab11e593db}{%
+           family={Bear},
+           familyi={B\bibinitperiod},
+           given={Mark},
+           giveni={M\bibinitperiod},
+           givenun=0}}%
+        {{uniquename=0,uniquepart=base,hash=0cfa8c70c0d15cefbe7ff536247453fc}{%
+           family={Connors},
+           familyi={C\bibinitperiod},
+           given={Barry},
+           giveni={B\bibinitperiod},
+           givenun=0}}%
+        {{uniquename=0,uniquepart=base,hash=0ee8ea4842abba955835848cf2bbc3ce}{%
+           family={Paradiso},
+           familyi={P\bibinitperiod},
+           given={Michael\bibnamedelima A},
+           giveni={M\bibinitperiod\bibinitdelim A\bibinitperiod},
+           givenun=0}}%
+      }
+      \list{publisher}{1}{%
+        {Jones \& Bartlett Learning, LLC}%
+      }
+      \strng{namehash}{0961ddd4ecc02815775b01dcda47bb0d}
+      \strng{fullhash}{0961ddd4ecc02815775b01dcda47bb0d}
+      \strng{bibnamehash}{0961ddd4ecc02815775b01dcda47bb0d}
+      \strng{authorbibnamehash}{0961ddd4ecc02815775b01dcda47bb0d}
+      \strng{authornamehash}{0961ddd4ecc02815775b01dcda47bb0d}
+      \strng{authorfullhash}{0961ddd4ecc02815775b01dcda47bb0d}
+      \field{sortinit}{B}
+      \field{sortinithash}{276475738cc058478c1677046f857703}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{year}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Neuroscience: Exploring the brain}
+      \field{year}{2020}
+    \endentry
     \entry{bellec2020solution}{article}{}
       \name{author}{7}{}{%
         {{uniquename=0,uniquepart=base,hash=2b9b631384f8ec77cc43dcf66984cd5c}{%
@@ -84,6 +253,33 @@
       \field{year}{2020}
       \field{pages}{738385}
       \range{pages}{1}
+    \endentry
+    \entry{drachman2005we}{misc}{}
+      \name{author}{1}{}{%
+        {{uniquename=0,uniquepart=base,hash=efd338305c817c157bd80cf6f0434d5a}{%
+           family={Drachman},
+           familyi={D\bibinitperiod},
+           given={David\bibnamedelima A},
+           giveni={D\bibinitperiod\bibinitdelim A\bibinitperiod},
+           givenun=0}}%
+      }
+      \list{publisher}{1}{%
+        {AAN Enterprises}%
+      }
+      \strng{namehash}{efd338305c817c157bd80cf6f0434d5a}
+      \strng{fullhash}{efd338305c817c157bd80cf6f0434d5a}
+      \strng{bibnamehash}{efd338305c817c157bd80cf6f0434d5a}
+      \strng{authorbibnamehash}{efd338305c817c157bd80cf6f0434d5a}
+      \strng{authornamehash}{efd338305c817c157bd80cf6f0434d5a}
+      \strng{authorfullhash}{efd338305c817c157bd80cf6f0434d5a}
+      \field{sortinit}{D}
+      \field{sortinithash}{2ef1bd9a78cc71eb74d7231c635177b8}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{year}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Do we have brain to spare?}
+      \field{year}{2005}
     \endentry
     \entry{fayek2016}{misc}{}
       \name{author}{1}{}{%
@@ -397,6 +593,50 @@
       \field{labeltitlesource}{title}
       \field{title}{The atlas of North American English: Phonetics, phonology and sound change}
       \field{year}{2008}
+    \endentry
+    \entry{lecun2015deep}{article}{}
+      \name{author}{3}{}{%
+        {{uniquename=0,uniquepart=base,hash=6a1aa6b7eab12b931ca7c7e3f927231d}{%
+           family={LeCun},
+           familyi={L\bibinitperiod},
+           given={Yann},
+           giveni={Y\bibinitperiod},
+           givenun=0}}%
+        {{uniquename=0,uniquepart=base,hash=40a8e4774982146adc2688546f54efb2}{%
+           family={Bengio},
+           familyi={B\bibinitperiod},
+           given={Yoshua},
+           giveni={Y\bibinitperiod},
+           givenun=0}}%
+        {{uniquename=0,uniquepart=base,hash=9a8750ccdb2a4cf14d2655face1ce016}{%
+           family={Hinton},
+           familyi={H\bibinitperiod},
+           given={Geoffrey},
+           giveni={G\bibinitperiod},
+           givenun=0}}%
+      }
+      \list{publisher}{1}{%
+        {Nature Publishing Group}%
+      }
+      \strng{namehash}{c6c75bd00ce5a488e91a749d8383b3df}
+      \strng{fullhash}{c6c75bd00ce5a488e91a749d8383b3df}
+      \strng{bibnamehash}{c6c75bd00ce5a488e91a749d8383b3df}
+      \strng{authorbibnamehash}{c6c75bd00ce5a488e91a749d8383b3df}
+      \strng{authornamehash}{c6c75bd00ce5a488e91a749d8383b3df}
+      \strng{authorfullhash}{c6c75bd00ce5a488e91a749d8383b3df}
+      \field{sortinit}{L}
+      \field{sortinithash}{2c7981aaabc885868aba60f0c09ee20f}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{year}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{nature}
+      \field{number}{7553}
+      \field{title}{Deep learning}
+      \field{volume}{521}
+      \field{year}{2015}
+      \field{pages}{436\bibrangedash 444}
+      \range{pages}{9}
     \endentry
     \entry{raffel2019exploring}{article}{}
       \name{author}{9}{}{%

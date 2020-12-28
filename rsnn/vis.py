@@ -35,12 +35,12 @@ def weights_to_img(arr, is_binary=False):
     return arr
 
 
-def plot_run(cfg, terrs, percs_wrong_t, verrs, percs_wrong_v, W, epoch, log_id, inp_size):
+def plot_run(cfg, terrs, percs_wrong_t, verrs, percs_wrong_v, W, epoch, etas, spikerates, log_id, inp_size):
 
     labelpad = 35
     fontsize = 14
     fig = plt.figure(constrained_layout=False, figsize=(8, 16))
-    gsc = fig.add_gridspec(nrows=15 if cfg["Track_weights"] else 5,
+    gsc = fig.add_gridspec(nrows=17 if cfg["Track_weights"] else 7,
                            ncols=1, hspace=0.05)
     axs = []
 
@@ -69,7 +69,24 @@ def plot_run(cfg, terrs, percs_wrong_t, verrs, percs_wrong_v, W, epoch, log_id, 
                        labelpad=labelpad,
                        fontsize=fontsize)
     axs[-1].grid()
+    axs[-1].legend()
     axs[-1].set_ylim(0, 120)
+
+    axs.append(fig.add_subplot(gsc[len(axs), :], sharex=axs[0]))
+    axs[-1].plot(etas[:epoch], label="$\\eta$")
+    axs[-1].grid()
+    axs[-1].set_ylabel("$\\eta$",
+                       rotation=0,
+                       labelpad=labelpad,
+                       fontsize=fontsize)
+
+    axs.append(fig.add_subplot(gsc[len(axs), :], sharex=axs[0]))
+    axs[-1].plot(1000*spikerates[:epoch], label="Mean Hz")
+    axs[-1].grid()
+    axs[-1].set_ylabel("$Mean Hz$",
+                       rotation=0,
+                       labelpad=labelpad,
+                       fontsize=fontsize)
 
     if epoch >= 1 and cfg["Track_weights"]:
         for weight_type, weights in W.items():
@@ -176,9 +193,9 @@ def plot_run(cfg, terrs, percs_wrong_t, verrs, percs_wrong_v, W, epoch, log_id, 
 
 
 def plot_state(cfg, M, B, W_rec, W_out, b_out, e, log_id, plot_weights=True):
-    S_plotvars = ["X", "I", "V", "H", "U", "Z", "Y", "L_std", "L_reg"]
+    S_plotvars = ["X", "I", "V", "H", "U", "Z", "Zbar", "Y", "L_std", "L_reg", "Z_in", "Z_inbar"]
     if cfg["Track_synapse"]:
-        S_plotvars = S_plotvars[:6] + ["EVV", "EVU", "ETbar", "gW"] + S_plotvars[6:]
+        S_plotvars = S_plotvars[:6] + ["EVV", "EVU", "ET", "ETbar", "gW"] + S_plotvars[6:]
 
     M_plotvars = ["P", "D", "Pmax", "T", "CE"]
     if cfg["n_directions"] > 1:
@@ -186,10 +203,12 @@ def plot_state(cfg, M, B, W_rec, W_out, b_out, e, log_id, plot_weights=True):
 
     W = {"B": B, "W_rec": W_rec, "W_out": W_out, "b_out": b_out}
 
-    fig = plt.figure(constrained_layout=False, figsize=(8, 16))
-    gsc = fig.add_gridspec(nrows=(len(M_plotvars)
-                                  + len(S_plotvars)
-                                  + (len(W.keys()) if plot_weights else 0)),
+    nrows = (len(M_plotvars)
+             + len(S_plotvars)
+             + (len(W.keys()) if plot_weights else 0))
+
+    fig = plt.figure(constrained_layout=False, figsize=(8, nrows//1.2))
+    gsc = fig.add_gridspec(nrows=nrows,
                            ncols=cfg["n_directions"],
                            hspace=0.075,
                            wspace=0.5)
@@ -210,12 +229,11 @@ def plot_state(cfg, M, B, W_rec, W_out, b_out, e, log_id, plot_weights=True):
             axs.append(fig.add_subplot(gsc[row_idx, s]))
             if var == "X":
                 arr = M[f"X{s}"]
-
             else:
                 arr = M[var][s]
             # For synapses, plot mean of set with shared receiving.
-            if arr.ndim == 4:
-                arr = np.mean(arr, axis=3)
+            # if arr.ndim == 4:
+            #     arr = np.mean(arr, axis=3)
 
             axs[-1].imshow(weights_to_img(arr,
                                           is_binary=lookup[var]["binary"]),
@@ -272,10 +290,10 @@ def plot_state(cfg, M, B, W_rec, W_out, b_out, e, log_id, plot_weights=True):
 
     if plot_weights:
         for k, v in W.items():
-            if k in ["W_rec", "B"]:
-                v = np.mean(v, axis=3)
-            if k == "W_out":
-                v = np.mean(v, axis=2)
+            # if k in ["W_rec", "B"]:
+            #     v = np.mean(v, axis=3)
+            # if k == "W_out":
+            #     v = np.mean(v, axis=2)
             v = v.flatten()
             v = np.expand_dims(v, axis=0)
             v = np.repeat(v, M['X0'].shape[0], axis=0)
