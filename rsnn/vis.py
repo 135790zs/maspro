@@ -70,7 +70,8 @@ def plot_run(cfg, terrs, percs_wrong_t, verrs, percs_wrong_v, W, epoch, etas, sp
                        fontsize=fontsize)
     axs[-1].grid()
     axs[-1].legend()
-    axs[-1].set_ylim(0, 120)
+    # axs[-1].set_ylim(None, 100)
+    axs[-1].set_yscale('log')
 
     axs.append(fig.add_subplot(gsc[len(axs), :], sharex=axs[0]))
     axs[-1].plot(etas[:epoch], label="$\\eta$")
@@ -87,6 +88,7 @@ def plot_run(cfg, terrs, percs_wrong_t, verrs, percs_wrong_v, W, epoch, etas, sp
                        rotation=0,
                        labelpad=labelpad,
                        fontsize=fontsize)
+    axs[-1].set_yscale('log')
 
     if epoch >= 1 and cfg["Track_weights"]:
         for weight_type, weights in W.items():
@@ -192,12 +194,13 @@ def plot_run(cfg, terrs, percs_wrong_t, verrs, percs_wrong_v, W, epoch, etas, sp
     plt.close()
 
 
-def plot_state(cfg, M, B, W_rec, W_out, b_out, e, log_id, plot_weights=True):
-    S_plotvars = ["X", "I", "V", "H", "U", "Z", "Zbar", "Y", "L_std", "L_reg", "Z_in", "Z_inbar"]
+def plot_state(cfg, M, B, W_rec, W_out, b_out, e, log_id, plot_weights=False):
+    S_plotvars = ["X", "I", "V", "U", "Z"]
     if cfg["Track_synapse"]:
-        S_plotvars = S_plotvars[:6] + ["EVV", "EVU", "ET", "ETbar", "gW"] + S_plotvars[6:]
+        S_plotvars += ["EVV", "EVU", "ET", "ETbar", "gW"]
+    S_plotvars += ["L_std", "L_reg"]
 
-    M_plotvars = ["P", "D", "Pmax", "T", "CE"]
+    M_plotvars = ["Y", "D", "Pmax", "T", "CE"]
     if cfg["n_directions"] > 1:
         M_plotvars = ["X", "Y"] + M_plotvars  # Show combined/corrected in, out
 
@@ -232,8 +235,8 @@ def plot_state(cfg, M, B, W_rec, W_out, b_out, e, log_id, plot_weights=True):
             else:
                 arr = M[var][s]
             # For synapses, plot mean of set with shared receiving.
-            # if arr.ndim == 4:
-            #     arr = np.mean(arr, axis=3)
+            if arr.ndim == 4:
+                arr = np.mean(arr, axis=3)
 
             axs[-1].imshow(weights_to_img(arr,
                                           is_binary=lookup[var]["binary"]),
@@ -290,10 +293,10 @@ def plot_state(cfg, M, B, W_rec, W_out, b_out, e, log_id, plot_weights=True):
 
     if plot_weights:
         for k, v in W.items():
-            # if k in ["W_rec", "B"]:
-            #     v = np.mean(v, axis=3)
-            # if k == "W_out":
-            #     v = np.mean(v, axis=2)
+            if k in ["W_rec", "B"]:
+                v = np.mean(v, axis=3)
+            if k == "W_out":
+                v = np.mean(v, axis=2)
             v = v.flatten()
             v = np.expand_dims(v, axis=0)
             v = np.repeat(v, M['X0'].shape[0], axis=0)

@@ -8,22 +8,22 @@ cfg = {
     "n_directions": 1,
     "delay": 0,
 
-    "alpha": exp(-1/20),  # Bellec1: 20 = 0.951
-    "rho": exp(-1/200),  # Bellec1: 200 = 0.995
-    "kappa": exp(-1/3),  # Bellec1: 3 = 0.717
-    "beta": 1,    # Bellecs: 1.8. Adaptive strength. 0 = LIF
+    "alpha": 0.951,  # Bellec1: 20 = 0.951
+    "rho": 0.995,  # Bellec1: 200 = 0.995
+    "kappa": 0.717,  # Bellec1: 3 = 0.717
+    "beta": 1.8,    # Bellecs: 1.8. Adaptive strength. 0 = LIF
     "gamma": 0.3,     # Bellecs: 0.3.
-    "eta_b_out": None,  # Constant
+    "eta_b_out": None,  # None=no sep. eta. Otherwise=Constant
     "eta_init": 1e-2,   # Bellecs: 1e-2
-    "eta_slope": 1,      # Slope defining relation between Verr and eta (1e-2 for TIMIT)
-    "eta_init_loss": 0,  # 0 to disable annealing. This is the cap below which annealing to 0 takes place.
-    "ramping": 3,  # Ramps eta linearly from 0 to init between epoch 0 and this one. 0 to disable.
-    "thr": 5,        # Bellec1: unknown. Bellec2: 1.6?
+    "eta_slope": 0.8,      # Slope defining relation between Verr and eta (1e-2 for TIMIT)
+    "eta_init_loss": 4,  # 0 to disable annealing. This is the cap below which annealing to 0 takes place.
+    "ramping": 2,  # Ramps eta linearly from 0 to init between epoch 0 and this one. 0 to disable.
+    "thr": 1,        # Bellec1: unknown. Bellec2: 1.6?
     "dt_refr": 2,    # Bellec1: 2
-    "weight_decay": 0,  # Bellec1: 0. Bellec2: 1e-2. For W_out and B, only if adaptive.
+    "weight_decay": 1e-2,  # Bellec1: 0. Bellec2: 1e-2. For W_out and B, only if adaptive.
     "L2_reg": 0,  # Bellec1: 0. Bellec2: 1e-5
     "FR_target": 1e-2,  # Bellecs: 1e-2
-    "FR_reg": 50,  # Bellec1: 1. Bellec2: 50.
+    "FR_reg": 25,  # Bellec1: 1. Bellec2: 50.
     "dropout": 0.8,  # of recurrent (excl inputs)
     "softmax_factor": 1,  # Bellecs: 1
     "weight_scaling": 1,  # Bellecs: 1
@@ -39,27 +39,27 @@ cfg = {
     "one_to_one_output": False,
     "update_dead_weights": False,
 
-    "N_R": 92,
+    "N_R": 600,
     "N_Rec": 1,
 
-    "task": "TIMIT_small",
+    "task": "TIMIT",
     "wavs_fname": "../data/data_wavs",
     "phns_fname": "../data/data_phns",
 
     "Epochs": 150,  # def = 80
     "Track_weights": True,
-    "Track_synapse": False,  # Only for synapse vars
+    "Track_synapse": False,  # Only for nonweight synapse vars (e.g. ET)
     "Repeats": 5,  # ms per epoch, def = 5
-    "batch_size_train": 5,  # def = 32
-    "batch_size_val": 5,  # def = 32
+    "batch_size_train": 1,  # def = 32
+    "batch_size_val": 1,  # def = 32
     "batch_size_test": 32,  # def = 32
-    "val_every_E": 5,
+    "val_every_E": 10,
     "maxlen": 778,  #def 778, Don't forget to re-run process_timit.py!
-    "TIMIT_derivative": 0,
-    "n_examples": {'train': 10, 'val': 10, 'test': 2},
-    # "n_examples": {'train': 3696, 'val': 400, 'test': 192},
-    "plot_interval": 1,  #  State plot; 0 to disable plots
-    "state_save_interval": 20,
+    "TIMIT_derivative": 2,
+    # "n_examples": {'train': 10, 'val': 10, 'test': 2},
+    "n_examples": {'train': 3696, 'val': 400, 'test': 192},
+    "plot_interval": 3,  #  State plot; 0 to disable plots
+    "state_save_interval": 5,
     "plot_main": True,
     "plot_state": True,
     "plot_graph": False,

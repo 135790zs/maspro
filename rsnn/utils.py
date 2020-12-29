@@ -137,16 +137,18 @@ def initialize_weights(cfg, inp_size, tar_size):
 
     n_epochs = cfg["Epochs"] if cfg["Track_weights"] else 1
 
-    W["W"] = rng.random(size=(n_epochs,
+    W["W"] = rng.normal(size=(n_epochs,
                               cfg["n_directions"],
                               cfg["N_Rec"],
                               cfg["N_R"],
-                              cfg["N_R"] * 2,)) * 2 - 1
+                              cfg["N_R"] * 2,),
+                        scale=0.5)
 
-    W["W_out"] = rng.random(size=(n_epochs,
+    W["W_out"] = rng.normal(size=(n_epochs,
                                   cfg["n_directions"],
                                   tar_size,
-                                  cfg["N_R"],)) * 2 - 1
+                                  cfg["N_R"],),
+                            scale=0.25)
 
     if cfg["one_to_one_output"]:
         for s in range(cfg["n_directions"]):

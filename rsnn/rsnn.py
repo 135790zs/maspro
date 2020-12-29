@@ -192,15 +192,11 @@ def feed_batch(cfg, inps, tars, W_rec, W_out, b_out, eta, B, epoch, tvt_type, ad
 
         for w_type in ['W', 'W_out', 'b_out']:
             # Summing and dividing because `Track_synapse' defines if dw's
-            # are accumulated or listed
+            # are accumulated or listed  TODO: don't think this is correct, should take mean?
             gw = np.sum(final_model[f'g{w_type}'], axis=1) / this_inps.shape[0]
 
             batch_gW[w_type] += gw + L2_reg
 
-    if cfg["verbose"]:
-        print(f"\t\tCE:      {batch_err:.3f},\n"
-              f"\t\t% wrong: {100*batch_perc_wrong:.1f}%\n"
-              f"\t\tRate:    {1000*batch_spikerate:.1f} Hz")
     return batch_err, batch_perc_wrong, batch_gW, batch_spikerate
 
 
@@ -264,8 +260,6 @@ def main(cfg):
             eta *= (e+1)/cfg["ramping"]
 
         etas[e] = eta
-
-        print(f"Loss: {verr if verr else -1:.3f}, \tEta: {eta:.4f}")
 
         ep_curr = e if cfg["Track_weights"] else 0
 
