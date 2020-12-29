@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017/Debian) (preloaded format=pdflatex 2020.11.2)  22 DEC 2020 17:40
+This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017/Debian) (preloaded format=pdflatex 2020.11.2)  28 DEC 2020 16:19
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -2431,20 +2431,21 @@ Chapter 1.
 
 
 
-] [2]) [3] [4]
+] [2]) [3]
 \openout2 = `Chapters/Chapter02.aux'.
 
  (./Chapters/Chapter02.tex
 Chapter 2.
-[5
+[4
 
 
 
 
-] [6] [7] [8] [9] [10] [11] [12] [13]) [14] [15]
+] [5] [6] [7] [8] [9] [10] [11] [12] [13]) [14] [15]
 \openout2 = `Chapters/Chapter03.aux'.
 
- (./Chapters/Chapter03.tex
+
+(./Chapters/Chapter03.tex
 Chapter 3.
 [16
 
@@ -2740,10 +2741,10 @@ Package logreq Info: Writing requests to 'thesis.run.xml'.
 
  ) 
 Here is how much of TeX's memory you used:
- 47450 strings out of 492982
- 946624 string characters out of 6134896
+ 47459 strings out of 492982
+ 946771 string characters out of 6134896
  1499080 words of memory out of 5000000
- 49880 multiletter control sequences out of 15000+600000
+ 49889 multiletter control sequences out of 15000+600000
  566721 words of font info for 202 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  73i,23n,90p,10509b,2202s stack positions out of 5000i,500n,10000p,200000b,80000s
@@ -2766,7 +2767,7 @@ ublic/cm-super/sfrm1000.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfrm1
 095.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfrm1200.pfb></usr/share/
 texmf/fonts/type1/public/cm-super/sfti1095.pfb></usr/share/texmf/fonts/type1/pu
 blic/cm-super/sftt1095.pfb>
-Output written on thesis.pdf (62 pages, 649141 bytes).
+Output written on thesis.pdf (62 pages, 648729 bytes).
 PDF statistics:
  876 PDF objects out of 1000 (max. 8388607)
  683 compressed objects within 7 object streams

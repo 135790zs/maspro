@@ -2,14 +2,12 @@
 # TO DO (priority order):
 	# Reproduce Bellec  (37.1 wrongs on test)
 		* Identify weakness.
-		  * Track everything top-down in BIN task. Get intuition
-		  * Check TZ_in
-		  * Rate might be wrong because input is also counted.
 	# Sweep (intelligently, and with low-capacity) only after reproducing
 	# Implement optional L2 weight decay
 	# Track all run-based in own dict (etas, adam, weights, rates, metrics, etc). Subdict for train/val if applicable?
 	# Read literature, catalogue relevant information
 	# Work on thesis
+	# Read TODOs
 	# Implement Izhikevich neurons
 	# Explore non-uniform synaptic delays
 	# Explore membrane potential reset (Bellec Reset)
@@ -17,8 +15,21 @@
 	# Make N_R variable per layer
 	# Implement logging learning data (e.g. errs, LR, etc)
 	# Change into online learning rather than batch based.
+	# Fancy visualization (slider)
 	# Refactor
 	# Comment code
+
+# TODO for thesis:
+	# Read up on:
+		- BCM rule and spike-rate dependent plasticity
+		- Triplet-STDP
+		  - First-spike dominating model (Wang2020b/41)
+		  - Last-spike dominating model (Wang2020b/42)
+		- paired-pulse facilitation or -depression.
+		- Clopath rule
+		- 3F Hebbian overview
+	# Continue collecting facts from literature (In the 2020s, only Taherkani).
+	# Draft clear and logical structure for report. Base it off my central research question, and top-down into introduction etc.
 
 # IDEAS/NOTES
 	# Gradient capping?
@@ -42,4 +53,4 @@ Correctly overfitting on small sets
 Bellec reads out from all layers in multi-layer setup!!!!!!
 =========
 
-Global doesn't work well because of mean approx 0
+Global doesn't work well because of mean approx 0?
