@@ -2,11 +2,12 @@
 # TO DO (priority order):
 	# Reproduce Bellec  (37.1 wrongs on test)
 		* Identify weakness.
+		  - Are TZ's (and TZ_in) updating correctly?
+		  - Double check everything. Use Bellec and actual numbers to manually recalculate.
+		  - See if GPU works better now that np.wheres have been removed
 	# Sweep (intelligently, and with low-capacity) only after reproducing
 	# Implement optional L2 weight decay
 	# Track all run-based in own dict (etas, adam, weights, rates, metrics, etc). Subdict for train/val if applicable?
-	# Read literature, catalogue relevant information
-	# Work on thesis
 	# Read TODOs
 	# Implement Izhikevich neurons
 	# Explore non-uniform synaptic delays

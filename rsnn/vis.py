@@ -195,12 +195,12 @@ def plot_run(cfg, terrs, percs_wrong_t, verrs, percs_wrong_v, W, epoch, etas, sp
 
 
 def plot_state(cfg, M, B, W_rec, W_out, b_out, e, log_id, plot_weights=False):
-    S_plotvars = ["X", "I", "V", "U", "Z"]
+    S_plotvars = ["X", "I", "V", "U", "Z", "Z_prev"]
     if cfg["Track_synapse"]:
         S_plotvars += ["EVV", "EVU", "ET", "ETbar", "gW"]
-    S_plotvars += ["L_std", "L_reg"]
+    S_plotvars += ["L_std", "L_reg", "Y"]
 
-    M_plotvars = ["Y", "D", "Pmax", "T", "CE"]
+    M_plotvars = ["D", "Pmax", "T", "CE"]
     if cfg["n_directions"] > 1:
         M_plotvars = ["X", "Y"] + M_plotvars  # Show combined/corrected in, out
 

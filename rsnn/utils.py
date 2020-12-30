@@ -46,6 +46,8 @@ def initialize_model(cfg, length, tar_size):
 
     pruned_length = length if cfg["Track_synapse"] else 1
 
+    rng = np.random.default_rng(seed=cfg["seed"])
+
     M = {}
     neuron_shape = (cfg["n_directions"],
                     length,
@@ -80,7 +82,7 @@ def initialize_model(cfg, length, tar_size):
     for T_var in ["T", "P", "Pmax", "D"]:
         M[T_var] = np.zeros(shape=T_shape)
 
-    for neuronvar in ["Z", "Zbar", "I", "L_std", "L_reg", "spikerate"]:
+    for neuronvar in ["Z", "V", "Zbar", "Z_prev", "I", "L_std", "L_reg", "spikerate"]:
         M[neuronvar] = np.zeros(shape=neuron_shape)
 
     for weightvar in ["EVV", "EVU", "ET", "ETbar", 'gW']:
@@ -96,8 +98,8 @@ def initialize_model(cfg, length, tar_size):
         M[b_out_var] = np.zeros(shape=b_out_shape)
 
     M["U"] = np.ones(shape=neuron_shape) * cfg["thr"]
-    M["V"] = np.random.random(size=neuron_shape) * cfg["thr"]
-    M["H"] = np.random.random(size=neuron_shape) * cfg["gamma"]
+    # M["V"] = rng.random(size=neuron_shape) * cfg["thr"]  # TODO: Revert
+    M["H"] = rng.random(size=neuron_shape) * cfg["gamma"]
 
     M["TZ"] = np.ones(shape=neuron_timeless_shape) * -cfg["dt_refr"]
 
@@ -112,7 +114,7 @@ def initialize_model(cfg, length, tar_size):
         shape=(cfg["n_directions"] * cfg["N_Rec"] * cfg["N_R"]))
 
     M["is_ALIF"][:int(M["is_ALIF"].size * cfg["fraction_ALIF"])] = 1
-    np.random.shuffle(M["is_ALIF"])
+    rng.shuffle(M["is_ALIF"])
 
     M["is_ALIF"] = M["is_ALIF"].reshape(neuron_timeless_shape)
     return M
@@ -133,31 +135,42 @@ def initialize_weights(cfg, inp_size, tar_size):
     """
 
     W = {}
-    rng = np.random.default_rng()
+    rng = np.random.default_rng(seed=cfg["seed"])
 
     n_epochs = cfg["Epochs"] if cfg["Track_weights"] else 1
-
-    W["W"] = rng.normal(size=(n_epochs,
-                              cfg["n_directions"],
-                              cfg["N_Rec"],
-                              cfg["N_R"],
-                              cfg["N_R"] * 2,),
-                        scale=0.5)
-
-    W["W_out"] = rng.normal(size=(n_epochs,
+    if cfg["uniform_weights"]:
+        W["W"] = rng.random(size=(n_epochs,
                                   cfg["n_directions"],
-                                  tar_size,
-                                  cfg["N_R"],),
-                            scale=0.25)
+                                  cfg["N_Rec"],
+                                  cfg["N_R"],
+                                  cfg["N_R"] * 2)) * 2 - 1
+
+        W["W_out"] = rng.random(size=(n_epochs,
+                                      cfg["n_directions"],
+                                      tar_size,
+                                      cfg["N_R"])) * 2 - 1
+    else:
+        W["W"] = rng.normal(size=(n_epochs,
+                                  cfg["n_directions"],
+                                  cfg["N_Rec"],
+                                  cfg["N_R"],
+                                  cfg["N_R"] * 2,),
+                            scale=0.5)
+
+        W["W_out"] = rng.normal(size=(n_epochs,
+                                      cfg["n_directions"],
+                                      tar_size,
+                                      cfg["N_R"],),
+                                scale=0.25)
 
     if cfg["one_to_one_output"]:
         for s in range(cfg["n_directions"]):
             W["W_out"][0, s] = 0
             np.fill_diagonal(W["W_out"][0, s, :, tar_size:], 1)
 
-    W["b_out"] = np.zeros(shape=(n_epochs,
+    W["b_out"] = rng.random(size=(n_epochs,
                                  cfg["n_directions"],
-                                 tar_size,))
+                                 tar_size,)) * 2 - 1
 
     B_shape = (n_epochs,
                cfg["n_directions"],
@@ -184,7 +197,7 @@ def initialize_weights(cfg, inp_size, tar_size):
 
     # Randomly dropout a fraction of the (remaining) recurrent weights.
     # inps = W['W'][0]
-    W['W'][0] = np.where(np.random.random(W['W'][0].shape) < cfg["dropout"],
+    W['W'][0] = np.where(rng.random(W['W'][0].shape) < cfg["dropout"],
                          0,
                          W['W'][0])
     # W['W'][0] = inps
@@ -287,17 +300,17 @@ def normalize(arr):
 
 
 def eprop_Z(cfg, t, TZ, V, U, is_ALIF):
-    if cfg["fraction_ALIF"] == 1:
-        thr = cfg["thr"] + cfg["beta"] * U
-    elif cfg["fraction_ALIF"] == 0:
-        thr = cfg["thr"]
-    else:
-        thr = np.where(is_ALIF,
-                       cfg["thr"] + cfg["beta"] * U,
-                       cfg["thr"])
+    # if cfg["fraction_ALIF"] == 1:
+    #     thr = cfg["thr"] + cfg["beta"] * U
+    # elif cfg["fraction_ALIF"] == 0:
+    #     thr = cfg["thr"]
+    # else:
+    #     thr = np.where(is_ALIF,
+    #                    cfg["thr"] + cfg["beta"] * U,
+    #                    cfg["thr"])
 
     return np.where(np.logical_and(t - TZ >= cfg["dt_refr"],
-                                   V >= thr),
+                                   V >= cfg["thr"] + cfg["beta"] * U),
                     1,
                     0)
 
@@ -306,9 +319,17 @@ def eprop_I(W_rec, Z_in):
     return np.dot(W_rec, Z_in)
 
 
-def eprop_V(cfg, V, I, Z, t, TZ):
+def eprop_V(cfg, V, I, Z, U, t, TZ):
     if not cfg["traub_trick"]:
-        return cfg["alpha"] * V + I - Z * cfg["thr"]
+        # if cfg["fraction_ALIF"] == 1:
+        #     thr = cfg["thr"] + cfg["beta"] * U
+        # elif cfg["fraction_ALIF"] == 0:
+        #     thr = cfg["thr"]
+        # else:
+        #     thr = np.where(is_ALIF,  # TODO: Think about this!
+        #                    cfg["thr"] + cfg["beta"] * U,
+        #                    cfg["thr"])
+        return cfg["alpha"] * V + I - Z * (cfg["thr"] + cfg["beta"] * U)
     else:
         return (cfg["alpha"] * V
                 + I
@@ -317,13 +338,15 @@ def eprop_V(cfg, V, I, Z, t, TZ):
 
 
 def eprop_U(cfg, U, Z, is_ALIF):
-    if cfg["fraction_ALIF"] == 1:
-        return cfg["rho"] * U + Z
-    elif cfg["fraction_ALIF"] == 0:
-        return U
-    return np.where(is_ALIF,
-                    cfg["rho"] * U + Z,
-                    U)
+
+    return U + is_ALIF * ((cfg["rho"]) * U + Z)
+    # if cfg["fraction_ALIF"] == 1:
+    #     return cfg["rho"] * U + Z
+    # elif cfg["fraction_ALIF"] == 0:
+    #     return U
+    # return np.where(is_ALIF,
+    #                 cfg["rho"] * U + Z,
+    #                 U)
 
 
 def eprop_EVV(cfg, EVV, Z_in, t, TZ, TZ_in, Z):
@@ -334,6 +357,7 @@ def eprop_EVV(cfg, EVV, Z_in, t, TZ, TZ_in, Z):
     if not cfg["traub_trick"]:
         return cfg["alpha"] * EVV + Z_in
     else:
+        print("WARNING: UNCOMMENT TZ_IN")
         # Repeating to match EVV. Repeating axis differ because Z_in concerns presynaptics.
         Zrep = np.repeat(a=Z[:, np.newaxis], repeats=EVV.shape[1], axis=1)
         TZrep = np.repeat(a=TZ[:, np.newaxis], repeats=EVV.shape[1], axis=1)
@@ -346,75 +370,82 @@ def eprop_EVV(cfg, EVV, Z_in, t, TZ, TZ_in, Z):
                 + Z_inrep)
 
 
-def eprop_EVU(cfg, is_ALIF, H, Z_inbar, EVU):
-    """
-    ALIF: H_j * Zinbar_i + (rho - H_j * beta) * EVU_ji
-    LIF: N/A
-    checked
-    """
-    Hp = cfg["rho"] - H * cfg["beta"]
+# def eprop_EVU(cfg, is_ALIF, H, Z_inbar, EVU):
+#     """
+#     ALIF: H_j * Zinbar_i + (rho - H_j * beta) * EVU_ji
+#     LIF: N/A
+#     checked
+#     """
+#     # Hp = cfg["rho"] - H * cfg["beta"]
 
-    if cfg["fraction_ALIF"] == 1:
-        return np.outer(H, Z_inbar) + np.einsum("j, ji -> ji", Hp, EVU)
-    elif cfg["fraction_ALIF"] == 0:
-        return EVU
+#     # if cfg["fraction_ALIF"] == 1:
+#     #     return np.outer(H, Z_inbar) + np.einsum("j, ji -> ji", Hp, EVU)
+#     # elif cfg["fraction_ALIF"] == 0:
+#     #     return EVU
 
-    is_ALIF = np.repeat(a=is_ALIF[:, np.newaxis],
-                        repeats=is_ALIF.size*2,
-                        axis=1)
+#     # is_ALIF = np.repeat(a=is_ALIF[:, np.newaxis],
+#     #                     repeats=is_ALIF.size*2,
+#     #                     axis=1)
 
-    ret = np.where(is_ALIF,
-                   np.outer(H, Z_inbar) + np.einsum("j, ji -> ji", Hp, EVU),
-                   EVU)
-    return ret
+#     # ret = np.where(is_ALIF,
+#     #                np.outer(H, Z_inbar) + np.einsum("j, ji -> ji", Hp, EVU),
+#     #                EVU)
+
+#     return (np.outer(H, Z_inbar)
+#             + np.einsum("j, ji -> ji",
+#                         cfg["rho"] - H * cfg["beta"],
+#                         EVU)
+#             ) * np.repeat(a=is_ALIF[:, np.newaxis],
+#                           repeats=is_ALIF.size*2,
+#                           axis=1)
 
 
 def eprop_H(cfg, V, U, t, TZ, is_ALIF):  # TODO: 1/thr here? Traub and Bellec differ
-    if cfg["fraction_ALIF"] == 1:
-        thr = cfg["thr"] + cfg["beta"] * U
-    elif cfg["fraction_ALIF"] == 0:
-        thr = cfg["thr"]
-    else:
-        thr = np.where(is_ALIF,
-                       cfg["thr"] + cfg["beta"] * U,
-                       cfg["thr"])
+    # if cfg["fraction_ALIF"] == 1:
+    #     thr = cfg["thr"] + cfg["beta"] * U
+    # elif cfg["fraction_ALIF"] == 0:
+    #     thr = cfg["thr"]
+    # else:
+    #     thr = np.where(is_ALIF,
+    #                    cfg["thr"] + cfg["beta"] * U,
+    #                    cfg["thr"])
 
     if cfg["traub_trick"]:
         return np.where(t - TZ < cfg["dt_refr"],
             -cfg["gamma"],
             cfg["gamma"] * np.clip(
-            a=1 - (abs(V - thr) / cfg["thr"]),
+            a=1 - (abs(V - (cfg["thr"] + cfg["beta"] * U)) / cfg["thr"]),
             a_min=0,
             a_max=None))
     else:
         return 1 / cfg["thr"] * cfg["gamma"] * np.clip(
-            a=1 - (abs(V - thr) / cfg["thr"]),
+            a=1 - (abs(V - (cfg["thr"] + cfg["beta"] * U)) / cfg["thr"]),
             a_min=0,
             a_max=None)
 
 
-def eprop_ET(cfg, is_ALIF, H, EVV, EVU):
-    """
-    ET_ji = H_j * (EVV_ji - X)
-    X = - beta * EVU_ji if ALIF else 0
+# def eprop_ET(cfg, is_ALIF, H, EVV, EVU):
+#     """
+#     ET_ji = H_j * (EVV_ji - X)
+#     X = - beta * EVU_ji if ALIF else 0
 
-    checked for LIF and ALIF!
-    """
+#     checked for LIF and ALIF!
+#     """
 
-    if cfg["fraction_ALIF"] == 1:
-        return np.einsum("j, ji->ji", H, EVV - cfg["beta"] * EVU)
-    elif cfg["fraction_ALIF"] == 0:
-        return np.einsum("j, ji->ji", H, EVV)
+#     # if cfg["fraction_ALIF"] == 1:
+#     #     return np.einsum("j, ji->ji", H, EVV - cfg["beta"] * EVU)
+#     # elif cfg["fraction_ALIF"] == 0:
+#     #     return np.einsum("j, ji->ji", H, EVV)
 
-    is_ALIF = np.repeat(a=is_ALIF[:, np.newaxis],
-                        repeats=is_ALIF.size*2,
-                        axis=1)
+#     # is_ALIF = np.repeat(a=is_ALIF[:, np.newaxis],
+#     #                     repeats=is_ALIF.size*2,
+#     #                     axis=1)
 
-    ret = np.where(is_ALIF,  # Timesink!
-                   np.einsum("j, ji->ji", H, EVV - cfg["beta"] * EVU),
-                   np.einsum("j, ji->ji", H, EVV))
+#     # ret = np.where(is_ALIF,  # Timesink!
+#     #                np.einsum("j, ji->ji", H, EVV - cfg["beta"] * EVU),
+#     #                np.einsum("j, ji->ji", H, EVV))
 
-    return ret
+#     return np.einsum("j, ji->ji", H, EVV - cfg["beta"] * EVU)
 
 
 def eprop_Y(cfg, Y, W_out, Z_last, b_out):
@@ -433,42 +464,44 @@ def eprop_P(cfg, Y):
     return ret
 
 
-def eprop_CE(cfg, T, P, W_rec, W_out, B):
-    """ Has no effect on training, only serves as performance metric. """
+# def eprop_CE(cfg, T, P, W_rec, W_out, B):
+#     """ Has no effect on training, only serves as performance metric. """
 
-    return -np.sum(T * np.log(1e-30 + P))
-
-
-def eprop_gradient(wtype, L_std, L_reg, ETbar, D, Zbar_last):
-    """ Return the gradient of the weights. """
-    if wtype == "W":
-        return (np.einsum("rj,rji->rji", L_std, ETbar)
-                + np.einsum("rj,rji->rji", L_reg, np.ones(shape=ETbar.shape)))
-    elif wtype == "W_out":
-        return np.outer(D, Zbar_last)
-    elif wtype == "b_out":
-        return D
+#     return -np.sum(T * np.log(1e-30 + P))
 
 
-def eprop_DW(cfg, wtype, s, adamvars, gradient, eta):
-    eta = cfg["eta_b_out"] if wtype == "b_out" and cfg["eta_b_out"] is not None else eta
+# def eprop_gradient(wtype, L_std, L_reg, ETbar, D, Zbar_last):
+#     """ Return the gradient of the weights. """
+#     if wtype == "W":
+#         return (np.einsum("rj,rji->rji", L_std, ETbar)  # Checked correct
+#                 + np.repeat(L_reg[:, :, np.newaxis],
+#                             repeats=L_std.shape[-1]*2,
+#                             axis=2))  # Checked correct
+#     elif wtype == "W_out":
+#         return np.outer(D, Zbar_last)
+#     elif wtype == "b_out":
+#         return D
 
-    if cfg["optimizer"] == 'SGD':
-        return -eta * gradient
-    elif cfg["optimizer"] == 'Adam':
-        m = (cfg["adam_beta1"] * adamvars[f"m{wtype}"][s]
-             + (1 - cfg["adam_beta1"]) * gradient)
-        v = (cfg["adam_beta2"] * adamvars[f"v{wtype}"][s]
-             + (1 - cfg["adam_beta2"]) * (gradient ** 2))
-        f1 = m / ( 1 - cfg["adam_beta1"])
-        f2 = np.sqrt(v / (1 - cfg["adam_beta2"])) + cfg["adam_eps"]
-        ret = -eta * (f1 / f2)
-        return ret
+
+# def eprop_DW(cfg, wtype, s, adamvars, gradient, eta):
+#     eta = cfg["eta_b_out"] if wtype == "b_out" and cfg["eta_b_out"] is not None else eta
+
+#     if cfg["optimizer"] == 'SGD':
+#         return -eta * gradient
+#     elif cfg["optimizer"] == 'Adam':
+#         m = (cfg["adam_beta1"] * adamvars[f"m{wtype}"][s]
+#              + (1 - cfg["adam_beta1"]) * gradient)
+#         v = (cfg["adam_beta2"] * adamvars[f"v{wtype}"][s]
+#              + (1 - cfg["adam_beta2"]) * (gradient ** 2))
+#         f1 = m / ( 1 - cfg["adam_beta1"])
+#         f2 = np.sqrt(v / (1 - cfg["adam_beta2"])) + cfg["adam_eps"]
+#         ret = -eta * (f1 / f2)
+#         return ret
 
 
 def process_layer(cfg, M, t, s, r, W_rec):
     """ Process a single layer of the model at a single time step."""
-    # print(f"\nTime={t}")
+
     # If not tracking state, the time dimensions of synaptic variables have
     # length 1 and we overwrite those previous time steps at index 0.
     if cfg["Track_synapse"]:
@@ -480,98 +513,83 @@ def process_layer(cfg, M, t, s, r, W_rec):
         curr_t = 0
         next_t = 0
 
+    # Pad any input with zeros to make it length N_R. Used to be able to dot
+    # product with weights.
+    M["Z_prev"][s, t, r] = M['Z'][s, t, r-1] if r > 0 else \
+        np.pad(M[f'X{s}'][t],
+               (0, cfg["N_R"] - M[f'X{s}'].shape[1]))
+
+    M["Z_in"][s, t, r] = np.concatenate((M["Z_prev"][s, t, r], M['Z'][s, t-1, r]))
+
+    # Revert eprop functions EVV and V if using traub trick!
+    assert(not cfg["traub_trick"])
+
+    # EVV
+    M['EVV'][s, curr_t, r] = (cfg["alpha"] * M['EVV'][s, prev_t, r]
+                              + M["Z_in"][s, t-1, r])
+
+    # EVU
+    M['EVU'][s, curr_t, r] = (np.outer(M['H'][s, prev_t, r],
+                              M['Z_inbar'][s, t-1, r])
+                              + np.einsum("j, ji -> ji",
+                                          (cfg["rho"]
+                                           - (M['H'][s, prev_t, r]
+                                              * cfg["beta"])),
+                                          M['EVU'][s, prev_t, r])
+                              ) * np.repeat(
+                                  a=M['is_ALIF'][s, r][:, np.newaxis],
+                                  repeats=M['is_ALIF'][s, r].size*2,
+                                  axis=1)
+
+
+    # I
+    M['I'][s, t, r] = np.dot(W_rec, M["Z_in"][s, t, r])
+
+    # V
+    M['V'][s, t, r] =  cfg["alpha"] * M['V'][s, t-1, r] + M['I'][s, t, r] - M['Z'][s, t-1, r] * (cfg["thr"] + cfg["beta"] * M['U'][s, t-1, r])
+
+    # U
+    M['U'][s, t, r] = (M['U'][s, t-1, r]
+                         + (M['is_ALIF'][s, r]
+                            * ((cfg["rho"] - 1) * M['U'][s, t-1, r]
+                               + M['Z'][s, t-1, r])))
+
     # Update the spikes Z of the neurons.
-    # Refractory time must have passed and V should reach (ALIF corrected) thr.
-    M['Z'][s, t, r] = eprop_Z(cfg=cfg,
-                              t=t,
-                              TZ=M['TZ'][s, r],
-                              V=M['V'][s, t, r],
-                              U=M['U'][s, t, r],
-                              is_ALIF=M['is_ALIF'][s, r])
-    # print(f"Zj ({M['Z'][s, t, r].shape}) = {M['Z'][s, t, r]}")
+    M['Z'][s, t, r] = np.where(
+        np.logical_and(t - M['TZ'][s, r] >= cfg["dt_refr"],
+                       M['V'][s, t, r] >= (cfg["thr"]
+                                           + cfg["beta"] * M['U'][s, t, r])),
+        1,
+        0)
 
     # TZ is time of latest spike
     M['TZ'][s, r, M['Z'][s, t, r]==1] = t
 
-    # Pseudoderivative
+    # Pseudoderivative H
     M['H'][s, t, r] = eprop_H(cfg=cfg,
                               V=M['V'][s, t, r],
                               U=M['U'][s, t, r],
                               is_ALIF=M['is_ALIF'][s, r],
                               t=t,
                               TZ=M['TZ'][s, r])
-    # print(f"Hj ({M['H'][s, t, r].shape}) = {M['H'][s, t, r]}")
 
-    M['ET'][s, curr_t, r] = eprop_ET(cfg=cfg,
-                                     is_ALIF=M['is_ALIF'][s, r],
-                                     H=M['H'][s, t, r],
-                                     EVV=M['EVV'][s, curr_t, r],
-                                     EVU=M['EVU'][s, curr_t, r])
+    # ET
 
-    # print(f"e_ji ({M['ET'][s, curr_t, r].shape}) = {M['ET'][s, curr_t, r]}")
-    # print("Z_prev", Z_prev)
-    # print("Z", M['Z'][s, t, r])
-    # Z_prev is the spike array of the previous layer (or input if r==0).
-    # Pad any input with zeros to make it length N_R. Used to be able to dot
-    # product with weights.
-    Z_prev = M['Z'][s, t, r-1] if r > 0 else \
-        np.pad(M[f'X{s}'][t],
-               (0, cfg["N_R"] - len(M[f'X{s}'][t])))
-    M["Z_in"][s, t, r] = np.concatenate((Z_prev, M['Z'][s, t-1, r]))
-    # print("Dot", np.dot(W_rec, conc))
-    # print("W_rec", W_rec)
-    # M["Z_in"][s, t, r] = np.dot(W_rec, conc) != 0
-    # print("Z", M["Z_in"][s, t, r])
-    # print(f"Zi ({M['Z_in'][s, t, r].shape}) = {M['Z_in'][s, t, r]}")
-    # print()
+    M['ET'][s, curr_t, r] = np.einsum("j, ji->ji",
+                                      M['H'][s, t, r],
+                                      (M['EVV'][s, curr_t, r]
+                                       - cfg["beta"] * M['EVU'][s, curr_t, r]))
+
 
     # Input layer always "spikes" (with nonbinary spike values Z=X).
-    TZ_prev = M['TZ'][s, r-1] if r > 0 else \
-        np.ones(shape=(M['TZ'][s, r].shape)) * t
+    # TZ_prev = M['TZ'][s, r-1] if r > 0 else \
+    #     np.ones(shape=(M['TZ'][s, r].shape)) * t
 
-    M["TZ_in"][s, r] = np.concatenate((TZ_prev, M['TZ'][s, r]-1))
-
+    # M["TZ_in"][s, r] = np.concatenate((TZ_prev, M['TZ'][s, r]-1))
 
     M['Z_inbar'][s, t] = (cfg["alpha"] * (M['Z_inbar'][s, t-1] if t > 0 else 0)) + M['Z_in'][s, t]
-
-
-    M['I'][s, t, r] = eprop_I(W_rec=W_rec,
-                              Z_in=M["Z_in"][s, t, r])
-    # print(f"I ({M['I'][s, t, r].shape}) = {M['I'][s, t, r]}")
-
     M['ETbar'][s, curr_t, r] = cfg["kappa"] * (M['ETbar'][s, prev_t, r] if t > 0 else 0) + M['ET'][s, curr_t, r]
-
     M['Zbar'][s, t, r] = cfg["kappa"] * (M['Zbar'][s, t-1, r] if t > 0 else 0) + M['Z'][s, t, r]
-
-    if t < M[f"X{s}"].shape[0] - 1:
-
-        # Eligibility vector
-        M['EVV'][s, next_t, r] = eprop_EVV(cfg=cfg,
-                                           EVV=M['EVV'][s, curr_t, r],
-                                           Z_in=M["Z_in"][s, t, r],
-                                           Z=M['Z'][s, t, r],
-                                           TZ=M['TZ'][s, r],
-                                           TZ_in=M['TZ_in'][s, r],
-                                           t=t)
-
-        M['EVU'][s, next_t, r] = eprop_EVU(cfg=cfg,
-                                           Z_inbar=M['Z_inbar'][s, t, r],
-                                           EVU=M['EVU'][s, curr_t, r],
-                                           H=M['H'][s, curr_t, r],
-                                           is_ALIF=M['is_ALIF'][s, r])
-
-        M['V'][s, t+1, r] = eprop_V(cfg=cfg,
-                                    V=M['V'][s, t, r],
-                                    I=M['I'][s, t, r],
-                                    Z=M['Z'][s, t, r],
-                                    TZ=M['TZ'][s, r],
-                                    t=t)
-
-
-        M['U'][s, t+1, r] = eprop_U(cfg=cfg,
-                                    U=M['U'][s, t, r],
-                                    Z=M['Z'][s, t, r],
-                                    is_ALIF=M['is_ALIF'][s, r])
 
     return M
 
@@ -649,7 +667,6 @@ def get_elapsed_time(cfg, start_time, e, b, batch_size):
 def eprop_FR_reg(cfg, rates, ETbar, t):
     ret = eta * cfg["FR_reg"] * np.sum()
     return ret
-
 
 
 def interpolate_inputs(inp, tar, stretch):

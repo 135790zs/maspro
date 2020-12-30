@@ -6,6 +6,8 @@ import vis
 
 
 def network(cfg, inp, tar, W_rec, W_out, b_out, B, adamvars, eta):
+
+
     inp = np.pad(array=inp, mode='edge', pad_width=((0, cfg["delay"]), (0, 0)))
 
     n_steps = inp.shape[0]
@@ -30,16 +32,15 @@ def network(cfg, inp, tar, W_rec, W_out, b_out, B, adamvars, eta):
             for r in range(cfg['N_Rec']):
                 M = ut.process_layer(cfg=cfg,
                                      M=M,
-                                     s=s,
                                      t=t,
+                                     s=s,
                                      r=r,
                                      W_rec=W_rec[s, r])
 
-            M['Y'][s, t] = ut.eprop_Y(cfg=cfg,
-                                      Y=M['Y'][s, t-1] if t > 0 else 0,
-                                      W_out=W_out[s],
-                                      Z_last=M['Z'][s, t, -1],
-                                      b_out=b_out[s])
+            M['Y'][s, t] = (
+                cfg["kappa"] * (M['Y'][s, t-1] if t > 0 else 0)
+                + np.sum(W_out[s] * M['Z'][s, t, -1], axis=1)
+                + b_out[s])
 
         # Shared output layer, so step out of subnetwork loop.
         Ysum = np.sum(M['Y'][:, t], axis=0)
@@ -48,22 +49,18 @@ def network(cfg, inp, tar, W_rec, W_out, b_out, B, adamvars, eta):
 
         M['Pmax'][t, M['P'][t].argmax()] = 1
 
-        M['CE'][t] = ut.eprop_CE(cfg=cfg,
-                                 T=M['T'][t],
-                                 P=M['P'][t],
-                                 W_rec=W_rec,
-                                 W_out=W_out,
-                                 B=B)
+        M['CE'][t] = -np.sum(M['T'][t] * np.log(1e-30 + M['P'][t]))
 
         if cfg["Track_synapse"]:
             curr_t = t
         else:
             curr_t = 0
 
+        M['D'][t] = M['P'][t] - M['T'][t]
+
         # Calculate weight updates for all subnetworks
         for s in range(cfg["n_directions"]):
-            M['D'][t] = M['P'][t] - M['T'][t]
-            L_std = np.dot(B[s], M['D'][t])
+            L_std = np.einsum("rjk, k -> rj", B[s], M['D'][t])  # Checked correct
 
             if t:
                 rates = np.mean(M['Z'][s, :t], axis=0)
@@ -79,24 +76,20 @@ def network(cfg, inp, tar, W_rec, W_out, b_out, B, adamvars, eta):
             M['L_std'][s, t] = L_std
             M['L_reg'][s, t] = L_reg
 
-            # Calculate gradient and weight update
-            # TODO: make into iterable
-            for wtype in ["W", "W_out", "b_out"]:
-                if not cfg["update_bias"] and wtype == "b_out":
-                    continue
-                if not cfg["update_W_out"] and wtype == "W_out":
-                    continue
+            M[f'gW'][s, curr_t] += (
+                np.einsum("rj,rji->rji",
+                          M['L_std'][s, t],
+                          M['ETbar'][s, curr_t])  # Checked correct
+                + np.repeat(M['L_reg'][s, t][:, :, np.newaxis],
+                            repeats=cfg["N_R"]*2,
+                            axis=2))  # Checked correct
 
 
-                grad = ut.eprop_gradient(wtype=wtype,
-                                         D=M['D'][t],
-                                         L_std=M['L_std'][s, t],
-                                         L_reg=M['L_reg'][s, t],
-                                         ETbar=M['ETbar'][s, curr_t],
-                                         Zbar_last=M['Zbar'][s, t, -1])
+            if cfg["update_W_out"]:
+                M[f'gW_out'][s, curr_t] += np.outer(M['D'][t], M['Zbar'][s, t, -1])
 
-                M[f'g{wtype}'][s, curr_t] += grad
-
+            if cfg["update_bias"]:
+                M[f'gb_out'][s, curr_t] += M['D'][t]
 
         if cfg["plot_graph"]:
             vis.plot_graph(
@@ -106,7 +99,7 @@ def network(cfg, inp, tar, W_rec, W_out, b_out, B, adamvars, eta):
     return M
 
 
-def feed_batch(cfg, inps, tars, W_rec, W_out, b_out, eta, B, epoch, tvt_type, adamvars, e, log_id, start_time=None):
+def feed_batch(cfg, inps, tars, W_rec, W_out, b_out, eta, B, tvt_type, adamvars, e, log_id, start_time=None):
     batch_err = 0
     batch_perc_wrong = 0
     batch_spikerate = 0
@@ -131,7 +124,7 @@ def feed_batch(cfg, inps, tars, W_rec, W_out, b_out, eta, B, epoch, tvt_type, ad
             plustime, remtime = ut.get_elapsed_time(cfg=cfg, b=b, start_time=start_time, batch_size=inps.shape[0], e=e)
 
             print((f"({log_id})\t+{plustime}{remtime}\t"
-                   f"Epoch {epoch}/{cfg['Epochs']-1}\t" if tvt_type != 'test'
+                   f"Epoch {e}/{cfg['Epochs']-1}\t" if tvt_type != 'test'
                    else '\t'),
                   f"{'  ' if tvt_type == 'val' else ''}{tvt_type} "
                   f"sample {b+1}/{inps.shape[0]}",
@@ -153,7 +146,6 @@ def feed_batch(cfg, inps, tars, W_rec, W_out, b_out, eta, B, epoch, tvt_type, ad
         this_inps, this_tars = ut.interpolate_inputs(inp=this_inps,
                                                      tar=this_tars,
                                                      stretch=cfg["Repeats"])
-
         final_model = network(
             cfg=cfg,
             inp=this_inps,
@@ -191,11 +183,8 @@ def feed_batch(cfg, inps, tars, W_rec, W_out, b_out, eta, B, epoch, tvt_type, ad
             b_out.flatten())))
 
         for w_type in ['W', 'W_out', 'b_out']:
-            # Summing and dividing because `Track_synapse' defines if dw's
-            # are accumulated or listed  TODO: don't think this is correct, should take mean?
-            gw = np.sum(final_model[f'g{w_type}'], axis=1) / this_inps.shape[0]
-
-            batch_gW[w_type] += gw + L2_reg
+            gw = np.sum(final_model[f'g{w_type}'], axis=1)  # Checked correct
+            batch_gW[w_type] += (gw + L2_reg) / inps.shape[0]  # Divide to correct for batch size
 
     return batch_err, batch_perc_wrong, batch_gW, batch_spikerate
 
@@ -216,6 +205,8 @@ def main(cfg):
         tars[tvt_type] = np.load(f"{cfg['phns_fname']}_{tvt_type}_{cfg['task']}.npy")
 
     log_id = ut.get_log_id()
+
+    rng = np.random.default_rng(seed=cfg["seed"])
 
     ut.prepare_log(cfg=cfg, log_id=log_id)
 
@@ -251,6 +242,13 @@ def main(cfg):
 
 
     for e in range(0, cfg["Epochs"]):
+        if cfg["Track_weights"]:
+            ep_curr = e
+            ep_incr = 1
+        else:
+            ep_curr = 0
+            ep_incr = 0
+
         if verr is None or cfg["eta_init_loss"] <= 0:
             eta = cfg["eta_init"]
         else:
@@ -261,14 +259,11 @@ def main(cfg):
 
         etas[e] = eta
 
-        ep_curr = e if cfg["Track_weights"] else 0
-
         # Make batch
-        randidxs = np.random.randint(inps['train'].shape[0],
-                                     size=cfg["batch_size_train"])
+        randidxs = rng.integers(inps['train'].shape[0],
+                                size=cfg["batch_size_train"])
 
         terr, perc_wrong_t, gW, spikerate = feed_batch(
-            epoch=e,
             tvt_type='train',
             cfg=cfg,
             inps=inps['train'][randidxs],
@@ -287,11 +282,11 @@ def main(cfg):
         percs_wrong_t[e] = perc_wrong_t
         spikerates[e] = spikerate
 
+        # Validation
         if e % cfg["val_every_E"] == 0:
-            randidxs = np.random.randint(inps['val'].shape[0],
-                                         size=cfg["batch_size_val"])
+            randidxs = rng.integers(inps['val'].shape[0],
+                                    size=cfg["batch_size_val"])
             verr, perc_wrong_v, _, _ = feed_batch(
-                epoch=e,
                 tvt_type='val',
                 cfg=cfg,
                 inps=inps['val'][randidxs],
@@ -326,20 +321,13 @@ def main(cfg):
                          verrs=verrs, percs_wrong_v=percs_wrong_v,
                          etas=etas, spikerates=spikerates,
                          W=W, epoch=e, log_id=log_id, inp_size=inps['train'].shape[-1])
-
+        # Dont update weights in last epoch
         if e == cfg['Epochs'] - 1:
             break
 
-        if cfg["Track_weights"]:
-            ep_curr = e
-            ep_incr = 1
-        else:
-            ep_curr = 0
-            ep_incr = 0
-
         # Calculate DWs
         for wtype in W.keys():
-            if wtype == "B":
+            if wtype == "B":  # There's no DW for B. B is updated differently.
                 continue
             if cfg["optimizer"] == "Adam":
                 # Update Adam for W, W_out, b_out
@@ -413,13 +401,12 @@ def main(cfg):
         print("\nTraining complete!\n")
 
     # Make test batch
-    randidxs = np.random.randint(inps['val'].shape[0],
-                                 size=cfg["batch_size_test"])
+    randidxs = rng.integers(inps['val'].shape[0],
+                            size=cfg["batch_size_test"])
 
     optW = ut.load_weights(log_id=log_id)
 
     total_testerr, perc_wrong_test, _, _ = feed_batch(
-        epoch=1,
         tvt_type='test',
         cfg=cfg,
         inps=inps['val'][randidxs],
@@ -429,7 +416,7 @@ def main(cfg):
         b_out=optW['b_out'],
         B=optW['B'],
         adamvars=adamvars,
-        e=e,
+        e=1,
         log_id=log_id,
         eta=eta,
         start_time=start_time)
