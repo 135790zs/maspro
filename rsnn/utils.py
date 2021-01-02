@@ -1,6 +1,7 @@
 import time
 import os
 import numpy as np
+from numba import jit
 import datetime
 import json
 from scipy.interpolate import interp1d
@@ -117,6 +118,15 @@ def initialize_model(cfg, length, tar_size):
     rng.shuffle(M["is_ALIF"])
 
     M["is_ALIF"] = M["is_ALIF"].reshape(neuron_timeless_shape)
+
+    M["is_ALIF_r"] = np.zeros(
+        shape=(cfg["n_directions"], cfg["N_Rec"], cfg["N_R"], cfg["N_R"]*2))
+    for s in range(cfg["n_directions"]):
+        for r in range(cfg["N_Rec"]):
+            M["is_ALIF_r"][s, r] = np.repeat(a=M['is_ALIF'][s, r][:, np.newaxis],
+                                             repeats=M['is_ALIF'][s, r].size*2,
+                                             axis=1)
+
     return M
 
 
@@ -149,6 +159,9 @@ def initialize_weights(cfg, inp_size, tar_size):
                                       cfg["n_directions"],
                                       tar_size,
                                       cfg["N_R"])) * 2 - 1
+        W["b_out"] = np.zeros(shape=(n_epochs,
+                                     cfg["n_directions"],
+                                     tar_size,))
     else:
         W["W"] = rng.normal(size=(n_epochs,
                                   cfg["n_directions"],
@@ -162,15 +175,15 @@ def initialize_weights(cfg, inp_size, tar_size):
                                       tar_size,
                                       cfg["N_R"],),
                                 scale=0.25)
-
+        W["b_out"] = rng.random(size=(n_epochs,
+                                     cfg["n_directions"],
+                                     tar_size,)) * 2 - 1
     if cfg["one_to_one_output"]:
+        assert tar_size <= cfg["N_R"]
+        W["W_out"][0] = 0
         for s in range(cfg["n_directions"]):
-            W["W_out"][0, s] = 0
-            np.fill_diagonal(W["W_out"][0, s, :, tar_size:], 1)
+            np.fill_diagonal(W["W_out"][0, s, :, :], 1)
 
-    W["b_out"] = rng.random(size=(n_epochs,
-                                 cfg["n_directions"],
-                                 tar_size,)) * 2 - 1
 
     B_shape = (n_epochs,
                cfg["n_directions"],
@@ -209,6 +222,11 @@ def initialize_weights(cfg, inp_size, tar_size):
 
     W['W'][0, :, 0] *= cfg["weight_scaling"]
 
+    if cfg["load_checkpoints"]:
+        checkpoint = load_weights(log_id=cfg["load_checkpoints"], parent_dir='vault')
+        for wtype, arr in checkpoint.items():
+            W[wtype][0] = arr
+
     return W
 
 
@@ -239,7 +257,7 @@ def save_weights(W, epoch, log_id):
         np.save(f"../log/{log_id}/checkpoints/{k}", v[epoch])
 
 
-def load_weights(log_id):
+def load_weights(log_id, parent_dir='log'):
     """ Load weights from file to be used in network again.
 
     Mainly used for testing purposes, because the weights corresponding
@@ -247,7 +265,7 @@ def load_weights(log_id):
     """
 
     W = {}
-    for subdir, _, files in os.walk(f"../log/{log_id}/checkpoints"):
+    for subdir, _, files in os.walk(f"../{parent_dir}/{log_id}/checkpoints"):
         for filename in files:
             filepath = subdir + os.sep + filename
             W[filename[:-4]] = np.load(filepath)  # cut off '.npy'
@@ -498,6 +516,11 @@ def eprop_P(cfg, Y):
 #         ret = -eta * (f1 / f2)
 #         return ret
 
+# @jit(nopython=True)
+def einsum(a,b):
+    return (a*b.T).T
+    # return
+
 
 def process_layer(cfg, M, t, s, r, W_rec):
     """ Process a single layer of the model at a single time step."""
@@ -528,19 +551,17 @@ def process_layer(cfg, M, t, s, r, W_rec):
     M['EVV'][s, curr_t, r] = (cfg["alpha"] * M['EVV'][s, prev_t, r]
                               + M["Z_in"][s, t-1, r])
 
-    # EVU
+    # EVU (timesink)
     M['EVU'][s, curr_t, r] = (np.outer(M['H'][s, prev_t, r],
                               M['Z_inbar'][s, t-1, r])
-                              + np.einsum("j, ji -> ji",
-                                          (cfg["rho"]
-                                           - (M['H'][s, prev_t, r]
-                                              * cfg["beta"])),
-                                          M['EVU'][s, prev_t, r])
-                              ) * np.repeat(
-                                  a=M['is_ALIF'][s, r][:, np.newaxis],
-                                  repeats=M['is_ALIF'][s, r].size*2,
-                                  axis=1)
-
+                              # + np.einsum("j, ji -> ji",
+                              #             (cfg["rho"]
+                              #              - (M['H'][s, prev_t, r]
+                              #                 * cfg["beta"])),
+                              #             M['EVU'][s, prev_t, r])
+                              + einsum(a=cfg["rho"] - M['H'][s, prev_t, r] * cfg["beta"],
+                                       b=M['EVU'][s, prev_t, r])
+                              ) * M["is_ALIF_r"][s, r]
 
     # I
     M['I'][s, t, r] = np.dot(W_rec, M["Z_in"][s, t, r])
@@ -574,11 +595,9 @@ def process_layer(cfg, M, t, s, r, W_rec):
                               TZ=M['TZ'][s, r])
 
     # ET
-
-    M['ET'][s, curr_t, r] = np.einsum("j, ji->ji",
-                                      M['H'][s, t, r],
-                                      (M['EVV'][s, curr_t, r]
-                                       - cfg["beta"] * M['EVU'][s, curr_t, r]))
+    M['ET'][s, curr_t, r] = einsum(a=M['H'][s, t, r],
+                                   b=(M['EVV'][s, curr_t, r]
+                                      - cfg["beta"] * M['EVU'][s, curr_t, r]))
 
 
     # Input layer always "spikes" (with nonbinary spike values Z=X).

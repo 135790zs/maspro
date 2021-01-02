@@ -125,14 +125,15 @@ def plot_run(cfg, terrs, percs_wrong_t, verrs, percs_wrong_v, W, epoch, etas, sp
                                    fontsize=fontsize)
             else:
                 # W_in
+                a = weights[:epoch, :, 0, :, :inp_size]
                 axs[-1].imshow(
-                    weights_to_img(np.mean(weights[:epoch, :, 0, :, :inp_size], axis=3)),
+                    weights_to_img(np.mean(a, axis=3)),
                     aspect='auto',
                     interpolation='nearest',
                     cmap='coolwarm')
                 axs[-1].set_ylabel(f"W_in"
-                                   f"\n{np.min(weights[:epoch, :, 0, :, :inp_size]):.1e}"
-                                   f"\n{np.max(weights[:epoch, :, 0, :, :inp_size]):.1e}",
+                                   f"\n{np.min(a):.1e}"
+                                   f"\n{np.max(a):.1e}",
                                    rotation=0,
                                    labelpad=labelpad,
                                    fontsize=fontsize)
@@ -172,14 +173,15 @@ def plot_run(cfg, terrs, percs_wrong_t, verrs, percs_wrong_v, W, epoch, etas, sp
                                    fontsize=fontsize)
 
                 axs.append(fig.add_subplot(gsc[len(axs), :]))
+                a = W_rec1 - W_rec0
                 axs[-1].imshow(
-                    weights_to_img(W_rec1 - W_rec0),
+                    weights_to_img(a),
                     aspect='auto',
                     interpolation='nearest',
                     cmap='coolwarm')
                 axs[-1].set_ylabel(f"DW_rec"
-                                   f"\n{np.min(W_rec1 - W_rec0):.1e}"
-                                   f"\n{np.max(W_rec1 - W_rec0):.1e}",
+                                   f"\n{np.min(a):.1e}"
+                                   f"\n{np.max(a):.1e}",
                                    rotation=0,
                                    labelpad=labelpad,
                                    fontsize=fontsize)
@@ -195,7 +197,7 @@ def plot_run(cfg, terrs, percs_wrong_t, verrs, percs_wrong_v, W, epoch, etas, sp
 
 
 def plot_state(cfg, M, B, W_rec, W_out, b_out, e, log_id, plot_weights=False):
-    S_plotvars = ["X", "I", "V", "U", "Z", "Z_prev"]
+    S_plotvars = ["X", "I", "V", "U", "Z"]
     if cfg["Track_synapse"]:
         S_plotvars += ["EVV", "EVU", "ET", "ETbar", "gW"]
     S_plotvars += ["L_std", "L_reg", "Y"]

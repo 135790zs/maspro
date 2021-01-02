@@ -9,9 +9,11 @@
 	# Implement optional L2 weight decay
 	# Track all run-based in own dict (etas, adam, weights, rates, metrics, etc). Subdict for train/val if applicable?
 	# Read TODOs
+	# Vectorize as much as possible to speed up. Make sure to check for same functionality!
 	# Implement Izhikevich neurons
 	# Explore non-uniform synaptic delays
 	# Explore membrane potential reset (Bellec Reset)
+	# Concatenate low-pass filter to input vectors?
 	# Make it possible to use fewer than N_I N_Rs
 	# Make N_R variable per layer
 	# Implement logging learning data (e.g. errs, LR, etc)

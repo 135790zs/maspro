@@ -1,17 +1,18 @@
 from numpy import exp
 cfg = {
     "verbose": True,
-    "eprop_type": "random",  # in {global, random, symmetric, adaptive}
+    "eprop_type": "symmetric",  # in {global, random, symmetric, adaptive}
     "optimizer": 'Adam',  # in {Adam, SGD}
     "traub_trick": False,
-    "fraction_ALIF": 0.25,  # def 0.25
+    "fraction_ALIF": 1,  # def 0.25
     "n_directions": 2,
     "delay": 0,
     "seed": 42,  # 'None' for random seed
+    "load_checkpoints": None,
 
-    "alpha": 0.951,  # Bellec1: 20 = 0.951
-    "rho": 0.995,  # Bellec1: 200 = 0.995
-    "kappa": 0.717,  # Bellec1: 3 = 0.717
+    "alpha": 0.779,  # Bellec1: 20 = 0.951. 4: 0.779
+    "rho": 0.975,  # Bellec1: 200 = 0.995. 40: 0.975
+    "kappa": 0.779,  # Bellec1: 3 = 0.717. .75:~0.25
     "beta": 1.8,    # Bellecs: 1.8. Adaptive strength. 0 = LIF
     "gamma": 0.3,     # Bellecs: 0.3.
     "eta_b_out": None,  # None=no sep. eta. Otherwise=Constant
@@ -19,15 +20,15 @@ cfg = {
     "eta_slope": 0.8,      # Slope defining relation between Verr and eta (1e-2 for TIMIT)
     "eta_init_loss": 0,  # 0 to disable annealing. This is the cap below which annealing to 0 takes place.
     "ramping": 0,  # Ramps eta linearly from 0 to init between epoch 0 and this one. 0 to disable.
-    "thr": 1.6,        # Bellec1: unknown. Bellec2: 1.6?
+    "thr": 1,        # Bellec1: unknown. Bellec2: 1.6?
     "dt_refr": 2,    # Bellec1: 2
     "weight_decay": 1e-2,  # Bellec1: 0. Bellec2: 1e-2. For W_out and B, only if adaptive.
     "L2_reg": 0,  # Bellec1: 0. Bellec2: 1e-5
     "FR_target": 1e-2,  # Bellecs: 1e-2
-    "FR_reg": 10,  # Bellec1: 1. Bellec2: 50.
-    "dropout": 0.8,  # of recurrent (excl inputs)
+    "FR_reg": 1,  # Bellec1: 1. Bellec2: 50.
+    "dropout": 0,  # of recurrent (excl inputs)
     "softmax_factor": 1,  # Bellecs: 1
-    "weight_scaling": 1,  # Bellecs: 1
+    "weight_scaling": 0.5,  # Bellecs: 1
     "uniform_weights": True,
     "adam_beta1": 0.9,
     "adam_beta2": 0.999,
@@ -38,30 +39,31 @@ cfg = {
     "update_W": True,
     "update_bias": True,
     "update_W_out": True,
-    "one_to_one_output": False,
+    "one_to_one_output": True,
     "update_dead_weights": False,
 
-    "N_R": 400,
+    "N_R": 64,
     "N_Rec": 1,
 
-    "task": "TIMIT",
+    "task": "TIMIT_small",
     "wavs_fname": "../data/data_wavs",
     "phns_fname": "../data/data_phns",
 
-    "Epochs": 100,  # def = 80
+    "Epochs": 300,  # def = 80
     "Track_weights": True,
     "Track_synapse": False,  # Only for nonweight synapse vars (e.g. ET)
-    "Repeats": 5,  # ms per epoch, def = 5
-    "batch_size_train": 32,  # def = 32
-    "batch_size_val": 32,  # def = 32
+    "Repeats": 1,  # ms per epoch, def = 5
+    "batch_size_train": 4,  # def = 32
+    "batch_size_val": 4,  # def = 32
     "batch_size_test": 32,  # def = 32
     "val_every_E": 5,
     "maxlen": 778,  #def 778, Don't forget to re-run process_timit.py!
     "TIMIT_derivative": 0,
-    "n_examples": {'train': 1, 'val': 1, 'test': 2},
+    "n_examples": {'train': 20, 'val': 20, 'test': 2},
     # "n_examples": {'train': 3696, 'val': 400, 'test': 192},
-    "plot_interval": 5,  #  State plot; 0 to disable plots
+    "plot_state_interval": 5,  #  State plot; 0 to disable plots
     "state_save_interval": 5,
+    "plot_run_interval": 5,
     "plot_main": True,
     "plot_state": True,
     "plot_graph": False,

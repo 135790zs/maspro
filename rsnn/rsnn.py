@@ -7,7 +7,6 @@ import vis
 
 def network(cfg, inp, tar, W_rec, W_out, b_out, B, adamvars, eta):
 
-
     inp = np.pad(array=inp, mode='edge', pad_width=((0, cfg["delay"]), (0, 0)))
 
     n_steps = inp.shape[0]
@@ -25,7 +24,7 @@ def network(cfg, inp, tar, W_rec, W_out, b_out, B, adamvars, eta):
         M[f"X1"] = np.flip(inp, axis=0)
 
     for t in range(n_steps-1):
-
+        start = time.time()
         for s in range(cfg["n_directions"]):
 
             # Input is nonzero for first layer
@@ -60,37 +59,36 @@ def network(cfg, inp, tar, W_rec, W_out, b_out, B, adamvars, eta):
 
         # Calculate weight updates for all subnetworks
         for s in range(cfg["n_directions"]):
-            L_std = np.einsum("rjk, k -> rj", B[s], M['D'][t])  # Checked correct
+
+            M['L_std'][s, t] = np.einsum("rjk, k -> rj",
+                                         B[s],
+                                         M['D'][t])  # Checked correct
 
             if t:
                 rates = np.mean(M['Z'][s, :t], axis=0)
                 M['spikerate'][s, t] = rates
 
-                L_reg = (cfg["FR_reg"]
+                M['L_reg'][s, t] = (cfg["FR_reg"]
                          * (t/n_steps) * 0.5
                          * (rates - cfg["FR_target"]))
 
             else:
-                L_reg = 0
+                M['L_reg'][s, t] = 0
 
-            M['L_std'][s, t] = L_std
-            M['L_reg'][s, t] = L_reg
+            for r in range(cfg["N_Rec"]):
+                M[f'gW'][s, curr_t, r] += ut.einsum(a=M['L_std'][s, t, r],
+                                                    b=M['ETbar'][s, curr_t, r])  # Checked correct
 
-            M[f'gW'][s, curr_t] += (
-                np.einsum("rj,rji->rji",
-                          M['L_std'][s, t],
-                          M['ETbar'][s, curr_t])  # Checked correct
-                + np.repeat(M['L_reg'][s, t][:, :, np.newaxis],
-                            repeats=cfg["N_R"]*2,
-                            axis=2))  # Checked correct
-
+            M[f'gW'][s, curr_t] += np.repeat(
+                M['L_reg'][s, t][:, :, np.newaxis],
+                repeats=cfg["N_R"]*2,
+                axis=2)  # Checked correct
 
             if cfg["update_W_out"]:
                 M[f'gW_out'][s, curr_t] += np.outer(M['D'][t], M['Zbar'][s, t, -1])
 
             if cfg["update_bias"]:
                 M[f'gb_out'][s, curr_t] += M['D'][t]
-
         if cfg["plot_graph"]:
             vis.plot_graph(
                 cfg=cfg, M=M, s=s, t=t, W_rec=W_rec, W_out=W_out)
@@ -114,7 +112,6 @@ def feed_batch(cfg, inps, tars, W_rec, W_out, b_out, eta, B, tvt_type, adamvars,
         'B': np.zeros(
             shape=(cfg["n_directions"], cfg["N_Rec"], cfg["N_R"], tars.shape[-1],)),
     }
-
     for b in range(inps.shape[0]):
         if not cfg["verbose"]:
             print(f"ep {e}/{cfg['Epochs']}; \t "
@@ -146,6 +143,7 @@ def feed_batch(cfg, inps, tars, W_rec, W_out, b_out, eta, B, tvt_type, adamvars,
         this_inps, this_tars = ut.interpolate_inputs(inp=this_inps,
                                                      tar=this_tars,
                                                      stretch=cfg["Repeats"])
+
         final_model = network(
             cfg=cfg,
             inp=this_inps,
@@ -158,7 +156,7 @@ def feed_batch(cfg, inps, tars, W_rec, W_out, b_out, eta, B, tvt_type, adamvars,
             eta=eta)
 
         if (cfg['plot_state'] and b == 0 and tvt_type == "train"
-            and cfg["plot_interval"] and e % cfg["plot_interval"] == 0):
+            and cfg["plot_state_interval"] and e % cfg["plot_state_interval"] == 0):
             vis.plot_state(cfg=cfg,
                            M=final_model,
                            B=B,
@@ -219,7 +217,6 @@ def main(cfg):
     spikerates = np.ones(shape=(cfg["Epochs"])) * -1
 
     optVerr = None
-
     W = ut.initialize_weights(cfg=cfg,
                               inp_size=inps['train'].shape[-1],
                               tar_size=tars['train'].shape[-1])
@@ -316,7 +313,7 @@ def main(cfg):
             verrs[:e+1] = ut.interpolate_verrs(verrs[:e+1])
             percs_wrong_v[:e+1] = ut.interpolate_verrs(percs_wrong_v[:e+1])
 
-        if cfg["plot_main"]:
+        if cfg["plot_run_interval"] and e % cfg["plot_run_interval"] == 0:
             vis.plot_run(cfg=cfg, terrs=terrs, percs_wrong_t=percs_wrong_t,
                          verrs=verrs, percs_wrong_v=percs_wrong_v,
                          etas=etas, spikerates=spikerates,
@@ -337,12 +334,12 @@ def main(cfg):
                 adamvars[f'v{wtype}'] = (
                     cfg["adam_beta2"] * adamvars[f'v{wtype}']
                     + (1 - cfg["adam_beta2"]) * gW[wtype] ** 2)
+                m = adamvars[f'm{wtype}'] / (1 - cfg["adam_beta1"])
+                v = adamvars[f'v{wtype}'] / (1 - cfg["adam_beta2"])
 
                 # Calculate DWs
                 DW[wtype] = (-(eta if wtype != "b_out" or cfg["eta_b_out"] is None else cfg["eta_b_out"])
-                             * (adamvars[f'm{wtype}']
-                                / (np.sqrt(adamvars[f'v{wtype}'])
-                                   + cfg["adam_eps"])))
+                             * (m / (np.sqrt(v) + cfg["adam_eps"])))
             elif cfg["optimizer"] == "SGD":
                 DW[wtype] = (-(eta if wtype != "b_out" or cfg["eta_b_out"] is None else cfg["eta_b_out"])
                              * gW[wtype])
@@ -392,7 +389,7 @@ def main(cfg):
                 W[wtype][ep_curr+ep_incr] = W[wtype][ep_curr] + DW[wtype]
 
                 # Decay W_out
-                if wtype == "W_out":
+                if wtype == "W_out" and cfg["eprop_type"] == "adaptive":
                     W[wtype][ep_curr+ep_incr] -= (W[wtype][ep_curr+ep_incr]
                                                   * cfg["weight_decay"])
 
