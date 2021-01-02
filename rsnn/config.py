@@ -42,7 +42,7 @@ cfg = {
     "one_to_one_output": True,
     "update_dead_weights": False,
 
-    "N_R": 64,
+    "N_R": 400,
     "N_Rec": 1,
 
     "task": "TIMIT_small",
