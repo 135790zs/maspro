@@ -1,11 +1,11 @@
 from numpy import exp
 cfg = {
     "verbose": True,
-    "eprop_type": "symmetric",  # in {global, random, symmetric, adaptive}
+    "eprop_type": "random",  # in {global, random, symmetric, adaptive}
     "optimizer": 'Adam',  # in {Adam, SGD}
     "traub_trick": False,
-    "fraction_ALIF": 1,  # def 0.25
-    "n_directions": 2,
+    "fraction_ALIF": 0.25,  # def 0.25
+    "n_directions": 1,
     "delay": 0,
     "seed": 42,  # 'None' for random seed
     "load_checkpoints": None,
@@ -26,9 +26,9 @@ cfg = {
     "L2_reg": 0,  # Bellec1: 0. Bellec2: 1e-5
     "FR_target": 1e-2,  # Bellecs: 1e-2
     "FR_reg": 1,  # Bellec1: 1. Bellec2: 50.
-    "dropout": 0,  # of recurrent (excl inputs)
+    "dropout": 0.8,  # of recurrent (excl inputs)
     "softmax_factor": 1,  # Bellecs: 1
-    "weight_scaling": 0.5,  # Bellecs: 1
+    "weight_scaling": 1,  # Bellecs: 1
     "uniform_weights": True,
     "adam_beta1": 0.9,
     "adam_beta2": 0.999,
@@ -39,22 +39,22 @@ cfg = {
     "update_W": True,
     "update_bias": True,
     "update_W_out": True,
-    "one_to_one_output": True,
+    "one_to_one_output": False,
     "update_dead_weights": False,
 
-    "N_R": 400,
+    "N_R": 200,
     "N_Rec": 1,
 
-    "task": "TIMIT_small",
+    "task": "TIMIT",
     "wavs_fname": "../data/data_wavs",
     "phns_fname": "../data/data_phns",
 
-    "Epochs": 300,  # def = 80
+    "Epochs": 80,  # def = 80
     "Track_weights": True,
     "Track_synapse": False,  # Only for nonweight synapse vars (e.g. ET)
     "Repeats": 1,  # ms per epoch, def = 5
-    "batch_size_train": 4,  # def = 32
-    "batch_size_val": 4,  # def = 32
+    "batch_size_train": 10,  # def = 32
+    "batch_size_val": 10,  # def = 32
     "batch_size_test": 32,  # def = 32
     "val_every_E": 5,
     "maxlen": 778,  #def 778, Don't forget to re-run process_timit.py!
@@ -62,7 +62,7 @@ cfg = {
     "n_examples": {'train': 20, 'val': 20, 'test': 2},
     # "n_examples": {'train': 3696, 'val': 400, 'test': 192},
     "plot_state_interval": 5,  #  State plot; 0 to disable plots
-    "state_save_interval": 5,
+    "state_save_interval": 1,
     "plot_run_interval": 5,
     "plot_main": True,
     "plot_state": True,

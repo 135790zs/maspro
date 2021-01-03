@@ -54,6 +54,7 @@ Correctly overfitting on small sets
 
 =========
 Bellec reads out from all layers in multi-layer setup!!!!!!
+Bellec's SGD actually uses momentum (of val 0.9).
 =========
 
 Global doesn't work well because of mean approx 0?

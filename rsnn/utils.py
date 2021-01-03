@@ -436,7 +436,7 @@ def eprop_H(cfg, V, U, t, TZ, is_ALIF):  # TODO: 1/thr here? Traub and Bellec di
             a_min=0,
             a_max=None))
     else:
-        return 1 / cfg["thr"] * cfg["gamma"] * np.clip(
+        return (1 / cfg["thr"]) * cfg["gamma"] * np.clip(
             a=1 - (abs(V - (cfg["thr"] + cfg["beta"] * U)) / cfg["thr"]),
             a_min=0,
             a_max=None)
@@ -553,13 +553,13 @@ def process_layer(cfg, M, t, s, r, W_rec):
 
     # EVU (timesink)
     M['EVU'][s, curr_t, r] = (np.outer(M['H'][s, prev_t, r],
-                              M['Z_inbar'][s, t-1, r])
+                                       M['Z_inbar'][s, t-1, r])
                               # + np.einsum("j, ji -> ji",
                               #             (cfg["rho"]
                               #              - (M['H'][s, prev_t, r]
                               #                 * cfg["beta"])),
                               #             M['EVU'][s, prev_t, r])
-                              + einsum(a=cfg["rho"] - M['H'][s, prev_t, r] * cfg["beta"],
+                              + einsum(a=cfg["rho"] - M['H'][s, t, r] * cfg["beta"],
                                        b=M['EVU'][s, prev_t, r])
                               ) * M["is_ALIF_r"][s, r]
 
@@ -593,7 +593,6 @@ def process_layer(cfg, M, t, s, r, W_rec):
                               is_ALIF=M['is_ALIF'][s, r],
                               t=t,
                               TZ=M['TZ'][s, r])
-
     # ET
     M['ET'][s, curr_t, r] = einsum(a=M['H'][s, t, r],
                                    b=(M['EVV'][s, curr_t, r]
