@@ -18,9 +18,9 @@ search_space = [
     # Integer(0, 5, name="delay"),
     # Real(0.2, 1, name="fraction_ALIF"),
     # Real(1e-5, 5e-2, name='eta_b_out'),
-    Real(1e-3, 5e-1, name='eta_init'),
-    # Real(0.5, 3, name='eta_slope'),
-    # Real(0, 10, name='eta_init_loss'),
+    Real(1e-2, 5e-1, name='eta_init'),
+    Real(0.2, 5, name='eta_slope'),
+    Integer(0, 10, name='eta_init_loss'),
     # Real(1, 5, name='thr'),
     # Real(0.9, 0.99, name="alpha"),
     # Real(0.05, 2.5, name="beta"),
@@ -30,7 +30,7 @@ search_space = [
     # Real(0, 1e-1, name="weight_decay"),
     # Real(0, 1e-3, name="L2_reg"),
     # Real(0, .2, name="FR_target"),
-    # Real(0, 20, name="FR_reg"),
+    Real(0, 20, name="FR_reg"),
     # Real(.7, .9, name="dropout"),
     # Real(0.4, 1.2, name="weight_scaling"),
     # Real(0.8, 1.5, name="softmax_factor"),
@@ -77,7 +77,7 @@ if __name__ == "__main__":
     result = gp_minimize(evaluate_model,
                          search_space,
                          n_calls=1000,
-                         n_initial_points=3)
+                         n_initial_points=5)
     # summarizing finding:
     print(result)
     print(f'Best Accuracy: {result.fun:.3f}')

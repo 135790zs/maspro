@@ -165,6 +165,16 @@ def feed_batch(cfg, inps, tars, W_rec, W_out, b_out, eta, B, tvt_type, adamvars,
                            b_out=b_out,
                            e=e,
                            log_id=log_id)
+        if (cfg['plot_state'] and b == 0 and tvt_type == "train"
+            and cfg["plot_pair_interval"] and e % cfg["plot_pair_interval"] == 0):
+            vis.plot_pair(cfg=cfg,
+                           M=final_model,
+                           B=B,
+                           W_rec=W_rec,
+                           W_out=W_out,
+                           b_out=b_out,
+                           e=e,
+                           log_id=log_id)
 
         # Aggregate the mean batch error to the aggregator.
         # Dividing by batch size to get batch mean.
@@ -198,10 +208,18 @@ def main(cfg):
     for tvt_type in cfg['n_examples'].keys():
         inps[tvt_type] = np.load(f"{cfg['wavs_fname']}_{tvt_type}_{cfg['task']}.npy")
         # Normalize [0, 1]
-        inps[tvt_type] = ((inps[tvt_type] - np.min(inps[tvt_type]))
-                          / np.ptp(inps[tvt_type]))
+
+        # inps[tvt_type] = ((inps[tvt_type] - np.min(inps[tvt_type]))
+        #                   / np.ptp(inps[tvt_type]))
+        # print(np.min(inps[tvt_type]))
+        # print(np.max(inps[tvt_type]))
+        inps[tvt_type] -= np.min(inps[tvt_type], axis=1)[:, np.newaxis, :]
+        inps[tvt_type] /= np.max(inps[tvt_type], axis=1)[:, np.newaxis, :]
+
         tars[tvt_type] = np.load(f"{cfg['phns_fname']}_{tvt_type}_{cfg['task']}.npy")
 
+
+    print("N_train:", inps['train'].shape[0], "N_val:", inps['val'].shape[0])
     log_id = ut.get_log_id()
 
     rng = np.random.default_rng(seed=cfg["seed"])

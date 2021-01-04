@@ -1,22 +1,27 @@
 
 # TO DO (priority order):
-	# Reproduce Bellec  (37.1 wrongs on test)
+	# Reproduce Bellec  (37.1 wrongs on test with Random)
 		* Identify weakness.
-		  - Are TZ's (and TZ_in) updating correctly?
-		  - Double check everything. Use Bellec and actual numbers to manually recalculate.
-		  - See if GPU works better now that np.wheres have been removed
-	# Sweep (intelligently, and with low-capacity) only after reproducing
-	# Implement optional L2 weight decay
-	# Track all run-based in own dict (etas, adam, weights, rates, metrics, etc). Subdict for train/val if applicable?
-	# Read TODOs
-	# Vectorize as much as possible to speed up. Make sure to check for same functionality!
 	# Implement Izhikevich neurons
-	# Explore non-uniform synaptic delays
-	# Explore membrane potential reset (Bellec Reset)
+	# Implement non-uniform synaptic delays
+	# Implement Bellec's membrane reset
+	# Implement optional L2 weight decay
+	# Implement toggle for readout on last or all layers
+	# Implement logging learning data (e.g. errs, LR, etc)
+	# Sweep (intelligently, and with low-capacity), but only after reproducing
+	# Obtain results
+	  - One, two, three layers / readout on last or all layers (6 runs to sweep for)
+	  - LSNN, ALIF, STDP-LIF, Izhikevich
+
+	# Implement metaplasticity
+	# Obtain results for metaplasticity
+	# Refactor to track all run-based in own dict (etas, adam, weights, rates, metrics, etc). Subdict for train/val if applicable?
+	# Read TODOs
 	# Concatenate low-pass filter to input vectors?
+	# L_reg can cumulative instead of list
+	# A few things can be left out of the M[] dict
 	# Make it possible to use fewer than N_I N_Rs
 	# Make N_R variable per layer
-	# Implement logging learning data (e.g. errs, LR, etc)
 	# Change into online learning rather than batch based.
 	# Fancy visualization (slider)
 	# Refactor
@@ -38,6 +43,7 @@
 	# Gradient capping?
 	# L2 weight decay
 	# Different way to initialize model neurons (voltage etc?) Try eliminate onset chaos.
+	# Thesis: in discussion: layer-recurrent weights (sparse!)
 
 ========
 

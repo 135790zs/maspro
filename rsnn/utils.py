@@ -175,9 +175,11 @@ def initialize_weights(cfg, inp_size, tar_size):
                                       tar_size,
                                       cfg["N_R"],),
                                 scale=0.25)
+
         W["b_out"] = rng.random(size=(n_epochs,
                                      cfg["n_directions"],
                                      tar_size,)) * 2 - 1
+
     if cfg["one_to_one_output"]:
         assert tar_size <= cfg["N_R"]
         W["W_out"][0] = 0
@@ -549,17 +551,20 @@ def process_layer(cfg, M, t, s, r, W_rec):
 
     # EVV
     M['EVV'][s, curr_t, r] = (cfg["alpha"] * M['EVV'][s, prev_t, r]
-                              + M["Z_in"][s, t-1, r])
+                              + M["Z_in"][s, t, r])
 
     # EVU (timesink)
-    M['EVU'][s, curr_t, r] = (np.outer(M['H'][s, prev_t, r],
-                                       M['Z_inbar'][s, t-1, r])
+    M['EVU'][s, curr_t, r] = (
+                              # np.outer(M['H'][s, t-1, r],
+                              #          M['Z_inbar'][s, t-1, r])
+                              einsum(a=M['H'][s, t-1, r],
+                                     b=M['EVV'][s, prev_t, r])
                               # + np.einsum("j, ji -> ji",
                               #             (cfg["rho"]
                               #              - (M['H'][s, prev_t, r]
                               #                 * cfg["beta"])),
                               #             M['EVU'][s, prev_t, r])
-                              + einsum(a=cfg["rho"] - M['H'][s, t, r] * cfg["beta"],
+                              + einsum(a=cfg["rho"] - M['H'][s, t-1, r] * cfg["beta"],
                                        b=M['EVU'][s, prev_t, r])
                               ) * M["is_ALIF_r"][s, r]
 
@@ -567,7 +572,11 @@ def process_layer(cfg, M, t, s, r, W_rec):
     M['I'][s, t, r] = np.dot(W_rec, M["Z_in"][s, t, r])
 
     # V
-    M['V'][s, t, r] =  cfg["alpha"] * M['V'][s, t-1, r] + M['I'][s, t, r] - M['Z'][s, t-1, r] * (cfg["thr"] + cfg["beta"] * M['U'][s, t-1, r])
+    M['V'][s, t, r] =  (cfg["alpha"] * M['V'][s, t-1, r]
+                        + M['I'][s, t, r]
+                        - M['Z'][s, t-1, r] * (
+                            (cfg["thr"] + cfg["beta"] * M['U'][s, t-1, r])
+                            if cfg["v_fix"] else cfg["thr"]))
 
     # U
     M['U'][s, t, r] = (M['U'][s, t-1, r]
@@ -587,12 +596,12 @@ def process_layer(cfg, M, t, s, r, W_rec):
     M['TZ'][s, r, M['Z'][s, t, r]==1] = t
 
     # Pseudoderivative H
-    M['H'][s, t, r] = eprop_H(cfg=cfg,
-                              V=M['V'][s, t, r],
-                              U=M['U'][s, t, r],
-                              is_ALIF=M['is_ALIF'][s, r],
-                              t=t,
-                              TZ=M['TZ'][s, r])
+    M['H'][s, t, r] = (1 / cfg["thr"]) * cfg["gamma"] * np.clip(
+            a=1 - (abs(M['V'][s, t, r] - (cfg["thr"] + M['is_ALIF'][s, r]
+                            * cfg["beta"] * M['U'][s, t, r]) / cfg["thr"])),
+            a_min=0,
+            a_max=None)
+
     # ET
     M['ET'][s, curr_t, r] = einsum(a=M['H'][s, t, r],
                                    b=(M['EVV'][s, curr_t, r]
@@ -605,7 +614,7 @@ def process_layer(cfg, M, t, s, r, W_rec):
 
     # M["TZ_in"][s, r] = np.concatenate((TZ_prev, M['TZ'][s, r]-1))
 
-    M['Z_inbar'][s, t] = (cfg["alpha"] * (M['Z_inbar'][s, t-1] if t > 0 else 0)) + M['Z_in'][s, t]
+    # M['Z_inbar'][s, t] = (cfg["alpha"] * (M['Z_inbar'][s, t-1] if t > 0 else 0)) + M['Z_in'][s, t]
     M['ETbar'][s, curr_t, r] = cfg["kappa"] * (M['ETbar'][s, prev_t, r] if t > 0 else 0) + M['ET'][s, curr_t, r]
     M['Zbar'][s, t, r] = cfg["kappa"] * (M['Zbar'][s, t-1, r] if t > 0 else 0) + M['Z'][s, t, r]
 

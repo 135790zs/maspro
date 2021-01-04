@@ -190,7 +190,7 @@ def plot_run(cfg, terrs, percs_wrong_t, verrs, percs_wrong_v, W, epoch, etas, sp
 
     plt.savefig(f"../log/{log_id}/metric.pdf",
                 bbox_inches='tight')
-    plt.savefig(f"../log/latest_metric.pdf",
+    plt.savefig(f"../vis/latest_metric.pdf",
                 bbox_inches='tight')
 
     plt.close()
@@ -202,7 +202,7 @@ def plot_state(cfg, M, B, W_rec, W_out, b_out, e, log_id, plot_weights=False):
         S_plotvars += ["EVV", "EVU", "ET", "ETbar", "gW"]
     S_plotvars += ["L_std", "L_reg", "Y"]
 
-    M_plotvars = ["D", "Pmax", "T", "CE"]
+    M_plotvars = ["P", "D", "Pmax", "T", "CE"]
     if cfg["n_directions"] > 1:
         M_plotvars = ["X", "Y"] + M_plotvars  # Show combined/corrected in, out
 
@@ -237,8 +237,8 @@ def plot_state(cfg, M, B, W_rec, W_out, b_out, e, log_id, plot_weights=False):
             else:
                 arr = M[var][s]
             # For synapses, plot mean of set with shared receiving.
-            if arr.ndim == 4:
-                arr = np.mean(arr, axis=3)
+            # if arr.ndim == 4:
+            #     arr = np.mean(arr, axis=3)
 
             axs[-1].imshow(weights_to_img(arr,
                                           is_binary=lookup[var]["binary"]),
@@ -323,13 +323,70 @@ def plot_state(cfg, M, B, W_rec, W_out, b_out, e, log_id, plot_weights=False):
 
     plt.savefig(f"../log/{log_id}/states/state.pdf",
                 bbox_inches='tight')
-    plt.savefig(f"../log/latest_state.pdf",
+    plt.savefig(f"../vis/latest_state.pdf",
                 bbox_inches='tight')
     if e % cfg["state_save_interval"] == 0:
         plt.savefig(f"../log/{log_id}/states/state_{e}.pdf",
                     bbox_inches='tight')
 
     plt.close()
+
+
+def plot_pair(cfg, M, B, W_rec, W_out, b_out, e, log_id):
+    S_plotvars = ["I", "V", "U", "Z", "H"]
+    if cfg["Track_synapse"]:
+        S_plotvars += ["EVV", "EVU", "ET", "ETbar"]
+    S_plotvars += ["L_std"]
+    if cfg["Track_synapse"]:
+        S_plotvars += ["gW", "DW"]
+
+    fig = plt.figure(constrained_layout=False, figsize=(8, len(S_plotvars)//1.2))
+    gsc = fig.add_gridspec(nrows=len(S_plotvars),
+                           ncols=1,
+                           hspace=0.075,
+                           wspace=0.5)
+    axs = []
+    labelpad = 30
+    fontsize = 13
+
+    rng = np.random.default_rng(5)
+    ni = rng.integers(cfg["N_R"])
+    nj = ni
+
+    while nj == ni or W_rec[0, 0, nj, ni+cfg["N_R"]] == 0:
+        nj = rng.integers(cfg["N_R"])
+
+    row_idx = 0
+    for var in S_plotvars:
+        axs.append(fig.add_subplot(gsc[row_idx]))
+        if var == "DW":
+            arr = np.cumsum(M['gW'][0, :, 0], axis=0)
+        else:
+            arr = M[var][0, :, 0]
+
+        if arr.ndim == 2:
+            axs[-1].plot(arr[:, ni], linewidth=0.2, label=f"presynaptic: i={ni}")
+            axs[-1].plot(arr[:, nj], linewidth=0.2, label=f"postsynaptic: j={nj}")
+
+        elif arr.ndim == 3:
+            axs[-1].plot(arr[:, nj, ni+cfg["N_R"]], linewidth=0.2)
+
+        axs[-1].set_ylabel(f"${lookup[var]['label']}$",
+                           rotation=0,
+                           labelpad=labelpad,
+                           fontsize=fontsize)
+        # axs[-1].set_xticks(np.arange(0, arr.shape[0], 1))
+        # axs[-1].grid(axis='x')
+        row_idx += 1
+
+    axs[-1].set_xlabel("$t$", fontsize=fontsize)
+    axs[0].legend()
+
+    plt.savefig(f"../vis/pair.pdf",
+                bbox_inches='tight')
+
+    plt.close()
+
 
 
 def plot_graph(cfg, M, t, W_rec, W_out, log_id):
