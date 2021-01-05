@@ -4,7 +4,6 @@
 		* Identify weakness.
 	# Implement Izhikevich neurons
 	# Implement non-uniform synaptic delays
-	# Implement Bellec's membrane reset
 	# Implement optional L2 weight decay
 	# Implement toggle for readout on last or all layers
 	# Implement logging learning data (e.g. errs, LR, etc)

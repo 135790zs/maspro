@@ -185,14 +185,10 @@ def feed_batch(cfg, inps, tars, W_rec, W_out, b_out, eta, B, tvt_type, adamvars,
                    axis=1)) / inps.shape[0]
 
 
-        L2_reg = cfg["L2_reg"] * np.linalg.norm(np.concatenate((
-            W_rec.flatten(),
-            W_out.flatten(),
-            b_out.flatten())))
 
         for w_type in ['W', 'W_out', 'b_out']:
             gw = np.sum(final_model[f'g{w_type}'], axis=1)  # Checked correct
-            batch_gW[w_type] += (gw + L2_reg) / inps.shape[0]  # Divide to correct for batch size
+            batch_gW[w_type] += gw# / inps.shape[0]  # Divide to correct for batch size
 
     return batch_err, batch_perc_wrong, batch_gW, batch_spikerate
 
@@ -340,8 +336,15 @@ def main(cfg):
         if e == cfg['Epochs'] - 1:
             break
 
+
+        L2_reg = cfg["L2_reg"] * np.linalg.norm(np.concatenate((
+            W['W'][ep_curr].flatten(),
+            W['W_out'][ep_curr].flatten(),
+            W['b_out'][ep_curr].flatten())))
+
         # Calculate DWs
         for wtype in W.keys():
+            gW[wtype] += L2_reg
             if wtype == "B":  # There's no DW for B. B is updated differently.
                 continue
             if cfg["optimizer"] == "Adam":

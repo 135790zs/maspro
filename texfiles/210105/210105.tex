@@ -1,0 +1,157 @@
+\documentclass[t]{beamer}
+
+\setlength {\marginparwidth }{2cm}
+\setlength {\parskip}{0cm}
+\usepackage{todonotes}
+\usepackage{siunitx}
+\usepackage{subcaption}
+\usepackage{apacite} 	% Use APA Citation
+\presetkeys{todonotes}{inline}{}
+\beamertemplatenavigationsymbolsempty
+\usefonttheme[onlymath]{serif}
+
+\usepackage{algpseudocode}
+\usepackage{enumitem,amssymb, yfonts, bm}
+\newlist{todolist}{itemize}{2}
+\setlist[todolist]{label=$\square$}
+\usepackage{pifont}
+\newcommand{\cmark}{\ding{51}}%
+\newcommand{\xmark}{\ding{55}}%
+\newcommand{\done}{\rlap{$\square$}{\raisebox{2pt}{\large\hspace{1pt}\cmark}}%
+\hspace{-2.5pt}}
+
+% \usetheme{AnnArbor}
+% \usetheme{Antibes}
+% \usetheme{Bergen}
+% \usetheme{Berkeley}https://www.sharelatex.com/project/5b12e1a4f84b363f6f336dab
+% \usetheme{Berlin}
+% \usetheme{Boadilla}
+% \usetheme{boxes}
+\usetheme{CambridgeUS}
+% \usetheme{Copenhagen}
+%\usetheme{Darmstadt}
+% \usetheme{default}
+%\usetheme{Frankfurt}
+%\usetheme{Goettingen}
+% \usetheme{Hannover}
+% \usetheme{Ilmenau}
+% \usetheme{JuanLesPins}
+\setlength{\parskip}{10pt}
+
+% \newcommand*\vc[1]%
+% {\begin{pmatrix}#1\end{pmatrix}}
+
+\newcommand*\vc[1]%
+{\left(\begin{array}{cccc}#1\end{array}\right)}
+
+
+\newcommand\eqdef{\ \mathrel{\overset{\makebox[0pt]{\mbox{\normalfont\scriptsize\rmfamily def}}}{=}}\ }
+
+\title[Eligibility propagation]{Improving eligibility propagation using Izhikevich neurons in a multilayer RSNN.\\\vspace{10pt}
+\large{Presentation 6: Reproducing Bellec's results}}
+
+\author[Werner]{Werner~van~der~Veen\\\footnotesize\texttt({w.k.van.der.veen.2@student.rug.nl})}\date{\today}
+
+\begin{document}
+
+\begin{frame}
+    \titlepage
+\end{frame}
+
+%======================================
+
+%\begin{frame}
+%    \tableofcontents
+%\end{frame}
+
+\section{Work done since previous meeting}
+\begin{frame}{Work done since previous meeting}
+  \begin{todolist}
+
+    \item[\done] Implement Bellec's model;
+    \item[\done] Number of major and minor fixes;
+    \item[\done] Normalized input data per channel;
+    \item[\done] Started writing and drafting thesis.
+  \end{todolist}
+
+\end{frame}
+
+\begin{frame}{Performance}
+  \begin{itemize}[label=--]
+
+    \item Performance goal for e-prop with Bellec's configuration: 36.9\% misclassification rate on test set with fixed/random broadcast alignment;
+    \item Currently: approaching that performance as I try and find differences in the code;
+    \item Bellec doesn't report some of the hyperparameter settings, and uses inconsistent notation.
+    \item I wrote additional visualization modules to pinpoint the errors.
+    \item The system can now train and generalize well; just not down to the desired accuracy. I think this is simply a matter of tuning the learning rate.
+  \end{itemize}
+
+\end{frame}
+
+
+\begin{frame}{Performance}
+\center
+  (show performance)
+\end{frame}
+
+\section{Planning}
+\begin{frame}{Next steps}
+  \begin{todolist}
+
+    \item Reproduce Bellec's 36.9\% error rate. (est. 1--7 working days)
+    \item Obtain results comparing the 1, 2, 3 layer architectures. (2--3 days).
+    \item Obtain results comparing the (A)LIF, ALIF, STDP-LIF, and Izhikevich neurons for 1 layer. (3--4 days).
+    \item Implement non-uniform synaptic delays (1 day).
+    \item Implement metaplasticity (1 day).
+    \item Obtain performance for non-uniform synaptic delay (2 days).
+    \item ...and for metaplasticity (2 days).
+    \item Concurrent with the above steps, draft and write parts of the method and introduction of the thesis.
+  \end{todolist}
+
+\end{frame}
+\begin{frame}{Questions}
+  \begin{itemize}[label=--]
+
+    \item Which results are interesting? My proposal:
+    \begin{tabular}{|l|l|l|}
+    \hline
+	Number of layers & 1, 2, 3.  (readout from all or last? (Bellec = all))\\
+	\hline
+	Neuron type & (A)LIF, ALIF, STDP-LIF, Izhikevich\\
+	\hline
+	Synaptic delay & 1, 1--8\\
+	\hline
+	\end{tabular}
+	\item Combining the above?
+	\item Draft the thesis top-down. Start with method?
+	\item To what extent focus on peripheral topics (e.g. Hebbian learning, bioplausibility, dynamical systems theory, etc?) What is a sensible cutoff?
+	\item Does it make sense (it is valid?) to base initial weight distribution on previous runs?
+  \end{itemize}
+
+\end{frame}
+\footnotesize
+\begin{frame}{A possible thesis structure}
+  \begin{itemize}[label=--]
+
+    \item Introduction (Explanation of concepts, previous work, relevancy of this work)
+    \begin{itemize}[label=--]
+    \item No formal notation yet, only intuitions
+    \item What can I assume is known by reader? MSc. graduate level? Or do I need to re-explain ANNs?
+  	\end{itemize}
+  	\item Method (data, Bellec's e-prop, my own improvements)
+  	\begin{itemize}[label=--]
+    \item Adhere to Bellec's formal notation.
+    \item Exact reproducibility is paramount.
+    \item Can I intersperse the method with theoretical background?
+    \item Separate subsection under methods for optional settings (e.g. firing rate regularization). Bellec manages this by putting them in ``supplementary notes''.
+    \item Hyperparameter sweep procedure.
+  	\end{itemize}
+  	\item Results
+  	\item Discussion (interpreting results in light of other research, ideas for future work)
+  	\item Conclusion (summary, logical connection to Introduction)
+  	\item Appendix (supplementary figures, everything that may be interesting or illustrate findings described in main text)
+
+  \end{itemize}
+
+\end{frame}
+\end{document}

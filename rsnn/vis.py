@@ -350,11 +350,19 @@ def plot_pair(cfg, M, B, W_rec, W_out, b_out, e, log_id):
     fontsize = 13
 
     rng = np.random.default_rng(5)
-    ni = rng.integers(cfg["N_R"])
-    nj = ni
-
-    while nj == ni or W_rec[0, 0, nj, ni+cfg["N_R"]] == 0:
+    ni = 0
+    nj = 0
+    tries = 0
+    while True:
         nj = rng.integers(cfg["N_R"])
+        nj = rng.integers(cfg["N_R"])
+        if (nj != ni
+            and W_rec[0, 0, nj, ni+cfg["N_R"]] != 0
+            and (tries >= 100  # Prevents infloop if no spikes at all.
+                 or M['Z'][0, :, 0, ni].any()
+                 and M['Z'][0, :, 0, nj].any())):
+            tries += 1
+            break
 
     row_idx = 0
     for var in S_plotvars:

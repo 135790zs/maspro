@@ -4,26 +4,26 @@ cfg = {
     "eprop_type": "random",  # in {global, random, symmetric, adaptive}
     "optimizer": 'Adam',  # in {Adam, SGD}
     "traub_trick": False,
-    "v_fix": True,
+    "v_fix": False,
     "fraction_ALIF": 0.25,  # def 0.25
-    "n_directions": 1,
+    "n_directions": 2,
     "delay": 0,
     "seed": 42,  # 'None' for random seed
     "load_checkpoints": None,
 
     "alpha": 0.779,  # Bellec1: 20 = 0.951. 4: 0.779
     "rho": 0.975,  # Bellec1: 200 = 0.995. 40: 0.975
-    "kappa": 0.779,  # Bellec1: 3 = 0.717. .75:~0.25
+    "kappa": 0.25,  # Bellec1: 3 = 0.717. .75:~0.25
     "beta": 1.8,    # Bellecs: 1.8. Adaptive strength. 0 = LIF
     "gamma": 0.3,     # Bellecs: 0.3.
     "adam_beta1": 0.9,
     "adam_beta2": 0.999,
     "adam_eps": 1e-5,
-    "eta_init": 1e-2,   # Bellecs: 1e-2
+    "eta_init": 4e-2,   # Bellecs: 1e-2, inversely factored by batch size
     "thr": 1,        # Bellec1: unknown. Bellec2: 1.6?
     "dt_refr": 2,    # Bellec1: 2
     "weight_decay": 1e-2,  # Bellec1: 0. Bellec2: 1e-2. For W_out and B, only if adaptive.
-    "L2_reg": 0,  # Bellec1: 0. Bellec2: 1e-5
+    "L2_reg": 1e-5,  # Bellec1: 0. Bellec2: 1e-5
     "FR_target": 1e-2,  # Bellecs: 1e-2
     "FR_reg": 50,  # Bellec1: 1. Bellec2: 50.
     "dropout": 0.8,  # of recurrent (excl inputs)
@@ -37,35 +37,35 @@ cfg = {
     "uniform_weights": True,
 
     "one_to_one_input": False,
-    "update_input_weights": False,  # Subset of - and overridden by `update_W'.
+    "update_input_weights": True,  # Subset of - and overridden by `update_W'.
     "update_W": True,
-    "update_W_out": False,
-    "update_bias": False,
+    "update_W_out": True,
+    "update_bias": True,
     "one_to_one_output": False,
     "update_dead_weights": False,
 
-    "N_R": 200,
+    "N_R": 400,
     "N_Rec": 1,
 
     "task": "TIMIT",
     "wavs_fname": "../data/data_wavs",
     "phns_fname": "../data/data_phns",
 
-    "Epochs": 300,  # def = 80
+    "Epochs": 160,  # def = 80
     "Track_weights": True,
     "Track_synapse": False,  # Only for nonweight synapse vars (e.g. ET)
     "Repeats": 1,  # ms per epoch, def = 5
     "batch_size_train": 8,  # def = 32
     "batch_size_val": 8,  # def = 32
     "batch_size_test": 32,  # def = 32
-    "val_every_E": 50,
+    "val_every_E": 5,
     "maxlen": 778,  #def 778, Don't forget to re-run process_timit.py!
     "TIMIT_derivative": 2,
     # "n_examples": {'train': 1, 'val': 20, 'test': 2},
     "n_examples": {'train': 3696, 'val': 400, 'test': 192},
-    "plot_state_interval": 5,  #  State plot; 0 to disable plots
+    "plot_state_interval": 1,  #  State plot; 0 to disable plots
     "state_save_interval": 1,
-    "plot_run_interval": 5,
+    "plot_run_interval": 1,
     "plot_pair_interval": 0,
     "plot_main": True,
     "plot_state": True,
