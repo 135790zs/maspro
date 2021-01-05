@@ -65,12 +65,10 @@ def network(cfg, inp, tar, W_rec, W_out, b_out, B, adamvars, eta):
                                          M['D'][t])  # Checked correct
 
             if t:
-                rates = np.mean(M['Z'][s, :t], axis=0)
-                M['spikerate'][s, t] = rates
+                M['spikerate'][s, t] = np.mean(M['Z'][s, :t], axis=0)
 
-                M['L_reg'][s, t] = (cfg["FR_reg"]
-                         * (t/n_steps) * 0.5
-                         * (rates - cfg["FR_target"]))
+                M['L_reg'][s] = (cfg["FR_reg"]
+                                 * (M['spikerate'][s] - cfg["FR_target"]))
 
             else:
                 M['L_reg'][s, t] = 0
@@ -337,10 +335,7 @@ def main(cfg):
             break
 
 
-        L2_reg = cfg["L2_reg"] * np.linalg.norm(np.concatenate((
-            W['W'][ep_curr].flatten(),
-            W['W_out'][ep_curr].flatten(),
-            W['b_out'][ep_curr].flatten())))
+        L2_reg = cfg["L2_reg"] * np.linalg.norm(W['W'][ep_curr].flatten())
 
         # Calculate DWs
         for wtype in W.keys():

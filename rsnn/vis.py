@@ -88,7 +88,7 @@ def plot_run(cfg, terrs, percs_wrong_t, verrs, percs_wrong_v, W, epoch, etas, sp
                        rotation=0,
                        labelpad=labelpad,
                        fontsize=fontsize)
-    axs[-1].set_yscale('log')
+    # axs[-1].set_yscale('log')
 
     if epoch >= 1 and cfg["Track_weights"]:
         for weight_type, weights in W.items():
@@ -197,7 +197,7 @@ def plot_run(cfg, terrs, percs_wrong_t, verrs, percs_wrong_v, W, epoch, etas, sp
 
 
 def plot_state(cfg, M, B, W_rec, W_out, b_out, e, log_id, plot_weights=False):
-    S_plotvars = ["X", "I", "V", "U", "Z", "H"]
+    S_plotvars = ["X", "I", "V", "a", "Z", "H"]
     if cfg["Track_synapse"]:
         S_plotvars += ["EVV", "EVU", "ET", "ETbar", "gW"]
     S_plotvars += ["L_std", "L_reg", "Y"]
@@ -333,7 +333,7 @@ def plot_state(cfg, M, B, W_rec, W_out, b_out, e, log_id, plot_weights=False):
 
 
 def plot_pair(cfg, M, B, W_rec, W_out, b_out, e, log_id):
-    S_plotvars = ["I", "V", "U", "Z", "H"]
+    S_plotvars = ["I", "V", "a", "Z", "H"]
     if cfg["Track_synapse"]:
         S_plotvars += ["EVV", "EVU", "ET", "ETbar"]
     S_plotvars += ["L_std"]
@@ -359,10 +359,10 @@ def plot_pair(cfg, M, B, W_rec, W_out, b_out, e, log_id):
         if (nj != ni
             and W_rec[0, 0, nj, ni+cfg["N_R"]] != 0
             and (tries >= 100  # Prevents infloop if no spikes at all.
-                 or M['Z'][0, :, 0, ni].any()
-                 and M['Z'][0, :, 0, nj].any())):
-            tries += 1
+                 or (M['Z'][0, :, 0, ni].any()
+                     and M['Z'][0, :, 0, nj].any()))):
             break
+        tries += 1
 
     row_idx = 0
     for var in S_plotvars:
