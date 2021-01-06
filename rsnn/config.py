@@ -19,20 +19,20 @@ cfg = {
     "adam_beta1": 0.9,
     "adam_beta2": 0.999,
     "adam_eps": 1e-5,
-    "eta_init": 0.01,   # Bellecs: 1e-2, inversely factored by batch size
+    "eta_init": 1e-2,   # Bellecs: 1e-2, inversely factored by batch size
     "thr": 1.6,        # Bellec1: unknown. Bellec3: 1.6
     "dt_refr": 2,    # Bellec1 & 3: 2
     "weight_decay": 1e-2,  # Bellec1: 0. Bellec2: 1e-2. For W_out and B, only if adaptive.
     "L2_reg": 1e-5,  # Bellec1: 0. Bellec2: 1e-5
     "FR_target": 1e-2,  # Bellecs: 1e-2
-    "FR_reg": 50,  # Bellec1: 1. Bellec2: 50.
+    "FR_reg": 0.1,  # Bellec1: 1. Bellec2: 50.
 
     "eta_b_out": None,  # None=no sep. eta. Otherwise=Constant
     "eta_slope": 2,      # Slope defining relation between Verr and eta (1e-2 for TIMIT)
     "eta_init_loss": 0,  # 0 to disable annealing. This is the cap below which annealing to 0 takes place.
     "ramping": 0,  # Ramps eta linearly from 0 to init between epoch 0 and this one. 0 to disable.
     "softmax_factor": 1,  # Bellecs: 1
-    "weight_scaling": 1,  # Bellecs: 1
+    "weight_scaling": .5,  # Bellecs: 1
     "uniform_weights": True,
     "dropout": 0,  # of recurrent (excl inputs), bellecs = 0
 
@@ -51,7 +51,7 @@ cfg = {
     "wavs_fname": "../data/data_wavs",
     "phns_fname": "../data/data_phns",
 
-    "Epochs": 100,  # def = 80
+    "Epochs": 400,  # def = 80
     "Track_weights": True,
     "Track_synapse": False,  # Only for nonweight synapse vars (e.g. ET)
     "Repeats": 1,  # ms per epoch, def = 5
@@ -60,13 +60,13 @@ cfg = {
     "batch_size_test": 32,  # def = 32
     "maxlen": 778,  #def 778, Don't forget to re-run process_timit.py!
     "TIMIT_derivative": 2,
-    # "n_examples": {'train': 1, 'val': 20, 'test': 2},
-    "n_examples": {'train': 3696, 'val': 400, 'test': 192},
-    "plot_state_interval": 5,  #  State plot; 0 to disable plots
-    "state_save_interval": 5,
-    "plot_run_interval": 5,
-    "plot_pair_interval": 5,
-    "val_every_E": 5,
+    "n_examples": {'train': 20, 'val': 20, 'test': 2},
+    # "n_examples": {'train': 3696, 'val': 400, 'test': 192},
+    "plot_state_interval": 2,  #  State plot; 0 to disable plots
+    "state_save_interval": 2,
+    "plot_run_interval": 2,
+    "plot_pair_interval": 0,
+    "val_every_E": 10,
     "plot_main": True,
     "plot_state": True,
     "plot_graph": False,
@@ -94,6 +94,7 @@ lookup = {
     "Zbar":    {"scalar": False, "binary":False, "label": "\\bar{{z}}_\\kappa"},
     "I":       {"scalar": False, "binary":False, "label": "I"},
     "a":       {"scalar": False, "binary":False, "label": "a"},
+    "A":       {"scalar": False, "binary":False, "label": "A"},
     "EVV":     {"scalar": False, "binary":False, "label": "\\epsilon_v"},
     "EVU":     {"scalar": False, "binary":False, "label": "\\epsilon_a"},
     "H":       {"scalar": False, "binary":False, "label": "\\psi"},

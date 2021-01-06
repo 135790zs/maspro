@@ -564,14 +564,14 @@ def process_layer(cfg, M, t, s, r, W_rec):
     M['V'][s, t, r] =  (cfg["alpha"] * M['V'][s, t-1, r]
                         + M['I'][s, t, r]
                         - M['Z'][s, t-1, r] * (
-                            M['A'][s, t, r] if cfg["v_fix"] else cfg["thr"]))
+                            M['A'][s, t-1, r] if cfg["v_fix"] else cfg["thr"]))
 
     # U
     # M['U'][s, t, r] = (M['U'][s, t-1, r]
     #                      + (M['is_ALIF'][s, r]
     #                         * ((cfg["rho"] - 1) * M['U'][s, t-1, r]
     #                            + M['Z'][s, t-1, r])))
-    M['a'][s, t, r] = cfg['rho'] * M['a'][s, t-1, r] + M['Z'][s, t, r]
+    M['a'][s, t, r] = cfg['rho'] * M['a'][s, t-1, r] + M['Z'][s, t-1, r]
     M['A'][s, t, r] = cfg['thr'] + M['betas'][s, r] * M['a'][s, t, r]
 
     # Update the spikes Z of the neurons.
@@ -586,7 +586,7 @@ def process_layer(cfg, M, t, s, r, W_rec):
 
     # Pseudoderivative H
     M['H'][s, t, r] = (1 / cfg["thr"]) * cfg["gamma"] * np.clip(
-            a=1 - (abs((M['V'][s, t, r] - M['A'][s, t, r]) / cfg["thr"])),
+            a=1 - (abs((M['V'][s, t, r] - M['A'][s, t, r] / cfg["thr"]))),
             a_min=0,
             a_max=None)
 

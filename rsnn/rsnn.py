@@ -122,7 +122,7 @@ def feed_batch(cfg, inps, tars, W_rec, W_out, b_out, eta, B, tvt_type, adamvars,
                    f"Epoch {e}/{cfg['Epochs']-1}\t" if tvt_type != 'test'
                    else '\t'),
                   f"{'  ' if tvt_type == 'val' else ''}{tvt_type} "
-                  f"sample {b+1}/{inps.shape[0]}",
+                  f"sample {b+1}/{inps.shape[0]}\t",
                   end='\r' if b < inps.shape[0]-1 else '\n')
 
         this_tars = tars[b]
@@ -186,7 +186,7 @@ def feed_batch(cfg, inps, tars, W_rec, W_out, b_out, eta, B, tvt_type, adamvars,
 
         for w_type in ['W', 'W_out', 'b_out']:
             gw = np.sum(final_model[f'g{w_type}'], axis=1)  # Checked correct
-            batch_gW[w_type] += gw# / inps.shape[0]  # Divide to correct for batch size
+            batch_gW[w_type] += gw# / inps.shape[0]  # Divide to correct for batch size?
 
     return batch_err, batch_perc_wrong, batch_gW, batch_spikerate
 
