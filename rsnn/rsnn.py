@@ -186,7 +186,7 @@ def feed_batch(cfg, inps, tars, W_rec, W_out, b_out, eta, B, tvt_type, adamvars,
 
         for w_type in ['W', 'W_out', 'b_out']:
             gw = np.sum(final_model[f'g{w_type}'], axis=1)  # Checked correct
-            batch_gW[w_type] += gw# / inps.shape[0]  # Divide to correct for batch size?
+            batch_gW[w_type] += gw / inps.shape[0]  # Divide to correct for batch size?
 
     return batch_err, batch_perc_wrong, batch_gW, batch_spikerate
 

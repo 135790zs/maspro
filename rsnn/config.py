@@ -3,7 +3,7 @@ cfg = {
     "verbose": True,
     "eprop_type": "random",  # in {global, random, symmetric, adaptive}
     "optimizer": 'Adam',  # in {Adam, SGD}
-    "traub_trick": False,
+    "traub_trick": False,  # Change to "neurontype" soon {(A)LIF, Izh, STDP-(A)LIF}
     "v_fix": False,
     "fraction_ALIF": 0.25,  # def 0.25
     "n_directions": 1,
@@ -16,23 +16,25 @@ cfg = {
     "kappa": 0.25,  # Bellec1: 3 = 0.717. .75:~0.25
     "beta": 1.8,    # Bellec3: 1.8. Adaptive strength. 0 = LIF
     "gamma": 0.3,     # Bellecs: 0.3.
+    "thr": 1.6,        # Bellec1: unknown. Bellec3: 1.6
+    "dt_refr": 2,    # Bellec1 & 3: 2
+
+    "eta_init": 1e-2,   # Bellecs: 1e-2, inversely factored by batch size
     "adam_beta1": 0.9,
     "adam_beta2": 0.999,
     "adam_eps": 1e-5,
-    "eta_init": 1e-2,   # Bellecs: 1e-2, inversely factored by batch size
-    "thr": 1.6,        # Bellec1: unknown. Bellec3: 1.6
-    "dt_refr": 2,    # Bellec1 & 3: 2
+
     "weight_decay": 1e-2,  # Bellec1: 0. Bellec2: 1e-2. For W_out and B, only if adaptive.
     "L2_reg": 1e-5,  # Bellec1: 0. Bellec2: 1e-5
     "FR_target": 1e-2,  # Bellecs: 1e-2
-    "FR_reg": 0.1,  # Bellec1: 1. Bellec2: 50.
+    "FR_reg": 1,  # Bellec1: 1. Bellec2: 50.
 
     "eta_b_out": None,  # None=no sep. eta. Otherwise=Constant
     "eta_slope": 2,      # Slope defining relation between Verr and eta (1e-2 for TIMIT)
     "eta_init_loss": 0,  # 0 to disable annealing. This is the cap below which annealing to 0 takes place.
     "ramping": 0,  # Ramps eta linearly from 0 to init between epoch 0 and this one. 0 to disable.
     "softmax_factor": 1,  # Bellecs: 1
-    "weight_scaling": .5,  # Bellecs: 1
+    "weight_scaling": 1,  # Bellecs: 1
     "uniform_weights": True,
     "dropout": 0,  # of recurrent (excl inputs), bellecs = 0
 
@@ -40,11 +42,11 @@ cfg = {
     "update_input_weights": True,  # Subset of - and overridden by `update_W'.
     "update_W": True,
     "update_W_out": True,
-    "update_bias": True,
+    "update_bias": False,
     "one_to_one_output": False,
     "update_dead_weights": True,
 
-    "N_R": 400,
+    "N_R": 40,
     "N_Rec": 1,
 
     "task": "TIMIT",
@@ -55,18 +57,18 @@ cfg = {
     "Track_weights": True,
     "Track_synapse": False,  # Only for nonweight synapse vars (e.g. ET)
     "Repeats": 1,  # ms per epoch, def = 5
-    "batch_size_train": 8,  # def = 32
-    "batch_size_val": 8,  # def = 32
+    "batch_size_train": 32,  # def = 32
+    "batch_size_val": 32,  # def = 32
     "batch_size_test": 32,  # def = 32
     "maxlen": 778,  #def 778, Don't forget to re-run process_timit.py!
     "TIMIT_derivative": 2,
     "n_examples": {'train': 20, 'val': 20, 'test': 2},
     # "n_examples": {'train': 3696, 'val': 400, 'test': 192},
-    "plot_state_interval": 2,  #  State plot; 0 to disable plots
-    "state_save_interval": 2,
-    "plot_run_interval": 2,
+    "plot_state_interval": 20,  #  State plot; 0 to disable plots
+    "state_save_interval": 20,
+    "plot_run_interval": 20,
     "plot_pair_interval": 0,
-    "val_every_E": 10,
+    "val_every_E": 20,
     "plot_main": True,
     "plot_state": True,
     "plot_graph": False,

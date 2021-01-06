@@ -547,15 +547,15 @@ def process_layer(cfg, M, t, s, r, W_rec):
     # Revert eprop functions EVV and V if using traub trick!
     assert(not cfg["traub_trick"])
 
-    # EVV
-    M['EVV'][s, curr_t, r] = (cfg["alpha"] * M['EVV'][s, prev_t, r]
-                              + M["Z_in"][s, t, r])
 
     # EVU (timesink)
     M['EVU'][s, curr_t, r] = (einsum(a=M['H'][s, t-1, r],
                                      b=M['EVV'][s, prev_t, r])
                               + einsum(a=cfg["rho"] - M['H'][s, t-1, r] * M["betas"][s,r],
                                        b=M['EVU'][s, prev_t, r]))
+    # EVV
+    M['EVV'][s, curr_t, r] = (cfg["alpha"] * M['EVV'][s, prev_t, r]
+                              + M["Z_in"][s, t, r])
 
     # I
     M['I'][s, t, r] = np.dot(W_rec, M["Z_in"][s, t, r])
