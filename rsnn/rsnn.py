@@ -49,6 +49,7 @@ def network(cfg, inp, tar, W_rec, W_out, b_out, B, adamvars, eta):
         M['Pmax'][t, M['P'][t].argmax()] = 1
 
         M['CE'][t] = -np.sum(M['T'][t] * np.log(1e-30 + M['P'][t]))
+        M['Correct'][t] = int((M['Pmax'][t] == M['T'][t]).all())
 
         if cfg["Track_synapse"]:
             curr_t = t
@@ -67,20 +68,19 @@ def network(cfg, inp, tar, W_rec, W_out, b_out, B, adamvars, eta):
             if t:
                 M['spikerate'][s, t] = np.mean(M['Z'][s, :t], axis=0)
 
-                M['L_reg'][s] = (cfg["FR_reg"]
-                                 * (M['spikerate'][s] - cfg["FR_target"]))
+                M['L_reg'][s, t] = (cfg["FR_reg"]
+                                 * (1 / n_steps)
+                                 * (M['spikerate'][s, t] - cfg["FR_target"]))
 
             else:
                 M['L_reg'][s, t] = 0
 
+            M['L'][s, t] = M['L_std'][s, t] + M['L_reg'][s, t]
+
             for r in range(cfg["N_Rec"]):
-                M[f'gW'][s, curr_t, r] += ut.einsum(a=M['L_std'][s, t, r],
+                M[f'gW'][s, curr_t, r] += ut.einsum(a=M['L'][s, t, r],
                                                     b=M['ETbar'][s, curr_t, r])  # Checked correct
 
-            M[f'gW'][s, curr_t] += np.repeat(
-                M['L_reg'][s, t][:, :, np.newaxis],
-                repeats=cfg["N_R"]*2,
-                axis=2)  # Checked correct
 
             if cfg["update_W_out"]:
                 M[f'gW_out'][s, curr_t] += np.outer(M['D'][t], M['Zbar'][s, t, -1])
@@ -344,18 +344,22 @@ def main(cfg):
                 continue
             if cfg["optimizer"] == "Adam":
                 # Update Adam for W, W_out, b_out
+
                 adamvars[f'm{wtype}'] = (
                     cfg["adam_beta1"] * adamvars[f'm{wtype}']
                     + (1 - cfg["adam_beta1"]) * gW[wtype])
+
                 adamvars[f'v{wtype}'] = (
                     cfg["adam_beta2"] * adamvars[f'v{wtype}']
                     + (1 - cfg["adam_beta2"]) * gW[wtype] ** 2)
+
                 m = adamvars[f'm{wtype}'] / (1 - cfg["adam_beta1"])
                 v = adamvars[f'v{wtype}'] / (1 - cfg["adam_beta2"])
 
                 # Calculate DWs
                 DW[wtype] = (-(eta if wtype != "b_out" or cfg["eta_b_out"] is None else cfg["eta_b_out"])
                              * (m / (np.sqrt(v) + cfg["adam_eps"])))
+
             elif cfg["optimizer"] == "SGD":
                 DW[wtype] = (-(eta if wtype != "b_out" or cfg["eta_b_out"] is None else cfg["eta_b_out"])
                              * gW[wtype])
@@ -366,29 +370,27 @@ def main(cfg):
         if not cfg["update_dead_weights"]:
             DW['W'][W["W"][ep_curr] == 0] = 0
 
+        if not cfg["update_W"]:
+            DW['W'] = 0
+
+        if not cfg["update_W_out"]:
+            DW["W_out"] = 0
+
+        if not cfg["update_bias"]:
+            DW['b_out'] = 0
+
         # Apply DWs
         for wtype in W.keys():
-
-            # Update weights
-            if not cfg["update_bias"] and wtype == "b_out":
-                W[wtype][ep_curr+ep_incr] = W[wtype][ep_curr]
-                continue
-            if not cfg["update_W_out"] and wtype == "W_out":
-                W[wtype][ep_curr+ep_incr] = W[wtype][ep_curr]
-                continue
-            if not cfg["update_W"] and wtype == "W":
-                W[wtype][ep_curr+ep_incr] = W[wtype][ep_curr]
-                continue
 
             if wtype == "B":
 
                 # "Global" is already next by definition.
 
                 if cfg["eprop_type"] in ["global", "random"]:
-                    W["B"][ep_curr+ep_incr, :] = W["B"][ep_curr, :]
+                    W["B"][ep_curr+ep_incr] = W["B"][ep_curr]
 
                 elif cfg["eprop_type"] == "symmetric":
-                    for s in range(cfg["n_directions"]):  # TODO: Get rid of s?
+                    for s in range(cfg["n_directions"]):  # TODO: Vectorize out s?
                         W["B"][ep_curr+ep_incr, s] = (W["B"][ep_curr, s]
                                                    + DW["W_out"][s].T)
 
@@ -404,11 +406,14 @@ def main(cfg):
 
                 W[wtype][ep_curr+ep_incr] = W[wtype][ep_curr] + DW[wtype]
 
-                # Decay W_out
-                if wtype == "W_out" and cfg["eprop_type"] == "adaptive":
-                    W[wtype][ep_curr+ep_incr] -= (W[wtype][ep_curr+ep_incr]
-                                                  * cfg["weight_decay"])
+        # Decay W_out
+        if cfg["eprop_type"] == "adaptive":
+            W["W_out"][ep_curr+ep_incr] -= (W["W_out"][ep_curr+ep_incr]
+                                          * cfg["weight_decay"])
 
+
+
+    # Epoch loop ends here
 
     if cfg["verbose"]:
         print("\nTraining complete!\n")

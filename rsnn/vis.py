@@ -200,9 +200,9 @@ def plot_state(cfg, M, B, W_rec, W_out, b_out, e, log_id, plot_weights=False):
     S_plotvars = ["X", "I", "V", "a", "A", "Z", "H"]
     if cfg["Track_synapse"]:
         S_plotvars += ["EVV", "EVU", "ET", "ETbar", "gW"]
-    S_plotvars += ["L_std", "L_reg", "Y"]
+    S_plotvars += ["L_std", "L_reg", "L", "Y"]
 
-    M_plotvars = ["P", "D", "Pmax", "T", "CE"]
+    M_plotvars = ["P", "D", "Pmax", "T", "Correct", "CE"]
     if cfg["n_directions"] > 1:
         M_plotvars = ["X", "Y"] + M_plotvars  # Show combined/corrected in, out
 
@@ -274,7 +274,8 @@ def plot_state(cfg, M, B, W_rec, W_out, b_out, e, log_id, plot_weights=False):
         if not lookup[var]['scalar']:
             axs[-1].imshow(weights_to_img(arr,
                                           is_binary=lookup[var]["binary"]),
-                           cmap=('copper' if lookup[var]["binary"]
+                           cmap=('RdYlGn' if var == 'Correct' else
+                                 'copper' if lookup[var]["binary"]
                                  else 'coolwarm'),
                            vmin=np.min(arr),
                            vmax=np.max(arr),

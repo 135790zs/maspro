@@ -26,8 +26,8 @@ cfg = {
 
     "weight_decay": 1e-2,  # Bellec1: 0. Bellec2: 1e-2. For W_out and B, only if adaptive.
     "L2_reg": 1e-5,  # Bellec1: 0. Bellec2: 1e-5
-    "FR_target": 1e-2,  # Bellecs: 1e-2
-    "FR_reg": 1,  # Bellec1: 1. Bellec2: 50.
+    "FR_target": 0.01,  # Bellecs: 1e-2
+    "FR_reg": 200,  # Bellec1: 1. Bellec2: 50.
 
     "eta_b_out": None,  # None=no sep. eta. Otherwise=Constant
     "eta_slope": 2,      # Slope defining relation between Verr and eta (1e-2 for TIMIT)
@@ -35,40 +35,40 @@ cfg = {
     "ramping": 0,  # Ramps eta linearly from 0 to init between epoch 0 and this one. 0 to disable.
     "softmax_factor": 1,  # Bellecs: 1
     "weight_scaling": 1,  # Bellecs: 1
-    "uniform_weights": True,
+    "weight_initialization": "bellec18",
     "dropout": 0,  # of recurrent (excl inputs), bellecs = 0
 
     "one_to_one_input": False,
     "update_input_weights": True,  # Subset of - and overridden by `update_W'.
     "update_W": True,
     "update_W_out": True,
-    "update_bias": False,
+    "update_bias": True,
     "one_to_one_output": False,
     "update_dead_weights": True,
 
-    "N_R": 40,
+    "N_R": 400,
     "N_Rec": 1,
 
     "task": "TIMIT",
     "wavs_fname": "../data/data_wavs",
     "phns_fname": "../data/data_phns",
 
-    "Epochs": 400,  # def = 80
+    "Epochs": 500,  # def = 80
     "Track_weights": True,
     "Track_synapse": False,  # Only for nonweight synapse vars (e.g. ET)
     "Repeats": 1,  # ms per epoch, def = 5
-    "batch_size_train": 32,  # def = 32
-    "batch_size_val": 32,  # def = 32
+    "batch_size_train": 4,  # def = 32
+    "batch_size_val": 4,  # def = 32
     "batch_size_test": 32,  # def = 32
     "maxlen": 778,  #def 778, Don't forget to re-run process_timit.py!
-    "TIMIT_derivative": 2,
+    "TIMIT_derivative": 0,
     "n_examples": {'train': 20, 'val': 20, 'test': 2},
     # "n_examples": {'train': 3696, 'val': 400, 'test': 192},
-    "plot_state_interval": 20,  #  State plot; 0 to disable plots
-    "state_save_interval": 20,
-    "plot_run_interval": 20,
+    "plot_state_interval": 10,  #  State plot; 0 to disable plots
+    "state_save_interval": 10,
+    "plot_run_interval": 5,
     "plot_pair_interval": 0,
-    "val_every_E": 20,
+    "val_every_E": 10,
     "plot_main": True,
     "plot_state": True,
     "plot_graph": False,
@@ -101,6 +101,7 @@ lookup = {
     "EVU":     {"scalar": False, "binary":False, "label": "\\epsilon_a"},
     "H":       {"scalar": False, "binary":False, "label": "\\psi"},
     "ET":      {"scalar": False, "binary":False, "label": "e"},
+    "L":       {"scalar": False, "binary":False, "label": "L"},
     "L_std":   {"scalar": False, "binary":False, "label": "L_{{std}}"},
     "L_reg":   {"scalar": False, "binary":False, "label": "L_{{reg}}"},
     "ETbar":   {"scalar": False, "binary":False, "label": "\\bar{{e}}"},
@@ -110,6 +111,7 @@ lookup = {
     "D":       {"scalar": False, "binary":True,  "label": "D"},
     "Pmax":    {"scalar": False, "binary":True,  "label": "\\pi_{{max}}"},
     "CE":      {"scalar": True,  "binary":False, "label": "CE"},
+    "Correct": {"scalar": False, "binary":True,  "label": "Correct"},
     "loss":    {"scalar": False, "binary":False, "label": "loss"},
     "T":       {"scalar": False, "binary":True,  "label": "T"},
     "w":       {"scalar": True,  "binary":False, "label": "w^{{rec}}"},

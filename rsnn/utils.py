@@ -83,7 +83,7 @@ def initialize_model(cfg, length, tar_size):
     for T_var in ["T", "P", "Pmax", "D"]:
         M[T_var] = np.zeros(shape=T_shape)
 
-    for neuronvar in ["Z", "V", "a", "H", "Zbar", "Z_prev", "I", "L_std", "L_reg", "spikerate"]:
+    for neuronvar in ["Z", "V", "a", "H", "Zbar", "Z_prev", "I", "L_std", "L_reg", "L", "spikerate"]:
         M[neuronvar] = np.zeros(shape=neuron_shape)
 
     for weightvar in ["EVV", "EVU", "ET", "ETbar", 'gW']:
@@ -108,6 +108,7 @@ def initialize_model(cfg, length, tar_size):
 
     M["Y"] = np.zeros(shape=(cfg["n_directions"], length, tar_size,))
     M["CE"] = np.zeros(shape=(length,))
+    M["Correct"] = np.zeros(shape=(length,))
 
     M["betas"] = np.zeros(
         shape=(cfg["n_directions"] * cfg["N_Rec"] * cfg["N_R"]))
@@ -146,7 +147,7 @@ def initialize_weights(cfg, inp_size, tar_size):
     rng = np.random.default_rng(seed=cfg["seed"])
 
     n_epochs = cfg["Epochs"] if cfg["Track_weights"] else 1
-    if cfg["uniform_weights"]:
+    if cfg["weight_initialization"] == 'uniform':
         W["W"] = rng.random(size=(n_epochs,
                                   cfg["n_directions"],
                                   cfg["N_Rec"],
@@ -157,10 +158,8 @@ def initialize_weights(cfg, inp_size, tar_size):
                                       cfg["n_directions"],
                                       tar_size,
                                       cfg["N_R"])) * 2 - 1
-        W["b_out"] = np.zeros(shape=(n_epochs,
-                                     cfg["n_directions"],
-                                     tar_size,))
-    else:
+
+    elif cfg["weight_initialization"] == 'normal':
         W["W"] = rng.normal(size=(n_epochs,
                                   cfg["n_directions"],
                                   cfg["N_Rec"],
@@ -174,9 +173,23 @@ def initialize_weights(cfg, inp_size, tar_size):
                                       cfg["N_R"],),
                                 scale=0.25)
 
-        W["b_out"] = rng.random(size=(n_epochs,
-                                     cfg["n_directions"],
-                                     tar_size,)) * 2 - 1
+    elif cfg["weight_initialization"] == 'bellec18':
+        """ See Supplementary information for: Long short-term
+        memory and learning-to-learn in networks of spiking
+        neurons """
+        W["W"] = rng.normal(size=(n_epochs,
+                                  cfg["n_directions"],
+                                  cfg["N_Rec"],
+                                  cfg["N_R"],
+                                  cfg["N_R"] * 2,)) / np.sqrt(cfg['N_R'])
+        W["W_out"] = rng.random(size=(n_epochs,
+                                      cfg["n_directions"],
+                                      tar_size,
+                                      cfg["N_R"])) * 2 - 1
+
+    W["b_out"] = np.zeros(shape=(n_epochs,
+                                 cfg["n_directions"],
+                                 tar_size,))
 
     if cfg["one_to_one_output"]:
         assert tar_size <= cfg["N_R"]
