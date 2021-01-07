@@ -98,7 +98,7 @@ def network(cfg, inp, tar, W_rec, W_out, b_out, B, adamvars, eta):
 def feed_batch(cfg, inps, tars, W_rec, W_out, b_out, eta, B, tvt_type, adamvars, e, log_id, start_time=None):
     batch_err = 0
     batch_perc_wrong = 0
-    batch_spikerate = 0
+    batch_spikerate = np.zeros(shape=(cfg["n_directions"], cfg["N_Rec"], cfg["N_R"],))
 
     batch_gW = {
         'W': np.zeros(
@@ -176,9 +176,9 @@ def feed_batch(cfg, inps, tars, W_rec, W_out, b_out, eta, B, tvt_type, adamvars,
 
         # Aggregate the mean batch error to the aggregator.
         # Dividing by batch size to get batch mean.
-        batch_spikerate += np.mean(final_model["spikerate"]) / inps.shape[0]
+        batch_spikerate += np.mean(final_model["spikerate"], axis=1) / inps.shape[0]
         batch_err += np.mean(final_model["CE"]) / inps.shape[0]
-        batch_perc_wrong += np.mean(
+        batch_perc_wrong += 100*np.mean(
             np.max(np.abs(final_model["Pmax"] - final_model["T"]),
                    axis=1)) / inps.shape[0]
 
@@ -203,10 +203,6 @@ def main(cfg):
         inps[tvt_type] = np.load(f"{cfg['wavs_fname']}_{tvt_type}_{cfg['task']}.npy")
         # Normalize [0, 1]
 
-        # inps[tvt_type] = ((inps[tvt_type] - np.min(inps[tvt_type]))
-        #                   / np.ptp(inps[tvt_type]))
-        # print(np.min(inps[tvt_type]))
-        # print(np.max(inps[tvt_type]))
         inps[tvt_type] -= np.min(inps[tvt_type], axis=1)[:, np.newaxis, :]
         inps[tvt_type] /= np.max(inps[tvt_type], axis=1)[:, np.newaxis, :]
 
@@ -220,15 +216,8 @@ def main(cfg):
 
     ut.prepare_log(cfg=cfg, log_id=log_id)
 
-    terrs = np.zeros(shape=(cfg["Epochs"]))
-    verrs = np.ones(shape=(cfg["Epochs"])) * -1
-    verr = None
-    percs_wrong_t = np.zeros(shape=(cfg["Epochs"]))
-    percs_wrong_v = np.ones(shape=(cfg["Epochs"])) * -1
-    etas = np.ones(shape=(cfg["Epochs"])) * -1
-    spikerates = np.ones(shape=(cfg["Epochs"])) * -1
+    R = ut.initialize_tracking(cfg=cfg)
 
-    optVerr = None
     W = ut.initialize_weights(cfg=cfg,
                               inp_size=inps['train'].shape[-1],
                               tar_size=tars['train'].shape[-1])
@@ -258,21 +247,19 @@ def main(cfg):
             ep_curr = 0
             ep_incr = 0
 
-        if verr is None or cfg["eta_init_loss"] <= 0:
-            eta = cfg["eta_init"]
+        if R['latest_val_err'] is None or cfg["eta_init_loss"] <= 0:
+            R['eta'][e] = cfg["eta_init"]
         else:
-            eta = min(cfg["eta_init"],
-                      cfg["eta_init"] * (verr / cfg["eta_init_loss"]) ** cfg["eta_slope"])
+            R['eta'][e] = min(cfg["eta_init"],
+                      cfg["eta_init"] * (R['latest_val_err'] / cfg["eta_init_loss"]) ** cfg["eta_slope"])
         if e+1 < cfg["ramping"]:
-            eta *= (e+1)/cfg["ramping"]
-
-        etas[e] = eta
+            R['eta'][e] *= (e+1)/cfg["ramping"]
 
         # Make batch
         randidxs = rng.integers(inps['train'].shape[0],
                                 size=cfg["batch_size_train"])
 
-        terr, perc_wrong_t, gW, spikerate = feed_batch(
+        err, perc_wrong, gW, spikerate = feed_batch(
             tvt_type='train',
             cfg=cfg,
             inps=inps['train'][randidxs],
@@ -284,18 +271,18 @@ def main(cfg):
             adamvars=adamvars,
             e=e,
             log_id=log_id,
-            eta=eta,
+            eta=R['eta'][e],
             start_time=start_time)
 
-        terrs[e] = terr
-        percs_wrong_t[e] = perc_wrong_t
-        spikerates[e] = spikerate
+        R['err']['train'][e] = err
+        R[f'%wrong']['train'][e] = perc_wrong
+        R['Hz'][e] = spikerate
 
         # Validation
         if e % cfg["val_every_E"] == 0:
             randidxs = rng.integers(inps['val'].shape[0],
                                     size=cfg["batch_size_val"])
-            verr, perc_wrong_v, _, _ = feed_batch(
+            err, perc_wrong, _, _ = feed_batch(
                 tvt_type='val',
                 cfg=cfg,
                 inps=inps['val'][randidxs],
@@ -307,33 +294,36 @@ def main(cfg):
                 adamvars=adamvars,
                 e=e,
                 log_id=log_id,
-                eta=eta,
+                eta=R['eta'][e],
                 start_time=start_time)
-            verrs[e] = verr
-            percs_wrong_v[e] = perc_wrong_v
 
+            R['err']['val'][e] = err
+            R['latest_val_err'] = R['err']['val'][e]
+            R[f'%wrong']['val'][e] = perc_wrong
 
             # Save best weights
-            if optVerr is None or verr < optVerr:
+            if R[f'optimal_val_err'] is None or R['err']['val'][e] < R[f'optimal_val_err']:
                 if cfg["verbose"]:
-                    print(f"\nLowest val error ({verr:.3f}) found at epoch {e}!\n")
-                optVerr = verr
+                    print(f"\nLowest val error ({R['err']['val'][e]:.3f}) found at epoch {e}!\n")
+                R[f'optimal_val_err'] = R['err']['val'][e]
                 ut.save_weights(W=W, epoch=e if cfg["Track_weights"] else 0,
                                 log_id=log_id)
 
             # Interpolate missing verrs
-            verrs[:e+1] = ut.interpolate_verrs(verrs[:e+1])
-            percs_wrong_v[:e+1] = ut.interpolate_verrs(percs_wrong_v[:e+1])
+            R['err']['val'][:e+1] = ut.interpolate_verrs(R['err']['val'][:e+1])
+            R[f'%wrong']['val'][:e+1] = ut.interpolate_verrs(R[f'%wrong']['val'][:e+1])
 
-        if cfg["plot_run_interval"] and e % cfg["plot_run_interval"] == 0:
-            vis.plot_run(cfg=cfg, terrs=terrs, percs_wrong_t=percs_wrong_t,
-                         verrs=verrs, percs_wrong_v=percs_wrong_v,
-                         etas=etas, spikerates=spikerates,
-                         W=W, epoch=e, log_id=log_id, inp_size=inps['train'].shape[-1])
+        if cfg["plot_run_interval"] and e % cfg["plot_run_interval"] == 0 and e:
+            vis.plot_run(cfg=cfg, R=R, W=W, epoch=e, log_id=log_id,
+                         inp_size=inps['train'].shape[-1])
+
         # Dont update weights in last epoch
         if e == cfg['Epochs'] - 1:
             break
 
+        # If there's a time constraint (helpful in sweeping), break now.
+        if cfg["max_duration"] and cfg["max_duration"] >= time.time() - start_time:
+            break
 
         L2_reg = cfg["L2_reg"] * np.linalg.norm(W['W'][ep_curr].flatten())
 
@@ -357,11 +347,11 @@ def main(cfg):
                 v = adamvars[f'v{wtype}'] / (1 - cfg["adam_beta2"])
 
                 # Calculate DWs
-                DW[wtype] = (-(eta if wtype != "b_out" or cfg["eta_b_out"] is None else cfg["eta_b_out"])
+                DW[wtype] = (-(R['eta'][e] if wtype != "b_out" or cfg["eta_b_out"] is None else cfg["eta_b_out"])
                              * (m / (np.sqrt(v) + cfg["adam_eps"])))
 
             elif cfg["optimizer"] == "SGD":
-                DW[wtype] = (-(eta if wtype != "b_out" or cfg["eta_b_out"] is None else cfg["eta_b_out"])
+                DW[wtype] = (-(R['eta'][e] if wtype != "b_out" or cfg["eta_b_out"] is None else cfg["eta_b_out"])
                              * gW[wtype])
 
         if not cfg["update_input_weights"]:
@@ -370,37 +360,34 @@ def main(cfg):
         if not cfg["update_dead_weights"]:
             DW['W'][W["W"][ep_curr] == 0] = 0
 
-        if not cfg["update_W"]:
-            DW['W'] = 0
-
-        if not cfg["update_W_out"]:
-            DW["W_out"] = 0
-
-        if not cfg["update_bias"]:
-            DW['b_out'] = 0
 
         # Apply DWs
         for wtype in W.keys():
+            if wtype == 'W' and not cfg["update_W"]:
+                W[wtype][ep_curr+ep_incr] = W[wtype][ep_curr]
 
-            if wtype == "B":
+            elif wtype == 'W_out' and not cfg["update_W_out"]:
+                W[wtype][ep_curr+ep_incr] = W[wtype][ep_curr]
 
-                # "Global" is already next by definition.
+            elif wtype == 'b_out' and not cfg["update_bias"]:
+                W[wtype][ep_curr+ep_incr] = W[wtype][ep_curr]
 
-                if cfg["eprop_type"] in ["global", "random"]:
-                    W["B"][ep_curr+ep_incr] = W["B"][ep_curr]
+            elif wtype == "B":
 
-                elif cfg["eprop_type"] == "symmetric":
+                if cfg["eprop_type"] == "symmetric" and cfg['update_W_out']:
                     for s in range(cfg["n_directions"]):  # TODO: Vectorize out s?
                         W["B"][ep_curr+ep_incr, s] = (W["B"][ep_curr, s]
                                                    + DW["W_out"][s].T)
 
-                elif cfg["eprop_type"] == "adaptive":
+                elif cfg["eprop_type"] == "adaptive" and cfg['update_W_out']:
                     for s in range(cfg["n_directions"]):
                         W["B"][ep_curr+ep_incr, s] = (W["W_out"][ep_curr, s]
                                                       + DW["W_out"][s]).T
                         W["B"][ep_curr+ep_incr, s] -= (
                             W["B"][ep_curr+ep_incr, s]
                             * cfg["weight_decay"])
+                else:
+                    W["B"][ep_curr+ep_incr] = W["B"][ep_curr]
 
             else:  # W, W_out, or b_out (depending on update cfg)
 
@@ -410,8 +397,6 @@ def main(cfg):
         if cfg["eprop_type"] == "adaptive":
             W["W_out"][ep_curr+ep_incr] -= (W["W_out"][ep_curr+ep_incr]
                                           * cfg["weight_decay"])
-
-
 
     # Epoch loop ends here
 
@@ -436,13 +421,13 @@ def main(cfg):
         adamvars=adamvars,
         e=1,
         log_id=log_id,
-        eta=eta,
+        eta=R['eta'][-1],
         start_time=start_time)
 
     print(f"\nTesting complete with CE loss {total_testerr:.3f} and error "
-          f"rate {100*perc_wrong_test:.1f}%!\n")
+          f"rate {perc_wrong_test:.1f}%!\n")
 
-    return optVerr, perc_wrong_test
+    return R[f'optimal_val_err'], perc_wrong_test
 
 
 if __name__ == "__main__":

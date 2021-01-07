@@ -2,7 +2,7 @@
 # TO DO (priority order):
 	# Reproduce Bellec  (37.1 wrongs on test with Random)
 		* Identify weakness.
-	# Implement Izhikevich neurons
+	# Implement Izhikevich neurons (do these things while sweeping on mini nets and simplified data)
 	# Implement non-uniform synaptic delays
 	# Implement optional L2 weight decay
 	# Implement toggle for readout on last or all layers
@@ -22,6 +22,7 @@
 	# Make it possible to use fewer than N_I N_Rs
 	# Make N_R variable per layer
 	# Change into online learning rather than batch based.
+	# Instead of is_ALIF, just make a mask of beta, since beta=0 means LIF
 	# Fancy visualization (slider)
 	# Refactor
 	# Comment code
@@ -43,6 +44,7 @@
 	# L2 weight decay
 	# Different way to initialize model neurons (voltage etc?) Try eliminate onset chaos.
 	# Thesis: in discussion: layer-recurrent weights (sparse!)
+	# Is the einsum thing even correct to access afferent neurons?
 
 ========
 

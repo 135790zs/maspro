@@ -1,7 +1,7 @@
 from numpy import exp
 cfg = {
     "verbose": True,
-    "eprop_type": "random",  # in {global, random, symmetric, adaptive}
+    "eprop_type": "symmetric",  # in {global, random, symmetric, adaptive}
     "optimizer": 'Adam',  # in {Adam, SGD}
     "traub_trick": False,  # Change to "neurontype" soon {(A)LIF, Izh, STDP-(A)LIF}
     "v_fix": False,
@@ -9,11 +9,9 @@ cfg = {
     "n_directions": 1,
     "delay": 0,
     "seed": None,  # 'None' for random seed
+    "max_duration": 600
     "load_checkpoints": None,
 
-    "alpha": 0.779,  # Bellec1: 20 = 0.951. 4: 0.779
-    "rho": 0.975,  # Bellec1: 200 = 0.995. 40: 0.975
-    "kappa": 0.25,  # Bellec1: 3 = 0.717. .75:~0.25
     "beta": 1.8,    # Bellec3: 1.8. Adaptive strength. 0 = LIF
     "gamma": 0.3,     # Bellecs: 0.3.
     "thr": 1.6,        # Bellec1: unknown. Bellec3: 1.6
@@ -27,7 +25,7 @@ cfg = {
     "weight_decay": 1e-2,  # Bellec1: 0. Bellec2: 1e-2. For W_out and B, only if adaptive.
     "L2_reg": 1e-5,  # Bellec1: 0. Bellec2: 1e-5
     "FR_target": 0.01,  # Bellecs: 1e-2
-    "FR_reg": 200,  # Bellec1: 1. Bellec2: 50.
+    "FR_reg": 50,  # Bellec1: 1. Bellec2: 50.
 
     "eta_b_out": None,  # None=no sep. eta. Otherwise=Constant
     "eta_slope": 2,      # Slope defining relation between Verr and eta (1e-2 for TIMIT)
@@ -44,7 +42,8 @@ cfg = {
     "update_W_out": True,
     "update_bias": True,
     "one_to_one_output": False,
-    "update_dead_weights": True,
+    "update_dead_weights": False,
+    "recurrent": True,
 
     "N_R": 400,
     "N_Rec": 1,
@@ -53,20 +52,20 @@ cfg = {
     "wavs_fname": "../data/data_wavs",
     "phns_fname": "../data/data_phns",
 
-    "Epochs": 500,  # def = 80
+    "Epochs": 300,  # def = 80
     "Track_weights": True,
     "Track_synapse": False,  # Only for nonweight synapse vars (e.g. ET)
     "Repeats": 1,  # ms per epoch, def = 5
     "batch_size_train": 4,  # def = 32
     "batch_size_val": 4,  # def = 32
-    "batch_size_test": 32,  # def = 32
+    "batch_size_test": 20,  # def = 32
     "maxlen": 778,  #def 778, Don't forget to re-run process_timit.py!
-    "TIMIT_derivative": 0,
-    "n_examples": {'train': 20, 'val': 20, 'test': 2},
+    "TIMIT_derivative": 2,
+    "n_examples": {'train': 1, 'val': 1, 'test': 1},
     # "n_examples": {'train': 3696, 'val': 400, 'test': 192},
     "plot_state_interval": 10,  #  State plot; 0 to disable plots
     "state_save_interval": 10,
-    "plot_run_interval": 5,
+    "plot_run_interval": 10,
     "plot_pair_interval": 0,
     "val_every_E": 10,
     "plot_main": True,
@@ -81,6 +80,10 @@ cfg = {
     "num_ceps": 13,
     "cep_lifter": 22,
 }
+
+cfg["alpha"] = exp(-1/(4*cfg['Repeats']))  # Bellec1: 20 = 0.951. 4: 0.779
+cfg["rho"] = exp(-1/(40*cfg["Repeats"]))  # Bellec1: 200 = 0.995. 40: 0.975
+cfg["kappa"] = exp(-1/(0.6*cfg["Repeats"]))  # Bellec1: 3 = 0.717. .75:~0.25
 
 lookup = {
     "X":       {"scalar": False, "binary":False, "label": "x"},
@@ -104,6 +107,7 @@ lookup = {
     "L":       {"scalar": False, "binary":False, "label": "L"},
     "L_std":   {"scalar": False, "binary":False, "label": "L_{{std}}"},
     "L_reg":   {"scalar": False, "binary":False, "label": "L_{{reg}}"},
+    "spikerate":{"scalar": False, "binary":False, "label": "Hz"},
     "ETbar":   {"scalar": False, "binary":False, "label": "\\bar{{e}}"},
     "B":       {"scalar": False, "binary":False, "label": "B"},
     "Y":       {"scalar": False, "binary":False, "label": "Y"},

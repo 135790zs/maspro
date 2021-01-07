@@ -215,6 +215,9 @@ def initialize_weights(cfg, inp_size, tar_size):
 
     else:  # Symmetric: Uniform [0, 1]. Irrelevant, as it'll be overwritten
         W["B"] = rng.random(size=B_shape) * 2 - 1
+        for r in range(cfg["N_Rec"]):
+            for s in range(cfg["n_directions"]):
+                W["B"][0, s, r] = W["W_out"][0, s].T
 
     # Drop all self-looping weights. A neuron cannot be connected with itself.
     for r in range(cfg["N_Rec"]):
@@ -240,6 +243,9 @@ def initialize_weights(cfg, inp_size, tar_size):
         for wtype, arr in checkpoint.items():
             W[wtype][0] = arr
 
+    if not cfg['recurrent']:
+        W['W'][0, :, :, :, inp_size:] = 0
+
     return W
 
 
@@ -257,6 +263,22 @@ def initialize_DWs(cfg, inp_size, tar_size):
     DW["b_out"] = np.zeros(shape=(cfg["n_directions"],
                                  tar_size,))
     return DW
+
+def initialize_tracking(cfg):
+    R = {'err': {}, '%wrong': {}, 'Hz': {}}
+    for tv_type in ['train', 'val']:
+        R['err'][tv_type] = np.ones(shape=(cfg["Epochs"])) * -1
+        R[f'%wrong'][tv_type] = np.ones(shape=(cfg["Epochs"])) * -1
+    R['Hz'] = np.ones(shape=(cfg["Epochs"],
+                             cfg["n_directions"],
+                             cfg["N_Rec"],
+                             cfg["N_R"])) * -1
+    R['eta'] = np.ones(shape=(cfg["Epochs"])) * -1
+    R['latest_val_err'] = None
+    R['optimal_val_err'] = None
+
+
+    return R
 
 
 def save_weights(W, epoch, log_id):
@@ -616,6 +638,7 @@ def process_layer(cfg, M, t, s, r, W_rec):
     # M["TZ_in"][s, r] = np.concatenate((TZ_prev, M['TZ'][s, r]-1))
 
     # M['Z_inbar'][s, t] = (cfg["alpha"] * (M['Z_inbar'][s, t-1] if t > 0 else 0)) + M['Z_in'][s, t]
+
     M['ETbar'][s, curr_t, r] = cfg["kappa"] * (M['ETbar'][s, prev_t, r] if t > 0 else 0) + M['ET'][s, curr_t, r]
     M['Zbar'][s, t, r] = cfg["kappa"] * (M['Zbar'][s, t-1, r] if t > 0 else 0) + M['Z'][s, t, r]
 

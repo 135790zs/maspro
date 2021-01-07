@@ -35,60 +35,45 @@ def weights_to_img(arr, is_binary=False):
     return arr
 
 
-def plot_run(cfg, terrs, percs_wrong_t, verrs, percs_wrong_v, W, epoch, etas, spikerates, log_id, inp_size):
+def plot_run(cfg, R, W, epoch, log_id, inp_size):
 
     labelpad = 35
     fontsize = 14
     fig = plt.figure(constrained_layout=False, figsize=(8, 16))
     gsc = fig.add_gridspec(nrows=17 if cfg["Track_weights"] else 7,
-                           ncols=1, hspace=0.05)
+                           ncols=1, hspace=0.4)
     axs = []
 
-    axs.append(fig.add_subplot(gsc[len(axs), :]))
+    for k, v in R.items():
+        if k == 'eta':
+            axs.append(fig.add_subplot(gsc[len(axs), :]))
+            axs[-1].plot(v[:epoch])
+        elif k == 'Hz':
+            axs.append(fig.add_subplot(gsc[len(axs), :]))
+            v = v[:epoch+1]
+            v = v.reshape(epoch+1, -1) * 1000
+            vm = np.mean(v[:epoch], axis=1)
+            axs[-1].plot(vm)
+            axs[-1].fill_between(np.arange(epoch),
+                                 np.min(v[:epoch], axis=1),
+                                 np.max(v[:epoch], axis=1),
+                                 alpha=.25)
+            axs[-1].set_ylim(0, 100)
+        elif type(v) == dict:
+            axs.append(fig.add_subplot(gsc[len(axs), :]))
+            for tvtype, arr in v.items():
+                axs[-1].plot(arr[arr >= 0][:epoch], label=tvtype)
+            axs[-1].legend()
+        else:
+            continue
 
-    for errs, label in [(terrs, "Train"), (verrs, "Val")]:
-        axs[-1].plot(errs[errs >= 0][:epoch], label=label)
-        # axs[-1].set_ylim(0, np.max(errs[errs >= 0]) * 1.1)
-
-    axs[-1].set_ylabel(f"Cross-entropy",
-                       rotation=0,
-                       labelpad=labelpad,
-                       fontsize=fontsize)
-    axs[-1].grid()
-    axs[-1].legend()
-    axs[-1].set_yscale('log')
-
-    axs.append(fig.add_subplot(gsc[len(axs), :], sharex=axs[0]))
-    for percs_wrong, label in [(percs_wrong_t, "Train"),
-                               (percs_wrong_v, "Val")]:
-
-        axs[-1].plot(percs_wrong[percs_wrong >= 0][:epoch]*100, label=label)
-
-    axs[-1].set_ylabel(f"% mislabeled",
-                       rotation=0,
-                       labelpad=labelpad,
-                       fontsize=fontsize)
-    axs[-1].grid()
-    axs[-1].legend()
-    # axs[-1].set_ylim(None, 100)
-    axs[-1].set_yscale('log')
-
-    axs.append(fig.add_subplot(gsc[len(axs), :], sharex=axs[0]))
-    axs[-1].plot(etas[:epoch], label="$\\eta$")
-    axs[-1].grid()
-    axs[-1].set_ylabel("$\\eta$",
-                       rotation=0,
-                       labelpad=labelpad,
-                       fontsize=fontsize)
-
-    axs.append(fig.add_subplot(gsc[len(axs), :], sharex=axs[0]))
-    axs[-1].plot(1000*spikerates[:epoch], label="Mean Hz")
-    axs[-1].grid()
-    axs[-1].set_ylabel("$Mean Hz$",
-                       rotation=0,
-                       labelpad=labelpad,
-                       fontsize=fontsize)
-    # axs[-1].set_yscale('log')
+        if k in ['err', f'%wrong']:
+            axs[-1].set_yscale('log')
+        axs[-1].grid()
+        axs[-1].set_ylabel(k,
+                           rotation=0,
+                           labelpad=labelpad,
+                           fontsize=fontsize)
 
     if epoch >= 1 and cfg["Track_weights"]:
         for weight_type, weights in W.items():
@@ -200,7 +185,7 @@ def plot_state(cfg, M, B, W_rec, W_out, b_out, e, log_id, plot_weights=False):
     S_plotvars = ["X", "I", "V", "a", "A", "Z", "H"]
     if cfg["Track_synapse"]:
         S_plotvars += ["EVV", "EVU", "ET", "ETbar", "gW"]
-    S_plotvars += ["L_std", "L_reg", "L", "Y"]
+    S_plotvars += ["L_std", "L_reg", "spikerate", "L", "Y"]
 
     M_plotvars = ["P", "D", "Pmax", "T", "Correct", "CE"]
     if cfg["n_directions"] > 1:
