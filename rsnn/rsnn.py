@@ -37,7 +37,7 @@ def network(cfg, inp, tar, W_rec, W_out, b_out, B, adamvars, eta):
                                      W_rec=W_rec[s, r])
 
             M['Y'][s, t] = (
-                cfg["kappa"] * (M['Y'][s, t-1] if t > 0 else 0)
+                cfg["kappa"] * M['Y'][s, t-1]
                 + np.sum(W_out[s] * M['Z'][s, t, -1], axis=1)
                 + b_out[s])
 
@@ -75,11 +75,15 @@ def network(cfg, inp, tar, W_rec, W_out, b_out, B, adamvars, eta):
             else:
                 M['L_reg'][s, t] = 0
 
-            M['L'][s, t] = M['L_std'][s, t] + M['L_reg'][s, t]
+            # M['L'][s, t] = M['L_std'][s, t] + M['L_reg'][s, t]
 
             for r in range(cfg["N_Rec"]):
-                M[f'gW'][s, curr_t, r] += ut.einsum(a=M['L'][s, t, r],
+                M[f'gW'][s, curr_t, r] += ut.einsum(a=M['L_std'][s, t, r],
                                                     b=M['ETbar'][s, curr_t, r])  # Checked correct
+                M[f'gW'][s, curr_t, r] += ut.einsum(a=M['L_reg'][s, t, r],
+                                                    b=M['ET'][s, curr_t, r])
+                # Bellec contains error w.r.t. factoring with ET, because this can't revive silent neurons.
+                # M[f'gW'][s, curr_t, r] = (M['L_reg'][s, t, r] + M[f'gW'][s, curr_t, r].T).T
 
 
             if cfg["update_W_out"]:
@@ -254,6 +258,8 @@ def main(cfg):
                       cfg["eta_init"] * (R['latest_val_err'] / cfg["eta_init_loss"]) ** cfg["eta_slope"])
         if e+1 < cfg["ramping"]:
             R['eta'][e] *= (e+1)/cfg["ramping"]
+        if cfg["unramp"]:
+            R['eta'][e] = max(0, R['eta'][e] * (cfg["unramp"] - e) / cfg["unramp"])
 
         # Make batch
         randidxs = rng.integers(inps['train'].shape[0],
@@ -322,7 +328,7 @@ def main(cfg):
             break
 
         # If there's a time constraint (helpful in sweeping), break now.
-        if cfg["max_duration"] and cfg["max_duration"] >= time.time() - start_time:
+        if cfg["max_duration"] and cfg["max_duration"] <= time.time() - start_time:
             break
 
         L2_reg = cfg["L2_reg"] * np.linalg.norm(W['W'][ep_curr].flatten())
@@ -343,8 +349,8 @@ def main(cfg):
                     cfg["adam_beta2"] * adamvars[f'v{wtype}']
                     + (1 - cfg["adam_beta2"]) * gW[wtype] ** 2)
 
-                m = adamvars[f'm{wtype}'] / (1 - cfg["adam_beta1"])
-                v = adamvars[f'v{wtype}'] / (1 - cfg["adam_beta2"])
+                m = adamvars[f'm{wtype}'] / (1 - cfg["adam_beta1"] ** (e+1))
+                v = adamvars[f'v{wtype}'] / (1 - cfg["adam_beta2"] ** (e+1))
 
                 # Calculate DWs
                 DW[wtype] = (-(R['eta'][e] if wtype != "b_out" or cfg["eta_b_out"] is None else cfg["eta_b_out"])
@@ -376,16 +382,14 @@ def main(cfg):
 
                 if cfg["eprop_type"] == "symmetric" and cfg['update_W_out']:
                     for s in range(cfg["n_directions"]):  # TODO: Vectorize out s?
-                        W["B"][ep_curr+ep_incr, s] = (W["B"][ep_curr, s]
-                                                   + DW["W_out"][s].T)
+                        W["B"][ep_curr+ep_incr, s] = (W["W_out"][ep_curr, s]
+                                                   + DW["W_out"][s]).T
 
                 elif cfg["eprop_type"] == "adaptive" and cfg['update_W_out']:
                     for s in range(cfg["n_directions"]):
-                        W["B"][ep_curr+ep_incr, s] = (W["W_out"][ep_curr, s]
-                                                      + DW["W_out"][s]).T
-                        W["B"][ep_curr+ep_incr, s] -= (
-                            W["B"][ep_curr+ep_incr, s]
-                            * cfg["weight_decay"])
+                        W["B"][ep_curr+ep_incr, s] = (W["B"][ep_curr, s]
+                                                      + DW["W_out"][s].T)
+
                 else:
                     W["B"][ep_curr+ep_incr] = W["B"][ep_curr]
 
@@ -397,6 +401,8 @@ def main(cfg):
         if cfg["eprop_type"] == "adaptive":
             W["W_out"][ep_curr+ep_incr] -= (W["W_out"][ep_curr+ep_incr]
                                           * cfg["weight_decay"])
+            W['B'][ep_curr+ep_incr] -= (W["B"][ep_curr+ep_incr, s]
+                                        * cfg["weight_decay"])
 
     # Epoch loop ends here
 

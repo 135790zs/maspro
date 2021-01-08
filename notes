@@ -2,9 +2,10 @@
 # TO DO (priority order):
 	# Reproduce Bellec  (37.1 wrongs on test with Random)
 		* Identify weakness.
+	# Separate W_in and W_rec
 	# Implement Izhikevich neurons (do these things while sweeping on mini nets and simplified data)
-	# Implement non-uniform synaptic delays
-	# Implement optional L2 weight decay
+
+	# Implement matrix of distributed betas
 	# Implement toggle for readout on last or all layers
 	# Implement logging learning data (e.g. errs, LR, etc)
 	# Sweep (intelligently, and with low-capacity), but only after reproducing

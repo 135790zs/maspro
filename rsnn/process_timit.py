@@ -218,6 +218,8 @@ if __name__ == "__main__":
                     idx += 1
                     if idx == nwavs:
                         break
+            else:
+                print(f"Found only {idx} {tvt_type} files instead of {nwavs}.")
 
         d_ext = "_small" if cfg["n_examples"]['train'] < 3696 else ""
 
@@ -227,10 +229,11 @@ if __name__ == "__main__":
         elif tvt_type == 'train':
             np.save(f'{cfg["wavs_fname"]}_train_TIMIT{d_ext}.npy',
                     wavdata[:cfg['n_examples']['train']])
-            np.save(f'{cfg["phns_fname"]}_train_TIMIT{d_ext}.npy',
-                    phonedata[:cfg['n_examples']['train']])
             np.save(f'{cfg["wavs_fname"]}_val_TIMIT{d_ext}.npy',
                     wavdata[cfg['n_examples']['val']:])
+
+            np.save(f'{cfg["phns_fname"]}_train_TIMIT{d_ext}.npy',
+                    phonedata[:cfg['n_examples']['train']])
             np.save(f'{cfg["phns_fname"]}_val_TIMIT{d_ext}.npy',
                     phonedata[cfg['n_examples']['val']:])
 
