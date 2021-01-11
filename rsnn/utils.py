@@ -173,11 +173,14 @@ def initialize_weights(cfg, inp_size, tar_size):
                                   cfg["n_directions"],
                                   cfg["N_Rec"],
                                   cfg["N_R"],
-                                  cfg["N_R"] * 2,)) / np.sqrt(2*cfg['N_R'])
-        W["W_out"] = rng.random(size=(n_epochs,
+                                  cfg["N_R"] * 2,))
+        # W['W'][0, :, :, :, cfg["N_R"]:] /= np.sqrt(cfg["N_R"])
+        # W['W'][0, :, :, :, :cfg["N_R"]] /= np.sqrt(inp_size)
+        W['W'][0] /= np.sqrt(cfg["N_R"]+inp_size)
+        W["W_out"] = rng.normal(size=(n_epochs,
                                       cfg["n_directions"],
                                       tar_size,
-                                      cfg["N_R"])) * 2 - 1
+                                      cfg["N_R"])) / np.sqrt(tar_size)
 
     W["b_out"] = np.zeros(shape=(n_epochs,
                                  cfg["n_directions"],
@@ -235,7 +238,7 @@ def initialize_weights(cfg, inp_size, tar_size):
             W[wtype][0] = arr
 
     if not cfg['recurrent']:
-        W['W'][0, :, :, :, inp_size:] = 0
+        W['W'][0, :, :, :, cfg["N_R"]:] = 0
 
     return W
 
@@ -403,7 +406,6 @@ def process_layer(cfg, M, t, s, r, W_rec):
     # Revert eprop functions EVV and V if using traub trick!
     assert(not cfg["traub_trick"])
 
-
     # EVU
     M['EVU'][s, curr_t, r] = (einsum(a=M['H'][s, t-1, r],
                                      b=M['EVV'][s, prev_t, r])
@@ -539,17 +541,17 @@ def eprop_FR_reg(cfg, rates, ETbar, t):
     return ret
 
 
-def interpolate_inputs(inp, tar, stretch):
+def interpolate_inputs(cfg, inp, tar, stretch):
     inp = inp.T
     tar = tar.T
 
     itp_inp = interp1d(np.arange(inp.shape[-1]),
-                   inp,
-                   kind='linear')
+                       inp,
+                       kind=cfg["Interpolation"])
 
     itp_tar = interp1d(np.arange(tar.shape[-1]),
-                   tar,
-                   kind='nearest')
+                       tar,
+                       kind='nearest')
 
     inp = itp_inp(np.linspace(0, inp.shape[-1]-1, int(inp.shape[-1]*stretch)))
     tar = itp_tar(np.linspace(0, tar.shape[-1]-1, int(tar.shape[-1]*stretch)))

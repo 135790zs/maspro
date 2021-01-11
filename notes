@@ -41,11 +41,9 @@
 	# Draft clear and logical structure for report. Base it off my central research question, and top-down into introduction etc.
 
 # IDEAS/NOTES
-	# Gradient capping?
-	# L2 weight decay
-	# Different way to initialize model neurons (voltage etc?) Try eliminate onset chaos.
-	# Thesis: in discussion: layer-recurrent weights (sparse!)
-	# Is the einsum thing even correct to access afferent neurons?
+	# Thesis: in discussion: skip connections between layers? (sparse!)
+	# Adam might be an excellent local training method, and could be integrated in the e-prop theory learning update in my paper.
+	# Bellec uses std in normalize, why?
 
 ========
 

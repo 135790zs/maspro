@@ -1,7 +1,7 @@
 from numpy import exp
 cfg = {
     "verbose": True,
-    "eprop_type": "symmetric",  # in {global, random, symmetric, adaptive}
+    "eprop_type": "random",  # in {global, random, symmetric, adaptive}
     "optimizer": 'Adam',  # in {Adam, SGD}
     "traub_trick": False,  # Change to "neurontype" soon {(A)LIF, Izh, STDP-(A)LIF}
     "v_fix": False,
@@ -46,27 +46,29 @@ cfg = {
     "update_input_weights": True,  # Subset of - and overridden by `update_W'.
     "recurrent": True,
 
-    "N_R": 128,
+    "N_R": 200,
     "N_Rec": 1,
 
     "task": "TIMIT",
     "wavs_fname": "../data/data_wavs",
     "phns_fname": "../data/data_phns",
 
-    "Epochs": 2000,  # def = 80
+    "Epochs": 100,  # def = 80
     "Track_weights": True,
     "Track_synapse": False,  # Only for nonweight synapse vars (e.g. ET)
-    "Repeats": 1,  # ms per epoch, def = 5
-    "batch_size_train": 10,  # def = 32
-    "batch_size_val": 10,  # def = 32
+    "Repeats": 5,  # ms per epoch, def = 5
+    "Interpolation": 'nearest',  # nearest, linear
+    "crop_silence": False,
+    "batch_size_train": 16,  # def = 32
+    "batch_size_val": 16,  # def = 32
     "batch_size_test": 30,  # def = 32
     "maxlen": 778,  #def 778, Don't forget to re-run process_timit.py!
-    "TIMIT_derivative": 0,
-    "n_examples": {'train': 30, 'val': 100, 'test': 1},
-    # "n_examples": {'train': 3696, 'val': 400, 'test': 192},
-    "plot_state_interval": 10,  #  State plot; 0 to disable plots
+    "TIMIT_derivative": 2,
+    # "n_examples": {'train': 30, 'val': 100, 'test': 1},
+    "n_examples": {'train': 3696, 'val': 400, 'test': 192},
+    "plot_state_interval": 1,  #  State plot; 0 to disable plots
     "state_save_interval": 1,
-    "plot_run_interval": 5,
+    "plot_run_interval": 1,
     "plot_pair_interval": 0,
     "val_every_E": 5,
     "plot_main": True,

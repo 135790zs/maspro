@@ -112,6 +112,7 @@ def my_mfcc(signal, sample_rate):
         plt.clf()
     return mfcc
 
+
 def read_phonelines(phonelines_):
     def to_ohv(p):
         try:
@@ -191,7 +192,7 @@ if __name__ == "__main__":
             nwavs = cfg["n_examples"]['train'] + cfg["n_examples"]['val']
             print(f"\nReading {nwavs} train & val files...")
 
-        wavdata = np.zeros(shape=(nwavs, maxnframes, nfeat))
+        wavdata = np.ones(shape=(nwavs, maxnframes, nfeat)) * -1  # -1 used to truncate padding in code
         phonedata = np.zeros(shape=(nwavs, maxnframes, 61))
 
         directory = tvt_type.upper()
@@ -218,8 +219,6 @@ if __name__ == "__main__":
                     idx += 1
                     if idx == nwavs:
                         break
-            else:
-                print(f"Found only {idx} {tvt_type} files instead of {nwavs}.")
 
         d_ext = "_small" if cfg["n_examples"]['train'] < 3696 else ""
 

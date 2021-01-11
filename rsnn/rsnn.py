@@ -81,7 +81,7 @@ def network(cfg, inp, tar, W_rec, W_out, b_out, B, adamvars, eta):
                 M[f'gW'][s, curr_t, r] += ut.einsum(a=M['L_std'][s, t, r],
                                                     b=M['ETbar'][s, curr_t, r])  # Checked correct
                 M[f'gW'][s, curr_t, r] += ut.einsum(a=M['L_reg'][s, t, r],
-                                                    b=M['ET'][s, curr_t, r])
+                                                    b=M['ETbar'][s, curr_t, r])
                 # Bellec contains error w.r.t. factoring with ET, because this can't revive silent neurons.
                 # M[f'gW'][s, curr_t, r] = (M['L_reg'][s, t, r] + M[f'gW'][s, curr_t, r].T).T
 
@@ -129,20 +129,21 @@ def feed_batch(cfg, inps, tars, W_rec, W_out, b_out, eta, B, tvt_type, adamvars,
                   f"sample {b+1}/{inps.shape[0]}\t",
                   end='\r' if b < inps.shape[0]-1 else '\n')
 
-        this_tars = tars[b]
+        this_inps = inps[b]
+        # Crop placeholder -1's off the array.
+        while np.all(this_inps[-1] == -1):
+            this_inps = this_inps[:-1]
 
-        # Crop silence off of data
-        while this_tars[-1, 0] == 1:
-            this_tars = this_tars[:-1]
-
-            if this_tars.size == 0:
+            if this_inps.size == 0:
                 # Process failed: was 0 everywhere. Continue with original
-                this_tars = tars[b]
+                this_inps = inps[b]
                 break
 
-        this_inps = inps[b, :this_tars.shape[0]]
+        # this_inps = inps[b, :this_tars.shape[0]]
+        this_tars = tars[b, :this_inps.shape[0]]
 
-        this_inps, this_tars = ut.interpolate_inputs(inp=this_inps,
+        this_inps, this_tars = ut.interpolate_inputs(cfg=cfg,
+                                                     inp=this_inps,
                                                      tar=this_tars,
                                                      stretch=cfg["Repeats"])
 
@@ -203,15 +204,20 @@ def main(cfg):
     inps = {}
     tars = {}
 
+
     for tvt_type in cfg['n_examples'].keys():
         inps[tvt_type] = np.load(f"{cfg['wavs_fname']}_{tvt_type}_{cfg['task']}.npy")
+
+    mintrain = np.amin(inps['train'], axis=(0, 1))
+    maxtrain = np.ptp(inps['train'], axis=(0, 1))
+
+    for tvt_type in cfg['n_examples'].keys():
         # Normalize [0, 1]
 
-        inps[tvt_type] -= np.min(inps[tvt_type], axis=1)[:, np.newaxis, :]
-        inps[tvt_type] /= np.max(inps[tvt_type], axis=1)[:, np.newaxis, :]
+        inps[tvt_type] = np.where(inps[tvt_type] != -1, inps[tvt_type] - mintrain, -1)
+        inps[tvt_type] = np.where(inps[tvt_type] != -1, inps[tvt_type] / maxtrain, -1)
 
         tars[tvt_type] = np.load(f"{cfg['phns_fname']}_{tvt_type}_{cfg['task']}.npy")
-
 
     print("N_train:", inps['train'].shape[0], "N_val:", inps['val'].shape[0])
     log_id = ut.get_log_id()
@@ -331,13 +337,13 @@ def main(cfg):
         if cfg["max_duration"] and cfg["max_duration"] <= time.time() - start_time:
             break
 
-        L2_reg = cfg["L2_reg"] * np.linalg.norm(W['W'][ep_curr].flatten())
 
         # Calculate DWs
         for wtype in W.keys():
-            gW[wtype] += L2_reg
+
             if wtype == "B":  # There's no DW for B. B is updated differently.
                 continue
+            gW[wtype] += cfg["L2_reg"] * np.linalg.norm(W[wtype][ep_curr].flatten())
             if cfg["optimizer"] == "Adam":
                 # Update Adam for W, W_out, b_out
 
