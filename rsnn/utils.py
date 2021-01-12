@@ -83,7 +83,7 @@ def initialize_model(cfg, length, tar_size):
     for T_var in ["T", "P", "Pmax", "D"]:
         M[T_var] = np.zeros(shape=T_shape)
 
-    for neuronvar in ["Z", "V", "a", "H", "Zbar", "Z_prev", "I", "L_std", "L_reg", "L", "spikerate"]:
+    for neuronvar in ["Z", "V", "a", "H", "Zbar", "Z_prev", "I", "I_in", "I_rec", "L_std", "L_reg", "spikerate"]:
         M[neuronvar] = np.zeros(shape=neuron_shape)
 
     for weightvar in ["EVV", "EVU", "ET", "ETbar", 'gW']:
@@ -175,12 +175,12 @@ def initialize_weights(cfg, inp_size, tar_size):
                                   cfg["N_R"],
                                   cfg["N_R"] * 2,))
         # W['W'][0, :, :, :, cfg["N_R"]:] /= np.sqrt(cfg["N_R"])
-        # W['W'][0, :, :, :, :cfg["N_R"]] /= np.sqrt(inp_size)
+        # W['W'][0, :, :, :, :cfg["N_R"]] /= np.sqrt(cfg["N_R"])
         W['W'][0] /= np.sqrt(cfg["N_R"]+inp_size)
         W["W_out"] = rng.normal(size=(n_epochs,
                                       cfg["n_directions"],
                                       tar_size,
-                                      cfg["N_R"])) / np.sqrt(tar_size)
+                                      cfg["N_R"])) / np.sqrt(cfg["N_R"])
 
     W["b_out"] = np.zeros(shape=(n_epochs,
                                  cfg["n_directions"],
@@ -243,7 +243,7 @@ def initialize_weights(cfg, inp_size, tar_size):
     return W
 
 
-def initialize_DWs(cfg, inp_size, tar_size):
+def initialize_DWs(cfg, tar_size):
     DW = {}
     DW["W"] = np.zeros(shape=(cfg["n_directions"],
                               cfg["N_Rec"],
@@ -257,6 +257,25 @@ def initialize_DWs(cfg, inp_size, tar_size):
     DW["b_out"] = np.zeros(shape=(cfg["n_directions"],
                                  tar_size,))
     return DW
+
+
+def gW_tracker(cfg, tar_size):
+    GW = {}
+    GW["W"] = np.zeros(shape=(cfg["Epochs"],
+                              cfg["n_directions"],
+                              cfg["N_Rec"],
+                              cfg["N_R"],
+                              cfg["N_R"] * 2,))
+
+    GW["W_out"] = np.zeros(shape=(cfg["Epochs"],
+                                  cfg["n_directions"],
+                                  tar_size,
+                                  cfg["N_R"],))
+
+    GW["b_out"] = np.zeros(shape=(cfg["Epochs"],
+                                  cfg["n_directions"],
+                                 tar_size,))
+    return GW
 
 def initialize_tracking(cfg):
     R = {'err': {}, '%wrong': {}, 'Hz': {}}
@@ -401,7 +420,8 @@ def process_layer(cfg, M, t, s, r, W_rec):
         np.pad(M[f'X{s}'][t],
                (0, cfg["N_R"] - M[f'X{s}'].shape[1]))
 
-    M["Z_in"][s, t, r] = np.concatenate((M["Z_prev"][s, t, r], M['Z'][s, t-1, r]))
+    M["Z_in"][s, t, r] = np.concatenate((M["Z_prev"][s, t, r],
+                                         M['Z'][s, t-1, r]))
 
     # Revert eprop functions EVV and V if using traub trick!
     assert(not cfg["traub_trick"])
@@ -416,7 +436,15 @@ def process_layer(cfg, M, t, s, r, W_rec):
                               + M["Z_in"][s, t, r])
 
     # I
-    M['I'][s, t, r] = np.dot(W_rec, M["Z_in"][s, t, r])
+    M['I_in'][s, t, r] = np.dot(W_rec[:, :cfg["N_R"]], M["Z_prev"][s, t, r])
+    M['I_rec'][s, t, r] = np.dot(W_rec[:, cfg["N_R"]:], M['Z'][s, t-1, r])
+    # if np.any(M['Z'][s, t-1, r]):
+    #     print()
+    #     print(W_rec[:, cfg["N_R"]:])
+    #     print(M['Z'][s, t-1, r])
+    #     print(M['I_rec'][s, t, r])
+    # M['I'][s, t, r] = np.dot(W_rec, M["Z_in"][s, t, r])
+    M['I'][s, t, r] = M['I_in'][s, t, r] + M['I_rec'][s, t, r]
 
     # V
     M['V'][s, t, r] =  (cfg["alpha"] * M['V'][s, t-1, r]
@@ -495,17 +523,6 @@ def prepare_log(cfg, log_id):
     with open(f'../log/{log_id}/config.json', 'w+') as fp:
         json.dump(cfg0, fp)
 
-    # folder = f"../vis/states/"
-    # for filename in os.listdir(folder):
-    #     file_path = os.path.join(folder, filename)
-    #     try:
-    #         if os.path.isfile(file_path) or os.path.islink(file_path):
-    #             os.unlink(file_path)
-    #         elif os.path.isdir(file_path):
-    #             shutil.rmtree(file_path)
-    #     except Exception as e:
-    #         print('Failed to delete %s. Reason: %s' % (file_path, e))
-
 
 def get_log_id():
     log_id = datetime.datetime.now().strftime('%Y-%m-%d-%H:%M:%S')
@@ -536,10 +553,25 @@ def get_elapsed_time(cfg, start_time, e, b, batch_size):
     return plustime, remtime
 
 
-def eprop_FR_reg(cfg, rates, ETbar, t):
-    ret = eta * cfg["FR_reg"] * np.sum()
-    return ret
+def load_data(cfg):
 
+    inps = {}
+    tars = {}
+    for tvt_type in cfg['n_examples'].keys():
+        inps[tvt_type] = np.load(f"{cfg['wavs_fname']}_{tvt_type}_{cfg['task']}.npy")
+
+    mintrain = np.amin(inps['train'], axis=(0, 1))
+    maxtrain = np.ptp(inps['train'], axis=(0, 1))
+
+    for tvt_type in cfg['n_examples'].keys():
+        # Normalize [0, 1]
+
+        inps[tvt_type] = np.where(inps[tvt_type] != -1, inps[tvt_type] - mintrain, -1)
+        inps[tvt_type] = np.where(inps[tvt_type] != -1, inps[tvt_type] / maxtrain, -1)
+
+        tars[tvt_type] = np.load(f"{cfg['phns_fname']}_{tvt_type}_{cfg['task']}.npy")
+
+    return inps, tars
 
 def interpolate_inputs(cfg, inp, tar, stretch):
     inp = inp.T

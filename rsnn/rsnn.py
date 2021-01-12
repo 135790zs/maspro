@@ -68,6 +68,7 @@ def network(cfg, inp, tar, W_rec, W_out, b_out, B, adamvars, eta):
             if t:
                 M['spikerate'][s, t] = np.mean(M['Z'][s, :t], axis=0)
 
+
                 M['L_reg'][s, t] = (cfg["FR_reg"]
                                  * (1 / n_steps)
                                  * (M['spikerate'][s, t] - cfg["FR_target"]))
@@ -75,21 +76,21 @@ def network(cfg, inp, tar, W_rec, W_out, b_out, B, adamvars, eta):
             else:
                 M['L_reg'][s, t] = 0
 
-            # M['L'][s, t] = M['L_std'][s, t] + M['L_reg'][s, t]
-
             for r in range(cfg["N_Rec"]):
-                M[f'gW'][s, curr_t, r] += ut.einsum(a=M['L_std'][s, t, r],
-                                                    b=M['ETbar'][s, curr_t, r])  # Checked correct
-                M[f'gW'][s, curr_t, r] += ut.einsum(a=M['L_reg'][s, t, r],
-                                                    b=M['ETbar'][s, curr_t, r])
-                # Bellec contains error w.r.t. factoring with ET, because this can't revive silent neurons.
+                stdloss = ut.einsum(a=M['L_std'][s, t, r],
+                                    b=M['ETbar'][s, curr_t, r])  # Checked correct
+                M[f'gW'][s, curr_t, r] += stdloss
+                regloss = ut.einsum(a=M['L_reg'][s, t, r],
+                                    b=M['ETbar'][s, curr_t, r])
+                M[f'gW'][s, curr_t, r] += regloss
+                # Bellec contains error w.r.t. factoring with ET, because this can't revive silent neurons?
                 # M[f'gW'][s, curr_t, r] = (M['L_reg'][s, t, r] + M[f'gW'][s, curr_t, r].T).T
 
 
             if cfg["update_W_out"]:
                 M[f'gW_out'][s, curr_t] += np.outer(M['D'][t], M['Zbar'][s, t, -1])
 
-            if cfg["update_bias"]:
+            if cfg["update_b_out"]:
                 M[f'gb_out'][s, curr_t] += M['D'][t]
         if cfg["plot_graph"]:
             vis.plot_graph(
@@ -111,8 +112,6 @@ def feed_batch(cfg, inps, tars, W_rec, W_out, b_out, eta, B, tvt_type, adamvars,
             shape=(cfg["n_directions"], tars.shape[-1], cfg["N_R"],)),
         'b_out': np.zeros(
             shape=(cfg["n_directions"], tars.shape[-1],)),
-        'B': np.zeros(
-            shape=(cfg["n_directions"], cfg["N_Rec"], cfg["N_R"], tars.shape[-1],)),
     }
     for b in range(inps.shape[0]):
         if not cfg["verbose"]:
@@ -190,7 +189,7 @@ def feed_batch(cfg, inps, tars, W_rec, W_out, b_out, eta, B, tvt_type, adamvars,
 
 
         for w_type in ['W', 'W_out', 'b_out']:
-            gw = np.sum(final_model[f'g{w_type}'], axis=1)  # Checked correct
+            gw = np.sum(final_model[f'g{w_type}'], axis=1) / this_inps.shape[0]   # Checked correct
             batch_gW[w_type] += gw / inps.shape[0]  # Divide to correct for batch size?
 
     return batch_err, batch_perc_wrong, batch_gW, batch_spikerate
@@ -199,44 +198,33 @@ def feed_batch(cfg, inps, tars, W_rec, W_out, b_out, eta, B, tvt_type, adamvars,
 def main(cfg):
 
     start_time = time.time()
-
-    # Load data
-    inps = {}
-    tars = {}
-
-
-    for tvt_type in cfg['n_examples'].keys():
-        inps[tvt_type] = np.load(f"{cfg['wavs_fname']}_{tvt_type}_{cfg['task']}.npy")
-
-    mintrain = np.amin(inps['train'], axis=(0, 1))
-    maxtrain = np.ptp(inps['train'], axis=(0, 1))
-
-    for tvt_type in cfg['n_examples'].keys():
-        # Normalize [0, 1]
-
-        inps[tvt_type] = np.where(inps[tvt_type] != -1, inps[tvt_type] - mintrain, -1)
-        inps[tvt_type] = np.where(inps[tvt_type] != -1, inps[tvt_type] / maxtrain, -1)
-
-        tars[tvt_type] = np.load(f"{cfg['phns_fname']}_{tvt_type}_{cfg['task']}.npy")
-
-    print("N_train:", inps['train'].shape[0], "N_val:", inps['val'].shape[0])
-    log_id = ut.get_log_id()
-
     rng = np.random.default_rng(seed=cfg["seed"])
 
+    log_id = ut.get_log_id()
     ut.prepare_log(cfg=cfg, log_id=log_id)
 
+    # Load data
+    inps, tars = ut.load_data(cfg=cfg)
+    n_channels = inps['train'].shape[-1]
+    n_phones = tars['train'].shape[-1]
+
+    n_train = inps['train'].shape[0]
+    n_val = inps['val'].shape[0]
+
+    print("N_train:", n_train, "N_val:", n_val)
+
+    # Dict to track errors, eta, etc over epochs
     R = ut.initialize_tracking(cfg=cfg)
 
-    W = ut.initialize_weights(cfg=cfg,
-                              inp_size=inps['train'].shape[-1],
-                              tar_size=tars['train'].shape[-1])
+    # Weights to the network. Keys: W, W_out, b_out, B
+    W = ut.initialize_weights(cfg=cfg, inp_size=n_channels, tar_size=n_phones)
 
-    DW = ut.initialize_DWs(cfg=cfg,
-                           inp_size=inps['train'].shape[-1],
-                           tar_size=tars['train'].shape[-1])
+    # Weight update
+    DW = ut.initialize_DWs(cfg=cfg, tar_size=n_phones)
 
-    adamvars = ut.init_adam(cfg=cfg, tar_size=tars['train'].shape[-1])
+    gWtracker = ut.gW_tracker(cfg=cfg, tar_size=n_phones)
+
+    adamvars = ut.init_adam(cfg=cfg, tar_size=n_phones)
 
     # Print size of system in memory
     if cfg["verbose"]:
@@ -289,6 +277,8 @@ def main(cfg):
         R['err']['train'][e] = err
         R[f'%wrong']['train'][e] = perc_wrong
         R['Hz'][e] = spikerate
+        for wtype, g in gW.items():
+            gWtracker[wtype][e] = g
 
         # Validation
         if e % cfg["val_every_E"] == 0:
@@ -327,7 +317,7 @@ def main(cfg):
 
         if cfg["plot_run_interval"] and e % cfg["plot_run_interval"] == 0 and e:
             vis.plot_run(cfg=cfg, R=R, W=W, epoch=e, log_id=log_id,
-                         inp_size=inps['train'].shape[-1])
+                         inp_size=inps['train'].shape[-1], gW=gWtracker)
 
         # Dont update weights in last epoch
         if e == cfg['Epochs'] - 1:
@@ -341,9 +331,14 @@ def main(cfg):
         # Calculate DWs
         for wtype in W.keys():
 
-            if wtype == "B":  # There's no DW for B. B is updated differently.
+            if wtype == "B" or not cfg[f"update_{wtype}"]:  # There's no DW for B. B is updated differently.
                 continue
+
             gW[wtype] += cfg["L2_reg"] * np.linalg.norm(W[wtype][ep_curr].flatten())
+
+            eta = (R['eta'][e] if wtype != "b_out" or cfg["eta_b_out"] is None
+                   else cfg["eta_b_out"])
+
             if cfg["optimizer"] == "Adam":
                 # Update Adam for W, W_out, b_out
 
@@ -353,18 +348,46 @@ def main(cfg):
 
                 adamvars[f'v{wtype}'] = (
                     cfg["adam_beta2"] * adamvars[f'v{wtype}']
-                    + (1 - cfg["adam_beta2"]) * gW[wtype] ** 2)
+                    + (1 - cfg["adam_beta2"]) * (gW[wtype] ** 2))
 
                 m = adamvars[f'm{wtype}'] / (1 - cfg["adam_beta1"] ** (e+1))
                 v = adamvars[f'v{wtype}'] / (1 - cfg["adam_beta2"] ** (e+1))
 
                 # Calculate DWs
-                DW[wtype] = (-(R['eta'][e] if wtype != "b_out" or cfg["eta_b_out"] is None else cfg["eta_b_out"])
-                             * (m / (np.sqrt(v) + cfg["adam_eps"])))
+                DW[wtype] = (-eta * (m / (np.sqrt(v) + cfg["adam_eps"])))
+
+            elif cfg["optimizer"] == "RAdam":
+                # Update Adam for W, W_out, b_out
+
+                adamvars[f'm{wtype}'] = (
+                    cfg["adam_beta1"] * adamvars[f'm{wtype}']
+                    + (1 - cfg["adam_beta1"]) * gW[wtype])
+
+                adamvars[f'v{wtype}'] = (
+                    (1/cfg["adam_beta2"]) * adamvars[f'v{wtype}']
+                    + (1 - cfg["adam_beta2"]) * gW[wtype] ** 2)
+
+                m = adamvars[f'm{wtype}'] / (1 - cfg["adam_beta1"] ** (e+1))
+                # v = adamvars[f'v{wtype}'] / (1 - cfg["adam_beta2"] ** (e+1))
+                DW[wtype] = -eta*m
+
+                rinf = 2/(1-cfg["adam_beta2"]) - 1
+                rho = (rinf - 2 * (e+1) * cfg["adam_beta2"] ** (e+1)
+                              / (1 - cfg["adam_beta1"] ** (e+1)))
+
+                if rho > 4 and not np.any(adamvars[f'v{wtype}'] == 0):
+                    alr = np.sqrt((1 - cfg["adam_beta1"] ** (e+1))
+                                  / adamvars[f'v{wtype}'])
+                    vrt = np.sqrt(((rho-4)*(rho-2)*rinf)
+                                  / ((rinf-4)*(rinf-2)*rho))
+                    DW[wtype] *= vrt * alr
+
+                # # Calculate DWs
+                # DW[wtype] = (-eta * (m / (np.sqrt(v) + cfg["adam_eps"])))
 
             elif cfg["optimizer"] == "SGD":
-                DW[wtype] = (-(R['eta'][e] if wtype != "b_out" or cfg["eta_b_out"] is None else cfg["eta_b_out"])
-                             * gW[wtype])
+                DW[wtype] = (-eta * gW[wtype])
+
 
         if not cfg["update_input_weights"]:
             DW['W'][:, 0, :, :inps['train'].shape[-1]] = 0
@@ -375,16 +398,8 @@ def main(cfg):
 
         # Apply DWs
         for wtype in W.keys():
-            if wtype == 'W' and not cfg["update_W"]:
-                W[wtype][ep_curr+ep_incr] = W[wtype][ep_curr]
 
-            elif wtype == 'W_out' and not cfg["update_W_out"]:
-                W[wtype][ep_curr+ep_incr] = W[wtype][ep_curr]
-
-            elif wtype == 'b_out' and not cfg["update_bias"]:
-                W[wtype][ep_curr+ep_incr] = W[wtype][ep_curr]
-
-            elif wtype == "B":
+            if wtype == "B":
 
                 if cfg["eprop_type"] == "symmetric" and cfg['update_W_out']:
                     for s in range(cfg["n_directions"]):  # TODO: Vectorize out s?
@@ -399,8 +414,7 @@ def main(cfg):
                 else:
                     W["B"][ep_curr+ep_incr] = W["B"][ep_curr]
 
-            else:  # W, W_out, or b_out (depending on update cfg)
-
+            else:  # Normal update of W, W_out, or b_out
                 W[wtype][ep_curr+ep_incr] = W[wtype][ep_curr] + DW[wtype]
 
         # Decay W_out

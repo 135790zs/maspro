@@ -1,7 +1,7 @@
 from numpy import exp
 cfg = {
     "verbose": True,
-    "eprop_type": "random",  # in {global, random, symmetric, adaptive}
+    "eprop_type": "symmetric",  # in {global, random, symmetric, adaptive}
     "optimizer": 'Adam',  # in {Adam, SGD}
     "traub_trick": False,  # Change to "neurontype" soon {(A)LIF, Izh, STDP-(A)LIF}
     "v_fix": False,
@@ -12,20 +12,20 @@ cfg = {
     "max_duration": None,
     "load_checkpoints": None,
 
-    "beta": 0.184,  # Bellec2: "order of 0.07", Bellec3: 0.184
+    "beta": 0.184,  # Bellec2: "order of 0.07", Bellec3: 0.184. Code: 1.8
     "gamma": 0.3,  # Bellec2: 0.3
     "thr": 1.6,  # Bellec3: 1.6
     "dt_refr": 2,  # Bellec3: 2
     "weight_initialization": "bellec18",
 
-    "eta_init": 1e-2,
+    "eta_init": 0.01,
     "adam_beta1": 0.9,
     "adam_beta2": 0.999,
     "adam_eps": 1e-5,
 
     "weight_decay": 1e-2,  # Bellec3: 1e-2
-    "L2_reg": 1e-5,  # Bellec3: 1e-5
-    "FR_target": 0.01,  # Likely 0.01 (10hz)
+    "L2_reg": 0,  # Bellec3: 1e-5
+    "FR_target": 0.01,  # BellecCode: 0.01 (10hz)
     "FR_reg": 50,  # Bellec3: 50
 
     "eta_b_out": None,  # None=no sep. eta. Otherwise=Constant
@@ -39,36 +39,35 @@ cfg = {
 
     "update_W": True,
     "update_W_out": True,
-    "update_bias": True,
+    "update_b_out": True,
     "one_to_one_input": False,
     "one_to_one_output": False,
     "update_dead_weights": False,
     "update_input_weights": True,  # Subset of - and overridden by `update_W'.
     "recurrent": True,
 
-    "N_R": 200,
+    "N_R": 400,
     "N_Rec": 1,
 
-    "task": "TIMIT",
+    "task": "TIMIT_small",
     "wavs_fname": "../data/data_wavs",
     "phns_fname": "../data/data_phns",
 
-    "Epochs": 100,  # def = 80
+    "Epochs": 500,  # def = 80
     "Track_weights": True,
     "Track_synapse": False,  # Only for nonweight synapse vars (e.g. ET)
-    "Repeats": 5,  # ms per epoch, def = 5
+    "Repeats": 1,  # ms per epoch, def = 5
     "Interpolation": 'nearest',  # nearest, linear
-    "crop_silence": False,
-    "batch_size_train": 16,  # def = 32
-    "batch_size_val": 16,  # def = 32
+    "batch_size_train": 4,  # def = 32
+    "batch_size_val": 4,  # def = 32
     "batch_size_test": 30,  # def = 32
     "maxlen": 778,  #def 778, Don't forget to re-run process_timit.py!
-    "TIMIT_derivative": 2,
-    # "n_examples": {'train': 30, 'val': 100, 'test': 1},
-    "n_examples": {'train': 3696, 'val': 400, 'test': 192},
-    "plot_state_interval": 1,  #  State plot; 0 to disable plots
-    "state_save_interval": 1,
-    "plot_run_interval": 1,
+    "TIMIT_derivative": 0,
+    "n_examples": {'train': 30, 'val': 100, 'test': 1},
+    # "n_examples": {'train': 3696, 'val': 400, 'test': 192},
+    "plot_state_interval": 10,  #  State plot; 0 to disable plots
+    "state_save_interval": 20,
+    "plot_run_interval": 5,
     "plot_pair_interval": 0,
     "val_every_E": 5,
     "plot_main": True,
@@ -87,6 +86,8 @@ cfg = {
 cfg["alpha"] = exp(-1/(4*cfg['Repeats']))  # Bellec1: 20 = 0.951. 4: 0.779
 cfg["rho"] = exp(-1/(40*cfg["Repeats"]))  # Bellec1: 200 = 0.995. 40: 0.975
 cfg["kappa"] = exp(-1/(0.6*cfg["Repeats"]))  # Bellec1: 3 = 0.717. .75:~0.25
+# cfg["FR_target"] /= cfg["Repeats"]
+# cfg["FR_reg"] /= cfg["Repeats"]
 
 lookup = {
     "X":       {"scalar": False, "binary":False, "label": "x"},
@@ -101,6 +102,8 @@ lookup = {
     "Z_inbar": {"scalar": False, "binary":False, "label": "\\bar{{z}}_{{in}}"},
     "Zbar":    {"scalar": False, "binary":False, "label": "\\bar{{z}}_\\kappa"},
     "I":       {"scalar": False, "binary":False, "label": "I"},
+    "I_in":    {"scalar": False, "binary":False, "label": "I_{{in}}"},
+    "I_rec":   {"scalar": False, "binary":False, "label": "I_{{rec}}"},
     "a":       {"scalar": False, "binary":False, "label": "a"},
     "A":       {"scalar": False, "binary":False, "label": "A"},
     "EVV":     {"scalar": False, "binary":False, "label": "\\epsilon_v"},

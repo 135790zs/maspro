@@ -35,13 +35,13 @@ def weights_to_img(arr, is_binary=False):
     return arr
 
 
-def plot_run(cfg, R, W, epoch, log_id, inp_size):
+def plot_run(cfg, R, W, epoch, log_id, inp_size, gW):
 
     labelpad = 35
     fontsize = 14
     fig = plt.figure(constrained_layout=False, figsize=(8, 16))
-    gsc = fig.add_gridspec(nrows=17 if cfg["Track_weights"] else 7,
-                           ncols=1, hspace=0.4)
+    gsc = fig.add_gridspec(nrows=20 if cfg["Track_weights"] else 10,
+                           ncols=1, hspace=0.05)
     axs = []
 
     for k, v in R.items():
@@ -58,7 +58,7 @@ def plot_run(cfg, R, W, epoch, log_id, inp_size):
                                  np.min(v[:epoch], axis=1),
                                  np.max(v[:epoch], axis=1),
                                  alpha=.25)
-            axs[-1].set_ylim(0, 100)
+            # axs[-1].set_ylim(0, 100)
         elif type(v) == dict:
             axs.append(fig.add_subplot(gsc[len(axs), :]))
             for tvtype, arr in v.items():
@@ -110,7 +110,7 @@ def plot_run(cfg, R, W, epoch, log_id, inp_size):
                                    fontsize=fontsize)
             else:
                 # W_in
-                a = weights[:epoch, :, 0, :, :inp_size]
+                a = weights[:epoch, :, 0, :, :cfg["N_R"]]
                 axs[-1].imshow(
                     weights_to_img(np.mean(a, axis=3)),
                     aspect='auto',
@@ -125,24 +125,24 @@ def plot_run(cfg, R, W, epoch, log_id, inp_size):
 
                 axs.append(fig.add_subplot(gsc[len(axs), :]))
                 axs[-1].imshow(
-                    weights_to_img(np.mean(weights[1:epoch+1, :, 0, :, :inp_size], axis=3) -
-                                   np.mean(weights[:epoch, :, 0, :, :inp_size], axis=3)),
+                    weights_to_img(np.mean(weights[1:epoch+1, :, 0, :, :cfg["N_R"]], axis=3) -
+                                   np.mean(weights[:epoch, :, 0, :, :cfg["N_R"]], axis=3)),
                     aspect='auto',
                     interpolation='nearest',
                     cmap='coolwarm')
                 axs[-1].set_ylabel(f"DW_in"
-                                   f"\n{np.min(weights[1:epoch+1, :, 0, :, :inp_size] - weights[:epoch, :, 0, :, :inp_size]):.1e}"
-                                   f"\n{np.max(weights[1:epoch+1, :, 0, :, :inp_size] - weights[:epoch, :, 0, :, :inp_size]):.1e}",
+                                   f"\n{np.min(weights[1:epoch+1, :, 0, :, :cfg['N_R']] - weights[:epoch, :, 0, :, :cfg['N_R']]):.1e}"
+                                   f"\n{np.max(weights[1:epoch+1, :, 0, :, :cfg['N_R']] - weights[:epoch, :, 0, :, :cfg['N_R']]):.1e}",
                                    rotation=0,
                                    labelpad=labelpad,
                                    fontsize=fontsize)
 
                 # W_rec
                 axs.append(fig.add_subplot(gsc[len(axs), :]))
-                W_rec0 = np.mean(weights[:epoch, :, 0, :, inp_size:], axis=3).reshape(epoch, -1)
+                W_rec0 = np.mean(weights[:epoch, :, 0, :, cfg["N_R"]:], axis=3).reshape(epoch, -1)
                 if cfg["N_Rec"] > 1:
                     W_rec0 = np.concatenate((W_rec0, weights[:epoch, :, 1:].reshape(epoch, -1)), axis=1)
-                W_rec1 = np.mean(weights[1:epoch+1, :, 0, :, inp_size:], axis=3).reshape(epoch, -1)
+                W_rec1 = np.mean(weights[1:epoch+1, :, 0, :, cfg["N_R"]:], axis=3).reshape(epoch, -1)
                 if cfg["N_Rec"] > 1:
                     W_rec1 = np.concatenate((W_rec1, weights[1:epoch+1, :, 1:].reshape(epoch, -1)), axis=1)
                 axs[-1].imshow(
@@ -171,6 +171,22 @@ def plot_run(cfg, R, W, epoch, log_id, inp_size):
                                    labelpad=labelpad,
                                    fontsize=fontsize)
 
+        for wtype, g in gW.items():
+            if wtype == 'W':
+                g = np.mean(g, axis=3)
+            axs.append(fig.add_subplot(gsc[len(axs), :]))
+            axs[-1].imshow(
+                    weights_to_img(g[:epoch]),
+                    aspect='auto',
+                    interpolation='nearest',
+                    cmap='coolwarm')
+            axs[-1].set_ylabel(f"g{wtype}"
+                               f"\n{np.min(g[:epoch]):.1e}"
+                               f"\n{np.max(g[:epoch]):.1e}",
+                               rotation=0,
+                               labelpad=labelpad,
+                               fontsize=fontsize)
+
     axs[-1].set_xlabel("Epoch $E$", fontsize=fontsize)
 
     plt.savefig(f"../log/{log_id}/metric.pdf",
@@ -182,10 +198,10 @@ def plot_run(cfg, R, W, epoch, log_id, inp_size):
 
 
 def plot_state(cfg, M, B, W_rec, W_out, b_out, e, log_id, plot_weights=False):
-    S_plotvars = ["X", "I", "V", "a", "A", "Z", "H"]
+    S_plotvars = ["X", "I_in", "I_rec", "I", "V", "a", "A", "Z", "H"]
     if cfg["Track_synapse"]:
         S_plotvars += ["EVV", "EVU", "ET", "ETbar", "gW"]
-    S_plotvars += ["L_std", "L_reg", "spikerate", "L", "Y"]
+    S_plotvars += ["L_std", "L_reg", "spikerate", "Y"]
 
     M_plotvars = ["P", "D", "Pmax", "T", "Correct", "CE"]
     if cfg["n_directions"] > 1:
