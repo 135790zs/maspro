@@ -43,7 +43,13 @@
 # IDEAS/NOTES
 	# Thesis: in discussion: skip connections between layers? (sparse!)
 	# Adam might be an excellent local training method, and could be integrated in the e-prop theory learning update in my paper.
-	# Bellec uses std in normalize, why?
+	# Probably current fault: Bellec uses effective batches of the full data set. He splits these up in smaller ones that he process simultaneously.
+	  My options are:
+	  	- Use a batch_size of 3696. Effectively similar but extremely slow. Concession: large but not full batch size?
+	  	- Refactor to a similar iterations-based flow. This requires simultaneous batch processing first.
+	  	- Try to see if I can improve the learning speed using my old batch size.
+	  	- Improve the processing speed by a factor of 100. Also needs refactor.
+	  I can deduce that really precise gradients are crucial for convergence. Perhaps another way to obtain precise gradient?
 
 ========
 

@@ -226,14 +226,15 @@ if __name__ == "__main__":
             np.save(f'{cfg["wavs_fname"]}_{tvt_type}_TIMIT{d_ext}.npy', wavdata)
             np.save(f'{cfg["phns_fname"]}_{tvt_type}_TIMIT{d_ext}.npy', phonedata)
         elif tvt_type == 'train':
+
             np.save(f'{cfg["wavs_fname"]}_train_TIMIT{d_ext}.npy',
                     wavdata[:cfg['n_examples']['train']])
             np.save(f'{cfg["wavs_fname"]}_val_TIMIT{d_ext}.npy',
-                    wavdata[cfg['n_examples']['val']:])
+                    wavdata[cfg['n_examples']['train']:])
 
             np.save(f'{cfg["phns_fname"]}_train_TIMIT{d_ext}.npy',
                     phonedata[:cfg['n_examples']['train']])
             np.save(f'{cfg["phns_fname"]}_val_TIMIT{d_ext}.npy',
-                    phonedata[cfg['n_examples']['val']:])
+                    phonedata[cfg['n_examples']['train']:])
 
     print("\nDone parsing TIMIT dataset!")
