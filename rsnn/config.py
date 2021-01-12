@@ -46,28 +46,29 @@ cfg = {
     "update_input_weights": True,  # Subset of - and overridden by `update_W'.
     "recurrent": True,
 
-    "N_R": 40,
+    "N_R": 39,
     "N_Rec": 1,
 
-    "task": "TIMIT_small",
+    "task": "TIMIT",
     "wavs_fname": "../data/data_wavs",
     "phns_fname": "../data/data_phns",
 
-    "Epochs": 500,  # def = 80
+    "Epochs": 80,  # def = 80
     "Track_weights": True,
     "Track_synapse": False,  # Only for nonweight synapse vars (e.g. ET)
     "Repeats": 1,  # ms per epoch, def = 5
     "Interpolation": 'nearest',  # nearest, linear
-    "batch_size_train": 10,  # def = 32
-    "batch_size_val": 10,  # def = 32
+    "maxiter": 4,
+    "batch_size_train": 4,  # def = 32
+    "batch_size_val": 32,  # def = 32
     "batch_size_test": 1,  # def = 32
     "maxlen": 778,  #def 778, Don't forget to re-run process_timit.py!
     "TIMIT_derivative": 0,
     "n_examples": {'train': 10, 'val': 10, 'test': 1},
     # "n_examples": {'train': 3696, 'val': 400, 'test': 192},
-    "plot_state_interval": 10,  #  State plot; 0 to disable plots
+    "plot_state_interval": 2,  # Per iter  #  State plot; 0 to disable plots
     "state_save_interval": 20,
-    "plot_run_interval": 5,
+    "plot_run_interval": 2,  # Per epoch
     "plot_pair_interval": 0,
     "val_every_E": 5,
     "plot_main": True,

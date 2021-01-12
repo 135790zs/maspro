@@ -35,12 +35,12 @@ def weights_to_img(arr, is_binary=False):
     return arr
 
 
-def plot_run(cfg, R, W, epoch, log_id, inp_size, gW):
+def plot_run(cfg, R, W, epoch, log_id, inp_size):
 
     labelpad = 35
     fontsize = 14
     fig = plt.figure(constrained_layout=False, figsize=(8, 16))
-    gsc = fig.add_gridspec(nrows=20 if cfg["Track_weights"] else 10,
+    gsc = fig.add_gridspec(nrows=17 if cfg["Track_weights"] else 7,
                            ncols=1, hspace=0.05)
     axs = []
 
@@ -171,22 +171,6 @@ def plot_run(cfg, R, W, epoch, log_id, inp_size, gW):
                                    labelpad=labelpad,
                                    fontsize=fontsize)
 
-        for wtype, g in gW.items():
-            if wtype == 'W':
-                g = np.mean(g, axis=3)
-            axs.append(fig.add_subplot(gsc[len(axs), :]))
-            axs[-1].imshow(
-                    weights_to_img(g[:epoch]),
-                    aspect='auto',
-                    interpolation='nearest',
-                    cmap='coolwarm')
-            axs[-1].set_ylabel(f"g{wtype}"
-                               f"\n{np.min(g[:epoch]):.1e}"
-                               f"\n{np.max(g[:epoch]):.1e}",
-                               rotation=0,
-                               labelpad=labelpad,
-                               fontsize=fontsize)
-
     axs[-1].set_xlabel("Epoch $E$", fontsize=fontsize)
 
     plt.savefig(f"../log/{log_id}/metric.pdf",
@@ -197,7 +181,7 @@ def plot_run(cfg, R, W, epoch, log_id, inp_size, gW):
     plt.close()
 
 
-def plot_state(cfg, M, B, W_rec, W_out, b_out, e, log_id, plot_weights=False):
+def plot_state(cfg, M, B, W_rec, W_out, b_out, e, it, log_id, plot_weights=False):
     S_plotvars = ["X", "I_in", "I_rec", "I", "V", "a", "A", "Z", "H"]
     if cfg["Track_synapse"]:
         S_plotvars += ["EVV", "EVU", "ET", "ETbar", "gW"]
@@ -223,10 +207,7 @@ def plot_state(cfg, M, B, W_rec, W_out, b_out, e, log_id, plot_weights=False):
     fontsize = 13
 
     fig.suptitle(f"Single-run model state\n"
-                 f"$\\alpha={cfg['alpha']:.3f}$, "
-                 f"$\\kappa={cfg['kappa']:.3f}$, "
-                 f"$\\rho={cfg['rho']:.3f}$\n"
-                 f"ID {log_id}, Epoch {e}",
+                 f"ID {log_id}, Epoch {e}, Iter {it}",
                  fontsize=20)
     row_idx = 0
 

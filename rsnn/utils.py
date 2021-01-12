@@ -557,6 +557,7 @@ def load_data(cfg):
 
     inps = {}
     tars = {}
+    rng = np.random.default_rng(seed=cfg["seed"])
     for tvt_type in cfg['n_examples'].keys():
         inps[tvt_type] = np.load(f"{cfg['wavs_fname']}_{tvt_type}_{cfg['task']}.npy")
 
@@ -570,6 +571,12 @@ def load_data(cfg):
         inps[tvt_type] = np.where(inps[tvt_type] != -1, inps[tvt_type] / maxtrain, -1)
 
         tars[tvt_type] = np.load(f"{cfg['phns_fname']}_{tvt_type}_{cfg['task']}.npy")
+
+        shuf_idxs = np.arange(inps[tvt_type].shape[0])
+        rng.shuffle(shuf_idxs)
+        inps[tvt_type] = inps[tvt_type][shuf_idxs]
+        tars[tvt_type] = tars[tvt_type][shuf_idxs]
+
 
     return inps, tars
 
