@@ -1,7 +1,7 @@
 from numpy import exp
 cfg = {
     "verbose": True,
-    "eprop_type": "symmetric",  # in {global, random, symmetric, adaptive}
+    "eprop_type": "random",  # in {global, random, symmetric, adaptive}
     "optimizer": 'Adam',  # in {Adam, SGD}
     "traub_trick": False,  # Change to "neurontype" soon {(A)LIF, Izh, STDP-(A)LIF}
     "v_fix": False,
@@ -31,7 +31,7 @@ cfg = {
     "eta_b_out": None,  # None=no sep. eta. Otherwise=Constant
     "eta_slope": 2,      # Slope defining relation between Verr and eta (1e-2 for TIMIT)
     "eta_init_loss": 0,  # 0 to disable annealing. This is the cap below which annealing to 0 takes place.
-    "ramping": 0,  # Ramps eta linearly from 0 to init between epoch 0 and this one. 0 to disable.
+    "ramping": 0,  # Ramps eta in first epoch
     "unramp": 0,  # Ramps eta linearly from init to 0 between epoch 0 and this one. 0 to disable.
     "softmax_factor": 1,  # Bellecs: 1
     "weight_scaling": 1,  # Bellecs: 1
@@ -46,29 +46,28 @@ cfg = {
     "update_input_weights": True,  # Subset of - and overridden by `update_W'.
     "recurrent": True,
 
-    "N_R": 39,
+    "N_R": 400,
     "N_Rec": 1,
 
     "task": "TIMIT",
     "wavs_fname": "../data/data_wavs",
     "phns_fname": "../data/data_phns",
 
-    "Epochs": 80,  # def = 80
-    "Track_weights": True,
+    "Epochs": 9500,  # def = 80
+    "Track_weights": False,
     "Track_synapse": False,  # Only for nonweight synapse vars (e.g. ET)
     "Repeats": 1,  # ms per epoch, def = 5
     "Interpolation": 'nearest',  # nearest, linear
-    "maxiter": 4,
-    "batch_size_train": 4,  # def = 32
+    "batch_size_train": 32,  # def = 32
     "batch_size_val": 32,  # def = 32
     "batch_size_test": 1,  # def = 32
     "maxlen": 778,  #def 778, Don't forget to re-run process_timit.py!
     "TIMIT_derivative": 0,
-    "n_examples": {'train': 10, 'val': 10, 'test': 1},
+    "n_examples": {'train': 100, 'val': 100, 'test': 1},
     # "n_examples": {'train': 3696, 'val': 400, 'test': 192},
-    "plot_state_interval": 2,  # Per iter  #  State plot; 0 to disable plots
+    "plot_state_interval": 20,  # Per iter  #  State plot; 0 to disable plots
     "state_save_interval": 20,
-    "plot_run_interval": 2,  # Per epoch
+    "plot_run_interval": 5,  # Per epoch
     "plot_pair_interval": 0,
     "val_every_E": 5,
     "plot_main": True,

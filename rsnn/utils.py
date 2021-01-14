@@ -1,12 +1,12 @@
 import time
 import os
 import numpy as np
-# from numba import jit
+from numba import jit, cuda, vectorize
+# import pytorch as torch
 import datetime
 import json
 from scipy.interpolate import interp1d
 # import cupy as cp
-
 
 def initialize_model(cfg, length, tar_size):
     """ Initializes the variables used in predicting a single time series.
@@ -110,15 +110,20 @@ def initialize_model(cfg, length, tar_size):
     M["CE"] = np.zeros(shape=(length,))
     M["Correct"] = np.zeros(shape=(length,))
 
-    M["betas"] = np.zeros(
+    return M
+
+def initialize_betas(cfg):
+    rng = np.random.default_rng(seed=cfg["seed"])
+    betas = np.zeros(
         shape=(cfg["n_directions"] * cfg["N_Rec"] * cfg["N_R"]))
 
-    M["betas"][:int(M["betas"].size * cfg["fraction_ALIF"])] = cfg["beta"]
-    rng.shuffle(M["betas"])
+    betas[:int(betas.size * cfg["fraction_ALIF"])] = cfg["beta"]
+    rng.shuffle(betas)
 
-    M["betas"] = M["betas"].reshape(neuron_timeless_shape)
-
-    return M
+    betas = betas.reshape((cfg["n_directions"],
+                             cfg["N_Rec"],
+                             cfg["N_R"],))
+    return betas
 
 
 def initialize_weights(cfg, inp_size, tar_size):
@@ -394,17 +399,72 @@ def eprop_P(cfg, Y):
     ret = ex / denom
     return ret
 
-# @jit(nopython=True)
+
+# # @cuda.jit
+# # @vectorize(['float64(float64, float64)'], target='cuda')
 def einsum(a,b):
     return (a*b.T).T
+    # ac = cp.asarray(a)
+    # bc = cp.asarray(b)
+    # return cp.asnumpy((a*b.T).T)
+    # return np.einsum("j, ji -> i", a, b, optimize='optimal')
     # return
 
 
-def process_layer(cfg, M, t, s, r, W_rec):
-    """ Process a single layer of the model at a single time step."""
 
+# @cuda.jit
+# def ET(H, V, B, U, E):
+#     # Define an array in the shared memory
+#     # The size and type of the arrays must be known at compile time
+#     sH = cuda.shared.array(shape=(NR,), dtype=float32)
+#     sV = cuda.shared.array(shape=(NR, NR*2), dtype=float32)
+#     sB = cuda.shared.array(shape=(NR,), dtype=float32)
+#     sU = cuda.shared.array(shape=(NR, NR*2), dtype=float32)
+
+#     x, y = cuda.grid(2)
+
+#     tx = cuda.threadIdx.x
+#     ty = cuda.threadIdx.y
+#     bpg = cuda.gridDim.x    # blocks per grid
+
+#     if x >= E.shape[0] and y >= E.shape[1]:
+#         # Quit if (x, y) is outside of valid E boundary
+#         return
+
+#     # Each thread computes one element in the result matrix.
+#     # The dot product is chunked into dot products of NR-long vectors.
+#     tmp = 0.
+#     for i in range(bpg):
+#         # Preload data into shared memory
+#         sH[tx] = H[x]
+#         sB[tx] = B[x]
+#         sV[tx, ty] = V[tx + i * NR, y]
+#         sU[tx, ty] = U[tx + i * NR, y]
+
+#         # Wait until all threads finish preloading
+#         cuda.syncthreads()
+
+#         # Computes partial product on the shared memory
+#         for j in range(NR):
+#             tmp += sA[tx, j] * sB[j, ty]
+
+#         # Wait until all threads finish computing
+#         cuda.syncthreads()
+
+#     E[x, y] = tmp
+
+# def ET(H, EVV, betas, EVU):
+#     with tf.device(device):
+#         return H[:, tnp.newaxis] * (EVV - betas[:, tnp.newaxis] * EVU)
+
+
+    # M['H'][s, t, r, :, np.newaxis] * (
+    #     M['EVV'][s, curr_t, r] - M["betas"][s, r, :, np.newaxis] * M['EVU'][s, curr_t, r])
+def process_layer(cfg, M, t, s, r, W_rec, betas):
+    """ Process a single layer of the model at a single time step."""
     # If not tracking state, the time dimensions of synaptic variables have
     # length 1 and we overwrite those previous time steps at index 0.
+    start = time.time()
     if cfg["Track_synapse"]:
         prev_t = t-1
         curr_t = t
@@ -427,10 +487,10 @@ def process_layer(cfg, M, t, s, r, W_rec):
     assert(not cfg["traub_trick"])
 
     # EVU
-    M['EVU'][s, curr_t, r] = (einsum(a=M['H'][s, t-1, r],
-                                     b=M['EVV'][s, prev_t, r])
-                              + einsum(a=cfg["rho"] - M['H'][s, t-1, r] * M["betas"][s,r],
-                                       b=M['EVU'][s, prev_t, r]))
+
+    M['EVU'][s, curr_t, r] = (M['H'][s, t-1, r, :, np.newaxis] * M['EVV'][s, prev_t, r]
+                              + (cfg["rho"] - M['H'][s, t-1, r] * betas)[:, np.newaxis] * M['EVU'][s, prev_t, r])
+
     # EVV
     M['EVV'][s, curr_t, r] = (cfg["alpha"] * M['EVV'][s, prev_t, r]
                               + M["Z_in"][s, t, r])
@@ -438,12 +498,7 @@ def process_layer(cfg, M, t, s, r, W_rec):
     # I
     M['I_in'][s, t, r] = np.dot(W_rec[:, :cfg["N_R"]], M["Z_prev"][s, t, r])
     M['I_rec'][s, t, r] = np.dot(W_rec[:, cfg["N_R"]:], M['Z'][s, t-1, r])
-    # if np.any(M['Z'][s, t-1, r]):
-    #     print()
-    #     print(W_rec[:, cfg["N_R"]:])
-    #     print(M['Z'][s, t-1, r])
-    #     print(M['I_rec'][s, t, r])
-    # M['I'][s, t, r] = np.dot(W_rec, M["Z_in"][s, t, r])
+
     M['I'][s, t, r] = M['I_in'][s, t, r] + M['I_rec'][s, t, r]
 
     # V
@@ -454,7 +509,7 @@ def process_layer(cfg, M, t, s, r, W_rec):
 
     # a
     M['a'][s, t, r] = cfg['rho'] * M['a'][s, t-1, r] + M['Z'][s, t-1, r]
-    M['A'][s, t, r] = cfg['thr'] + M['betas'][s, r] * M['a'][s, t, r]
+    M['A'][s, t, r] = cfg['thr'] + betas * M['a'][s, t, r]
 
     # Update the spikes Z of the neurons.
     M['Z'][s, t, r] = np.where(
@@ -467,7 +522,7 @@ def process_layer(cfg, M, t, s, r, W_rec):
     M['TZ'][s, r, M['Z'][s, t, r]==1] = t
 
     # Pseudoderivative H
-    M['H'][s, t, r] = ((1 / cfg["thr"] if cfg["traub_trick"] else 1)
+    M['H'][s, t, r] = ((1 / cfg["thr"] if not cfg["traub_trick"] else 1)
                        * cfg["gamma"] * np.clip(
                             a=1 - (abs((M['V'][s, t, r] - M['A'][s, t, r]
                                        / cfg["thr"]))),
@@ -475,10 +530,8 @@ def process_layer(cfg, M, t, s, r, W_rec):
                             a_max=None))
 
     # ET
-    M['ET'][s, curr_t, r] = einsum(a=M['H'][s, t, r],
-                                   b=(M['EVV'][s, curr_t, r]
-                                      - (M["betas"][s, r] * M['EVU'][s, curr_t, r].T).T))
-
+    M['ET'][s, curr_t, r] = M['H'][s, t, r, :, np.newaxis] * (
+        M['EVV'][s, curr_t, r] - betas[:, np.newaxis] * M['EVU'][s, curr_t, r])
 
     # Input layer always "spikes" (with nonbinary spike values Z=X).
     # TZ_prev = M['TZ'][s, r-1] if r > 0 else \
@@ -488,9 +541,8 @@ def process_layer(cfg, M, t, s, r, W_rec):
 
     # M['Z_inbar'][s, t] = (cfg["alpha"] * (M['Z_inbar'][s, t-1] if t > 0 else 0)) + M['Z_in'][s, t]
 
-    M['ETbar'][s, curr_t, r] = cfg["kappa"] * (M['ETbar'][s, prev_t, r]) + M['ET'][s, curr_t, r]
+    M['ETbar'][s, curr_t, r] = cfg["kappa"] * M['ETbar'][s, prev_t, r] + M['ET'][s, curr_t, r]
     M['Zbar'][s, t, r] = cfg["kappa"] * (M['Zbar'][s, t-1, r]) + M['Z'][s, t, r]
-
     return M
 
 
@@ -581,8 +633,12 @@ def load_data(cfg):
     return inps, tars
 
 def interpolate_inputs(cfg, inp, tar, stretch):
-    inp = inp.T
-    tar = tar.T
+    if inp.ndim == 2:
+        inp = inp.T
+        tar = tar.T
+    else:
+        inp = inp.transpose((0, 2, 1))
+        tar = tar.transpose((0, 2, 1))
 
     itp_inp = interp1d(np.arange(inp.shape[-1]),
                        inp,
@@ -595,7 +651,14 @@ def interpolate_inputs(cfg, inp, tar, stretch):
     inp = itp_inp(np.linspace(0, inp.shape[-1]-1, int(inp.shape[-1]*stretch)))
     tar = itp_tar(np.linspace(0, tar.shape[-1]-1, int(tar.shape[-1]*stretch)))
 
-    return inp.T, tar.T
+    if inp.ndim == 2:
+        inp = inp.T
+        tar = tar.T
+    else:
+        inp = inp.transpose((0, 2, 1))
+        tar = tar.transpose((0, 2, 1))
+
+    return inp, tar
 
     # this_inps = np.repeat(this_inps, cfg["Repeats"], axis=0)
     # this_tars = np.repeat(this_tars, cfg["Repeats"], axis=0)

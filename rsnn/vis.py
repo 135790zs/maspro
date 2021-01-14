@@ -181,7 +181,7 @@ def plot_run(cfg, R, W, epoch, log_id, inp_size):
     plt.close()
 
 
-def plot_state(cfg, M, B, W_rec, W_out, b_out, e, it, log_id, plot_weights=False):
+def plot_state(cfg, M, B, W_rec, W_out, b_out, e, log_id, plot_weights=False):
     S_plotvars = ["X", "I_in", "I_rec", "I", "V", "a", "A", "Z", "H"]
     if cfg["Track_synapse"]:
         S_plotvars += ["EVV", "EVU", "ET", "ETbar", "gW"]
@@ -207,7 +207,10 @@ def plot_state(cfg, M, B, W_rec, W_out, b_out, e, it, log_id, plot_weights=False
     fontsize = 13
 
     fig.suptitle(f"Single-run model state\n"
-                 f"ID {log_id}, Epoch {e}, Iter {it}",
+                 f"$\\alpha={cfg['alpha']:.3f}$, "
+                 f"$\\kappa={cfg['kappa']:.3f}$, "
+                 f"$\\rho={cfg['rho']:.3f}$\n"
+                 f"ID {log_id}, Epoch {e}",
                  fontsize=20)
     row_idx = 0
 

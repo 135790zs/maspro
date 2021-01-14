@@ -50,6 +50,8 @@
 	  	- Try to see if I can improve the learning speed using my old batch size.
 	  	- Improve the processing speed by a factor of 100. Also needs refactor.
 	  I can deduce that really precise gradients are crucial for convergence. Perhaps another way to obtain precise gradient?
+	  If the network is local, it can be parallelized on the GPU! Look into this! First write a barebones e-prop (everything in a script, no logging, no loops, no layers, no subnetwork. Overwrite every variable that can be overwritten. Then parallelize. First by massive vectorization, then parallelize on GPU. Optionally add logging using "if epoch % interval: write_to_csv".
+	# Why n_val = 3696? WRONG!
 
 ========
 

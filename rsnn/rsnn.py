@@ -5,7 +5,7 @@ import utils as ut
 import vis
 
 
-def network(cfg, inp, tar, W_rec, W_out, b_out, B, adamvars, eta):
+def network(cfg, inp, tar, betas, W_rec, W_out, b_out, B, adamvars, eta):
 
     inp = np.pad(array=inp, mode='edge', pad_width=((0, cfg["delay"]), (0, 0)))
 
@@ -34,7 +34,8 @@ def network(cfg, inp, tar, W_rec, W_out, b_out, B, adamvars, eta):
                                      t=t,
                                      s=s,
                                      r=r,
-                                     W_rec=W_rec[s, r])
+                                     W_rec=W_rec[s, r],
+                                     betas=betas[s, r])
 
             M['Y'][s, t] = (
                 cfg["kappa"] * M['Y'][s, t-1]
@@ -65,16 +66,13 @@ def network(cfg, inp, tar, W_rec, W_out, b_out, B, adamvars, eta):
                                          B[s],
                                          M['D'][t])  # Checked correct
 
-            if t:
-                M['spikerate'][s, t] = np.mean(M['Z'][s, :t], axis=0)
+            M['spikerate'][s, t] = np.mean(M['Z'][s, :(t+1)], axis=0)
 
 
-                M['L_reg'][s, t] = (cfg["FR_reg"]
-                                 * (1 / n_steps)
-                                 * (M['spikerate'][s, t] - cfg["FR_target"]))
+            M['L_reg'][s, t] = (cfg["FR_reg"]
+                             * (1 / n_steps)
+                             * (M['spikerate'][s, t] - cfg["FR_target"]))
 
-            else:
-                M['L_reg'][s, t] = 0
 
             for r in range(cfg["N_Rec"]):
                 stdloss = ut.einsum(a=M['L_std'][s, t, r],
@@ -95,12 +93,11 @@ def network(cfg, inp, tar, W_rec, W_out, b_out, B, adamvars, eta):
         if cfg["plot_graph"]:
             vis.plot_graph(
                 cfg=cfg, M=M, s=s, t=t, W_rec=W_rec, W_out=W_out)
-            time.sleep(0.5)
 
     return M
 
 
-def feed_batch(cfg, inps, tars, W_rec, W_out, b_out, eta, B, tvt_type, adamvars, e, log_id, it=None, n_it=None ,start_time=None):
+def feed_batch(cfg, inps, tars, betas, W_rec, W_out, b_out, eta, B, tvt_type, adamvars, e, log_id, start_time=None):
     batch_err = 0
     batch_perc_wrong = 0
     batch_spikerate = np.zeros(shape=(cfg["n_directions"], cfg["N_Rec"], cfg["N_R"],))
@@ -124,7 +121,6 @@ def feed_batch(cfg, inps, tars, W_rec, W_out, b_out, eta, B, tvt_type, adamvars,
             print((f"({log_id})\t+{plustime}{remtime}\t"
                    f"Epoch {e}/{cfg['Epochs']-1}\t" if tvt_type != 'test'
                    else '\t'),
-                  (f"It {it}/{n_it}\t" if it is not None else '\t'),
                   f"{'  ' if tvt_type == 'val' else ''}{tvt_type} "
                   f"sample {b+1}/{inps.shape[0]}\t",
                   end='\r' if b < inps.shape[0]-1 else '\n')
@@ -151,6 +147,7 @@ def feed_batch(cfg, inps, tars, W_rec, W_out, b_out, eta, B, tvt_type, adamvars,
             cfg=cfg,
             inp=this_inps,
             tar=this_tars,
+            betas=betas,
             W_rec=W_rec,
             W_out=W_out,
             b_out=b_out,
@@ -158,8 +155,8 @@ def feed_batch(cfg, inps, tars, W_rec, W_out, b_out, eta, B, tvt_type, adamvars,
             adamvars=adamvars,
             eta=eta)
 
-        if (cfg['plot_state'] and b == 0 and it is not None and tvt_type == "train"
-            and cfg["plot_state_interval"] and it % cfg["plot_state_interval"] == 0):
+        if (cfg['plot_state'] and b == 0 and tvt_type == "train"
+            and cfg["plot_state_interval"] and e % cfg["plot_state_interval"] == 0):
             vis.plot_state(cfg=cfg,
                            M=final_model,
                            B=B,
@@ -167,7 +164,6 @@ def feed_batch(cfg, inps, tars, W_rec, W_out, b_out, eta, B, tvt_type, adamvars,
                            W_out=W_out,
                            b_out=b_out,
                            e=e,
-                           it=it,
                            log_id=log_id)
         if (cfg['plot_state'] and b == 0 and tvt_type == "train"
             and cfg["plot_pair_interval"] and e % cfg["plot_pair_interval"] == 0):
@@ -201,6 +197,7 @@ def main(cfg):
 
     start_time = time.time()
     rng = np.random.default_rng(seed=cfg["seed"])
+
     log_id = ut.get_log_id()
     ut.prepare_log(cfg=cfg, log_id=log_id)
 
@@ -220,6 +217,7 @@ def main(cfg):
     # Weights to the network. Keys: W, W_out, b_out, B
     W = ut.initialize_weights(cfg=cfg, inp_size=n_channels, tar_size=n_phones)
 
+    betas = ut.initialize_betas(cfg=cfg)
     # Weight update
     DW = ut.initialize_DWs(cfg=cfg, tar_size=n_phones)
 
@@ -235,8 +233,6 @@ def main(cfg):
                    for D in [M, W, DW, adamvars]]))
         del M
 
-    global_it = 0
-    maxiter = min(n_train // cfg["batch_size_train"], cfg["maxiter"])
 
     for e in range(0, cfg["Epochs"]):
         if cfg["Track_weights"]:
@@ -257,16 +253,40 @@ def main(cfg):
             R['eta'][e] = max(0, R['eta'][e] * (cfg["unramp"] - e) / cfg["unramp"])
 
         # Make batch
-        # randidxs = rng.choice(inps['train'].shape[0],
-        #                       size=cfg["batch_size_train"],
-        #                       replace=False)
+        # randidxs = rng.integers(inps['train'].shape[0],
+        #                         size=cfg["batch_size_train"])
+        it = e * cfg["batch_size_train"]
+        randidxs = np.arange(it, it + cfg["batch_size_train"]) % n_train
+
+        err, perc_wrong, gW, spikerate = feed_batch(
+            tvt_type='train',
+            cfg=cfg,
+            inps=inps['train'][randidxs],
+            tars=tars['train'][randidxs],
+            betas=betas,
+            W_rec=W['W'][ep_curr],
+            W_out=W['W_out'][ep_curr],
+            b_out=W['b_out'][ep_curr],
+            B=W['B'][ep_curr],
+            adamvars=adamvars,
+            e=e,
+            log_id=log_id,
+            eta=R['eta'][e],
+            start_time=start_time)
+
+        R['err']['train'][e] = err
+        R[f'%wrong']['train'][e] = perc_wrong
+        R['Hz'][e] = spikerate
+
         # Validation
         if e % cfg["val_every_E"] == 0:
-            randidxs = rng.integers(inps['val'].shape[0],
-                                    size=cfg["batch_size_val"])
+            randidxs = rng.choice(inps['val'].shape[0],
+                                  size=cfg["batch_size_val"],
+                                  replace=False)
             err, perc_wrong, _, _ = feed_batch(
                 tvt_type='val',
                 cfg=cfg,
+                betas=betas,
                 inps=inps['val'][randidxs],
                 tars=tars['val'][randidxs],
                 W_rec=W['W'][ep_curr],
@@ -307,128 +327,102 @@ def main(cfg):
         if cfg["max_duration"] and cfg["max_duration"] <= time.time() - start_time:
             break
 
-        for it in range(maxiter):
-            randidxs = (np.arange(cfg["batch_size_train"])
-                        + (global_it * cfg["batch_size_train"]))
-            randidxs %= n_train
-            global_it += 1
 
-            err, perc_wrong, gW, spikerate = feed_batch(
-                tvt_type='train',
-                cfg=cfg,
-                inps=inps['train'][randidxs],
-                tars=tars['train'][randidxs],
-                W_rec=W['W'][ep_curr],
-                W_out=W['W_out'][ep_curr],
-                b_out=W['b_out'][ep_curr],
-                B=W['B'][ep_curr],
-                adamvars=adamvars,
-                e=e,
-                it=it,
-                n_it=maxiter,
-                log_id=log_id,
-                eta=R['eta'][e],
-                start_time=start_time)
+        # Calculate DWs
+        for wtype in W.keys():
 
-            R['err']['train'][e] += err / maxiter
-            R[f'%wrong']['train'][e] += perc_wrong / maxiter
-            R['Hz'][e] += spikerate / maxiter
+            if wtype == "B" or not cfg[f"update_{wtype}"]:  # There's no DW for B. B is updated differently.
+                continue
 
-            # Calculate DWs
-            for wtype in W.keys():
+            gW[wtype] += cfg["L2_reg"] * np.linalg.norm(W[wtype][ep_curr].flatten())
 
-                if wtype == "B" or not cfg[f"update_{wtype}"]:  # There's no DW for B. B is updated differently.
-                    continue
+            eta = (R['eta'][e] if wtype != "b_out" or cfg["eta_b_out"] is None
+                   else cfg["eta_b_out"])
 
-                gW[wtype] += cfg["L2_reg"] * np.linalg.norm(W[wtype][ep_curr].flatten())
+            if cfg["optimizer"] == "Adam":
+                # Update Adam for W, W_out, b_out
 
-                eta = (R['eta'][e] if wtype != "b_out" or cfg["eta_b_out"] is None
-                       else cfg["eta_b_out"])
+                adamvars[f'm{wtype}'] = (
+                    cfg["adam_beta1"] * adamvars[f'm{wtype}']
+                    + (1 - cfg["adam_beta1"]) * gW[wtype])
 
-                if cfg["optimizer"] == "Adam":
-                    # Update Adam for W, W_out, b_out
+                adamvars[f'v{wtype}'] = (
+                    cfg["adam_beta2"] * adamvars[f'v{wtype}']
+                    + (1 - cfg["adam_beta2"]) * (gW[wtype] ** 2))
 
-                    adamvars[f'm{wtype}'] = (
-                        cfg["adam_beta1"] * adamvars[f'm{wtype}']
-                        + (1 - cfg["adam_beta1"]) * gW[wtype])
+                m = adamvars[f'm{wtype}'] / (1 - cfg["adam_beta1"] ** (e+1))
+                v = adamvars[f'v{wtype}'] / (1 - cfg["adam_beta2"] ** (e+1))
 
-                    adamvars[f'v{wtype}'] = (
-                        cfg["adam_beta2"] * adamvars[f'v{wtype}']
-                        + (1 - cfg["adam_beta2"]) * (gW[wtype] ** 2))
+                # Calculate DWs
+                DW[wtype] = (-eta * (m / (np.sqrt(v) + cfg["adam_eps"])))
 
-                    m = adamvars[f'm{wtype}'] / (1 - cfg["adam_beta1"] ** (e+1))
-                    v = adamvars[f'v{wtype}'] / (1 - cfg["adam_beta2"] ** (e+1))
+            elif cfg["optimizer"] == "RAdam":
+                # Update Adam for W, W_out, b_out
 
-                    # Calculate DWs
-                    DW[wtype] = (-eta * (m / (np.sqrt(v) + cfg["adam_eps"])))
+                adamvars[f'm{wtype}'] = (
+                    cfg["adam_beta1"] * adamvars[f'm{wtype}']
+                    + (1 - cfg["adam_beta1"]) * gW[wtype])
 
-                elif cfg["optimizer"] == "RAdam":
-                    # Update Adam for W, W_out, b_out
+                adamvars[f'v{wtype}'] = (
+                    (1/cfg["adam_beta2"]) * adamvars[f'v{wtype}']
+                    + (1 - cfg["adam_beta2"]) * gW[wtype] ** 2)
 
-                    adamvars[f'm{wtype}'] = (
-                        cfg["adam_beta1"] * adamvars[f'm{wtype}']
-                        + (1 - cfg["adam_beta1"]) * gW[wtype])
+                m = adamvars[f'm{wtype}'] / (1 - cfg["adam_beta1"] ** (e+1))
+                # v = adamvars[f'v{wtype}'] / (1 - cfg["adam_beta2"] ** (e+1))
+                DW[wtype] = -eta*m
 
-                    adamvars[f'v{wtype}'] = (
-                        (1/cfg["adam_beta2"]) * adamvars[f'v{wtype}']
-                        + (1 - cfg["adam_beta2"]) * gW[wtype] ** 2)
+                rinf = 2/(1-cfg["adam_beta2"]) - 1
+                rho = (rinf - 2 * (e+1) * cfg["adam_beta2"] ** (e+1)
+                              / (1 - cfg["adam_beta1"] ** (e+1)))
 
-                    m = adamvars[f'm{wtype}'] / (1 - cfg["adam_beta1"] ** (e+1))
-                    # v = adamvars[f'v{wtype}'] / (1 - cfg["adam_beta2"] ** (e+1))
-                    DW[wtype] = -eta*m
+                if rho > 4 and not np.any(adamvars[f'v{wtype}'] == 0):
+                    alr = np.sqrt((1 - cfg["adam_beta1"] ** (e+1))
+                                  / adamvars[f'v{wtype}'])
+                    vrt = np.sqrt(((rho-4)*(rho-2)*rinf)
+                                  / ((rinf-4)*(rinf-2)*rho))
+                    DW[wtype] *= vrt * alr
 
-                    rinf = 2/(1-cfg["adam_beta2"]) - 1
-                    rho = (rinf - 2 * (e+1) * cfg["adam_beta2"] ** (e+1)
-                                  / (1 - cfg["adam_beta1"] ** (e+1)))
+                # # Calculate DWs
+                # DW[wtype] = (-eta * (m / (np.sqrt(v) + cfg["adam_eps"])))
 
-                    if rho > 4 and not np.any(adamvars[f'v{wtype}'] == 0):
-                        alr = np.sqrt((1 - cfg["adam_beta1"] ** (e+1))
-                                      / adamvars[f'v{wtype}'])
-                        vrt = np.sqrt(((rho-4)*(rho-2)*rinf)
-                                      / ((rinf-4)*(rinf-2)*rho))
-                        DW[wtype] *= vrt * alr
-
-                    # # Calculate DWs
-                    # DW[wtype] = (-eta * (m / (np.sqrt(v) + cfg["adam_eps"])))
-
-                elif cfg["optimizer"] == "SGD":
-                    DW[wtype] = (-eta * gW[wtype])
+            elif cfg["optimizer"] == "SGD":
+                DW[wtype] = (-eta * gW[wtype])
 
 
-            if not cfg["update_input_weights"]:
-                DW['W'][:, 0, :, :inps['train'].shape[-1]] = 0
+        if not cfg["update_input_weights"]:
+            DW['W'][:, 0, :, :inps['train'].shape[-1]] = 0
 
-            if not cfg["update_dead_weights"]:
-                DW['W'][W["W"][ep_curr] == 0] = 0
+        if not cfg["update_dead_weights"]:
+            DW['W'][W["W"][ep_curr] == 0] = 0
 
 
-            # Apply DWs
-            for wtype in W.keys():
+        # Apply DWs
+        for wtype in W.keys():
 
-                if wtype == "B":
+            if wtype == "B":
 
-                    if cfg["eprop_type"] == "symmetric" and cfg['update_W_out']:
-                        for s in range(cfg["n_directions"]):  # TODO: Vectorize out s?
-                            W["B"][ep_curr+ep_incr, s] = (W["W_out"][ep_curr, s]
-                                                       + DW["W_out"][s]).T
+                if cfg["eprop_type"] == "symmetric" and cfg['update_W_out']:
+                    for s in range(cfg["n_directions"]):  # TODO: Vectorize out s?
+                        W["B"][ep_curr+ep_incr, s] = (W["W_out"][ep_curr, s]
+                                                   + DW["W_out"][s]).T
 
-                    elif cfg["eprop_type"] == "adaptive" and cfg['update_W_out']:
-                        for s in range(cfg["n_directions"]):
-                            W["B"][ep_curr+ep_incr, s] = (W["B"][ep_curr, s]
-                                                          + DW["W_out"][s].T)
+                elif cfg["eprop_type"] == "adaptive" and cfg['update_W_out']:
+                    for s in range(cfg["n_directions"]):
+                        W["B"][ep_curr+ep_incr, s] = (W["B"][ep_curr, s]
+                                                      + DW["W_out"][s].T)
 
-                    else:
-                        W["B"][ep_curr+ep_incr] = W["B"][ep_curr]
+                else:
+                    W["B"][ep_curr+ep_incr] = W["B"][ep_curr]
 
-                else:  # Normal update of W, W_out, or b_out
-                    W[wtype][ep_curr+ep_incr] = W[wtype][ep_curr] + DW[wtype]
+            else:  # Normal update of W, W_out, or b_out
+                W[wtype][ep_curr+ep_incr] = W[wtype][ep_curr] + DW[wtype]
 
-            # Decay W_out
-            if cfg["eprop_type"] == "adaptive":
-                W["W_out"][ep_curr+ep_incr] -= (W["W_out"][ep_curr+ep_incr]
-                                              * cfg["weight_decay"])
-                W['B'][ep_curr+ep_incr] -= (W["B"][ep_curr+ep_incr, s]
-                                            * cfg["weight_decay"])
+        # Decay W_out
+        if cfg["eprop_type"] == "adaptive":
+            W["W_out"][ep_curr+ep_incr] -= (W["W_out"][ep_curr+ep_incr]
+                                          * cfg["weight_decay"])
+            W['B'][ep_curr+ep_incr] -= (W["B"][ep_curr+ep_incr, s]
+                                        * cfg["weight_decay"])
 
     # Epoch loop ends here
 
@@ -446,6 +440,7 @@ def main(cfg):
         cfg=cfg,
         inps=inps['val'][randidxs],
         tars=tars['val'][randidxs],
+        betas=betas,
         W_rec=optW['W'],
         W_out=optW['W_out'],
         b_out=optW['b_out'],
