@@ -63,7 +63,7 @@ cfg = {
     "batch_size_test": 1,  # def = 32
     "maxlen": 778,  #def 778, Don't forget to re-run process_timit.py!
     "TIMIT_derivative": 0,
-    "n_examples": {'train': 100, 'val': 100, 'test': 1},
+    "n_examples": {'train': 12, 'val': 12, 'test': 1},
     # "n_examples": {'train': 3696, 'val': 400, 'test': 192},
     "plot_state_interval": 20,  # Per iter  #  State plot; 0 to disable plots
     "state_save_interval": 20,

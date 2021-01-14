@@ -218,8 +218,9 @@ def main(cfg):
     W = ut.initialize_weights(cfg=cfg, inp_size=n_channels, tar_size=n_phones)
 
     betas = ut.initialize_betas(cfg=cfg)
+
     # Weight update
-    DW = ut.initialize_DWs(cfg=cfg, tar_size=n_phones)
+    DW = ut.initialize_DWs(cfg=cfg, tar_size=n_phones)  # TODO: Refactor out
 
     adamvars = ut.init_adam(cfg=cfg, tar_size=n_phones)
 

@@ -331,7 +331,7 @@ def interpolate_verrs(arr):
     These exist, because validation may not happen in all epochs.
     """
 
-    # TOOD: comments
+    # TODO: comments
 
     retarr = arr
     x0 = 0

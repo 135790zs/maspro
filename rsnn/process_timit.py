@@ -4,7 +4,7 @@ import numpy as np
 from scipy.fftpack import dct
 import matplotlib.pyplot as plt
 from python_speech_features import delta
-from config import cfg
+from config2 import cfg
 
 def my_mfcc(signal, sample_rate):
     if not os.path.isfile("../vis/signal.pdf"):
@@ -32,7 +32,7 @@ def my_mfcc(signal, sample_rate):
 
     pad_signal_length = num_frames * frame_step + frame_length
     z = np.zeros((pad_signal_length - signal_length))
-    pad_signal = np.append(emphasized_signal, z) # Pad Signal to make sure that all frames have equal number of samples without truncating any samples from the original signal
+    pad_signal = np.append(emphasized_signal, z) # Pad signal to make sure that all frames have equal number of samples without truncating any samples from the original signal
 
     indices = np.tile(np.arange(0, frame_length), (num_frames, 1)) + np.tile(np.arange(0, num_frames * frame_step, frame_step), (frame_length, 1)).T
     frames = pad_signal[indices.astype(np.int32, copy=False)]

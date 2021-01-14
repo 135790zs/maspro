@@ -63,19 +63,19 @@ def main(cfg):
             H = np.zeros(shape=(mbsize, cfg["N_R"],))
             V = np.zeros_like(a=H)
             a = np.zeros_like(a=H)
-            A = np.zeros_like(a=H)
+            A = np.zeros_like(a=H)  # Transient
             Z = np.zeros_like(a=H)
             Zs = np.zeros_like(a=H)
             Zbar = np.zeros_like(a=H)
             TZ = np.zeros_like(a=H)
-            Y = np.zeros(shape=(mbsize, n_phones))
-            D = np.zeros_like(a=Y)
-            P = np.zeros_like(a=Y)
-            CE = 0
-            Z_in = np.zeros(shape=(mbsize, cfg["N_R"] + n_channels,))
+            Y = np.zeros(shape=(mbsize, n_phones))  # transient
+            D = np.zeros_like(a=Y)  # transient
+            P = np.zeros_like(a=Y)  # transient
+            CE = 0  # transient
+            Z_in = np.zeros(shape=(mbsize, cfg["N_R"] + n_channels,))  # transient
             EVV = np.zeros(shape=(mbsize, cfg["N_R"], cfg["N_R"] + n_channels))
             EVA = np.zeros_like(a=EVV)
-            ET = np.zeros_like(a=EVV)
+            ET = np.zeros_like(a=EVV)  # transient
             ETbar = np.zeros_like(a=EVV)
             gW = np.zeros_like(a=W)
             gW_out = np.zeros_like(a=W_out)
