@@ -34,11 +34,11 @@ def weights_to_img(arr, is_binary=False):
     return arr
 
 
-def plot_M(cfg, M, it, log_id, n_steps):
-    plotvars = ['x', 'I', "v", "a", "z", "h"]
+def plot_M(cfg, M, it, log_id, n_steps, inp_size):
+    plotvars = ['x', 'I_in', 'I_rec', 'I', "v", "a", "z", "h"]
     if cfg["Track_synapse"]:
         plotvars += ["vv", "va", "etbar"]
-    plotvars += ['l', "y", 'p', 'pm', 't', 'd', 'correct']
+    plotvars += ['l_std', 'l_fr', 'l', "y", 'p', 'pm', 't', 'd', 'correct']
 
     fig = plt.figure(constrained_layout=False, figsize=(8, len(plotvars)//1.2))
     gsc = fig.add_gridspec(nrows=len(plotvars),
@@ -57,9 +57,11 @@ def plot_M(cfg, M, it, log_id, n_steps):
     for var in plotvars:
         axs.append(fig.add_subplot(gsc[row_idx]))
         if var in ['y', 'p', 'pm', 't', 'd', 'correct']:
-            arr = M[var][b, :n_steps[b]]
+            arr = M[var][b, :n_steps[b]].cpu().numpy()
         else:
-            arr = M[var][0, b, :n_steps[b]]
+            arr = M[var][0, b, :n_steps[b]].cpu().numpy()
+        if var == 'x':
+            arr = arr[:, :inp_size]
         axs[-1].imshow(weights_to_img(arr,
                                       is_binary=lookup[var]["binary"]),
                        cmap=('RdYlGn' if var == 'correct' else
@@ -135,13 +137,17 @@ def plot_W(cfg, W_log, log_id):
                 axs[-1].plot(arr[arr >= 0], label=tvtype)
             axs[-1].legend()
             axs[-1].grid()
+            if k in ['Cross-entropy', 'Percentage wrong']:
+                axs[-1].set_yscale('log')
             axs[-1].set_ylabel(k,
                                rotation=0,
                                labelpad=labelpad,
                                fontsize=fontsize)
         if k in ['W', 'out', 'bias', 'B']:
-            axs.append(fig.add_subplot(gsc[len(axs), :]))
             weights = np.array(v).T
+            if weights.shape[0] <= 1:
+                continue
+            axs.append(fig.add_subplot(gsc[len(axs), :]))
             axs[-1].imshow(
                     weights_to_img(weights),
                     aspect='auto',

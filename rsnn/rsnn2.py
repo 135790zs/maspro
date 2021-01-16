@@ -22,7 +22,7 @@ def main(cfg):
 
     print("N_train:", n_train, "N_val:", n_val)
 
-    # Weights to the network. Keys: W, W_out, b_out, B
+    # Weights to the network. Keys: W, out, bias, B
     W = ut.initialize_weights(cfg=cfg, inp_size=n_channels, tar_size=n_phones)
     adamvars = ut.init_adam(cfg=cfg, tar_size=n_phones)
     betas = ut.initialize_betas(cfg=cfg)
@@ -31,9 +31,9 @@ def main(cfg):
 
     for e in range(cfg["Epochs"]):
 
-
         # Train on batched input samples
         batch_idxs_list = ut.sample_mbatches(cfg=cfg, n_train=n_train)
+
         for b_idx, batch_idxs in enumerate(batch_idxs_list):
             print((f"Epoch {e}/{cfg['Epochs']}\tBatch {b_idx}/"
                    f"{len(batch_idxs_list)}"), end='\r')
@@ -49,6 +49,7 @@ def main(cfg):
                 X, T = ut.trim_samples(X=X, T=T)
 
                 n_steps = ut.count_lengths(X=X)
+
                 _, Mv = ut.eprop(cfg=cfg,
                                  X=X,
                                  T=T,
@@ -76,6 +77,7 @@ def main(cfg):
                             betas=betas,
                             W=W)
 
+
             W_log = ut.update_W_log(W_log=W_log,
                                     Mt=M,
                                     Mv=Mv,
@@ -87,7 +89,9 @@ def main(cfg):
                            cfg=cfg,
                            it=adamvars['it'],
                            log_id=log_id,
-                           n_steps=n_steps)
+                           n_steps=n_steps,
+                           inp_size=n_channels)
+            del M
 
             if (adamvars['it'] == 0
                 or adamvars['it'] % cfg["plot_tracker_interval"] == 0):

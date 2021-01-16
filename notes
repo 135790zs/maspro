@@ -18,12 +18,11 @@
 	# Refactor to track all run-based in own dict (etas, adam, weights, rates, metrics, etc). Subdict for train/val if applicable?
 	# Read TODOs
 	# Concatenate low-pass filter to input vectors?
-	# L_reg can cumulative instead of list
+	# Store how many synapses are practically used (i.e., absolute value > eps). Also, see if pruning when they are very close to zero has any effect.
 	# A few things can be left out of the M[] dict
-	# Make it possible to use fewer than N_I N_Rs
+
 	# Make N_R variable per layer
-	# Change into online learning rather than batch based.
-	# Instead of is_ALIF, just make a mask of beta, since beta=0 means LIF
+
 	# Fancy visualization (slider)
 	# Refactor
 	# Comment code
