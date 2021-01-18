@@ -35,8 +35,8 @@ def main(cfg):
         batch_idxs_list = ut.sample_mbatches(cfg=cfg, n_train=n_train)
 
         for b_idx, batch_idxs in enumerate(batch_idxs_list):
-            print((f"Epoch {e}/{cfg['Epochs']}\tBatch {b_idx}/"
-                   f"{len(batch_idxs_list)}"), end='\r')
+            print((f"{'-'*10} Epoch {e}/{cfg['Epochs']}\tBatch {b_idx}/"
+                   f"{len(batch_idxs_list)} {'-'*10}"), end='\r')
             # Validate occasionally
             if adamvars['it'] % cfg["val_every_B"] == 0:
                 valbatch = rng.choice(n_val, size=cfg["batch_size_val"])
@@ -66,6 +66,7 @@ def main(cfg):
                                          inp=X,
                                          tar=T,
                                          stretch=cfg["Repeats"])
+
             X, T = ut.trim_samples(X=X, T=T)
 
             n_steps = ut.count_lengths(X=X)
@@ -103,7 +104,8 @@ def main(cfg):
                                             e=e,
                                             W=W,
                                             G=G,
-                                            adamvars=adamvars)
+                                            adamvars=adamvars,
+                                            it_per_e=len(batch_idxs_list))
 
 
 

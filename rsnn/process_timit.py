@@ -3,7 +3,7 @@ import soundfile as sf
 import numpy as np
 from scipy.fftpack import dct
 import matplotlib.pyplot as plt
-from python_speech_features import delta
+from python_speech_features import delta, mfcc
 from config2 import cfg
 
 def my_mfcc(signal, sample_rate):
@@ -87,11 +87,11 @@ def my_mfcc(signal, sample_rate):
         plt.savefig("../vis/spectrogram.pdf")
         plt.clf()
 
-    mfcc = dct(filter_banks, type=2, axis=1, norm='ortho')[:, 1 : (cfg["num_ceps"] + 1)] # Keep 2-13
-    (nframes, ncoeff) = mfcc.shape
-    n = np.arange(ncoeff)
-    lift = 1 + (cfg["cep_lifter"] / 2) * np.sin(np.pi * n / cfg["cep_lifter"])
-    mfcc *= lift  #*
+    mfcc = dct(filter_banks, type=2, axis=1, norm='ortho')[:, 0:(cfg["num_ceps"])] # Keep 2-13. NO: 0-12
+    # (nframes, ncoeff) = mfcc.shape
+    # n = np.arange(ncoeff)
+    # lift = 1 + (cfg["cep_lifter"] / 2) * np.sin(np.pi * n / cfg["cep_lifter"])
+    # mfcc *= lift  #*
 
     if not os.path.isfile("../vis/mfcc.pdf"):
         plt.imshow(mfcc.T, interpolation='none', cmap='jet', aspect='auto')
@@ -155,7 +155,8 @@ def align_phones(phones_):
 
 def read_sound(fname):
     """Returns as [(start, end, soundarr)] tuple list."""
-    mfcc_feat = my_mfcc(*sf.read(fname))
+    # mfcc_feat = my_mfcc(*sf.read(fname))
+    mfcc_feat = mfcc(*sf.read(fname))
     if cfg["TIMIT_derivative"] == 0:
         return mfcc_feat
     delta1 = delta(feat=mfcc_feat, N=2)

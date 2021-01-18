@@ -35,10 +35,14 @@ def weights_to_img(arr, is_binary=False):
 
 
 def plot_M(cfg, M, it, log_id, n_steps, inp_size):
-    plotvars = ['x', 'I_in', 'I_rec', 'I', "v", "a", "z", "h"]
+    plotvars = ['x']
+    if cfg["Track_neuron"]:
+        plotvars += ['I_in', 'I_rec', 'I', "v", "a", "z", "h"]
     if cfg["Track_synapse"]:
         plotvars += ["vv", "va", "etbar"]
-    plotvars += ['l_std', 'l_fr', 'l', "y", 'p', 'pm', 't', 'd', 'correct']
+    if cfg["Track_neuron"]:
+        plotvars += ['l_std', 'l_fr', 'l', "y", 'd']
+    plotvars += ['p', 'pm', 't', 'correct']
 
     fig = plt.figure(constrained_layout=False, figsize=(8, len(plotvars)//1.2))
     gsc = fig.add_gridspec(nrows=len(plotvars),

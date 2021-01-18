@@ -8,6 +8,7 @@ import time
 import opt_einsum
 import torch
 from config2 import cfg
+import einsums
 
 if cfg["cuda"]:
     torch.set_default_tensor_type('torch.cuda.FloatTensor')
@@ -18,10 +19,11 @@ def initialize_model(cfg, inp_size, tar_size, batch_size, n_steps):
     M = {}
 
     len_syn_time = n_steps if cfg["Track_synapse"] else 1
+    len_nrn_time = n_steps if cfg["Track_neuron"] else 1
 
     nrn_shape = (cfg["n_directions"],
                  batch_size,
-                 n_steps,
+                 len_nrn_time,
                  cfg["N_Rec"],
                  cfg["N_R"])
     syn_shape = (cfg["n_directions"],
@@ -31,25 +33,35 @@ def initialize_model(cfg, inp_size, tar_size, batch_size, n_steps):
                  cfg["N_R"],
                  cfg["N_R"] * 2)
     out_shape = (batch_size,
-                 n_steps,
+                 len_nrn_time,
                  tar_size)
+
+    out_shape_long = (batch_size,
+                      n_steps,
+                      tar_size)
 
     for var in ['z', 'I', 'I_in', 'I_rec', 'h', 'v', 'a', 'zbar', 'l', 'l_std', 'l_fr']:
         M[var] = torch.zeros(size=nrn_shape, dtype=torch.double)
 
+
     for var in ['vv', 'va', 'etbar']:
         M[var] = torch.zeros(size=syn_shape, dtype=torch.double)
+    nrn_timeless = (cfg["n_directions"],
+                    batch_size,
+                    cfg["N_Rec"],
+                    cfg["N_R"])
+    M['tz'] = torch.ones(size=nrn_timeless, dtype=torch.int) * -cfg["dt_refr"]
+    M['zs'] = torch.zeros(size=nrn_timeless)
 
-    M['tz'] = torch.ones(size=(cfg["n_directions"],
-                               batch_size,
-                               cfg["N_Rec"],
-                               cfg["N_R"]), dtype=torch.int) * -cfg["dt_refr"]
-
-    for var in ['y', 'p', 'd', 'pm']:
+    for var in ['y','d']:
         M[var] = torch.zeros(size=out_shape, dtype=torch.double)
+
+    for var in ['p','pm']:
+        M[var] = torch.zeros(size=out_shape_long, dtype=torch.double)
+
     M['ysub'] = torch.zeros(size=(cfg["n_directions"],
                                 batch_size,
-                                n_steps,
+                                len_nrn_time,
                                 tar_size), dtype=torch.double)
 
     M["ce"] = torch.zeros(size=(batch_size, n_steps,))
@@ -67,8 +79,8 @@ def initialize_gradients(cfg, tar_size, batch_size):
                              cfg["N_R"] * 2,))
     G["out"] = torch.zeros(size=(cfg["n_directions"],
                                batch_size,
-                               tar_size,
-                               cfg["N_R"]))
+                               cfg["N_R"],
+                               tar_size,))
 
     G["bias"] = torch.zeros(size=(batch_size,
                                 tar_size,))
@@ -105,13 +117,13 @@ def initialize_weights(cfg, inp_size, tar_size):
 
     # Bellec: rd.randn(n_in, n_rec) / np.sqrt(n_in)
     for r in range(cfg["N_Rec"]):
-        W['W'][:, 0, :, :cfg["N_R"]] /= np.sqrt(inp_size)
+        W['W'][:, 0, :, :cfg["N_R"]] /= np.sqrt(cfg["N_R"])
         if r > 0:
             W['W'][:, r, :, :cfg["N_R"]] /= np.sqrt(cfg["N_R"])
     W['W'][:, 0, :, inp_size:cfg["N_R"]] = 0
     W["out"] = rng.normal(size=(cfg["n_directions"],
-                                tar_size,
-                                cfg["N_R"])) / np.sqrt(tar_size)
+                                cfg["N_R"],
+                                tar_size)) / np.sqrt(tar_size)
 
     W["bias"] = np.zeros(shape=(tar_size,))
 
@@ -130,7 +142,7 @@ def initialize_weights(cfg, inp_size, tar_size):
         W["B"] = rng.random(size=B_shape) * 2 - 1
         for r in range(cfg["N_Rec"]):
             for s in range(cfg["n_directions"]):
-                W["B"][s, r] = W["out"][s].T
+                W["B"][s, r] = W["out"][s]
 
     # Drop all self-looping weights. A neuron cannot be connected with itself.
     for r in range(cfg["N_Rec"]):
@@ -147,22 +159,57 @@ def initialize_weights(cfg, inp_size, tar_size):
     return W
 
 
-def update_weights(W, G, adamvars, e, cfg):
+def update_weights(W, G, adamvars, e, cfg, it_per_e):
     adamvars['it'] += 1
 
     for wtype in G.keys():
         if not cfg[f"train_{wtype}"]:
             continue
+        eta = cfg[f"eta_{wtype}"]
+        if cfg["warmup"] and e == 0:
+            eta *= adamvars['it'] / it_per_e
 
-        adamvars[f"m{wtype}"] = (cfg["adam_beta1"] * adamvars[f"m{wtype}"]
-                                 + (1 - cfg["adam_beta1"]) * G[wtype])
-        adamvars[f"v{wtype}"] = (cfg["adam_beta2"] * adamvars[f"v{wtype}"]
-                                 + (1 - cfg["adam_beta2"]) * G[wtype] ** 2)
+        if cfg["Optimizer"] == "Adam":
+            adamvars[f"m{wtype}"] = (cfg["adam_beta1"] * adamvars[f"m{wtype}"]
+                                     + (1 - cfg["adam_beta1"]) * G[wtype])
+            adamvars[f"v{wtype}"] = (cfg["adam_beta2"] * adamvars[f"v{wtype}"]
+                                     + (1 - cfg["adam_beta2"]) * G[wtype] ** 2)
 
-        m = adamvars[f"m{wtype}"] / (1 - cfg["adam_beta1"] ** adamvars['it'])
-        v = adamvars[f"v{wtype}"] / (1 - cfg["adam_beta2"] ** adamvars['it'])
+            m = adamvars[f"m{wtype}"] / (1 - cfg["adam_beta1"] ** adamvars['it'])
+            v = adamvars[f"v{wtype}"] / (1 - cfg["adam_beta2"] ** adamvars['it'])
 
-        dw = -cfg[f"eta_{wtype}"] * (m / (torch.sqrt(v) + cfg["adam_eps"]))
+            dw = -eta * (m / (torch.sqrt(v) + cfg["adam_eps"]))
+
+        elif cfg["Optimizer"] == "RAdam":
+
+            adamvars[f"m{wtype}"] = (cfg["adam_beta1"] * adamvars[f"m{wtype}"]
+                                     + (1 - cfg["adam_beta1"]) * G[wtype])
+
+            adamvars[f"v{wtype}"] = (1 / cfg["adam_beta2"] * adamvars[f"v{wtype}"]
+                                     + (1 - cfg["adam_beta2"]) * G[wtype] ** 2)
+
+            m = adamvars[f"m{wtype}"] / (1 - cfg["adam_beta1"] ** adamvars['it'])
+
+            rinf = 2 / (1 - cfg["adam_beta2"]) - 1
+
+            rho = rinf - 2 * adamvars['it'] * cfg["adam_beta2"] ** adamvars['it'] / (1 - cfg["adam_beta2"] ** adamvars['it'])
+
+            if rho > 4:
+
+                l = torch.sqrt((1 - cfg["adam_beta2"] ** adamvars['it']) / (adamvars[f"v{wtype}"] + cfg["adam_eps"]))
+
+                upper = (rho - 4) * (rho - 2) * rinf
+
+                lower = (rinf - 4) * (rinf - 2) * rho
+
+                r = np.sqrt(upper / lower)
+
+                dw = -eta * m * r * l
+
+
+            else:
+                dw = -eta * m
+
         W[wtype] += dw
 
         if wtype == 'out' and cfg['eprop_type'] == 'adaptive':
@@ -174,7 +221,7 @@ def update_weights(W, G, adamvars, e, cfg):
     if cfg["eprop_type"] == 'symmetric':
         for s in range(cfg['n_directions']):
             for r in range(cfg['N_Rec']):
-                W['B'][s, r] = W['out'][s].T
+                W['B'][s, r] = W['out'][s]
 
     return W, adamvars
 
@@ -202,7 +249,7 @@ def eprop(cfg, X, T, n_steps, betas, W):
                              tar_size=T.shape[-1],
                              batch_size=X.shape[0])
 
-    M['x'] = X[np.newaxis, :]  # Insert subnetwork dimension
+    M['x'] = X[None, :]  # Insert subnetwork dimension
     M['t'] = T
 
     if cfg["n_directions"] == 2:
@@ -212,124 +259,99 @@ def eprop(cfg, X, T, n_steps, betas, W):
 
     for t in torch.arange(0, max(n_steps), dtype=torch.int):
         start = time.time()
-        prev_t, curr_t = conn_t_idxs(track_synapse=cfg['Track_synapse'], t=t)
+        prev_syn_t, curr_syn_t = conn_t_idxs(track_synapse=cfg['Track_synapse'], t=t)
+        prev_nrn_t, curr_nrn_t = conn_t_idxs(track_synapse=cfg['Track_neuron'], t=t)
 
         is_valid = torch.any(M['x'][:, :, t] != -1, axis=2)
 
         for r in range(cfg["N_Rec"]):  # TODO: Can overwrite r instead of appending, except Z
-            Z_prev = M['z'][:, :, t, r-1] if r else M['x'][:, :, t]
-            Z_in = torch.cat((Z_prev, M['z'][:, :, t-1, r]), axis=2)
 
-            M['va'][:, :, curr_t, r] = (opt_einsum.contract("sbj, sbji -> sbji",
-                                                  M['h'][:, :, t-1, r],
-                                                  M['vv'][:, :, prev_t, r],
-                                                  backend='torch')
-                                        + opt_einsum.contract("sbj, sbji -> sbji",
-                                                    cfg["rho"] - opt_einsum.contract(
-                                                        "sbj, sj -> sbj",
-                                                        M['h'][:, :, t-1, r],
-                                                        betas[:, r]),
-                                                    M['va'][:, :, prev_t, r],
-                                                    backend='torch'))
+            Z_prev = M['z'][:, :, curr_nrn_t, r-1] if r else M['x'][:, :, t]
 
-            # TIMESINK
-            M['vv'][:, :, curr_t, r] = opt_einsum.contract("sbji, sbi -> sbji",
-                                                    cfg["alpha"] * M['vv'][:, :, prev_t, r],
-                                                    Z_in,
-                                                    backend='torch')  # TODO: not sure!
+            Z_in = torch.cat((Z_prev, M['z'][:, :, prev_nrn_t, r]), axis=2)
+
+            M['va'][:, :, curr_syn_t, r] = (M['h'][:, :, prev_nrn_t, r, :, None] * M['vv'][:, :, prev_syn_t, r]
+                + (cfg["rho"] - (M['h'][:, :, prev_nrn_t, r]
+                                 * betas[:, None, r]))[..., None]
+                * M['va'][:, :, prev_syn_t, r])
 
 
-            # TIMESINK
-            M['vv'][:, :, curr_t, r] = cfg["alpha"] * M['vv'][:, :, prev_t, r] + Z_in[:, :, np.newaxis, :]
-            M['I_in'][:, :, t, r] = opt_einsum.contract("sji, sbi -> sbj",
-                                        W['W'][:, r, :, :cfg["N_R"]],
-                                        Z_prev,
-                                        backend='torch')
-            M['I_rec'][:, :, t, r] = opt_einsum.contract("sji, sbi -> sbj",
-                                        W['W'][:, r, :, cfg["N_R"]:],
-                                        M['z'][:, :, t-1, r],
-                                        backend='torch')
-            M['I'][:, :, t, r] = M['I_in'][:, :, t, r] + M['I_rec'][:, :, t, r]
+            M['vv'][:, :, curr_syn_t, r] = cfg["alpha"] * M['vv'][:, :, prev_syn_t, r] + Z_in[:, :, None]
 
-            M['a'][:, :, t, r] = (cfg["rho"] * M['a'][:, :, t-1, r]
-                                  + M['z'][:, :, t-1, r])
-            A = cfg["thr"] + opt_einsum.contract("sj, sbj -> sbj",
-                                                 betas[:, r],
-                                                 M['a'][:, :, t, r])
+            # Can contract this further!
+            M['I_in'][:, :, curr_nrn_t, r] = torch.sum(W['W'][:, None, r, :, :cfg["N_R"]] * Z_prev[:, :, None, :], axis=-1)
 
-            M['v'][:, :, t, r] = (cfg["alpha"] * M['v'][:, :, t-1, r]
-                                  + M['I'][:, :, t, r]
-                                  - M['z'][:, :, t-1, r] * (A if cfg["v_fix"] else cfg["thr"]))
+            M['I_rec'][:, :, curr_nrn_t, r] = torch.sum(W['W'][:, None, r, :, cfg["N_R"]:] * M['z'][:, :, prev_nrn_t, r, None, :], axis=-1)
 
-            M['z'][:, :, t, r] = torch.where(
+            M['I'][:, :, curr_nrn_t, r] = M['I_in'][:, :, curr_nrn_t, r] + M['I_rec'][:, :, curr_nrn_t, r]
+
+            M['a'][:, :, curr_nrn_t, r] = (cfg["rho"] * M['a'][:, :, prev_nrn_t, r]
+                                  + M['z'][:, :, prev_nrn_t, r])
+
+            A = cfg["thr"] + betas[:, None, r] * M['a'][:, :, curr_nrn_t, r]
+
+            M['v'][:, :, curr_nrn_t, r] = (cfg["alpha"] * M['v'][:, :, prev_nrn_t, r]
+                                  + M['I'][:, :, curr_nrn_t, r]
+                                  - M['z'][:, :, prev_nrn_t, r] * (A if cfg["v_fix"] else cfg["thr"]))
+
+            M['z'][:, :, curr_nrn_t, r] = torch.where(
                 torch.logical_and(t - M['tz'][:, :, r] >= cfg["dt_refr"],
-                               M['v'][:, :, t, r] >= A),
+                               M['v'][:, :, curr_nrn_t, r] >= A),
                 1,
                 0)
-            M['tz'][:, :, r] = torch.where(M['z'][:, :, t, r] != 0, t, M['tz'][:, :, r])
 
-            M['h'][:, :, t, r] = ((1 / (A if cfg["v_fix"] else cfg["thr"])) * cfg["gamma"] * torch.clip(
-            # M['h'][:, :, t, r] = (cfg["gamma"] * torch.clip(
-                1 - (abs((M['v'][:, :, t, r] - A
+            M['tz'][:, :, r] = torch.where(M['z'][:, :, curr_nrn_t, r] != 0, t, M['tz'][:, :, r])
+            M['zs'][:, :, r] += M['z'][:, :, curr_nrn_t, r]
+
+            M['h'][:, :, curr_nrn_t, r] = ((1 / (A if cfg["v_fix"] else cfg["thr"])) * cfg["gamma"] * torch.clip(
+            # M['h'][:, :, curr_nrn_t, r] = (cfg["gamma"] * torch.clip(
+                1 - (abs((M['v'][:, :, curr_nrn_t, r] - A
                            / (A if cfg["v_fix"] else cfg["thr"])))),
                 0,
                 None))
 
-            # TIMESINK
-            ET = (opt_einsum.contract("sbj, sbji -> sbji",
-                                      M['h'][:, :, t, r],
-                                      M['vv'][:, :, curr_t, r],
-                                      backend='torch')
-                  - opt_einsum.contract("sj, sbji -> sbji",
-                                        betas[:, r],
-                                        M['va'][:, :, curr_t, r],
-                                        backend='torch'))
 
-            M['etbar'][:, :, curr_t, r] = cfg["kappa"] * M['etbar'][:, :, prev_t, r] + ET
-            M['zbar'][:, :, t, r] = cfg["kappa"] * M['zbar'][:, :, t-1, r] + M['z'][:, :, t, r]
-
-        # TODO: Can vectorize (over t) everything below here
-        M['ysub'][:, :, t] = opt_einsum.contract("skj, sbj -> sbk", # Checked correct
-                                           W['out'],
-                                           M['z'][:, :, t, -1],
-                                           backend='torch')
-
-        M['ysub'][:, :, t] += cfg["kappa"] * M['ysub'][:, :, t-1]
-        M['y'][:, t] = torch.sum(M['ysub'][:, :, t], axis=0)
-        M['y'][:, t] += W['bias']
-
-        M['p'][:, t] = torch.exp(M['y'][:, t] - torch.amax(M['y'][:, t], axis=1)[:, np.newaxis])
-        M['p'][:, t] = M['p'][:, t] / torch.sum(M['p'][:, t], axis=1)[:, np.newaxis]
+            ET = M['h'][:, :, curr_nrn_t, r, :, None] * (M['vv'][:, :, curr_syn_t, r] - betas[:, r, :, None] * M['va'][:, :, curr_syn_t, r])
 
 
-        M['d'][:, t] = M['p'][:, t] - T[:, t]
+            M['etbar'][:, :, curr_syn_t, r] = cfg["kappa"] * M['etbar'][:, :, prev_syn_t, r] + ET
 
-        M['l_std'][:, :, t] = opt_einsum.contract("srjk, bk -> sbrj",
-                      W['B'],
-                      M['d'][:, t],
-                      backend='torch')
+            M['zbar'][:, :, curr_nrn_t, r] = cfg["kappa"] * M['zbar'][:, :, prev_nrn_t, r] + M['z'][:, :, curr_nrn_t, r]
+
+
+        M['ysub'][:, :, curr_nrn_t] = torch.sum(W['out'][:, None]
+                                       * M['z'][:, :, curr_nrn_t, -1, :, None], axis=-2)
+
+        M['ysub'][:, :, curr_nrn_t] += cfg["kappa"] * M['ysub'][:, :, prev_nrn_t]
+
+        M['y'][:, curr_nrn_t] = torch.sum(M['ysub'][:, :, curr_nrn_t], axis=0)
+
+        M['y'][:, curr_nrn_t] += W['bias']
+
+        M['p'][:, t] = torch.exp(M['y'][:, curr_nrn_t] - torch.amax(M['y'][:, curr_nrn_t], axis=1)[:, None])
+
+        M['p'][:, t] = M['p'][:, t] / torch.sum(M['p'][:, t], axis=1)[:, None]
+
+
+        M['d'][:, curr_nrn_t] = M['p'][:, t] - T[:, curr_nrn_t]
+
+        M['l_std'][:, :, curr_nrn_t] = torch.sum(W['B'][:, None, ...] * M['d'][None, :, curr_nrn_t, None, None], axis=-1)
 
         # Dividing by number of total steps isn't really online!
-        M['l_fr'][:, :, t] = (cfg["FR_reg"] / n_steps[np.newaxis, :, np.newaxis, np.newaxis]
-              * (torch.mean(M['z'][:, :, :t+1], axis=2) - cfg["FR_target"]))
-        M['l'][:, :, t] = (M['l_std'][:, :, t] + M['l_fr'][:, :, t])
+        M['l_fr'][:, :, curr_nrn_t] = (cfg["FR_reg"] / n_steps[None, :, None, None]
+              * (M['zs'] / n_steps[None, :, None, None] - cfg["FR_target"]))
 
-        # TIMESINK:
-        G['W'] += opt_einsum.contract("sbrj, sbrji -> sbrji",
-                                      M['l_std'][:, :, t],
-                                      M['etbar'][:, :, curr_t],
-                                      backend='torch') * is_valid[..., None, None, None]
-        G['W'] += opt_einsum.contract("sbrj, sbrji -> sbrji",
-                                      M['l_fr'][:, :, t],
-                                      torch.ones_like(M['etbar'][:, :, curr_t]),
-                                      backend='torch') * is_valid[..., None, None, None]
+        M['l'][:, :, curr_nrn_t] = (M['l_std'][:, :, curr_nrn_t] + M['l_fr'][:, :, curr_nrn_t])
 
-        G['out'] += opt_einsum.contract("bk, sbj -> sbkj",
-                                 M['d'][:, t],
-                                 M['zbar'][:, :, t, -1],
-                                 backend='torch') * is_valid[..., None, None]
+        G['W'] += ((M['l_std'][:, :, curr_nrn_t, :, :, None]
+                    * M['etbar'][:, :, curr_syn_t]
+                     + M['l_fr'][:, :, curr_nrn_t, :, :, None])
+                   * is_valid[..., None, None, None])
 
-        G['bias'] += torch.sum(M['d'][:, t] * is_valid[..., None], axis=0)
+
+        G['out'] += M['d'][None, :, curr_nrn_t, None] * M['zbar'][:, :, curr_nrn_t, -1, :, None] * is_valid[..., None, None]
+
+        G['bias'] += torch.sum(M['d'][:, curr_nrn_t] * is_valid[..., None], axis=0)
 
     a = torch.arange(M['p'].shape[1])
     for b in range(M['p'].shape[0]):
@@ -377,8 +399,8 @@ def init_adam(cfg, tar_size):
     return {
         'mW': torch.zeros(size=(cfg["n_directions"], cfg["N_Rec"], cfg["N_R"], cfg["N_R"] * 2,)),
         'vW': torch.zeros(size=(cfg["n_directions"], cfg["N_Rec"], cfg["N_R"], cfg["N_R"] * 2,)),
-        'mout': torch.zeros(size=(cfg["n_directions"], tar_size, cfg["N_R"],)),
-        'vout': torch.zeros(size=(cfg["n_directions"], tar_size, cfg["N_R"],)),
+        'mout': torch.zeros(size=(cfg["n_directions"], cfg["N_R"], tar_size)),
+        'vout': torch.zeros(size=(cfg["n_directions"], cfg["N_R"], tar_size)),
         'mbias': torch.zeros(size=(tar_size,)),
         'vbias': torch.zeros(size=(tar_size,)),
         'it': 0
@@ -434,7 +456,7 @@ def update_W_log(W_log, Mt, Mv, W):
     # weights sample
     for wtype, w in W.items():
         wcpu = w.cpu().numpy()
-        W_log[wtype] = np.append(W_log[wtype], wcpu.flatten()[W_log[f'{wtype}_idxs']][:, np.newaxis], axis=1)
+        W_log[wtype] = np.append(W_log[wtype], wcpu.flatten()[W_log[f'{wtype}_idxs']][:, None], axis=1)
 
     for tv_type, M in (('train', Mt), ('val', Mv)):
         if M is None:  # Mv skipped

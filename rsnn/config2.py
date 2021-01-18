@@ -1,6 +1,7 @@
 from numpy import exp
 cfg = {
     "eprop_type": "symmetric",  # in {global, random, symmetric, adaptive}
+    "Optimizer": "Adam",
     "v_fix": False,
     "fraction_ALIF": 0.25,  # def 0.25
     "n_directions": 1,  # Reduces error from 36.1 to 32.9.
@@ -18,39 +19,42 @@ cfg = {
     "eta_bias": 0.01,
     "adam_beta1": 0.9,
     "adam_beta2": 0.999,
-    "adam_eps": 1e-5,
+    "adam_eps": 1e-8,
 
     "weight_decay": 0,  # Bellec3: 1e-2
     "L2_reg": 0,  # Bellec3: 1e-5
     "FR_target": 0.01,  # BellecCode: 0.01 (10hz)
-    "FR_reg": 50,  # Bellec3: 50
+    "FR_reg": 0,  # Bellec3: 50
 
-    "N_R": 400,
+    "N_R": 128,
     "N_Rec": 1,
 
-    "task": "TIMIT",
+    "task": "TIMIT_small",
     "wavs_fname": "../data/data_wavs",
     "phns_fname": "../data/data_phns",
 
     "cuda": True,
+
+    "warmup": False,
 
     "train_W": True,
     "train_out": True,
     "train_bias": True,
 
     "Epochs": 100,  # def = 80
-    "Track_synapse": False,  # Only for nonweight synapse vars (e.g. ET)
+    "Track_synapse": False,
+    "Track_neuron": True,
     "Repeats": 1,  # ms per epoch, def = 5
     "Interpolation": 'nearest',  # nearest, linear
     "batch_size_train": 32,  # def = 32
-    "batch_size_val": 10,  # def = 32
-    "batch_size_test": 1,  # def = 32
+    "batch_size_val": 32,  # def = 32
+    "batch_size_test": 39,  # def = 32
     "maxlen": 778,  #def 778, Don't forget to re-run process_timit.py!
-    "TIMIT_derivative": 0,
-    "n_examples": {'train': 10, 'val': 10, 'test': 39},
+    "TIMIT_derivative": 2,
+    "n_examples": {'train': 128, 'val': 128, 'test': 39},
     # # "n_examples": {'train': 3696, 'val': 400, 'test': 192},
-    "plot_model_interval": 1,  # Per iter  #  State plot; 0 to disable plots
-    "plot_tracker_interval": 1,  # Per epoch
+    "plot_model_interval": 50,  # Per iter  #  State plot; 0 to disable plots
+    "plot_tracker_interval": 3,  # Per epoch
     "state_save_interval": 1000,
     "val_every_B": 10,
 
@@ -65,7 +69,7 @@ cfg = {
 
 cfg["alpha"] = exp(-1/(4*cfg['Repeats']))  # Bellec1: 20 = 0.951. 4: 0.779
 cfg["rho"] = exp(-1/(40*cfg["Repeats"]))  # Bellec1: 200 = 0.995. 40: 0.975
-cfg["kappa"] = 0.717#exp(-1/(0.6*cfg["Repeats"]))  # Bellec1: 3 = 0.717. .75:~0.25
+cfg["kappa"] = cfg["alpha"]#exp(-1/(0.6*cfg["Repeats"]))  # Bellec1: 3 = 0.717. .75:~0.25
 # cfg["FR_target"] /= cfg["Repeats"]
 # cfg["FR_reg"] /= cfg["Repeats"]
 
