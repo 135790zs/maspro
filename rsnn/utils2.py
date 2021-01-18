@@ -44,7 +44,7 @@ def initialize_model(cfg, inp_size, tar_size, batch_size, n_steps):
         M[var] = torch.zeros(size=nrn_shape, dtype=torch.double)
 
 
-    for var in ['vv', 'va', 'etbar']:
+    for var in ['vv', 'va', 'et', 'etbar']:
         M[var] = torch.zeros(size=syn_shape, dtype=torch.double)
     nrn_timeless = (cfg["n_directions"],
                     batch_size,
@@ -113,17 +113,17 @@ def initialize_weights(cfg, inp_size, tar_size):
                               cfg["N_R"] * 2,))
 
     # Bellec: rd.randn(n_rec, n_rec) / np.sqrt(n_rec)
-    W['W'][:, :, :, cfg["N_R"]:] /= np.sqrt(cfg["N_R"])
+    W['W'][:, :, :, cfg["N_R"]:] /= np.sqrt(cfg["N_R"]-1)
 
     # Bellec: rd.randn(n_in, n_rec) / np.sqrt(n_in)
     for r in range(cfg["N_Rec"]):
-        W['W'][:, 0, :, :cfg["N_R"]] /= np.sqrt(cfg["N_R"])
+        W['W'][:, 0, :, :cfg["N_R"]] /= np.sqrt(inp_size)
         if r > 0:
-            W['W'][:, r, :, :cfg["N_R"]] /= np.sqrt(cfg["N_R"])
+            W['W'][:, r, :, :cfg["N_R"]] /= np.sqrt(cfg["N_R"]-1)
     W['W'][:, 0, :, inp_size:cfg["N_R"]] = 0
     W["out"] = rng.normal(size=(cfg["n_directions"],
                                 cfg["N_R"],
-                                tar_size)) / np.sqrt(tar_size)
+                                tar_size)) / np.sqrt(cfg["N_R"])
 
     W["bias"] = np.zeros(shape=(tar_size,))
 
@@ -192,7 +192,8 @@ def update_weights(W, G, adamvars, e, cfg, it_per_e):
 
             rinf = 2 / (1 - cfg["adam_beta2"]) - 1
 
-            rho = rinf - 2 * adamvars['it'] * cfg["adam_beta2"] ** adamvars['it'] / (1 - cfg["adam_beta2"] ** adamvars['it'])
+            rho = (rinf
+                   - 2 * adamvars['it'] * cfg["adam_beta2"] ** adamvars['it'] / (1 - cfg["adam_beta2"] ** adamvars['it']))
 
             if rho > 4:
 
@@ -248,6 +249,7 @@ def eprop(cfg, X, T, n_steps, betas, W):
     G = initialize_gradients(cfg=cfg,
                              tar_size=T.shape[-1],
                              batch_size=X.shape[0])
+
 
     M['x'] = X[None, :]  # Insert subnetwork dimension
     M['t'] = T
@@ -311,10 +313,11 @@ def eprop(cfg, X, T, n_steps, betas, W):
                 None))
 
 
-            ET = M['h'][:, :, curr_nrn_t, r, :, None] * (M['vv'][:, :, curr_syn_t, r] - betas[:, r, :, None] * M['va'][:, :, curr_syn_t, r])
+            M['et'][:, :, curr_syn_t, r] = M['h'][:, :, curr_nrn_t, r, :, None] * (
+                M['vv'][:, :, curr_syn_t, r] - betas[:, r, :, None] * M['va'][:, :, curr_syn_t, r])
 
 
-            M['etbar'][:, :, curr_syn_t, r] = cfg["kappa"] * M['etbar'][:, :, prev_syn_t, r] + ET
+            M['etbar'][:, :, curr_syn_t, r] = cfg["kappa"] * M['etbar'][:, :, prev_syn_t, r] + M['et'][:, :, curr_syn_t, r]
 
             M['zbar'][:, :, curr_nrn_t, r] = cfg["kappa"] * M['zbar'][:, :, prev_nrn_t, r] + M['z'][:, :, curr_nrn_t, r]
 
@@ -333,19 +336,24 @@ def eprop(cfg, X, T, n_steps, betas, W):
         M['p'][:, t] = M['p'][:, t] / torch.sum(M['p'][:, t], axis=1)[:, None]
 
 
-        M['d'][:, curr_nrn_t] = M['p'][:, t] - T[:, curr_nrn_t]
+        # print(M['p'].shape)
+        M['d'][:, curr_nrn_t] = M['p'][:, t] - T[:, t]
 
         M['l_std'][:, :, curr_nrn_t] = torch.sum(W['B'][:, None, ...] * M['d'][None, :, curr_nrn_t, None, None], axis=-1)
 
         # Dividing by number of total steps isn't really online!
-        M['l_fr'][:, :, curr_nrn_t] = (cfg["FR_reg"] / n_steps[None, :, None, None]
+        M['l_fr'][:, :, curr_nrn_t] = (cfg["FR_reg"] / (n_steps[None, :, None, None] if cfg["div_over_time"] else 1)
               * (M['zs'] / n_steps[None, :, None, None] - cfg["FR_target"]))
 
         M['l'][:, :, curr_nrn_t] = (M['l_std'][:, :, curr_nrn_t] + M['l_fr'][:, :, curr_nrn_t])
 
         G['W'] += ((M['l_std'][:, :, curr_nrn_t, :, :, None]
-                    * M['etbar'][:, :, curr_syn_t]
-                     + M['l_fr'][:, :, curr_nrn_t, :, :, None])
+                    * M['etbar'][:, :, curr_syn_t])
+                     # + M['l_fr'][:, :, curr_nrn_t, :, :, None])
+                   * is_valid[..., None, None, None])
+        G['W'] += ((M['l_fr'][:, :, curr_nrn_t, :, :, None]
+                    * M['et'][:, :, curr_syn_t])
+                     # + M['l_fr'][:, :, curr_nrn_t, :, :, None])
                    * is_valid[..., None, None, None])
 
 
@@ -501,7 +509,7 @@ def trim_samples(X, T=None):
 def count_lengths(X):
     n_steps = np.zeros(shape=(X.shape[0]), dtype=np.int32)
     for idx, arr in enumerate(X):
-        while np.any(arr[-1] == -1):
+        while np.any(arr[-1, 0] == -1):
             arr = arr[:-1]
         n_steps[idx] = arr.shape[0]
     return n_steps

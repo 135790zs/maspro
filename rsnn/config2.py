@@ -16,15 +16,16 @@ cfg = {
 
     "eta_W": 0.01,
     "eta_out": 0.01,
-    "eta_bias": 0.01,
+    "eta_bias": 0.002,
     "adam_beta1": 0.9,
     "adam_beta2": 0.999,
-    "adam_eps": 1e-8,
+    "adam_eps": 1e-5,
 
-    "weight_decay": 0,  # Bellec3: 1e-2
+    "weight_decay": 1e-2,  # Bellec3: 1e-2
     "L2_reg": 0,  # Bellec3: 1e-5
     "FR_target": 0.01,  # BellecCode: 0.01 (10hz)
-    "FR_reg": 0,  # Bellec3: 50
+    "FR_reg": 50,  # Bellec3: 50
+    "div_over_time": False,
 
     "N_R": 128,
     "N_Rec": 1,
@@ -41,20 +42,21 @@ cfg = {
     "train_out": True,
     "train_bias": True,
 
+
     "Epochs": 100,  # def = 80
     "Track_synapse": False,
     "Track_neuron": True,
     "Repeats": 1,  # ms per epoch, def = 5
-    "Interpolation": 'nearest',  # nearest, linear
+    "Interpolation": 'linear',  # nearest, linear
     "batch_size_train": 32,  # def = 32
     "batch_size_val": 32,  # def = 32
-    "batch_size_test": 39,  # def = 32
+    "batch_size_test": 16,  # def = 32
     "maxlen": 778,  #def 778, Don't forget to re-run process_timit.py!
     "TIMIT_derivative": 2,
     "n_examples": {'train': 128, 'val': 128, 'test': 39},
     # # "n_examples": {'train': 3696, 'val': 400, 'test': 192},
-    "plot_model_interval": 50,  # Per iter  #  State plot; 0 to disable plots
-    "plot_tracker_interval": 3,  # Per epoch
+    "plot_model_interval": 10,  # Per iter  #  State plot; 0 to disable plots
+    "plot_tracker_interval": 5,  # Per epoch
     "state_save_interval": 1000,
     "val_every_B": 10,
 
@@ -69,7 +71,7 @@ cfg = {
 
 cfg["alpha"] = exp(-1/(4*cfg['Repeats']))  # Bellec1: 20 = 0.951. 4: 0.779
 cfg["rho"] = exp(-1/(40*cfg["Repeats"]))  # Bellec1: 200 = 0.995. 40: 0.975
-cfg["kappa"] = cfg["alpha"]#exp(-1/(0.6*cfg["Repeats"]))  # Bellec1: 3 = 0.717. .75:~0.25
+cfg["kappa"] = exp(-1/(0.6*cfg["Repeats"]))  # Bellec1: 3 = 0.717. .75:~0.25
 # cfg["FR_target"] /= cfg["Repeats"]
 # cfg["FR_reg"] /= cfg["Repeats"]
 
@@ -94,6 +96,8 @@ lookup = {
     "vv":      {"binary":False, "label": "\\epsilon_v"},
     "va":      {"binary":False, "label": "\\epsilon_a"},
     "etbar":   {"binary":False, "label": "\\bar{{e}}"},
+    "et":      {"binary":False, "label": "e"},
 }
 
-# assert cfg["n_directions"] == 1, "NOT YET IMPLEMENTED RIGHT, -1 not trimmed in reverse"
+if cfg["Repeats"] == 1:
+    cfg["Interpolation"] = 'nearest'
