@@ -314,7 +314,7 @@ def eprop(cfg, X, T, n_steps, betas, W):
 
 
             M['et'][:, :, curr_syn_t, r] = M['h'][:, :, curr_nrn_t, r, :, None] * (
-                M['vv'][:, :, curr_syn_t, r] - betas[:, r, :, None] * M['va'][:, :, curr_syn_t, r])
+                M['vv'][:, :, curr_syn_t, r] - betas[:, None, r, :, None] * M['va'][:, :, curr_syn_t, r])
 
 
             M['etbar'][:, :, curr_syn_t, r] = cfg["kappa"] * M['etbar'][:, :, prev_syn_t, r] + M['et'][:, :, curr_syn_t, r]
@@ -379,7 +379,7 @@ def eprop(cfg, X, T, n_steps, betas, W):
 
     # L2 regularization
     for wtype in ['W', 'out', 'bias']:
-        G[wtype] += cfg["L2_reg"] * torch.linalg.norm(W[wtype].flatten())
+        G[wtype] += cfg["L2_reg"] * W[wtype]**2
 
     return G, M
 
