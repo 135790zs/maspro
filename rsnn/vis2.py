@@ -129,7 +129,7 @@ def plot_W(cfg, W_log, log_id):
     labelpad = 35
     fontsize = 14
     fig = plt.figure(constrained_layout=False, figsize=(8, 16))
-    gsc = fig.add_gridspec(nrows=11,
+    gsc = fig.add_gridspec(nrows=13,
                            ncols=1, hspace=0.05)
     axs = []
     for k, v in W_log.items():
@@ -147,7 +147,7 @@ def plot_W(cfg, W_log, log_id):
                                rotation=0,
                                labelpad=labelpad,
                                fontsize=fontsize)
-        if k in ['W', 'out', 'bias', 'B']:
+        if k in ['W_in', 'W_rec', 'out', 'bias', 'B']:
             weights = np.array(v).T
             if weights.shape[0] <= 1:
                 continue

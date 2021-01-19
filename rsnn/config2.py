@@ -14,9 +14,11 @@ cfg = {
 
     "dropout": 0,
 
-    "eta_W": 0.01,
+    "eta_W_in": 0.01,
+    "eta_W_rec": 0.01,
     "eta_out": 0.01,
     "eta_bias": 0.01,
+
     "adam_beta1": 0.9,
     "adam_beta2": 0.999,
     "adam_eps": 1e-5,
@@ -27,7 +29,7 @@ cfg = {
     "FR_reg": 50,  # Bellec3: 50
     "div_over_time": False,
 
-    "N_R": 800,
+    "N_R": 128,
     "N_Rec": 1,
 
     "task": "TIMIT",
@@ -38,27 +40,28 @@ cfg = {
 
     "warmup": False,
 
-    "train_W": True,
+    "train_W_in": True,
+    "train_W_rec": True,
     "train_out": True,
     "train_bias": True,
 
 
-    "Epochs": 130,  # def = 80
+    "Epochs": 100,  # def = 80
     "Track_synapse": False,
     "Track_neuron": True,
     "Repeats": 1,  # ms per epoch, def = 5
     "Interpolation": 'linear',  # nearest, linear
-    "batch_size_train": 18,  # def = 32
-    "batch_size_val": 18,  # def = 32
-    "batch_size_test": 32,  # def = 32
+    "batch_size_train": 8,  # def = 32
+    "batch_size_val": 8,  # def = 32
+    "batch_size_test": 2,  # def = 32
     "maxlen": 778,  #def 778, Don't forget to re-run process_timit.py!
     "TIMIT_derivative": 2,
-    "n_examples": {'train': 128, 'val': 128, 'test': 39},
+    "n_examples": {'train': 16, 'val': 16, 'test': 16},
     # # "n_examples": {'train': 3696, 'val': 400, 'test': 192},
-    "plot_model_interval": 1,  # Per iter  #  State plot; 0 to disable plots
+    "plot_model_interval": 5,  # Per iter  #  State plot; 0 to disable plots
     "plot_tracker_interval": 1,  # Per epoch
     "state_save_interval": 1000,
-    "val_every_B": 10,
+    "val_every_B": 5,
 
     "frame_size": 0.025,
     "frame_stride": 0.01,

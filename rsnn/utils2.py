@@ -5,10 +5,8 @@ import os
 import json
 from scipy.interpolate import interp1d
 import time
-import opt_einsum
 import torch
 from config2 import cfg
-import einsums
 
 if cfg["cuda"]:
     torch.set_default_tensor_type('torch.cuda.FloatTensor')
@@ -72,11 +70,16 @@ def initialize_model(cfg, inp_size, tar_size, batch_size, n_steps):
 
 def initialize_gradients(cfg, tar_size, batch_size):
     G = {}
-    G["W"] = torch.zeros(size=(cfg["n_directions"],
-                             batch_size,
-                             cfg["N_Rec"],
-                             cfg["N_R"],
-                             cfg["N_R"] * 2,))
+    G["W_in"] = torch.zeros(size=(cfg["n_directions"],
+                                  batch_size,
+                                  cfg["N_Rec"],
+                                  cfg["N_R"],
+                                  cfg["N_R"],))
+    G["W_rec"] = torch.zeros(size=(cfg["n_directions"],
+                                   batch_size,
+                                   cfg["N_Rec"],
+                                   cfg["N_R"],
+                                   cfg["N_R"],))
     G["out"] = torch.zeros(size=(cfg["n_directions"],
                                batch_size,
                                cfg["N_R"],
@@ -95,8 +98,8 @@ def initialize_weights(cfg, inp_size, tar_size):
     over many epochs. They are also stored in an array such that the
     evolution of the weights over the number of epochs can be inspected.
 
-    W_out: Output weights
-    b_out: Bias
+    out:   Output weights
+    bias:  Bias
     W:     Network weights
     B:     Broadcast weights
     """
@@ -107,20 +110,25 @@ def initialize_weights(cfg, inp_size, tar_size):
     """ See Supplementary information for: Long short-term
     memory and learning-to-learn in networks of spiking
     neurons """
-    W["W"] = rng.normal(size=(cfg["n_directions"],
-                              cfg["N_Rec"],
-                              cfg["N_R"],
-                              cfg["N_R"] * 2,))
-
-    # Bellec: rd.randn(n_rec, n_rec) / np.sqrt(n_rec)
-    W['W'][:, :, :, cfg["N_R"]:] /= np.sqrt(cfg["N_R"]-1)
-
+    W["W_in"] = rng.normal(size=(cfg["n_directions"],
+                                 cfg["N_Rec"],
+                                 cfg["N_R"],
+                                 cfg["N_R"],))
     # Bellec: rd.randn(n_in, n_rec) / np.sqrt(n_in)
+    W['W_in'][:, 0, :, inp_size:] = 0  # From padded channels
+    W['W_in'][:, 0] /= np.sqrt(inp_size)
     for r in range(cfg["N_Rec"]):
-        W['W'][:, 0, :, :cfg["N_R"]] /= np.sqrt(inp_size)
         if r > 0:
-            W['W'][:, r, :, :cfg["N_R"]] /= np.sqrt(cfg["N_R"]-1)
-    W['W'][:, 0, :, inp_size:cfg["N_R"]] = 0
+            W['W_in'][:, r] /= np.sqrt(cfg["N_R"]-1)
+
+    W["W_rec"] = rng.normal(size=(cfg["n_directions"],
+                                  cfg["N_Rec"],
+                                  cfg["N_R"],
+                                  cfg["N_R"],))
+    # Bellec: rd.randn(n_rec, n_rec) / np.sqrt(n_rec)
+    W['W_rec'] /= np.sqrt(cfg["N_R"]-1)
+
+
     W["out"] = rng.normal(size=(cfg["n_directions"],
                                 cfg["N_R"],
                                 tar_size)) / np.sqrt(cfg["N_R"])
@@ -147,13 +155,13 @@ def initialize_weights(cfg, inp_size, tar_size):
     # Drop all self-looping weights. A neuron cannot be connected with itself.
     for r in range(cfg["N_Rec"]):
         for s in range(cfg["n_directions"]):
-            np.fill_diagonal(W['W'][s, r, :, cfg["N_R"]:], 0)
+            np.fill_diagonal(W['W_rec'][s, r], 0)
 
-    W['W'][..., cfg["N_R"]:] = np.where(rng.random(W['W'][..., cfg["N_R"]:].shape) < cfg["dropout"],
+    W['W_rec'] = np.where(rng.random(W['W_rec'].shape) < cfg["dropout"],
                          0,
-                         W['W'][..., cfg["N_R"]:])
+                         W['W_rec'])
 
-    for wtype in ["W", "out", "bias", "B"]:
+    for wtype in ["W_in", "W_rec", "out", "bias", "B"]:
         W[wtype] = torch.tensor(W[wtype])
 
     return W
@@ -281,9 +289,9 @@ def eprop(cfg, X, T, n_steps, betas, W):
             M['vv'][:, :, curr_syn_t, r] = cfg["alpha"] * M['vv'][:, :, prev_syn_t, r] + Z_in[:, :, None]
 
             # Can contract this further!
-            M['I_in'][:, :, curr_nrn_t, r] = torch.sum(W['W'][:, None, r, :, :cfg["N_R"]] * Z_prev[:, :, None, :], axis=-1)
+            M['I_in'][:, :, curr_nrn_t, r] = torch.sum(W['W_in'][:, None, r] * Z_prev[:, :, None, :], axis=-1)
 
-            M['I_rec'][:, :, curr_nrn_t, r] = torch.sum(W['W'][:, None, r, :, cfg["N_R"]:] * M['z'][:, :, prev_nrn_t, r, None, :], axis=-1)
+            M['I_rec'][:, :, curr_nrn_t, r] = torch.sum(W['W_rec'][:, None, r] * M['z'][:, :, prev_nrn_t, r, None, :], axis=-1)
 
             M['I'][:, :, curr_nrn_t, r] = M['I_in'][:, :, curr_nrn_t, r] + M['I_rec'][:, :, curr_nrn_t, r]
 
@@ -347,12 +355,20 @@ def eprop(cfg, X, T, n_steps, betas, W):
 
         M['l'][:, :, curr_nrn_t] = (M['l_std'][:, :, curr_nrn_t] + M['l_fr'][:, :, curr_nrn_t])
 
-        G['W'] += ((M['l_std'][:, :, curr_nrn_t, :, :, None]
-                    * M['etbar'][:, :, curr_syn_t])
+        G['W_in'] += ((M['l_std'][:, :, curr_nrn_t, :, :, None]
+                    * M['etbar'][:, :, curr_syn_t, :, :, :cfg["N_R"]])
                      # + M['l_fr'][:, :, curr_nrn_t, :, :, None])
                    * is_valid[..., None, None, None])
-        G['W'] += ((M['l_fr'][:, :, curr_nrn_t, :, :, None]
-                    * M['et'][:, :, curr_syn_t])
+        G['W_in'] += ((M['l_fr'][:, :, curr_nrn_t, :, :, None]
+                    * M['et'][:, :, curr_syn_t, :, :, :cfg["N_R"]])
+                     # + M['l_fr'][:, :, curr_nrn_t, :, :, None])
+                   * is_valid[..., None, None, None])
+        G['W_rec'] += ((M['l_std'][:, :, curr_nrn_t, :, :, None]
+                    * M['etbar'][:, :, curr_syn_t, :, :, cfg["N_R"]:])
+                     # + M['l_fr'][:, :, curr_nrn_t, :, :, None])
+                   * is_valid[..., None, None, None])
+        G['W_rec'] += ((M['l_fr'][:, :, curr_nrn_t, :, :, None]
+                    * M['et'][:, :, curr_syn_t, :, :, cfg["N_R"]:])
                      # + M['l_fr'][:, :, curr_nrn_t, :, :, None])
                    * is_valid[..., None, None, None])
 
@@ -370,15 +386,17 @@ def eprop(cfg, X, T, n_steps, betas, W):
     M['ce'] = -torch.sum(M['t'] * torch.log(1e-30 + M['p']), axis=2)
 
     # Batch mean
-    G['W'] = torch.mean(G['W'], axis=1)
+    G['W_in'] = torch.mean(G['W_in'], axis=1)
+    G['W_rec'] = torch.mean(G['W_rec'], axis=1)
     G['out'] = torch.mean(G['out'], axis=1)
     G['bias'] = torch.mean(G['bias'], axis=0)
 
     # Don't update dead weights
-    G['W'][W['W']==0] = 0
+    G['W_in'][W['W_in']==0] = 0
+    G['W_rec'][W['W_rec']==0] = 0
 
     # L2 regularization
-    for wtype in ['W', 'out', 'bias']:
+    for wtype in ['W_in', 'W_rec', 'out', 'bias']:
         G[wtype] += cfg["L2_reg"] * W[wtype]**2
 
     return G, M
@@ -405,8 +423,10 @@ def prepare_log(cfg, log_id):
 
 def init_adam(cfg, tar_size):
     return {
-        'mW': torch.zeros(size=(cfg["n_directions"], cfg["N_Rec"], cfg["N_R"], cfg["N_R"] * 2,)),
-        'vW': torch.zeros(size=(cfg["n_directions"], cfg["N_Rec"], cfg["N_R"], cfg["N_R"] * 2,)),
+        'mW_in': torch.zeros(size=(cfg["n_directions"], cfg["N_Rec"], cfg["N_R"], cfg["N_R"])),
+        'vW_in': torch.zeros(size=(cfg["n_directions"], cfg["N_Rec"], cfg["N_R"], cfg["N_R"])),
+        'mW_rec': torch.zeros(size=(cfg["n_directions"], cfg["N_Rec"], cfg["N_R"], cfg["N_R"])),
+        'vW_rec': torch.zeros(size=(cfg["n_directions"], cfg["N_Rec"], cfg["N_R"], cfg["N_R"])),
         'mout': torch.zeros(size=(cfg["n_directions"], cfg["N_R"], tar_size)),
         'vout': torch.zeros(size=(cfg["n_directions"], cfg["N_R"], tar_size)),
         'mbias': torch.zeros(size=(tar_size,)),
@@ -544,16 +564,16 @@ def interpolate_inputs(cfg, inp, tar, stretch):
     return inp, tar
 
 
-def sample_mbatches(cfg, n_train):
+def sample_mbatches(cfg, n_samples, tvtype):
     ret = []
-    samples = np.arange(n_train)
+    samples = np.arange(n_samples)
 
     rng = np.random.default_rng(seed=cfg["seed"])
     rng.shuffle(samples)
 
     while samples.shape[0]:
-        ret.append(samples[:cfg["batch_size_train"]])
-        samples = samples[cfg["batch_size_train"]:]
+        ret.append(samples[:cfg[f"batch_size_{tvtype}"]])
+        samples = samples[cfg[f"batch_size_{tvtype}"]:]
 
     return ret
 
@@ -594,3 +614,17 @@ def get_log_id():
         id_append = f"_{count}"
         count += 1
     return log_id + id_append
+
+
+
+def save_checkpoint(W, cfg, log_id):
+    for wtype, w in W.items():
+        np.save(f"../log/{log_id}/checkpoints/{wtype}", w.cpu().numpy())
+
+def load_checkpoint(log_id, parent_dir='log'):
+    W = {}
+    for subdir, _, files in os.walk(f"../{parent_dir}/{log_id}/checkpoints"):
+        for filename in files:
+            filepath = subdir + os.sep + filename
+            W[filename[:-4]] = torch.tensor(np.load(filepath))  # cut off '.npy'
+    return W
