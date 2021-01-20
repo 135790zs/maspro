@@ -24,12 +24,23 @@ def initialize_model(cfg, inp_size, tar_size, batch_size, n_steps):
                  len_nrn_time,
                  cfg["N_Rec"],
                  cfg["N_R"])
+    nrn_shape_db = (cfg["n_directions"],
+                 batch_size,
+                 len_nrn_time,
+                 cfg["N_Rec"],
+                 cfg["N_R"]*2)
     syn_shape = (cfg["n_directions"],
                  batch_size,
                  len_syn_time,
                  cfg["N_Rec"],
                  cfg["N_R"],
                  cfg["N_R"] * 2)
+    syn_shape_half = (cfg["n_directions"],
+                 batch_size,
+                 len_syn_time,
+                 cfg["N_Rec"],
+                 cfg["N_R"],
+                 cfg["N_R"])
     out_shape = (batch_size,
                  len_nrn_time,
                  tar_size)
@@ -42,6 +53,10 @@ def initialize_model(cfg, inp_size, tar_size, batch_size, n_steps):
         M[var] = torch.zeros(size=nrn_shape, dtype=torch.double)
 
 
+    for var in ['stdloss_in', 'stdloss_rec', 'regloss_in', 'regloss_rec', 'loss_in', 'loss_rec']:
+        M[var] = torch.zeros(size=syn_shape_half, dtype=torch.double)
+
+
     for var in ['vv', 'va', 'et', 'etbar']:
         M[var] = torch.zeros(size=syn_shape, dtype=torch.double)
     nrn_timeless = (cfg["n_directions"],
@@ -50,6 +65,7 @@ def initialize_model(cfg, inp_size, tar_size, batch_size, n_steps):
                     cfg["N_R"])
     M['tz'] = torch.ones(size=nrn_timeless, dtype=torch.int) * -cfg["dt_refr"]
     M['zs'] = torch.zeros(size=nrn_timeless)
+    M['z_in'] = torch.zeros(size=nrn_shape_db)
 
     for var in ['y','d']:
         M[var] = torch.zeros(size=out_shape, dtype=torch.double)
@@ -84,7 +100,6 @@ def initialize_gradients(cfg, tar_size, batch_size):
                                batch_size,
                                cfg["N_R"],
                                tar_size,))
-
     G["bias"] = torch.zeros(size=(batch_size,
                                 tar_size,))
     return G
@@ -119,19 +134,26 @@ def initialize_weights(cfg, inp_size, tar_size):
     W['W_in'][:, 0] /= np.sqrt(inp_size)
     for r in range(cfg["N_Rec"]):
         if r > 0:
-            W['W_in'][:, r] /= np.sqrt(cfg["N_R"]-1)
+            W['W_in'][:, r] /= np.sqrt(cfg["N_R"])
 
     W["W_rec"] = rng.normal(size=(cfg["n_directions"],
                                   cfg["N_Rec"],
                                   cfg["N_R"],
                                   cfg["N_R"],))
     # Bellec: rd.randn(n_rec, n_rec) / np.sqrt(n_rec)
-    W['W_rec'] /= np.sqrt(cfg["N_R"]-1)
+    W['W_rec'] /= np.sqrt(cfg["N_R"])
 
 
     W["out"] = rng.normal(size=(cfg["n_directions"],
                                 cfg["N_R"],
-                                tar_size)) / np.sqrt(cfg["N_R"])
+                                tar_size)) / np.sqrt(tar_size)
+
+    if cfg["one_to_one_output"]:
+        W["out"] *= 0
+        for s in range(cfg["n_directions"]):
+            np.fill_diagonal(W["out"][s, :, :], 1.)
+
+
 
     W["bias"] = np.zeros(shape=(tar_size,))
 
@@ -267,31 +289,31 @@ def eprop(cfg, X, T, n_steps, betas, W):
         for b in range(M['x'].shape[1]):
             M['x'][1, b, :n_steps[b]] = torch.fliplr(M['x'][0, b, :n_steps[b]])
 
+
     for t in torch.arange(0, max(n_steps), dtype=torch.int):
         start = time.time()
         prev_syn_t, curr_syn_t = conn_t_idxs(track_synapse=cfg['Track_synapse'], t=t)
         prev_nrn_t, curr_nrn_t = conn_t_idxs(track_synapse=cfg['Track_neuron'], t=t)
-
-        is_valid = torch.any(M['x'][:, :, t] != -1, axis=2)
+        is_valid = torch.logical_not(torch.any(M['x'][0, :, t] == -1, axis=1))
 
         for r in range(cfg["N_Rec"]):  # TODO: Can overwrite r instead of appending, except Z
 
-            Z_prev = M['z'][:, :, curr_nrn_t, r-1] if r else M['x'][:, :, t]
-
-            Z_in = torch.cat((Z_prev, M['z'][:, :, prev_nrn_t, r]), axis=2)
 
             M['va'][:, :, curr_syn_t, r] = (M['h'][:, :, prev_nrn_t, r, :, None] * M['vv'][:, :, prev_syn_t, r]
                 + (cfg["rho"] - (M['h'][:, :, prev_nrn_t, r]
                                  * betas[:, None, r]))[..., None]
                 * M['va'][:, :, prev_syn_t, r])
 
+            Z_prev_layer = M['z'][:, :, curr_nrn_t, r-1] if r else M['x'][:, :, t] * is_valid[None, :, None]
+            Z_prev_time = M['z'][:, :, prev_nrn_t, r]
+            M['z_in'][:, :, curr_nrn_t, r] = torch.cat((Z_prev_layer, Z_prev_time), axis=2)
 
-            M['vv'][:, :, curr_syn_t, r] = cfg["alpha"] * M['vv'][:, :, prev_syn_t, r] + Z_in[:, :, None]
+            M['vv'][:, :, curr_syn_t, r] = cfg["alpha"] * M['vv'][:, :, prev_syn_t, r] + M['z_in'][:, :, curr_nrn_t, r, None]
 
             # Can contract this further!
-            M['I_in'][:, :, curr_nrn_t, r] = torch.sum(W['W_in'][:, None, r] * Z_prev[:, :, None, :], axis=-1)
+            M['I_in'][:, :, curr_nrn_t, r] = torch.sum(W['W_in'][:, None, r] * Z_prev_layer[..., None, :], axis=-1)
 
-            M['I_rec'][:, :, curr_nrn_t, r] = torch.sum(W['W_rec'][:, None, r] * M['z'][:, :, prev_nrn_t, r, None, :], axis=-1)
+            M['I_rec'][:, :, curr_nrn_t, r] = torch.sum(W['W_rec'][:, None, r] * Z_prev_time[..., None, :], axis=-1)
 
             M['I'][:, :, curr_nrn_t, r] = M['I_in'][:, :, curr_nrn_t, r] + M['I_rec'][:, :, curr_nrn_t, r]
 
@@ -313,13 +335,17 @@ def eprop(cfg, X, T, n_steps, betas, W):
             M['tz'][:, :, r] = torch.where(M['z'][:, :, curr_nrn_t, r] != 0, t, M['tz'][:, :, r])
             M['zs'][:, :, r] += M['z'][:, :, curr_nrn_t, r]
 
-            M['h'][:, :, curr_nrn_t, r] = ((1 / (A if cfg["v_fix"] else cfg["thr"])) * cfg["gamma"] * torch.clip(
+            M['h'][:, :, curr_nrn_t, r] = ( (1 / (A if cfg["v_fix"] else cfg["thr"])) * cfg["gamma"] * torch.clip(
             # M['h'][:, :, curr_nrn_t, r] = (cfg["gamma"] * torch.clip(
                 1 - (abs((M['v'][:, :, curr_nrn_t, r] - A
                            / (A if cfg["v_fix"] else cfg["thr"])))),
                 0,
                 None))
 
+            M['h'][:, :, curr_nrn_t, r] = torch.where(
+                t - M['tz'][:, :, r] >= cfg["dt_refr"],
+                M['h'][:, :, curr_nrn_t, r],
+                0.)
 
             M['et'][:, :, curr_syn_t, r] = M['h'][:, :, curr_nrn_t, r, :, None] * (
                 M['vv'][:, :, curr_syn_t, r] - betas[:, None, r, :, None] * M['va'][:, :, curr_syn_t, r])
@@ -329,11 +355,8 @@ def eprop(cfg, X, T, n_steps, betas, W):
 
             M['zbar'][:, :, curr_nrn_t, r] = cfg["kappa"] * M['zbar'][:, :, prev_nrn_t, r] + M['z'][:, :, curr_nrn_t, r]
 
-
         M['ysub'][:, :, curr_nrn_t] = torch.sum(W['out'][:, None]
-                                       * M['z'][:, :, curr_nrn_t, -1, :, None], axis=-2)
-
-        M['ysub'][:, :, curr_nrn_t] += cfg["kappa"] * M['ysub'][:, :, prev_nrn_t]
+                                       * M['z'][:, :, curr_nrn_t, -1, :, None], axis=-2) + cfg["kappa"] * M['ysub'][:, :, prev_nrn_t]
 
         M['y'][:, curr_nrn_t] = torch.sum(M['ysub'][:, :, curr_nrn_t], axis=0)
 
@@ -343,11 +366,11 @@ def eprop(cfg, X, T, n_steps, betas, W):
 
         M['p'][:, t] = M['p'][:, t] / torch.sum(M['p'][:, t], axis=1)[:, None]
 
-
-        # print(M['p'].shape)
         M['d'][:, curr_nrn_t] = M['p'][:, t] - T[:, t]
 
-        M['l_std'][:, :, curr_nrn_t] = torch.sum(W['B'][:, None, ...] * M['d'][None, :, curr_nrn_t, None, None], axis=-1)
+        M['l_std'][:, :, curr_nrn_t] = torch.sum(
+            W['B'][:, None, :, :] * M['d'][None, :, curr_nrn_t, None, None, :],
+            axis=-1)
 
         # Dividing by number of total steps isn't really online!
         M['l_fr'][:, :, curr_nrn_t] = (cfg["FR_reg"] / (n_steps[None, :, None, None] if cfg["div_over_time"] else 1)
@@ -355,27 +378,32 @@ def eprop(cfg, X, T, n_steps, betas, W):
 
         M['l'][:, :, curr_nrn_t] = (M['l_std'][:, :, curr_nrn_t] + M['l_fr'][:, :, curr_nrn_t])
 
-        G['W_in'] += ((M['l_std'][:, :, curr_nrn_t, :, :, None]
-                    * M['etbar'][:, :, curr_syn_t, :, :, :cfg["N_R"]])
-                     # + M['l_fr'][:, :, curr_nrn_t, :, :, None])
-                   * is_valid[..., None, None, None])
-        G['W_in'] += ((M['l_fr'][:, :, curr_nrn_t, :, :, None]
+        M['stdloss_in'][:, :, curr_syn_t] = ((M['l_std'][:, :, curr_nrn_t, :, :, None]
+                        * M['etbar'][:, :, curr_syn_t, :, :, :cfg["N_R"]])
+                       * is_valid[None, :, None, None, None])
+
+        M['regloss_in'][:, :, curr_syn_t] = ((M['l_fr'][:, :, curr_nrn_t, :, :, None]
                     * M['et'][:, :, curr_syn_t, :, :, :cfg["N_R"]])
-                     # + M['l_fr'][:, :, curr_nrn_t, :, :, None])
-                   * is_valid[..., None, None, None])
-        G['W_rec'] += ((M['l_std'][:, :, curr_nrn_t, :, :, None]
+                    # * torch.ones_like(M['et'][:, :, curr_syn_t, :, :, :cfg["N_R"]]))
+                   * is_valid[None, :, None, None, None])
+
+        M['stdloss_rec'][:, :, curr_syn_t] = ((M['l_std'][:, :, curr_nrn_t, :, :, None]
                     * M['etbar'][:, :, curr_syn_t, :, :, cfg["N_R"]:])
-                     # + M['l_fr'][:, :, curr_nrn_t, :, :, None])
-                   * is_valid[..., None, None, None])
-        G['W_rec'] += ((M['l_fr'][:, :, curr_nrn_t, :, :, None]
+                   * is_valid[None, :, None, None, None])
+
+        M['regloss_rec'][:, :, curr_syn_t] = ((M['l_fr'][:, :, curr_nrn_t, :, :, None]
                     * M['et'][:, :, curr_syn_t, :, :, cfg["N_R"]:])
-                     # + M['l_fr'][:, :, curr_nrn_t, :, :, None])
-                   * is_valid[..., None, None, None])
+                    # * torch.ones_like(M['et'][:, :, curr_syn_t, :, :, cfg["N_R"]:]))
+                   * is_valid[None, :, None, None, None])
 
+        M['loss_rec'][:, :, curr_syn_t] = M['regloss_rec'][:, :, curr_syn_t] + M['stdloss_rec'][:, :, curr_syn_t]
+        M['loss_in'][:, :, curr_syn_t] = M['regloss_in'][:, :, curr_syn_t] + M['stdloss_in'][:, :, curr_syn_t]
 
-        G['out'] += M['d'][None, :, curr_nrn_t, None] * M['zbar'][:, :, curr_nrn_t, -1, :, None] * is_valid[..., None, None]
+        G['W_in'] += M['loss_in'][:, :, curr_syn_t]
+        G['W_rec'] += M['loss_rec'][:, :, curr_syn_t]
 
-        G['bias'] += torch.sum(M['d'][:, curr_nrn_t] * is_valid[..., None], axis=0)
+        G['out'] += M['d'][None, :, curr_nrn_t, None, :] * M['zbar'][:, :, curr_nrn_t, -1, :, None] * is_valid[None, :, None, None]
+        G['bias'] += torch.sum(M['d'][:, curr_nrn_t] * is_valid[None, :, None], axis=0)
 
     a = torch.arange(M['p'].shape[1])
     for b in range(M['p'].shape[0]):
@@ -391,13 +419,15 @@ def eprop(cfg, X, T, n_steps, betas, W):
     G['out'] = torch.mean(G['out'], axis=1)
     G['bias'] = torch.mean(G['bias'], axis=0)
 
+    # L2 regularization
+    for wtype in ['W_in', 'W_rec', 'out', 'bias']:
+        G[wtype] += cfg["L2_reg"] * W[wtype]**2
+
     # Don't update dead weights
     G['W_in'][W['W_in']==0] = 0
     G['W_rec'][W['W_rec']==0] = 0
 
-    # L2 regularization
-    for wtype in ['W_in', 'W_rec', 'out', 'bias']:
-        G[wtype] += cfg["L2_reg"] * W[wtype]**2
+
 
     return G, M
 
@@ -473,7 +503,6 @@ def initialize_W_log(cfg, W, sample_size=100):
             idxs = np.arange(wf.shape[0])
 
         W_log[f'{wtype}_idxs'] = idxs
-        # W_log[wtype] = w.flatten()[W_log[f'{wtype}_idxs']][:, np.newaxis]
         W_log[wtype] = np.empty(shape=(idxs.size, 0))
 
 
@@ -505,9 +534,9 @@ def update_W_log(W_log, Mt, Mv, W):
             while np.any(arr[-1] == -1):
                 arr = arr[:-1]
 
-            ces[b] = np.mean(M['ce'].cpu().numpy()[b, :arr.shape[0]])
+            ces[b] = np.mean(M['ce'].cpu().numpy()[b, :arr.shape[0]], axis=0)
             pwrong[b] = 100-100*np.mean(M['correct'].cpu().numpy()[b, :arr.shape[0]])
-            hz[b] = 1000*np.mean(np.mean(M['z'][:, b, :arr.shape[0]].cpu().numpy(), axis=2))
+            hz[b] = 1000*np.mean(np.mean(M['z'][:, b, :arr.shape[0]].cpu().numpy(), axis=1))
 
         W_log['Cross-entropy'][tv_type].append(np.mean(ces))
         W_log['Mean Hz'][tv_type].append(np.mean(hz))
@@ -596,6 +625,9 @@ def load_data(cfg):
         inps[tvt_type] = np.where(inps[tvt_type] != -1, inps[tvt_type] / maxtrain, -1)
 
         tars[tvt_type] = np.load(f"{cfg['phns_fname']}_{tvt_type}_{cfg['task']}.npy")
+
+        # Add blank
+        tars[tvt_type] = np.append(np.zeros_like(tars[tvt_type][:, :, :1]), tars[tvt_type], axis=2)
 
         shuf_idxs = np.arange(inps[tvt_type].shape[0])
         rng.shuffle(shuf_idxs)

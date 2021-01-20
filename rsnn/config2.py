@@ -24,12 +24,12 @@ cfg = {
     "adam_eps": 1e-5,
 
     "weight_decay": 1e-2,  # Bellec3: 1e-2
-    "L2_reg": 0,  # Bellec3: 1e-5
+    "L2_reg": 1e-5,  # Bellec3: 1e-5
     "FR_target": 0.01,  # BellecCode: 0.01 (10hz)
     "FR_reg": 50,  # Bellec3: 50
     "div_over_time": False,
 
-    "N_R": 128,
+    "N_R": 400,
     "N_Rec": 1,
 
     "task": "TIMIT",
@@ -45,23 +45,25 @@ cfg = {
     "train_out": True,
     "train_bias": True,
 
+    "one_to_one_output": False,
 
-    "Epochs": 100,  # def = 80
-    "Track_synapse": False,
+
+    "Epochs": 200,  # def = 80
     "Track_neuron": True,
+    "Track_synapse": False,
     "Repeats": 1,  # ms per epoch, def = 5
-    "Interpolation": 'linear',  # nearest, linear
+    "Interpolation": 'nearest',  # nearest, linear
     "batch_size_train": 8,  # def = 32
     "batch_size_val": 8,  # def = 32
-    "batch_size_test": 2,  # def = 32
+    "batch_size_test": 8,  # def = 32
     "maxlen": 778,  #def 778, Don't forget to re-run process_timit.py!
     "TIMIT_derivative": 2,
     "n_examples": {'train': 16, 'val': 16, 'test': 16},
     # # "n_examples": {'train': 3696, 'val': 400, 'test': 192},
-    "plot_model_interval": 5,  # Per iter  #  State plot; 0 to disable plots
-    "plot_tracker_interval": 1,  # Per epoch
+    "plot_model_interval": 10,  # Per iter  #  State plot; 0 to disable plots
+    "plot_tracker_interval": 5,  # Per epoch
     "state_save_interval": 1000,
-    "val_every_B": 5,
+    "val_every_B": 10,
 
     "frame_size": 0.025,
     "frame_stride": 0.01,
@@ -72,8 +74,8 @@ cfg = {
     "cep_lifter": 22,
 }
 
-cfg["alpha"] = exp(-1/(4*cfg['Repeats']))  # Bellec1: 20 = 0.951. 4: 0.779
 cfg["rho"] = exp(-1/(40*cfg["Repeats"]))  # Bellec1: 200 = 0.995. 40: 0.975
+cfg["alpha"] = exp(-1/(4*cfg['Repeats']))  # Bellec1: 20 = 0.951. 4: 0.779
 cfg["kappa"] = exp(-1/(0.6*cfg["Repeats"]))  # Bellec1: 3 = 0.717. .75:~0.25
 # cfg["FR_target"] /= cfg["Repeats"]
 # cfg["FR_reg"] /= cfg["Repeats"]
@@ -87,9 +89,10 @@ lookup = {
     "a":       {"binary":False, "label": "a"},
     "h":       {"binary":False, "label": "\\psi"},
     "z":       {"binary":True, "label": "z"},
+    "z_in":    {"binary":True, "label": "z_{{in}}"},
     "l":       {"binary":False, "label": "L"},
-    "l_fr":    {"binary":False, "label": "L_{{fr}}"},
-    "l_std":   {"binary":False, "label": "L_{{std}}"},
+    "l_fr":    {"binary":False, "label": "Learn_{{fr}}"},
+    "l_std":   {"binary":False, "label": "Learn_{{std}}"},
     "y":       {"binary":False, "label": "y"},
     "t":       {"binary":True, "label": "\\pi^*"},
     "p":       {"binary":True, "label": "\\pi"},
@@ -100,6 +103,12 @@ lookup = {
     "va":      {"binary":False, "label": "\\epsilon_a"},
     "etbar":   {"binary":False, "label": "\\bar{{e}}"},
     "et":      {"binary":False, "label": "e"},
+    "stdloss_in": {"binary":False, "label": "L_{{std}}^{{in}}"},
+    "stdloss_rec": {"binary":False, "label": "L_{{std}}^{{rec}}"},
+    "regloss_in": {"binary":False, "label": "L_{{reg}}^{{in}}"},
+    "regloss_rec": {"binary":False, "label": "L_{{reg}}^{{rec}}"},
+    "loss_in": {"binary":False, "label": "L^{{in}}"},
+    "loss_rec": {"binary":False, "label": "L^{{rec}}"},
 }
 
 if cfg["Repeats"] == 1:

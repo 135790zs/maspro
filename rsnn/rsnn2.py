@@ -64,7 +64,8 @@ def main(cfg):
                 ce = np.mean(np.mean(Mv['ce'].cpu().numpy(), axis=0), axis=0)
                 if best_val_ce is None or ce < best_val_ce:
                     print(f"\nBest new validation error: {ce:.3f} "
-                          f"-> {best_val_ce:.3f}\n")
+                          + (f"<-- {best_val_ce:.3f}\n")
+                             if best_val_ce is not None else '\n')
                     best_val_ce = ce
                     ut.save_checkpoint(W=W, cfg=cfg, log_id=log_id)
             else:
@@ -103,13 +104,19 @@ def main(cfg):
                            log_id=log_id,
                            n_steps=n_steps,
                            inp_size=n_channels)
-            del M
+            del M, Mv
 
             if (adamvars['it'] == 0
                 or adamvars['it'] % cfg["plot_tracker_interval"] == 0):
                 vis.plot_W(W_log=W_log,
                            cfg=cfg,
                            log_id=log_id)
+                vis.plot_GW(W=W,
+                            G=G,
+                            cfg=cfg,
+                            log_id=log_id,
+                            n_channels=n_channels,
+                            n_phones=n_phones)
 
             W, adamvars = ut.update_weights(cfg=cfg,
                                             e=e,

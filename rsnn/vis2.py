@@ -37,9 +37,10 @@ def weights_to_img(arr, is_binary=False):
 def plot_M(cfg, M, it, log_id, n_steps, inp_size):
     plotvars = ['x']
     if cfg["Track_neuron"]:
-        plotvars += ['I_in', 'I_rec', 'I', "v", "a", "z", "h"]
+        plotvars += ['I_in', 'I_rec', 'I', "v", "a", "z", "z_in", "h"]
     if cfg["Track_synapse"]:
-        plotvars += ["vv", "va", "et", "etbar"]
+
+        plotvars += ["vv", "va", "et", "etbar", 'stdloss_in', 'regloss_in', 'loss_in', 'stdloss_rec', 'regloss_rec', 'loss_rec']
     if cfg["Track_neuron"]:
         plotvars += ['l_std', 'l_fr', 'l', "y", 'd']
     plotvars += ['p', 'pm', 't', 'correct']
@@ -186,6 +187,59 @@ def plot_W(cfg, W_log, log_id):
     plt.savefig(f"../log/{log_id}/metric.pdf",
                 bbox_inches='tight')
     plt.savefig(f"../vis/latest_metric.pdf",
+                bbox_inches='tight')
+
+    plt.close()
+
+
+def plot_GW(W, G, cfg, n_channels, n_phones, log_id):
+    labelpad = 35
+    fontsize = 14
+    fig = plt.figure(constrained_layout=False, figsize=(8, 16))
+    gsc = fig.add_gridspec(nrows=5,
+                           ncols=2, hspace=0.05)
+    shapes = {
+        'bias': (1, n_phones),
+        'out': (cfg["n_directions"]*cfg["N_R"], n_phones),
+        'W_in': (cfg["N_R"], cfg["n_directions"]*cfg["N_Rec"]*cfg["N_R"]),
+        'W_rec': (cfg["N_R"], cfg["n_directions"]*cfg["N_Rec"]*cfg["N_R"]),
+        'B': (cfg["n_directions"]*cfg["N_R"], n_phones),
+    }
+    rowidx = 0
+    for wtype, g in G.items():
+        ax = fig.add_subplot(gsc[rowidx, 0])
+        ax.imshow(
+                        np.reshape(g.cpu().numpy(), shapes[wtype]),
+                        aspect='auto',
+                        interpolation='nearest',
+                        cmap='coolwarm')
+        ax.set_ylabel(f"G{wtype}"
+                           f"\n{np.min(g.cpu().numpy()):.1e}"
+                           f"\n{np.max(g.cpu().numpy()):.1e}",
+                           rotation=0,
+                           labelpad=labelpad,
+                           fontsize=fontsize)
+        rowidx += 1
+
+    rowidx = 0
+    for wtype, w in W.items():
+        ax = fig.add_subplot(gsc[rowidx, 1])
+        ax.imshow(
+                        np.reshape(w.cpu().numpy(), shapes[wtype]),
+                        aspect='auto',
+                        interpolation='nearest',
+                        cmap='coolwarm')
+        ax.set_ylabel(f"W {wtype}"
+                           f"\n{np.min(w.cpu().numpy()):.1e}"
+                           f"\n{np.max(w.cpu().numpy()):.1e}",
+                           rotation=0,
+                           labelpad=labelpad,
+                           fontsize=fontsize)
+        rowidx += 1
+
+    plt.savefig(f"../log/{log_id}/weights.pdf",
+                bbox_inches='tight')
+    plt.savefig(f"../vis/latest_weights.pdf",
                 bbox_inches='tight')
 
     plt.close()
