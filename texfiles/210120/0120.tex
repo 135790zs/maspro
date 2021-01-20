@@ -1,0 +1,117 @@
+\documentclass[t]{beamer}
+
+\setlength {\marginparwidth }{2cm}
+\setlength {\parskip}{0cm}
+\usepackage{todonotes}
+\usepackage{siunitx}
+\usepackage{subcaption}
+\usepackage{apacite}    % Use APA Citation
+\presetkeys{todonotes}{inline}{}
+\beamertemplatenavigationsymbolsempty
+\usefonttheme[onlymath]{serif}
+
+\usepackage{algpseudocode}
+\usepackage{enumitem,amssymb, yfonts, bm}
+\newlist{todolist}{itemize}{2}
+\setlist[todolist]{label=$\square$}
+\usepackage{pifont}
+\newcommand{\cmark}{\ding{51}}%
+\newcommand{\xmark}{\ding{55}}%
+\newcommand{\done}{\rlap{$\square$}{\raisebox{2pt}{\large\hspace{1pt}\cmark}}%
+\hspace{-2.5pt}}
+
+% \usetheme{AnnArbor}
+% \usetheme{Antibes}
+% \usetheme{Bergen}
+% \usetheme{Berkeley}https://www.sharelatex.com/project/5b12e1a4f84b363f6f336dab
+% \usetheme{Berlin}
+% \usetheme{Boadilla}
+% \usetheme{boxes}
+\usetheme{CambridgeUS}
+% \usetheme{Copenhagen}
+%\usetheme{Darmstadt}
+% \usetheme{default}
+%\usetheme{Frankfurt}
+%\usetheme{Goettingen}
+% \usetheme{Hannover}
+% \usetheme{Ilmenau}
+% \usetheme{JuanLesPins}
+\setlength{\parskip}{10pt}
+
+% \newcommand*\vc[1]%
+% {\begin{pmatrix}#1\end{pmatrix}}
+
+\newcommand*\vc[1]%
+{\left(\begin{array}{cccc}#1\end{array}\right)}
+
+
+\newcommand\eqdef{\ \mathrel{\overset{\makebox[0pt]{\mbox{\normalfont\scriptsize\rmfamily def}}}{=}}\ }
+
+\title[Eligibility propagation]{Improving eligibility propagation using Izhikevich neurons in a multilayer RSNN.\\\vspace{10pt}
+\large{Presentation 7: Reproducing Bellec}}
+
+\author[Werner]{Werner~van~der~Veen\\\footnotesize\texttt({w.k.van.der.veen.2@student.rug.nl})}\date{\today}
+
+\begin{document}
+
+\begin{frame}
+    \titlepage
+\end{frame}
+
+%======================================
+
+%\begin{frame}
+%    \tableofcontents
+%\end{frame}
+
+\small
+
+\section{Work done since previous meeting}
+\begin{frame}{Work done since previous meeting}
+  \begin{todolist}
+
+    \item[\done] Identified and fixed errors.
+    \item[\done] Rewrote system on GPU, now 10x faster.
+
+  \end{todolist}
+
+\end{frame}
+
+\section{Work done since previous meeting}
+\begin{frame}{Work done since previous meeting}
+  \begin{itemize}[label=--]
+
+    \item Bellec uses iteration-based training.\\
+    $\rightarrow$ 80 epochs $\times$ 116 batches of size 32.
+    \item My system trains correctly, but not at the same speed and stability as Bellec's.
+    $\rightarrow$ Likely a mistake somewhere in the system.
+
+  \end{itemize}
+
+\end{frame}
+
+\section{Current system}
+\begin{frame}{}
+  (show figures)
+  \begin{itemize}[label=--]
+
+    \item Some weights decrease a lot $\rightarrow$ maybe matrix shape error?
+    \item Underfitting (logically)
+    \item Bias and output layer train correctly
+    \item Bellec reaches 30\% accuracy in 10 minutes, I do in 10 hours.
+    \item Bellec
+
+  \end{itemize}
+
+\end{frame}
+
+\begin{frame}{Current plan}
+  \begin{itemize}[label=--]
+
+    \item Backtrack the error, look first into weight/gradient shapes.
+    \item E-mail the e-prop team for anything unreported in their paper.
+    $\rightarrow$ initialization, learning curves, and a number of technical aspects.
+  \end{itemize}
+\end{frame}
+
+\end{document}
