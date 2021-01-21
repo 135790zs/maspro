@@ -3,13 +3,14 @@ cfg = {
     "eprop_type": "symmetric",  # in {global, random, symmetric, adaptive}
     "Optimizer": "Adam",
     "v_fix": False,
+    "v_fix_psi": False,
     "fraction_ALIF": 0.25,  # def 0.25
     "n_directions": 1,  # Reduces error from 36.1 to 32.9.
     "seed": None,  # 'None' for random seed
 
-    "beta": 0.184,  # Bellec2: "order of 0.07", Bellec3: 0.184. Code: 1.8
+    "beta": 1.8,  # Bellec2: "order of 0.07", Bellec3: 0.184. Code: 1.8
     "gamma": 0.3,  # Bellec2: 0.3
-    "thr": 1.6,  # Bellec3: 1.6
+    "thr": 0.01,  # Bellec3: 1.6
     "dt_refr": 2,  # Bellec3: 2
 
     "dropout": 0,
@@ -29,7 +30,7 @@ cfg = {
     "FR_reg": 50,  # Bellec3: 50
     "div_over_time": False,
 
-    "N_R": 400,
+    "N_R": 200,
     "N_Rec": 1,
 
     "task": "TIMIT",
@@ -39,14 +40,16 @@ cfg = {
     "cuda": True,
 
     "warmup": False,
+    "one_to_one_output": False,
 
     "train_W_in": True,
     "train_W_rec": True,
     "train_out": True,
     "train_bias": True,
 
-    "one_to_one_output": False,
-
+    "alpha_N": 20,
+    "rho_N": 200,
+    "kappa_N": 3,
 
     "Epochs": 200,  # def = 80
     "Track_neuron": True,
@@ -58,12 +61,12 @@ cfg = {
     "batch_size_test": 8,  # def = 32
     "maxlen": 778,  #def 778, Don't forget to re-run process_timit.py!
     "TIMIT_derivative": 2,
-    "n_examples": {'train': 16, 'val': 16, 'test': 16},
+    "n_examples": {'train': 1, 'val': 1, 'test': 16},
     # # "n_examples": {'train': 3696, 'val': 400, 'test': 192},
-    "plot_model_interval": 10,  # Per iter  #  State plot; 0 to disable plots
-    "plot_tracker_interval": 5,  # Per epoch
+    "plot_model_interval": 20,  # Per iter  #  State plot; 0 to disable plots
+    "plot_tracker_interval": 10,  # Per epoch
     "state_save_interval": 1000,
-    "val_every_B": 10,
+    "val_every_B": 5,
 
     "frame_size": 0.025,
     "frame_stride": 0.01,
@@ -74,9 +77,14 @@ cfg = {
     "cep_lifter": 22,
 }
 
-cfg["rho"] = exp(-1/(40*cfg["Repeats"]))  # Bellec1: 200 = 0.995. 40: 0.975
-cfg["alpha"] = exp(-1/(4*cfg['Repeats']))  # Bellec1: 20 = 0.951. 4: 0.779
-cfg["kappa"] = exp(-1/(0.6*cfg["Repeats"]))  # Bellec1: 3 = 0.717. .75:~0.25
+cfg["rho"] = exp(-1/(cfg["rho_N"]))  # Bellec1: 200 = 0.995. 40: 0.975
+cfg["alpha"] = exp(-1/(cfg["alpha_N"]))  # Bellec1: 20 = 0.951. 4: 0.779
+cfg["kappaY"] = exp(-1/(cfg["kappa_N"]))  # Bellec1: 3 = 0.717. .75:~0.25
+cfg["beta"] = cfg["beta"] *  (1 - exp(-1 / cfg["rho_N"])) / (1 - exp(-1 / cfg["alpha_N"]))
+cfg["kappaZ"] = (1 - exp(-1 / cfg["rho_N"])) / (1 - exp(-1 / cfg["alpha_N"]))
+# cfg["thr"] /= 1 - exp(-1 / cfg["alpha_N"])
+cfg["thr"] = 1.6
+# cfg["kappaZ"] = cfg["kappaY"]
 # cfg["FR_target"] /= cfg["Repeats"]
 # cfg["FR_reg"] /= cfg["Repeats"]
 
@@ -90,9 +98,6 @@ lookup = {
     "h":       {"binary":False, "label": "\\psi"},
     "z":       {"binary":True, "label": "z"},
     "z_in":    {"binary":True, "label": "z_{{in}}"},
-    "l":       {"binary":False, "label": "L"},
-    "l_fr":    {"binary":False, "label": "Learn_{{fr}}"},
-    "l_std":   {"binary":False, "label": "Learn_{{std}}"},
     "y":       {"binary":False, "label": "y"},
     "t":       {"binary":True, "label": "\\pi^*"},
     "p":       {"binary":True, "label": "\\pi"},
@@ -103,12 +108,13 @@ lookup = {
     "va":      {"binary":False, "label": "\\epsilon_a"},
     "etbar":   {"binary":False, "label": "\\bar{{e}}"},
     "et":      {"binary":False, "label": "e"},
-    "stdloss_in": {"binary":False, "label": "L_{{std}}^{{in}}"},
-    "stdloss_rec": {"binary":False, "label": "L_{{std}}^{{rec}}"},
-    "regloss_in": {"binary":False, "label": "L_{{reg}}^{{in}}"},
-    "regloss_rec": {"binary":False, "label": "L_{{reg}}^{{rec}}"},
-    "loss_in": {"binary":False, "label": "L^{{in}}"},
-    "loss_rec": {"binary":False, "label": "L^{{rec}}"},
+    "loss":    {"binary":False, "label": "L"},
+    "loss_reg": {"binary":False, "label": "L_{{reg}}"},
+    "loss_pred": {"binary":False, "label": "L_{{pred}}"},
+    "GW_in": {"binary":False, "label": "G_{{in}}"},
+    "GW_rec": {"binary":False, "label": "G_{{rec}}"},
+    "Gout": {"binary":False, "label": "G_{{out}}"},
+    "Gbias": {"binary":False, "label": "G_{{bias}}"},
 }
 
 if cfg["Repeats"] == 1:

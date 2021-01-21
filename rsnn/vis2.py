@@ -37,12 +37,11 @@ def weights_to_img(arr, is_binary=False):
 def plot_M(cfg, M, it, log_id, n_steps, inp_size):
     plotvars = ['x']
     if cfg["Track_neuron"]:
-        plotvars += ['I_in', 'I_rec', 'I', "v", "a", "z", "z_in", "h"]
+        plotvars += ['I', "v", "a", "z", "h", 'loss_pred', 'loss_reg', 'loss']
     if cfg["Track_synapse"]:
-
-        plotvars += ["vv", "va", "et", "etbar", 'stdloss_in', 'regloss_in', 'loss_in', 'stdloss_rec', 'regloss_rec', 'loss_rec']
+        plotvars += ["vv", "va", "etbar", "GW_in", "GW_rec"]
     if cfg["Track_neuron"]:
-        plotvars += ['l_std', 'l_fr', 'l', "y", 'd']
+        plotvars += ["y", 'd']
     plotvars += ['p', 'pm', 't', 'correct']
 
     fig = plt.figure(constrained_layout=False, figsize=(8, len(plotvars)//1.2))
@@ -63,6 +62,9 @@ def plot_M(cfg, M, it, log_id, n_steps, inp_size):
         axs.append(fig.add_subplot(gsc[row_idx]))
         if var in ['y', 'p', 'pm', 't', 'd', 'correct']:
             arr = M[var][b, :n_steps[b]].cpu().numpy()
+        # elif var == 'vv':
+        #     print(M[var].shape)
+        #     arr = M[var][0, b, :n_steps[b], ..., :cfg["N_R"]].cpu().numpy()
         else:
             arr = M[var][0, b, :n_steps[b]].cpu().numpy()
         if var == 'x':
@@ -130,7 +132,7 @@ def plot_W(cfg, W_log, log_id):
     labelpad = 35
     fontsize = 14
     fig = plt.figure(constrained_layout=False, figsize=(8, 16))
-    gsc = fig.add_gridspec(nrows=13,
+    gsc = fig.add_gridspec(nrows=14,
                            ncols=1, hspace=0.05)
     axs = []
     for k, v in W_log.items():

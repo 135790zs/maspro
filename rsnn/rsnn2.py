@@ -7,6 +7,12 @@ import vis2 as vis
 
 
 def main(cfg):
+    print(f"New thr: {cfg['thr']}")
+    print(f"New alpha: {cfg['alpha']}")
+    print(f"New beta: {cfg['beta']}")
+    print(f"New rho: {cfg['rho']}")
+    print(f"New kappaZ: {cfg['kappaZ']}")
+    print(f"New kappaY: {cfg['kappaY']}")
     start_time = time.time()
     rng = np.random.default_rng(seed=cfg["seed"])
 
@@ -45,6 +51,8 @@ def main(cfg):
                 valbatch = rng.choice(n_val, size=cfg["batch_size_val"])
                 X = inps['val'][valbatch]
                 T = tars['val'][valbatch]
+
+                # TODO: Consider interpolating and trimming in eprop function itself.
                 X, T = ut.interpolate_inputs(cfg=cfg,
                                              inp=X,
                                              tar=T,
@@ -61,7 +69,9 @@ def main(cfg):
                                  W=W)
 
                 # Mean over batch and over time
-                ce = np.mean(np.mean(Mv['ce'].cpu().numpy(), axis=0), axis=0)
+                ce = np.mean(np.mean(Mv['ce'].cpu().numpy()/n_steps[:, None],
+                                     axis=0),
+                             axis=0)
                 if best_val_ce is None or ce < best_val_ce:
                     print(f"\nBest new validation error: {ce:.3f} "
                           + (f"<-- {best_val_ce:.3f}\n")

@@ -41,6 +41,7 @@ def initialize_model(cfg, inp_size, tar_size, batch_size, n_steps):
                  cfg["N_Rec"],
                  cfg["N_R"],
                  cfg["N_R"])
+
     out_shape = (batch_size,
                  len_nrn_time,
                  tar_size)
@@ -49,16 +50,15 @@ def initialize_model(cfg, inp_size, tar_size, batch_size, n_steps):
                       n_steps,
                       tar_size)
 
-    for var in ['z', 'I', 'I_in', 'I_rec', 'h', 'v', 'a', 'zbar', 'l', 'l_std', 'l_fr']:
+    for var in ['z', 'I', 'I_in', 'I_rec', 'h', 'v', 'a', 'zbar', 'loss', 'loss_reg', 'loss_pred']:
         M[var] = torch.zeros(size=nrn_shape, dtype=torch.double)
-
-
-    for var in ['stdloss_in', 'stdloss_rec', 'regloss_in', 'regloss_rec', 'loss_in', 'loss_rec']:
-        M[var] = torch.zeros(size=syn_shape_half, dtype=torch.double)
-
 
     for var in ['vv', 'va', 'et', 'etbar']:
         M[var] = torch.zeros(size=syn_shape, dtype=torch.double)
+
+    for var in ['GW_in', 'GW_rec']:
+        M[var] = torch.zeros(size=syn_shape_half, dtype=torch.double)
+
     nrn_timeless = (cfg["n_directions"],
                     batch_size,
                     cfg["N_Rec"],
@@ -80,6 +80,15 @@ def initialize_model(cfg, inp_size, tar_size, batch_size, n_steps):
 
     M["ce"] = torch.zeros(size=(batch_size, n_steps,))
     M["correct"] = torch.zeros(size=(batch_size, n_steps,))
+
+    M["Gout"] = torch.zeros(size=(cfg["n_directions"],
+                                  batch_size,
+                                  len_syn_time,
+                                  cfg["N_R"],
+                                  tar_size))
+    M["Gbias"] = torch.zeros(size=(batch_size,
+                                   len_syn_time,
+                                   tar_size))
 
     return M
 
@@ -122,9 +131,6 @@ def initialize_weights(cfg, inp_size, tar_size):
     W = {}
     rng = np.random.default_rng(seed=cfg["seed"])
 
-    """ See Supplementary information for: Long short-term
-    memory and learning-to-learn in networks of spiking
-    neurons """
     W["W_in"] = rng.normal(size=(cfg["n_directions"],
                                  cfg["N_Rec"],
                                  cfg["N_R"],
@@ -207,7 +213,6 @@ def update_weights(W, G, adamvars, e, cfg, it_per_e):
 
             m = adamvars[f"m{wtype}"] / (1 - cfg["adam_beta1"] ** adamvars['it'])
             v = adamvars[f"v{wtype}"] / (1 - cfg["adam_beta2"] ** adamvars['it'])
-
             dw = -eta * (m / (torch.sqrt(v) + cfg["adam_eps"]))
 
         elif cfg["Optimizer"] == "RAdam":
@@ -276,11 +281,6 @@ def eprop(cfg, X, T, n_steps, betas, W):
                          batch_size=X.shape[0],
                          n_steps=max(n_steps))
 
-    G = initialize_gradients(cfg=cfg,
-                             tar_size=T.shape[-1],
-                             batch_size=X.shape[0])
-
-
     M['x'] = X[None, :]  # Insert subnetwork dimension
     M['t'] = T
 
@@ -289,7 +289,6 @@ def eprop(cfg, X, T, n_steps, betas, W):
         for b in range(M['x'].shape[1]):
             M['x'][1, b, :n_steps[b]] = torch.fliplr(M['x'][0, b, :n_steps[b]])
 
-
     for t in torch.arange(0, max(n_steps), dtype=torch.int):
         start = time.time()
         prev_syn_t, curr_syn_t = conn_t_idxs(track_synapse=cfg['Track_synapse'], t=t)
@@ -297,113 +296,122 @@ def eprop(cfg, X, T, n_steps, betas, W):
         is_valid = torch.logical_not(torch.any(M['x'][0, :, t] == -1, axis=1))
 
         for r in range(cfg["N_Rec"]):  # TODO: Can overwrite r instead of appending, except Z
+            # TODO: See which is_valid masks can be removed
 
-
-            M['va'][:, :, curr_syn_t, r] = (M['h'][:, :, prev_nrn_t, r, :, None] * M['vv'][:, :, prev_syn_t, r]
+            M['va'][:, :, curr_syn_t, r] = (
+                M['h'][:, :, prev_nrn_t, r, :, None] * M['vv'][:, :, prev_syn_t, r]
                 + (cfg["rho"] - (M['h'][:, :, prev_nrn_t, r]
                                  * betas[:, None, r]))[..., None]
-                * M['va'][:, :, prev_syn_t, r])
+                * M['va'][:, :, prev_syn_t, r]) * is_valid[None, :, None, None]
 
-            Z_prev_layer = M['z'][:, :, curr_nrn_t, r-1] if r else M['x'][:, :, t] * is_valid[None, :, None]
+            Z_prev_layer = (M['z'][:, :, curr_nrn_t, r-1] if r
+                            else M['x'][:, :, t] * is_valid[None, :, None])
             Z_prev_time = M['z'][:, :, prev_nrn_t, r]
             M['z_in'][:, :, curr_nrn_t, r] = torch.cat((Z_prev_layer, Z_prev_time), axis=2)
 
-            M['vv'][:, :, curr_syn_t, r] = cfg["alpha"] * M['vv'][:, :, prev_syn_t, r] + M['z_in'][:, :, curr_nrn_t, r, None]
+            M['vv'][:, :, curr_syn_t, r] = (
+                cfg["alpha"]
+                * M['vv'][:, :, prev_syn_t, r] + M['z_in'][:, :, curr_nrn_t, r, None]
+                ) * is_valid[None, :, None, None]
 
             # Can contract this further!
-            M['I_in'][:, :, curr_nrn_t, r] = torch.sum(W['W_in'][:, None, r] * Z_prev_layer[..., None, :], axis=-1)
+            M['I_in'][:, :, curr_nrn_t, r] = torch.sum(W['W_in'][:, None, r] * Z_prev_layer[..., None, :], axis=-1) # Checked correct
 
-            M['I_rec'][:, :, curr_nrn_t, r] = torch.sum(W['W_rec'][:, None, r] * Z_prev_time[..., None, :], axis=-1)
+            M['I_rec'][:, :, curr_nrn_t, r] = torch.sum(W['W_rec'][:, None, r] * Z_prev_time[..., None, :], axis=-1) # Checked correct
 
             M['I'][:, :, curr_nrn_t, r] = M['I_in'][:, :, curr_nrn_t, r] + M['I_rec'][:, :, curr_nrn_t, r]
 
             M['a'][:, :, curr_nrn_t, r] = (cfg["rho"] * M['a'][:, :, prev_nrn_t, r]
-                                  + M['z'][:, :, prev_nrn_t, r])
+                                  + M['z'][:, :, prev_nrn_t, r]) * is_valid[None, :, None]
 
             A = cfg["thr"] + betas[:, None, r] * M['a'][:, :, curr_nrn_t, r]
 
-            M['v'][:, :, curr_nrn_t, r] = (cfg["alpha"] * M['v'][:, :, prev_nrn_t, r]
-                                  + M['I'][:, :, curr_nrn_t, r]
-                                  - M['z'][:, :, prev_nrn_t, r] * (A if cfg["v_fix"] else cfg["thr"]))
+            M['v'][:, :, curr_nrn_t, r] = ((
+                  cfg["alpha"] * M['v'][:, :, prev_nrn_t, r]
+                  + M['I'][:, :, curr_nrn_t, r]
+                  - M['z'][:, :, prev_nrn_t, r] * (A if cfg["v_fix"] else cfg["thr"]))
+                  ) * is_valid[None, :, None]
 
             M['z'][:, :, curr_nrn_t, r] = torch.where(
-                torch.logical_and(t - M['tz'][:, :, r] >= cfg["dt_refr"],
-                               M['v'][:, :, curr_nrn_t, r] >= A),
+                torch.logical_and(t - M['tz'][:, :, r] > cfg["dt_refr"],
+                                  M['v'][:, :, curr_nrn_t, r] >= A),
                 1,
-                0)
+                0) * is_valid[None, :, None]
 
             M['tz'][:, :, r] = torch.where(M['z'][:, :, curr_nrn_t, r] != 0, t, M['tz'][:, :, r])
-            M['zs'][:, :, r] += M['z'][:, :, curr_nrn_t, r]
-
-            M['h'][:, :, curr_nrn_t, r] = ( (1 / (A if cfg["v_fix"] else cfg["thr"])) * cfg["gamma"] * torch.clip(
-            # M['h'][:, :, curr_nrn_t, r] = (cfg["gamma"] * torch.clip(
-                1 - (abs((M['v'][:, :, curr_nrn_t, r] - A
-                           / (A if cfg["v_fix"] else cfg["thr"])))),
-                0,
-                None))
+            M['zs'][:, :, r] += M['z'][:, :, curr_nrn_t, r] * is_valid[None, :, None]
+            M['h'][:, :, curr_nrn_t, r] = (
+                ((1 / (A if cfg["v_fix"] else cfg["thr"])) if not cfg["v_fix_psi"] else 1)
+                * cfg["gamma"]
+                * torch.clip(
+                    1 - (abs(((M['v'][:, :, curr_nrn_t, r] - A)
+                               / (A if cfg["v_fix"] else cfg["thr"])))),
+                    0,
+                    None))
 
             M['h'][:, :, curr_nrn_t, r] = torch.where(
-                t - M['tz'][:, :, r] >= cfg["dt_refr"],
+                t - M['tz'][:, :, r] > cfg["dt_refr"],
                 M['h'][:, :, curr_nrn_t, r],
                 0.)
 
-            M['et'][:, :, curr_syn_t, r] = M['h'][:, :, curr_nrn_t, r, :, None] * (
-                M['vv'][:, :, curr_syn_t, r] - betas[:, None, r, :, None] * M['va'][:, :, curr_syn_t, r])
+            M['et'][:, :, curr_syn_t, r] = (
+                M['h'][:, :, curr_nrn_t, r, :, None]
+                * (M['vv'][:, :, curr_syn_t, r]
+                   - betas[:, None, r, :, None] * M['va'][:, :, curr_syn_t, r])
+                ) * is_valid[None, :, None, None]
 
 
-            M['etbar'][:, :, curr_syn_t, r] = cfg["kappa"] * M['etbar'][:, :, prev_syn_t, r] + M['et'][:, :, curr_syn_t, r]
-
-            M['zbar'][:, :, curr_nrn_t, r] = cfg["kappa"] * M['zbar'][:, :, prev_nrn_t, r] + M['z'][:, :, curr_nrn_t, r]
+            M['etbar'][:, :, curr_syn_t, r] = (
+                cfg["kappaZ"]
+                * M['etbar'][:, :, prev_syn_t, r] + M['et'][:, :, curr_syn_t, r]
+                ) * is_valid[None, :, None, None]
+            M['zbar'][:, :, curr_nrn_t, r] = (
+                cfg["kappaZ"]
+                * M['zbar'][:, :, prev_nrn_t, r] + M['z'][:, :, curr_nrn_t, r]
+                ) * is_valid[None, :, None]
 
         M['ysub'][:, :, curr_nrn_t] = torch.sum(W['out'][:, None]
-                                       * M['z'][:, :, curr_nrn_t, -1, :, None], axis=-2) + cfg["kappa"] * M['ysub'][:, :, prev_nrn_t]
+                                       * M['z'][:, :, curr_nrn_t, -1, :, None], axis=-2) + cfg["kappaY"] * M['ysub'][:, :, prev_nrn_t]
 
-        M['y'][:, curr_nrn_t] = torch.sum(M['ysub'][:, :, curr_nrn_t], axis=0)
+        M['y'][:, curr_nrn_t] = torch.sum(M['ysub'][:, :, curr_nrn_t], axis=0) * is_valid[:, None]
 
-        M['y'][:, curr_nrn_t] += W['bias']
+        M['y'][:, curr_nrn_t] += W['bias'] * is_valid[:, None]
 
-        M['p'][:, t] = torch.exp(M['y'][:, curr_nrn_t] - torch.amax(M['y'][:, curr_nrn_t], axis=1)[:, None])
+        M['p'][:, t] = torch.exp(M['y'][:, curr_nrn_t]
+                                    - torch.amax(M['y'][:, curr_nrn_t],
+                                 axis=1)[:, None])
 
-        M['p'][:, t] = M['p'][:, t] / torch.sum(M['p'][:, t], axis=1)[:, None]
+        M['p'][:, t] = M['p'][:, t] / torch.sum(M['p'][:, t], axis=1)[:, None] * is_valid[:, None]
 
-        M['d'][:, curr_nrn_t] = M['p'][:, t] - T[:, t]
+        M['d'][:, curr_nrn_t] = (M['p'][:, t] - T[:, t]) * is_valid[:, None]
 
-        M['l_std'][:, :, curr_nrn_t] = torch.sum(
-            W['B'][:, None, :, :] * M['d'][None, :, curr_nrn_t, None, None, :],
-            axis=-1)
+        M['loss_pred'][:, :, curr_nrn_t] = torch.sum(
+            W['B'][:, None, :, :] * M['d'][None, :, curr_nrn_t, None, None, :],  # Checked correct (for batch size 1)
+            axis=-1) * is_valid[None, :, None, None]
 
-        # Dividing by number of total steps isn't really online!
-        M['l_fr'][:, :, curr_nrn_t] = (cfg["FR_reg"] / (n_steps[None, :, None, None] if cfg["div_over_time"] else 1)
-              * (M['zs'] / n_steps[None, :, None, None] - cfg["FR_target"]))
+        meanrates = M['zs'] / (t+1)
+        diff = meanrates - cfg["FR_target"]
+        M['loss_reg'][:, :, curr_nrn_t] = (
+            cfg["FR_reg"]
+            / (n_steps[None, :, None, None] if cfg["div_over_time"] else 1)
+            * diff
+            * is_valid[None, :, None, None])
 
-        M['l'][:, :, curr_nrn_t] = (M['l_std'][:, :, curr_nrn_t] + M['l_fr'][:, :, curr_nrn_t])
+        M['loss'][:, :, curr_nrn_t] = (M['loss_pred'][:, :, curr_nrn_t]
+                                       + M['loss_reg'][:, :, curr_nrn_t])
+        M['GW_in'][:, :, curr_syn_t] += (
+            M['loss'][:, :, curr_nrn_t, :, :, None]
+            * M['etbar'][:, :, curr_syn_t, :, :, :cfg["N_R"]])
+        M['GW_rec'][:, :, curr_syn_t] += (
+            M['loss'][:, :, curr_nrn_t, :, :, None]
+            * M['etbar'][:, :, curr_syn_t, :, :, cfg["N_R"]:])
 
-        M['stdloss_in'][:, :, curr_syn_t] = ((M['l_std'][:, :, curr_nrn_t, :, :, None]
-                        * M['etbar'][:, :, curr_syn_t, :, :, :cfg["N_R"]])
-                       * is_valid[None, :, None, None, None])
-
-        M['regloss_in'][:, :, curr_syn_t] = ((M['l_fr'][:, :, curr_nrn_t, :, :, None]
-                    * M['et'][:, :, curr_syn_t, :, :, :cfg["N_R"]])
-                    # * torch.ones_like(M['et'][:, :, curr_syn_t, :, :, :cfg["N_R"]]))
-                   * is_valid[None, :, None, None, None])
-
-        M['stdloss_rec'][:, :, curr_syn_t] = ((M['l_std'][:, :, curr_nrn_t, :, :, None]
-                    * M['etbar'][:, :, curr_syn_t, :, :, cfg["N_R"]:])
-                   * is_valid[None, :, None, None, None])
-
-        M['regloss_rec'][:, :, curr_syn_t] = ((M['l_fr'][:, :, curr_nrn_t, :, :, None]
-                    * M['et'][:, :, curr_syn_t, :, :, cfg["N_R"]:])
-                    # * torch.ones_like(M['et'][:, :, curr_syn_t, :, :, cfg["N_R"]:]))
-                   * is_valid[None, :, None, None, None])
-
-        M['loss_rec'][:, :, curr_syn_t] = M['regloss_rec'][:, :, curr_syn_t] + M['stdloss_rec'][:, :, curr_syn_t]
-        M['loss_in'][:, :, curr_syn_t] = M['regloss_in'][:, :, curr_syn_t] + M['stdloss_in'][:, :, curr_syn_t]
-
-        G['W_in'] += M['loss_in'][:, :, curr_syn_t]
-        G['W_rec'] += M['loss_rec'][:, :, curr_syn_t]
-
-        G['out'] += M['d'][None, :, curr_nrn_t, None, :] * M['zbar'][:, :, curr_nrn_t, -1, :, None] * is_valid[None, :, None, None]
-        G['bias'] += torch.sum(M['d'][:, curr_nrn_t] * is_valid[None, :, None], axis=0)
+        M['Gout'][:, :, curr_syn_t] += (
+            M['d'][None, :, curr_nrn_t, None]
+            * M['zbar'][:, :, curr_nrn_t, -1, :, None]
+            * is_valid[None, :, None, None])
+        M['Gbias'][:, curr_syn_t] += torch.sum(M['d'][:, curr_nrn_t] * is_valid[None, :, None],
+                               axis=0)
 
     a = torch.arange(M['p'].shape[1])
     for b in range(M['p'].shape[0]):
@@ -412,22 +420,26 @@ def eprop(cfg, X, T, n_steps, betas, W):
     M['correct'] = (M['pm'] == M['t']).all(axis=2)
 
     M['ce'] = -torch.sum(M['t'] * torch.log(1e-30 + M['p']), axis=2)
+    M['reg_error'] = 0.5 * torch.sum(
+        torch.mean(
+            (M['zs'] / n_steps[None, :, None, None] - cfg["FR_target"]),
+            axis=1)) ** 2
 
-    # Batch mean
-    G['W_in'] = torch.mean(G['W_in'], axis=1)
-    G['W_rec'] = torch.mean(G['W_rec'], axis=1)
-    G['out'] = torch.mean(G['out'], axis=1)
-    G['bias'] = torch.mean(G['bias'], axis=0)
+    # Sum over time, Mean over batch
+    G = {}
+    G['W_in'] = torch.mean(torch.sum(M['GW_in'], axis=2), axis=1)
+    G['W_rec'] = torch.mean(torch.sum(M['GW_rec'], axis=2), axis=1)
+    G['out'] = torch.mean(torch.sum(M['Gout'], axis=2), axis=1)
+    G['bias'] = torch.mean(torch.sum(M['Gbias'], axis=1), axis=0)
 
     # L2 regularization
     for wtype in ['W_in', 'W_rec', 'out', 'bias']:
         G[wtype] += cfg["L2_reg"] * W[wtype]**2
 
+
     # Don't update dead weights
     G['W_in'][W['W_in']==0] = 0
     G['W_rec'][W['W_rec']==0] = 0
-
-
 
     return G, M
 
@@ -491,8 +503,9 @@ def initialize_W_log(cfg, W, sample_size=100):
 
     rng = np.random.default_rng(seed=cfg['seed'])
     W_log['Cross-entropy'] = {'train': [], 'val': []}
-    W_log['Percentage wrong'] = {'train': [], 'val': []}
+    W_log['Error (reg)'] = {'train': [], 'val': []}
     W_log['Mean Hz'] = {'train': [], 'val': []}
+    W_log['Percentage wrong'] = {'train': [], 'val': []}
 
     for wtype, w in W.items():
         wf = w.flatten()
@@ -521,6 +534,7 @@ def update_W_log(W_log, Mt, Mv, W):
             W_log['Cross-entropy'][tv_type].append(-1)
             W_log['Mean Hz'][tv_type].append(-1)
             W_log['Percentage wrong'][tv_type].append(-1)
+            W_log['Error (reg)'][tv_type].append(-1)
             continue
 
         X = M['x'].cpu().numpy()
@@ -541,6 +555,7 @@ def update_W_log(W_log, Mt, Mv, W):
         W_log['Cross-entropy'][tv_type].append(np.mean(ces))
         W_log['Mean Hz'][tv_type].append(np.mean(hz))
         W_log['Percentage wrong'][tv_type].append(np.mean(pwrong))
+        W_log['Error (reg)'][tv_type].append(M['reg_error'])
 
     return W_log
 
