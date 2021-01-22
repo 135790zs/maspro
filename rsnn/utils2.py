@@ -311,7 +311,7 @@ def eprop(cfg, X, T, n_steps, betas, W):
 
             M['vv'][:, :, curr_syn_t, r] = (
                 cfg["alpha"]
-                * M['vv'][:, :, prev_syn_t, r] + M['z_in'][:, :, curr_nrn_t, r, None]
+                * M['vv'][:, :, prev_syn_t, r] + M['z_in'][:, :, prev_nrn_t, r, None]
                 ) * is_valid[None, :, None, None]
 
             # Can contract this further!
@@ -340,12 +340,14 @@ def eprop(cfg, X, T, n_steps, betas, W):
 
             M['tz'][:, :, r] = torch.where(M['z'][:, :, curr_nrn_t, r] != 0, t, M['tz'][:, :, r])
             M['zs'][:, :, r] += M['z'][:, :, curr_nrn_t, r] * is_valid[None, :, None]
+
             M['h'][:, :, curr_nrn_t, r] = (
-                ((1 / (A if cfg["v_fix"] else cfg["thr"])) if not cfg["v_fix_psi"] else 1)
+                # ((1 / (A if cfg["v_fix"] else cfg["thr"])) if not cfg["v_fix_psi"] else 1)
+                (1 / cfg["thr"])
                 * cfg["gamma"]
                 * torch.clip(
-                    1 - (abs(((M['v'][:, :, curr_nrn_t, r] - A)
-                               / (A if cfg["v_fix"] else cfg["thr"])))),
+                    1 - (abs((M['v'][:, :, curr_nrn_t, r] - A) / cfg["thr"])),
+                              # / (A if cfg["v_fix"] else cfg["thr"]))),
                     0,
                     None))
 
@@ -362,16 +364,16 @@ def eprop(cfg, X, T, n_steps, betas, W):
 
 
             M['etbar'][:, :, curr_syn_t, r] = (
-                cfg["kappaZ"]
+                cfg["kappa"]
                 * M['etbar'][:, :, prev_syn_t, r] + M['et'][:, :, curr_syn_t, r]
                 ) * is_valid[None, :, None, None]
             M['zbar'][:, :, curr_nrn_t, r] = (
-                cfg["kappaZ"]
+                cfg["kappa"]
                 * M['zbar'][:, :, prev_nrn_t, r] + M['z'][:, :, curr_nrn_t, r]
                 ) * is_valid[None, :, None]
 
         M['ysub'][:, :, curr_nrn_t] = torch.sum(W['out'][:, None]
-                                       * M['z'][:, :, curr_nrn_t, -1, :, None], axis=-2) + cfg["kappaY"] * M['ysub'][:, :, prev_nrn_t]
+                                       * M['z'][:, :, curr_nrn_t, -1, :, None], axis=-2) + cfg["kappa"] * M['ysub'][:, :, prev_nrn_t]
 
         M['y'][:, curr_nrn_t] = torch.sum(M['ysub'][:, :, curr_nrn_t], axis=0) * is_valid[:, None]
 
@@ -391,8 +393,10 @@ def eprop(cfg, X, T, n_steps, betas, W):
 
         meanrates = M['zs'] / (t+1)
         diff = meanrates - cfg["FR_target"]
+
         M['loss_reg'][:, :, curr_nrn_t] = (
             cfg["FR_reg"]
+            * t
             / (n_steps[None, :, None, None] if cfg["div_over_time"] else 1)
             * diff
             * is_valid[None, :, None, None])
@@ -400,11 +404,14 @@ def eprop(cfg, X, T, n_steps, betas, W):
         M['loss'][:, :, curr_nrn_t] = (M['loss_pred'][:, :, curr_nrn_t]
                                        + M['loss_reg'][:, :, curr_nrn_t])
         M['GW_in'][:, :, curr_syn_t] += (
-            M['loss'][:, :, curr_nrn_t, :, :, None]
+            M['loss_pred'][:, :, curr_nrn_t, :, :, None]
             * M['etbar'][:, :, curr_syn_t, :, :, :cfg["N_R"]])
         M['GW_rec'][:, :, curr_syn_t] += (
-            M['loss'][:, :, curr_nrn_t, :, :, None]
+            M['loss_pred'][:, :, curr_nrn_t, :, :, None]
             * M['etbar'][:, :, curr_syn_t, :, :, cfg["N_R"]:])
+
+        M['GW_in'][:, :, curr_syn_t] += M['loss_reg'][:, :, curr_nrn_t, :, :, None]
+        M['GW_rec'][:, :, curr_syn_t] += M['loss_reg'][:, :, curr_nrn_t, :, :, None]
 
         M['Gout'][:, :, curr_syn_t] += (
             M['d'][None, :, curr_nrn_t, None]
@@ -648,6 +655,9 @@ def load_data(cfg):
         rng.shuffle(shuf_idxs)
         inps[tvt_type] = inps[tvt_type][shuf_idxs]
         tars[tvt_type] = tars[tvt_type][shuf_idxs]
+
+        inps[tvt_type] = inps[tvt_type][:, :cfg["maxlen"]]
+        tars[tvt_type] = tars[tvt_type][:, :cfg["maxlen"]]
 
 
     return inps, tars

@@ -11,8 +11,7 @@ def main(cfg):
     print(f"New alpha: {cfg['alpha']}")
     print(f"New beta: {cfg['beta']}")
     print(f"New rho: {cfg['rho']}")
-    print(f"New kappaZ: {cfg['kappaZ']}")
-    print(f"New kappaY: {cfg['kappaY']}")
+    print(f"New kappa: {cfg['kappa']}")
     start_time = time.time()
     rng = np.random.default_rng(seed=cfg["seed"])
 

@@ -10,7 +10,7 @@ cfg = {
 
     "beta": 1.8,  # Bellec2: "order of 0.07", Bellec3: 0.184. Code: 1.8
     "gamma": 0.3,  # Bellec2: 0.3
-    "thr": 0.01,  # Bellec3: 1.6
+    "thr": 1.6,  # Bellec3: 1.6
     "dt_refr": 2,  # Bellec3: 2
 
     "dropout": 0,
@@ -28,16 +28,16 @@ cfg = {
     "L2_reg": 1e-5,  # Bellec3: 1e-5
     "FR_target": 0.01,  # BellecCode: 0.01 (10hz)
     "FR_reg": 50,  # Bellec3: 50
-    "div_over_time": False,
+    "div_over_time": True,
 
-    "N_R": 200,
+    "N_R": 32,
     "N_Rec": 1,
 
-    "task": "TIMIT",
+    "task": "TIMIT_small",
     "wavs_fname": "../data/data_wavs",
     "phns_fname": "../data/data_phns",
 
-    "cuda": True,
+    "cuda": False,
 
     "warmup": False,
     "one_to_one_output": False,
@@ -51,20 +51,20 @@ cfg = {
     "rho_N": 200,
     "kappa_N": 3,
 
-    "Epochs": 200,  # def = 80
+    "Epochs": 400,  # def = 80
     "Track_neuron": True,
-    "Track_synapse": False,
+    "Track_synapse": True,
     "Repeats": 1,  # ms per epoch, def = 5
     "Interpolation": 'nearest',  # nearest, linear
     "batch_size_train": 8,  # def = 32
     "batch_size_val": 8,  # def = 32
-    "batch_size_test": 8,  # def = 32
+    "batch_size_test": 2,  # def = 32
     "maxlen": 778,  #def 778, Don't forget to re-run process_timit.py!
     "TIMIT_derivative": 2,
-    "n_examples": {'train': 1, 'val': 1, 'test': 16},
+    "n_examples": {'train': 50, 'val': 50, 'test': 16},
     # # "n_examples": {'train': 3696, 'val': 400, 'test': 192},
     "plot_model_interval": 20,  # Per iter  #  State plot; 0 to disable plots
-    "plot_tracker_interval": 10,  # Per epoch
+    "plot_tracker_interval": 50,  # Per epoch
     "state_save_interval": 1000,
     "val_every_B": 5,
 
@@ -79,14 +79,8 @@ cfg = {
 
 cfg["rho"] = exp(-1/(cfg["rho_N"]))  # Bellec1: 200 = 0.995. 40: 0.975
 cfg["alpha"] = exp(-1/(cfg["alpha_N"]))  # Bellec1: 20 = 0.951. 4: 0.779
-cfg["kappaY"] = exp(-1/(cfg["kappa_N"]))  # Bellec1: 3 = 0.717. .75:~0.25
+cfg["kappa"] = exp(-1/(cfg["kappa_N"]))  # Bellec1: 3 = 0.717. .75:~0.25
 cfg["beta"] = cfg["beta"] *  (1 - exp(-1 / cfg["rho_N"])) / (1 - exp(-1 / cfg["alpha_N"]))
-cfg["kappaZ"] = (1 - exp(-1 / cfg["rho_N"])) / (1 - exp(-1 / cfg["alpha_N"]))
-# cfg["thr"] /= 1 - exp(-1 / cfg["alpha_N"])
-cfg["thr"] = 1.6
-# cfg["kappaZ"] = cfg["kappaY"]
-# cfg["FR_target"] /= cfg["Repeats"]
-# cfg["FR_reg"] /= cfg["Repeats"]
 
 lookup = {
     "x":       {"binary":False, "label": "x"},

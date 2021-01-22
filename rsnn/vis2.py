@@ -62,13 +62,12 @@ def plot_M(cfg, M, it, log_id, n_steps, inp_size):
         axs.append(fig.add_subplot(gsc[row_idx]))
         if var in ['y', 'p', 'pm', 't', 'd', 'correct']:
             arr = M[var][b, :n_steps[b]].cpu().numpy()
-        # elif var == 'vv':
-        #     print(M[var].shape)
-        #     arr = M[var][0, b, :n_steps[b], ..., :cfg["N_R"]].cpu().numpy()
         else:
             arr = M[var][0, b, :n_steps[b]].cpu().numpy()
         if var == 'x':
             arr = arr[:, :inp_size]
+        elif arr.ndim == 4:
+            arr = np.swapaxes(arr, 1, 3)  # Separate input and recurrent
         axs[-1].imshow(weights_to_img(arr,
                                       is_binary=lookup[var]["binary"]),
                        cmap=('RdYlGn' if var == 'correct' else
