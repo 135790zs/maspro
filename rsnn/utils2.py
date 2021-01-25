@@ -153,6 +153,33 @@ def initialize_weights(cfg, inp_size, tar_size):
     W["out"] = rng.normal(size=(cfg["n_directions"],
                                 cfg["N_R"],
                                 tar_size)) / np.sqrt(tar_size)
+    if cfg["uniform_dist"]:
+        W["W_in"] = rng.random(size=(cfg["n_directions"],
+                                 cfg["N_Rec"],
+                                 cfg["N_R"],
+                                 cfg["N_R"],)) * 2 - 1
+
+        W['W_in'][:, 0, :, inp_size:] = 0  # From padded channels
+        W['W_in'][:, 0] /= np.sqrt(inp_size)
+
+        for r in range(cfg["N_Rec"]):
+            if r > 0:
+                W['W_in'][:, r] /= np.sqrt(cfg["N_R"])
+
+        W["W_rec"] = rng.random(size=(cfg["n_directions"],
+                                      cfg["N_Rec"],
+                                      cfg["N_R"],
+                                      cfg["N_R"],)) * 2 - 1
+        W['W_rec'] /= np.sqrt(cfg["N_R"])
+
+
+        W["out"] = rng.random(size=(cfg["n_directions"],
+                                    cfg["N_R"],
+                                    tar_size)) * 2 - 1 / np.sqrt(tar_size)
+        W['out'] /= np.sqrt(tar_size)
+
+    for wtype in W.keys():
+        W[wtype] *= cfg["weightscale"]
 
     if cfg["one_to_one_output"]:
         W["out"] *= 0
@@ -204,6 +231,8 @@ def update_weights(W, G, adamvars, e, cfg, it_per_e):
         eta = cfg[f"eta_{wtype}"]
         if cfg["warmup"] and e == 0:
             eta *= adamvars['it'] / it_per_e
+
+        eta *= (1 - cfg["eta_decay"]) ** adamvars['it']
 
         if cfg["Optimizer"] == "Adam":
             adamvars[f"m{wtype}"] = (cfg["adam_beta1"] * adamvars[f"m{wtype}"]
@@ -338,9 +367,6 @@ def eprop(cfg, X, T, n_steps, betas, W):
                 1,
                 0) * is_valid[None, :, None]
 
-            M['tz'][:, :, r] = torch.where(M['z'][:, :, curr_nrn_t, r] != 0, t, M['tz'][:, :, r])
-            M['zs'][:, :, r] += M['z'][:, :, curr_nrn_t, r] * is_valid[None, :, None]
-
             M['h'][:, :, curr_nrn_t, r] = (
                 # ((1 / (A if cfg["v_fix"] else cfg["thr"])) if not cfg["v_fix_psi"] else 1)
                 (1 / cfg["thr"])
@@ -355,6 +381,9 @@ def eprop(cfg, X, T, n_steps, betas, W):
                 t - M['tz'][:, :, r] > cfg["dt_refr"],
                 M['h'][:, :, curr_nrn_t, r],
                 0.)
+
+            M['tz'][:, :, r] = torch.where(M['z'][:, :, curr_nrn_t, r] != 0, t, M['tz'][:, :, r])
+            M['zs'][:, :, r] += M['z'][:, :, curr_nrn_t, r] * is_valid[None, :, None]
 
             M['et'][:, :, curr_syn_t, r] = (
                 M['h'][:, :, curr_nrn_t, r, :, None]
@@ -398,7 +427,7 @@ def eprop(cfg, X, T, n_steps, betas, W):
             cfg["FR_reg"]
             * t
             / (n_steps[None, :, None, None] if cfg["div_over_time"] else 1)
-            * diff
+            * diff ** cfg["FR_pow"]
             * is_valid[None, :, None, None])
 
         M['loss'][:, :, curr_nrn_t] = (M['loss_pred'][:, :, curr_nrn_t]
@@ -412,6 +441,11 @@ def eprop(cfg, X, T, n_steps, betas, W):
 
         M['GW_in'][:, :, curr_syn_t] += M['loss_reg'][:, :, curr_nrn_t, :, :, None]
         M['GW_rec'][:, :, curr_syn_t] += M['loss_reg'][:, :, curr_nrn_t, :, :, None]
+
+        M['GW_in'][:, :, curr_syn_t] += (cfg["L2_reg"]
+            * is_valid[None, :, None, None, None] * torch.sum(W['W_in']**2))
+        M['GW_rec'][:, :, curr_syn_t] += (cfg["L2_reg"]
+            * is_valid[None, :, None, None, None] * torch.sum(W['W_rec']**2))
 
         M['Gout'][:, :, curr_syn_t] += (
             M['d'][None, :, curr_nrn_t, None]
@@ -434,14 +468,15 @@ def eprop(cfg, X, T, n_steps, betas, W):
 
     # Sum over time, Mean over batch
     G = {}
-    G['W_in'] = torch.mean(torch.sum(M['GW_in'], axis=2), axis=1)
-    G['W_rec'] = torch.mean(torch.sum(M['GW_rec'], axis=2), axis=1)
-    G['out'] = torch.mean(torch.sum(M['Gout'], axis=2), axis=1)
-    G['bias'] = torch.mean(torch.sum(M['Gbias'], axis=1), axis=0)
+    op = torch.sum if cfg["batch_op"] == 'sum' else torch.mean
+    G['W_in'] = op(torch.sum(M['GW_in'], axis=2), axis=1)
+    G['W_rec'] = op(torch.sum(M['GW_rec'], axis=2), axis=1)
+    G['out'] = op(torch.sum(M['Gout'], axis=2), axis=1)
+    G['bias'] = op(torch.sum(M['Gbias'], axis=1), axis=0)
 
-    # L2 regularization
-    for wtype in ['W_in', 'W_rec', 'out', 'bias']:
-        G[wtype] += cfg["L2_reg"] * W[wtype]**2
+    # # L2 regularization
+    # for wtype in ['W_in', 'W_rec', 'out', 'bias']:
+    #     G[wtype] += cfg["L2_reg"] * W[wtype]**2
 
 
     # Don't update dead weights
@@ -673,10 +708,10 @@ def get_log_id():
     return log_id + id_append
 
 
-
 def save_checkpoint(W, cfg, log_id):
     for wtype, w in W.items():
         np.save(f"../log/{log_id}/checkpoints/{wtype}", w.cpu().numpy())
+
 
 def load_checkpoint(log_id, parent_dir='log'):
     W = {}

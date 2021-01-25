@@ -15,10 +15,11 @@ cfg = {
 
     "dropout": 0,
 
-    "eta_W_in": 0.01,
-    "eta_W_rec": 0.01,
+    "eta_W_in": 0.01,  # Note: emp says 1e-3 with bias, out at 1e-2 works better
+    "eta_W_rec": 0.01,  # Note: emp says 1e-3 with bias, out at 1e-2 works better
     "eta_out": 0.01,
     "eta_bias": 0.01,
+    "eta_decay": 0,
 
     "adam_beta1": 0.9,
     "adam_beta2": 0.999,
@@ -28,16 +29,20 @@ cfg = {
     "L2_reg": 1e-5,  # Bellec3: 1e-5
     "FR_target": 0.01,  # BellecCode: 0.01 (10hz)
     "FR_reg": 50,  # Bellec3: 50
+    "FR_pow": 1,
     "div_over_time": True,
+    "batch_op": 'mean',
+    "uniform_dist": False,
+    "weightscale": 1,
 
-    "N_R": 32,
+    "N_R": 400,
     "N_Rec": 1,
 
-    "task": "TIMIT_small",
+    "task": "TIMIT",
     "wavs_fname": "../data/data_wavs",
     "phns_fname": "../data/data_phns",
 
-    "cuda": False,
+    "cuda": True,
 
     "warmup": False,
     "one_to_one_output": False,
@@ -51,22 +56,22 @@ cfg = {
     "rho_N": 200,
     "kappa_N": 3,
 
-    "Epochs": 400,  # def = 80
+    "Epochs": 1000,  # def = 80
     "Track_neuron": True,
-    "Track_synapse": True,
+    "Track_synapse": False,
     "Repeats": 1,  # ms per epoch, def = 5
     "Interpolation": 'nearest',  # nearest, linear
-    "batch_size_train": 8,  # def = 32
-    "batch_size_val": 8,  # def = 32
+    "batch_size_train": 12,  # def = 32
+    "batch_size_val": 12,  # def = 32
     "batch_size_test": 2,  # def = 32
     "maxlen": 778,  #def 778, Don't forget to re-run process_timit.py!
     "TIMIT_derivative": 2,
     "n_examples": {'train': 50, 'val': 50, 'test': 16},
     # # "n_examples": {'train': 3696, 'val': 400, 'test': 192},
-    "plot_model_interval": 20,  # Per iter  #  State plot; 0 to disable plots
-    "plot_tracker_interval": 50,  # Per epoch
-    "state_save_interval": 1000,
-    "val_every_B": 5,
+    "plot_model_interval": 10,  # Per iter  #  State plot; 0 to disable plots
+    "plot_tracker_interval": 10,  # Per epoch
+    "state_save_interval": 50,
+    "val_every_B": 10,
 
     "frame_size": 0.025,
     "frame_stride": 0.01,
