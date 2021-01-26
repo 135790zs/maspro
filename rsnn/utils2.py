@@ -271,9 +271,14 @@ def update_weights(W, G, adamvars, e, cfg, it_per_e):
 
                 dw = -eta * m * r * l
 
+        elif cfg["Optimizer"] == "Momentum":
+            adamvars[f"m{wtype}"] = cfg["adam_beta1"] * adamvars[f"m{wtype}"] - eta * G[wtype]
 
-            else:
-                dw = -eta * m
+            dw = adamvars[f"m{wtype}"]
+
+        else:
+            print("Warning: undefined optimizer")
+            dw = -eta * m
 
         W[wtype] += dw
 
@@ -326,27 +331,29 @@ def eprop(cfg, X, T, n_steps, betas, W):
 
         for r in range(cfg["N_Rec"]):  # TODO: Can overwrite r instead of appending, except Z
             # TODO: See which is_valid masks can be removed
-
             M['va'][:, :, curr_syn_t, r] = (
                 M['h'][:, :, prev_nrn_t, r, :, None] * M['vv'][:, :, prev_syn_t, r]
-                + (cfg["rho"] - (M['h'][:, :, prev_nrn_t, r]
-                                 * betas[:, None, r]))[..., None]
+                + (cfg["rho"] - (M['h'][:, :, prev_nrn_t, r, :, None]
+                                 * betas[:, None, r, :, None]))
                 * M['va'][:, :, prev_syn_t, r]) * is_valid[None, :, None, None]
 
             Z_prev_layer = (M['z'][:, :, curr_nrn_t, r-1] if r
                             else M['x'][:, :, t] * is_valid[None, :, None])
             Z_prev_time = M['z'][:, :, prev_nrn_t, r]
+
+            # Z_in is incoming at current t, so from last t.
             M['z_in'][:, :, curr_nrn_t, r] = torch.cat((Z_prev_layer, Z_prev_time), axis=2)
 
             M['vv'][:, :, curr_syn_t, r] = (
                 cfg["alpha"]
-                * M['vv'][:, :, prev_syn_t, r] + M['z_in'][:, :, prev_nrn_t, r, None]
+                * M['vv'][:, :, prev_syn_t, r]
+                + M['z_in'][:, :, curr_nrn_t, r, None, :]
                 ) * is_valid[None, :, None, None]
 
             # Can contract this further!
-            M['I_in'][:, :, curr_nrn_t, r] = torch.sum(W['W_in'][:, None, r] * Z_prev_layer[..., None, :], axis=-1) # Checked correct
+            M['I_in'][:, :, curr_nrn_t, r] = torch.sum(W['W_in'][:, None, r] * Z_prev_layer[:, :, None, :], axis=-1) # Checked correct
 
-            M['I_rec'][:, :, curr_nrn_t, r] = torch.sum(W['W_rec'][:, None, r] * Z_prev_time[..., None, :], axis=-1) # Checked correct
+            M['I_rec'][:, :, curr_nrn_t, r] = torch.sum(W['W_rec'][:, None, r] * Z_prev_time[:, :, None, :], axis=-1) # Checked correct
 
             M['I'][:, :, curr_nrn_t, r] = M['I_in'][:, :, curr_nrn_t, r] + M['I_rec'][:, :, curr_nrn_t, r]
 
@@ -368,8 +375,8 @@ def eprop(cfg, X, T, n_steps, betas, W):
                 0) * is_valid[None, :, None]
 
             M['h'][:, :, curr_nrn_t, r] = (
-                # ((1 / (A if cfg["v_fix"] else cfg["thr"])) if not cfg["v_fix_psi"] else 1)
-                (1 / cfg["thr"])
+                ((1 / (A if cfg["v_fix"] else cfg["thr"])) if not cfg["v_fix_psi"] else 1)
+                # (1 / cfg["thr"])
                 * cfg["gamma"]
                 * torch.clip(
                     1 - (abs((M['v'][:, :, curr_nrn_t, r] - A) / cfg["thr"])),
@@ -401,8 +408,11 @@ def eprop(cfg, X, T, n_steps, betas, W):
                 * M['zbar'][:, :, prev_nrn_t, r] + M['z'][:, :, curr_nrn_t, r]
                 ) * is_valid[None, :, None]
 
-        M['ysub'][:, :, curr_nrn_t] = torch.sum(W['out'][:, None]
-                                       * M['z'][:, :, curr_nrn_t, -1, :, None], axis=-2) + cfg["kappa"] * M['ysub'][:, :, prev_nrn_t]
+        M['ysub'][:, :, curr_nrn_t] = (
+            torch.sum(
+                W['out'][:, None] * M['z'][:, :, curr_nrn_t, -1, :, None],
+                axis=-2)
+            + cfg["kappa"] * M['ysub'][:, :, prev_nrn_t])
 
         M['y'][:, curr_nrn_t] = torch.sum(M['ysub'][:, :, curr_nrn_t], axis=0) * is_valid[:, None]
 
@@ -425,13 +435,15 @@ def eprop(cfg, X, T, n_steps, betas, W):
 
         M['loss_reg'][:, :, curr_nrn_t] = (
             cfg["FR_reg"]
-            * t
+            * (t if cfg["t_fix"] else 1)
             / (n_steps[None, :, None, None] if cfg["div_over_time"] else 1)
             * diff ** cfg["FR_pow"]
             * is_valid[None, :, None, None])
 
-        M['loss'][:, :, curr_nrn_t] = (M['loss_pred'][:, :, curr_nrn_t]
-                                       + M['loss_reg'][:, :, curr_nrn_t])
+        M['loss_reg'][:, :, curr_nrn_t] += (cfg["L2_reg"]
+            * is_valid[None, :, None, None]
+            * torch.sum(W['W_in']**2+W['W_rec']**2))
+
         M['GW_in'][:, :, curr_syn_t] += (
             M['loss_pred'][:, :, curr_nrn_t, :, :, None]
             * M['etbar'][:, :, curr_syn_t, :, :, :cfg["N_R"]])
@@ -439,13 +451,17 @@ def eprop(cfg, X, T, n_steps, betas, W):
             M['loss_pred'][:, :, curr_nrn_t, :, :, None]
             * M['etbar'][:, :, curr_syn_t, :, :, cfg["N_R"]:])
 
-        M['GW_in'][:, :, curr_syn_t] += M['loss_reg'][:, :, curr_nrn_t, :, :, None]
-        M['GW_rec'][:, :, curr_syn_t] += M['loss_reg'][:, :, curr_nrn_t, :, :, None]
+        if cfg["mp_by_et"]:
+            M['GW_in'][:, :, curr_syn_t] += (
+                M['loss_reg'][:, :, curr_nrn_t, :, :, None]
+                * M['et'][:, :, curr_syn_t, :, :, :cfg["N_R"]])
+            M['GW_rec'][:, :, curr_syn_t] += (
+                M['loss_reg'][:, :, curr_nrn_t, :, :, None]
+                * M['et'][:, :, curr_syn_t, :, :, cfg["N_R"]:])
+        else:
+            M['GW_in'][:, :, curr_syn_t] += M['loss_reg'][:, :, curr_nrn_t, :, :, None]
+            M['GW_rec'][:, :, curr_syn_t] += M['loss_reg'][:, :, curr_nrn_t, :, :, None]
 
-        M['GW_in'][:, :, curr_syn_t] += (cfg["L2_reg"]
-            * is_valid[None, :, None, None, None] * torch.sum(W['W_in']**2))
-        M['GW_rec'][:, :, curr_syn_t] += (cfg["L2_reg"]
-            * is_valid[None, :, None, None, None] * torch.sum(W['W_rec']**2))
 
         M['Gout'][:, :, curr_syn_t] += (
             M['d'][None, :, curr_nrn_t, None]
@@ -534,7 +550,7 @@ def initialize_betas(cfg):
     return betas
 
 
-def conn_t_idxs(t, track_synapse):  # TODO: Rework this and previous function to same idea
+def conn_t_idxs(t, track_synapse):
     if track_synapse:
         return t-1, t
     return 0, 0
@@ -671,6 +687,9 @@ def load_data(cfg):
     rng = np.random.default_rng(seed=cfg["seed"])
     for tvt_type in cfg['n_examples'].keys():
         inps[tvt_type] = np.load(f"{cfg['wavs_fname']}_{tvt_type}_{cfg['task']}.npy")
+        tars[tvt_type] = np.load(f"{cfg['phns_fname']}_{tvt_type}_{cfg['task']}.npy")
+
+
 
     mintrain = np.amin(inps['train'], axis=(0, 1))
     maxtrain = np.ptp(inps['train'], axis=(0, 1))
@@ -681,7 +700,6 @@ def load_data(cfg):
         inps[tvt_type] = np.where(inps[tvt_type] != -1, inps[tvt_type] - mintrain, -1)
         inps[tvt_type] = np.where(inps[tvt_type] != -1, inps[tvt_type] / maxtrain, -1)
 
-        tars[tvt_type] = np.load(f"{cfg['phns_fname']}_{tvt_type}_{cfg['task']}.npy")
 
         # Add blank
         tars[tvt_type] = np.append(np.zeros_like(tars[tvt_type][:, :, :1]), tars[tvt_type], axis=2)
@@ -693,7 +711,6 @@ def load_data(cfg):
 
         inps[tvt_type] = inps[tvt_type][:, :cfg["maxlen"]]
         tars[tvt_type] = tars[tvt_type][:, :cfg["maxlen"]]
-
 
     return inps, tars
 

@@ -37,7 +37,7 @@ def weights_to_img(arr, is_binary=False):
 def plot_M(cfg, M, it, log_id, n_steps, inp_size):
     plotvars = ['x']
     if cfg["Track_neuron"]:
-        plotvars += ['I', "v", "a", "z", "h", 'loss_pred', 'loss_reg', 'loss']
+        plotvars += ['I', "v", "a", "z", "h", 'loss_pred', 'loss_reg']
     if cfg["Track_synapse"]:
         plotvars += ["vv", "va", "etbar", "GW_in", "GW_rec"]
     if cfg["Track_neuron"]:
@@ -143,7 +143,7 @@ def plot_W(cfg, W_log, log_id):
                 axs[-1].plot(arr[arr >= 0], label=tvtype)
             axs[-1].legend()
             axs[-1].grid()
-            if k in ['Cross-entropy', 'Percentage wrong']:
+            if k in ['Cross-entropy', 'Percentage wrong', 'Error (reg)']:
                 axs[-1].set_yscale('log')
             axs[-1].set_ylabel(k,
                                rotation=0,

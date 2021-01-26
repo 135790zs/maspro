@@ -1,6 +1,6 @@
 from numpy import exp
 cfg = {
-    "eprop_type": "symmetric",  # in {global, random, symmetric, adaptive}
+    "eprop_type": "random",  # in {global, random, symmetric, adaptive}
     "Optimizer": "Adam",
     "v_fix": False,
     "v_fix_psi": False,
@@ -28,9 +28,12 @@ cfg = {
     "weight_decay": 1e-2,  # Bellec3: 1e-2
     "L2_reg": 1e-5,  # Bellec3: 1e-5
     "FR_target": 0.01,  # BellecCode: 0.01 (10hz)
-    "FR_reg": 50,  # Bellec3: 50
+    "FR_reg": 10,  # Bellec3: 50
     "FR_pow": 1,
+    "t_fix": True,
     "div_over_time": True,
+    "mp_by_et": False,
+
     "batch_op": 'mean',
     "uniform_dist": False,
     "weightscale": 1,
@@ -38,7 +41,7 @@ cfg = {
     "N_R": 400,
     "N_Rec": 1,
 
-    "task": "TIMIT",
+    "task": "TIMIT_small",
     "wavs_fname": "../data/data_wavs",
     "phns_fname": "../data/data_phns",
 
@@ -52,21 +55,21 @@ cfg = {
     "train_out": True,
     "train_bias": True,
 
-    "alpha_N": 20,
-    "rho_N": 200,
-    "kappa_N": 3,
+    # "alpha_N": 1,
+    # "rho_N": 20,
+    # "kappa_N": 3,
 
     "Epochs": 1000,  # def = 80
     "Track_neuron": True,
     "Track_synapse": False,
     "Repeats": 1,  # ms per epoch, def = 5
     "Interpolation": 'nearest',  # nearest, linear
-    "batch_size_train": 12,  # def = 32
-    "batch_size_val": 12,  # def = 32
+    "batch_size_train": 10,  # def = 32
+    "batch_size_val": 20,  # def = 32
     "batch_size_test": 2,  # def = 32
-    "maxlen": 778,  #def 778, Don't forget to re-run process_timit.py!
+    "maxlen": 778,
     "TIMIT_derivative": 2,
-    "n_examples": {'train': 50, 'val': 50, 'test': 16},
+    "n_examples": {'train': 10, 'val': 20, 'test': 50},
     # # "n_examples": {'train': 3696, 'val': 400, 'test': 192},
     "plot_model_interval": 10,  # Per iter  #  State plot; 0 to disable plots
     "plot_tracker_interval": 10,  # Per epoch
@@ -82,10 +85,16 @@ cfg = {
     "cep_lifter": 22,
 }
 
-cfg["rho"] = exp(-1/(cfg["rho_N"]))  # Bellec1: 200 = 0.995. 40: 0.975
-cfg["alpha"] = exp(-1/(cfg["alpha_N"]))  # Bellec1: 20 = 0.951. 4: 0.779
-cfg["kappa"] = exp(-1/(cfg["kappa_N"]))  # Bellec1: 3 = 0.717. .75:~0.25
-cfg["beta"] = cfg["beta"] *  (1 - exp(-1 / cfg["rho_N"])) / (1 - exp(-1 / cfg["alpha_N"]))
+# cfg["rho"] = exp(-1/(cfg["rho_N"]))  # Bellec1: 200 = 0.995. 40: 0.975
+# cfg["alpha"] = exp(-1/(cfg["alpha_N"]))  # Bellec1: 20 = 0.951. 4: 0.779
+# cfg["kappa"] = exp(-1/(cfg["kappa_N"]))  # Bellec1: 3 = 0.717. .75:~0.25
+# cfg["beta"] = cfg["beta"] *  (1 - exp(-1 / cfg["rho_N"])) / (1 - exp(-1 / cfg["alpha_N"]))
+
+cfg["rho"] = 0.995
+cfg["alpha"] = 0.95
+cfg["kappa"] = 0.717
+cfg["beta"] = 0.184
+cfg["thr"] = 1.6
 
 lookup = {
     "x":       {"binary":False, "label": "x"},
