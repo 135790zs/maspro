@@ -3,11 +3,14 @@ cfg = {
     "eprop_type": "random",  # in {global, random, symmetric, adaptive}
     "Optimizer": "Adam",
     "v_fix": False,
-    "v_fix_psi": False,
+    "v_fix_psi": True,
     "fraction_ALIF": 0.25,  # def 0.25
     "n_directions": 1,  # Reduces error from 36.1 to 32.9.
     "seed": None,  # 'None' for random seed
 
+    "alpha": 0.8,
+    "rho": 0.975,
+    "kappa": 0.25,
     "beta": 1.8,  # Bellec2: "order of 0.07", Bellec3: 0.184. Code: 1.8
     "gamma": 0.3,  # Bellec2: 0.3
     "thr": 1.6,  # Bellec3: 1.6
@@ -15,8 +18,8 @@ cfg = {
 
     "dropout": 0,
 
-    "eta_W_in": 0.01,  # Note: emp says 1e-3 with bias, out at 1e-2 works better
-    "eta_W_rec": 0.01,  # Note: emp says 1e-3 with bias, out at 1e-2 works better
+    "eta_W_in": 0.01,
+    "eta_W_rec": 0.01,
     "eta_out": 0.01,
     "eta_bias": 0.01,
     "eta_decay": 0,
@@ -26,22 +29,18 @@ cfg = {
     "adam_eps": 1e-5,
 
     "weight_decay": 1e-2,  # Bellec3: 1e-2
-    "L2_reg": 1e-5,  # Bellec3: 1e-5
+    "L2_reg": 0,  # Bellec3: 1e-5
     "FR_target": 0.01,  # BellecCode: 0.01 (10hz)
-    "FR_reg": 10,  # Bellec3: 50
-    "FR_pow": 1,
-    "t_fix": True,
-    "div_over_time": True,
-    "mp_by_et": False,
+    "FR_reg": 0.1,  # Bellec3: 50
 
     "batch_op": 'mean',
-    "uniform_dist": False,
+    "uniform_dist": True,
     "weightscale": 1,
 
     "N_R": 400,
     "N_Rec": 1,
 
-    "task": "TIMIT_small",
+    "task": "TIMIT",
     "wavs_fname": "../data/data_wavs",
     "phns_fname": "../data/data_phns",
 
@@ -55,24 +54,20 @@ cfg = {
     "train_out": True,
     "train_bias": True,
 
-    # "alpha_N": 1,
-    # "rho_N": 20,
-    # "kappa_N": 3,
-
-    "Epochs": 1000,  # def = 80
-    "Track_neuron": True,
+    "Epochs": 500,  # def = 80
+    "Track_neuron": False,
     "Track_synapse": False,
     "Repeats": 1,  # ms per epoch, def = 5
     "Interpolation": 'nearest',  # nearest, linear
-    "batch_size_train": 10,  # def = 32
-    "batch_size_val": 20,  # def = 32
+    "batch_size_train": 12,  # def = 32
+    "batch_size_val": 12,  # def = 32
     "batch_size_test": 2,  # def = 32
     "maxlen": 778,
     "TIMIT_derivative": 2,
-    "n_examples": {'train': 10, 'val': 20, 'test': 50},
+    "n_examples": {'train': 32, 'val': 1, 'test': 50},
     # # "n_examples": {'train': 3696, 'val': 400, 'test': 192},
-    "plot_model_interval": 10,  # Per iter  #  State plot; 0 to disable plots
-    "plot_tracker_interval": 10,  # Per epoch
+    "plot_model_interval": 20,  # Per iter  #  State plot; 0 to disable plots
+    "plot_tracker_interval": 5,  # Per it
     "state_save_interval": 50,
     "val_every_B": 10,
 
@@ -90,11 +85,6 @@ cfg = {
 # cfg["kappa"] = exp(-1/(cfg["kappa_N"]))  # Bellec1: 3 = 0.717. .75:~0.25
 # cfg["beta"] = cfg["beta"] *  (1 - exp(-1 / cfg["rho_N"])) / (1 - exp(-1 / cfg["alpha_N"]))
 
-cfg["rho"] = 0.995
-cfg["alpha"] = 0.95
-cfg["kappa"] = 0.717
-cfg["beta"] = 0.184
-cfg["thr"] = 1.6
 
 lookup = {
     "x":       {"binary":False, "label": "x"},

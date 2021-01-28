@@ -39,7 +39,7 @@ def plot_M(cfg, M, it, log_id, n_steps, inp_size):
     if cfg["Track_neuron"]:
         plotvars += ['I', "v", "a", "z", "h", 'loss_pred', 'loss_reg']
     if cfg["Track_synapse"]:
-        plotvars += ["vv", "va", "etbar", "GW_in", "GW_rec"]
+        plotvars += ["vv", "va", "et", "etbar", "GW_in", "GW_rec"]
     if cfg["Track_neuron"]:
         plotvars += ["y", 'd']
     plotvars += ['p', 'pm', 't', 'correct']
