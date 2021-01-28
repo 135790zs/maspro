@@ -1,8 +1,8 @@
 import time
 import numpy as np
 from config2 import cfg as CFG
-import utils2 as ut
-import vis2 as vis
+import utilsfast as ut
+import visfast as vis
 
 
 

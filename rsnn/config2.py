@@ -11,13 +11,14 @@ cfg = {
     "alpha": 0.8,
     "rho": 0.975,
     "kappa": 0.25,
-    "beta": 1.8,  # Bellec2: "order of 0.07", Bellec3: 0.184. Code: 1.8
+    "beta": 0.184,  # Bellec2: "order of 0.07", Bellec3: 0.184. Code: 1.8
     "gamma": 0.3,  # Bellec2: 0.3
     "thr": 1.6,  # Bellec3: 1.6
     "dt_refr": 2,  # Bellec3: 2
 
     "dropout": 0,
 
+    "eta_W": 0.01,  # for fast
     "eta_W_in": 0.01,
     "eta_W_rec": 0.01,
     "eta_out": 0.01,
@@ -29,9 +30,9 @@ cfg = {
     "adam_eps": 1e-5,
 
     "weight_decay": 1e-2,  # Bellec3: 1e-2
-    "L2_reg": 0,  # Bellec3: 1e-5
+    "L2_reg": 1e-5,  # Bellec3: 1e-5
     "FR_target": 0.01,  # BellecCode: 0.01 (10hz)
-    "FR_reg": 0.1,  # Bellec3: 50
+    "FR_reg": 50*32,  # Bellec3: 50
 
     "batch_op": 'mean',
     "uniform_dist": True,
@@ -49,25 +50,26 @@ cfg = {
     "warmup": False,
     "one_to_one_output": False,
 
+    "train_W": True,  # for fast
     "train_W_in": True,
     "train_W_rec": True,
     "train_out": True,
     "train_bias": True,
 
     "Epochs": 500,  # def = 80
-    "Track_neuron": False,
+    "Track_neuron": True,
     "Track_synapse": False,
     "Repeats": 1,  # ms per epoch, def = 5
     "Interpolation": 'nearest',  # nearest, linear
-    "batch_size_train": 12,  # def = 32
-    "batch_size_val": 12,  # def = 32
+    "batch_size_train": 32,  # def = 32
+    "batch_size_val": 32,  # def = 32
     "batch_size_test": 2,  # def = 32
     "maxlen": 778,
     "TIMIT_derivative": 2,
-    "n_examples": {'train': 32, 'val': 1, 'test': 50},
+    "n_examples": {'train': 370, 'val': 32, 'test': 50},
     # # "n_examples": {'train': 3696, 'val': 400, 'test': 192},
     "plot_model_interval": 20,  # Per iter  #  State plot; 0 to disable plots
-    "plot_tracker_interval": 5,  # Per it
+    "plot_tracker_interval": 10,  # Per it
     "state_save_interval": 50,
     "val_every_B": 10,
 
