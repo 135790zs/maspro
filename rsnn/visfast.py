@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import matplotlib.cm as mpcm
 from matplotlib import rcParams as rc
 import numpy as np
-from config2 import lookup
+from config import lookup
 
 rc['mathtext.fontset'] = 'stix'
 rc['font.family'] = 'STIXGeneral'

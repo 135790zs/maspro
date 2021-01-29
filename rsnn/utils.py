@@ -7,6 +7,7 @@ from scipy.interpolate import interp1d
 import time
 import torch
 from config import cfg  # For cuda only
+import csv
 
 if cfg["cuda"]:
     torch.set_default_tensor_type('torch.cuda.FloatTensor')
@@ -55,6 +56,8 @@ def initialize_model(cfg, inp_size, tar_size, batch_size, n_steps):
 
     for var in ['z', 'I', 'I_in', 'I_rec', 'h', 'v', 'a', 'zbar', 'loss_pred']:
         M[var] = torch.zeros(size=nrn_shape, )
+    if cfg["neuron"] == "Izhikevich":
+        M['v'] = torch.ones_like(M['v']) * cfg["IzhReset"]
 
     for var in ['loss_reg']:
         M[var] = torch.zeros(size=nrn_shape_nobatch, )
@@ -335,11 +338,19 @@ def eprop(cfg, X, T, n_steps, betas, W):
 
         for r in range(cfg["N_Rec"]):  # TODO: Can overwrite r instead of appending, except Z
             # TODO: See which is_valid masks can be removed
-            M['va'][:, :, curr_syn_t, r] = (
-                M['h'][:, :, prev_nrn_t, r, :, None] * M['vv'][:, :, prev_syn_t, r]
-                + (cfg["rho"] - (M['h'][:, :, prev_nrn_t, r, :, None]
-                                 * betas[:, None, r, :, None]))
-                * M['va'][:, :, prev_syn_t, r])
+
+
+            if cfg["neuron"] in ["ALIF", "STDP-ALIF"]:
+                M['va'][:, :, curr_syn_t, r] = (
+                    M['h'][:, :, prev_nrn_t, r, :, None] * M['vv'][:, :, prev_syn_t, r]
+                    + (cfg["rho"] - (M['h'][:, :, prev_nrn_t, r, :, None]
+                                     * betas[:, None, r, :, None]))
+                    * M['va'][:, :, prev_syn_t, r])
+            elif cfg["neuron"] == "Izhikevich":
+                oldva = M['va'][:, :, prev_syn_t, r]
+                M['va'][:, :, curr_syn_t, r] = (
+                    cfg["IzhA1"] * (1 - M['z'][:, :, prev_nrn_t, r, :, None]) * M['vv'][:, :, prev_syn_t, r]
+                    + (1 + cfg["IzhA2"]) * oldva)
 
             Z_prev_layer = (M['z'][:, :, curr_nrn_t, r-1] if r
                             else M['x'][:, :, t])
@@ -347,6 +358,7 @@ def eprop(cfg, X, T, n_steps, betas, W):
 
             # Z_in is incoming at current t, so from last t.
             M['z_in'][:, :, curr_nrn_t, r] = torch.cat((Z_prev_layer, Z_prev_time), axis=2)
+
             if cfg["neuron"] == "ALIF":
                 M['vv'][:, :, curr_syn_t, r] = (
                     cfg["alpha"]
@@ -363,6 +375,14 @@ def eprop(cfg, X, T, n_steps, betas, W):
                             0))[..., None]
                     + M['z_in'][:, :, curr_nrn_t, r, None, :]
                     )
+            elif cfg["neuron"] == "Izhikevich":
+                M['vv'][:, :, curr_syn_t, r] = (
+                    (1 - M['z'][:, :, prev_nrn_t, r, :, None])
+                    * (1 + (2 * cfg["IzhV1"] * M['v'][:, :, prev_nrn_t, r, :, None] + cfg["IzhV2"]))
+                    * M['vv'][:, :, prev_syn_t, r]
+                    - oldva
+                    + M['z_in'][:, :, curr_nrn_t, r, None, :])
+
             # Can contract this further!
             M['I_in'][:, :, curr_nrn_t, r] = torch.sum(W['W_in'][:, None, r] * Z_prev_layer[:, :, None, :], axis=-1) # Checked correct
 
@@ -370,8 +390,16 @@ def eprop(cfg, X, T, n_steps, betas, W):
 
             M['I'][:, :, curr_nrn_t, r] = M['I_in'][:, :, curr_nrn_t, r] + M['I_rec'][:, :, curr_nrn_t, r]
 
-            M['a'][:, :, curr_nrn_t, r] = (cfg["rho"] * M['a'][:, :, prev_nrn_t, r]
-                                  + M['z'][:, :, prev_nrn_t, r])
+            if cfg["neuron"] in ["ALIF", "STDP-ALIF"]:
+                M['a'][:, :, curr_nrn_t, r] = (cfg["rho"] * M['a'][:, :, prev_nrn_t, r]
+                                      + M['z'][:, :, prev_nrn_t, r])
+
+            elif cfg["neuron"] == "Izhikevich":
+                at = M['a'][:, :, prev_nrn_t, r] + 2 * M['z'][:, :, prev_nrn_t, r]
+                M['a'][:, :, curr_nrn_t, r] = (
+                    at
+                    + cfg["IzhA1"] * (M['v'][:, :, prev_nrn_t, r] - (M['v'][:, :, prev_nrn_t, r] + cfg["thr"]) * M['z'][:, :, prev_nrn_t, r])
+                    + cfg["IzhA2"] * at)
 
             A = cfg["thr"] + betas[:, None, r] * M['a'][:, :, curr_nrn_t, r]
 
@@ -391,25 +419,55 @@ def eprop(cfg, X, T, n_steps, betas, W):
                             1,
                             0))
                       )
+            elif cfg["neuron"] == "Izhikevich":
+                vt = M['v'][:, :, prev_nrn_t, r] - (M['v'][:, :, prev_nrn_t, r] - cfg["IzhReset"]) * M['z'][:, :, prev_nrn_t, r]
+                M['v'][:, :, curr_nrn_t, r] = (
+                      vt
+                      + cfg["IzhV1"]*vt**2
+                      + cfg["IzhV2"]*vt
+                      + cfg["IzhV3"]
+                      - (M['a'][:, :, prev_nrn_t, r] + 2 * M['z'][:, :, prev_nrn_t, r])
+                      + M['I'][:, :, curr_nrn_t, r]
+                      )
 
-            M['z'][:, :, curr_nrn_t, r] = torch.where(
-                torch.logical_and(t - M['tz'][:, :, r] > cfg["dt_refr"],
-                                  M['v'][:, :, curr_nrn_t, r] >= A),
-                1,
-                0)
+            if cfg["neuron"] in ["ALIF", "STDP-ALIF"]:
+                M['z'][:, :, curr_nrn_t, r] = torch.where(
+                    torch.logical_and(t - M['tz'][:, :, r] > cfg["dt_refr"],
+                                      M['v'][:, :, curr_nrn_t, r] >= A),
+                    1,
+                    0)
+            elif cfg["neuron"] == "Izhikevich":
+                M['z'][:, :, curr_nrn_t, r] = torch.where(
+                    M['v'][:, :, curr_nrn_t, r] >= cfg["thr"],
+                    1,
+                    0)
+                M['v'][:, :, curr_nrn_t, r] = torch.where(
+                    M['z'][:, :, curr_nrn_t, r] == 1,
+                    torch.ones_like(M['v'][:, :, curr_nrn_t, r]) * cfg["IzhReset"],
+                    M['v'][:, :, curr_nrn_t, r])
+                M['a'][:, :, curr_nrn_t, r] = torch.where(
+                    M['z'][:, :, curr_nrn_t, r] == 1,
+                    M['a'][:, :, curr_nrn_t, r] + 2,
+                    M['a'][:, :, curr_nrn_t, r])
+
             M['tz'][:, :, r] = torch.where(M['z'][:, :, curr_nrn_t, r] != 0,
                                            torch.ones_like(M['tz'][:, :, r])*t,
                                            M['tz'][:, :, r])
-            M['zs'][:, :, r] += M['z'][:, :, curr_nrn_t, r]
+            M['zs'][:, :, r] += M['z'][:, :, curr_nrn_t, r] * is_valid[None, :, None]
 
-            M['h'][:, :, curr_nrn_t, r] = (
-                ((1 / (A if cfg["v_fix"] else cfg["thr"])) if not cfg["v_fix_psi"] else 1)
-                # (1 / cfg["thr"])
-                * cfg["gamma"]
-                * torch.clip(
-                    1 - (abs((M['v'][:, :, curr_nrn_t, r] - A) / cfg["thr"])),
-                    0,
-                    None))
+            if cfg["neuron"] in ['ALIF', "STDP-ALIF"]:
+                M['h'][:, :, curr_nrn_t, r] = (
+                    ((1 / (A if cfg["v_fix"] else cfg["thr"])) if not cfg["v_fix_psi"] else 1)
+                    # (1 / cfg["thr"])
+                    * cfg["gamma"]
+                    * torch.clip(
+                        1 - (abs((M['v'][:, :, curr_nrn_t, r] - A) / cfg["thr"])),
+                        0,
+                        None))
+            elif cfg["neuron"] == 'Izhikevich':
+                cfg["gamma"] * torch.exp(
+                    (torch.clip(M['v'][:, :, curr_nrn_t, r], None, cfg["IzhPsi"]) - cfg["IzhPsi"])
+                    / cfg["IzhPsi"])
 
             if cfg["neuron"] == "ALIF":
                 M['h'][:, :, curr_nrn_t, r] = torch.where(
@@ -424,12 +482,15 @@ def eprop(cfg, X, T, n_steps, betas, W):
 
 
 
-            M['et'][:, :, curr_syn_t, r] = (
-                M['h'][:, :, curr_nrn_t, r, :, None]
-                * (M['vv'][:, :, curr_syn_t, r]
-                   - betas[:, None, r, :, None] * M['va'][:, :, curr_syn_t, r])
-                )
-
+            if cfg["neuron"] in ['ALIF', "STDP-ALIF"]:
+                M['et'][:, :, curr_syn_t, r] = (
+                    M['h'][:, :, curr_nrn_t, r, :, None]
+                    * (M['vv'][:, :, curr_syn_t, r]
+                       - betas[:, None, r, :, None] * M['va'][:, :, curr_syn_t, r])
+                    )
+            elif cfg["neuron"] == 'Izhikevich':
+                M['et'][:, :, curr_syn_t, r] = (
+                    M['h'][:, :, curr_nrn_t, r, :, None] * M['vv'][:, :, curr_syn_t, r])
 
             M['etbar'][:, :, curr_syn_t, r] = (
                 cfg["kappa"]
@@ -456,7 +517,7 @@ def eprop(cfg, X, T, n_steps, betas, W):
 
         M['p'][:, t] = M['p'][:, t] / torch.sum(M['p'][:, t], axis=1)[:, None]
 
-        M['d'][:, curr_nrn_t] = (M['p'][:, t] - T[:, t]) * is_valid[:, None]
+        M['d'][:, curr_nrn_t] = (M['p'][:, t] - T[:, t])
 
         M['loss_pred'][:, :, curr_nrn_t] = torch.sum(
             W['B'][:, None, :, :] * M['d'][None, :, curr_nrn_t, None, None, :],  # Checked correct (for batch size 1)
@@ -472,8 +533,8 @@ def eprop(cfg, X, T, n_steps, betas, W):
 
         M['loss_reg'][:, curr_nrn_t] = torch.mean(
             cfg["FR_reg"]
-            * 2 * t  # Initial means are less informative
-            / n_steps[None, :, None, None] ** 2  # Square corrects previous term
+            # * 2 * t  # Initial means are less informative
+            # / n_steps[None, :, None, None] ** 2  # Square corrects previous term
             * (M['zs'] / (t+1) - cfg["FR_target"]) * is_valid[None, :, None, None], axis=1)
 
         M['GW_in'][:, curr_syn_t] += M['loss_reg'][:, curr_nrn_t, :, :, None]
@@ -593,11 +654,24 @@ def initialize_W_log(cfg, W, sample_size=100):
     return W_log
 
 
-def update_W_log(W_log, Mt, Mv, W):
+def update_W_log(W_log, Mt, Mv, W, log_id):
     # weights sample
     for wtype, w in W.items():
         wcpu = w.cpu().numpy()
         W_log[wtype] = np.append(W_log[wtype], wcpu.flatten()[W_log[f'{wtype}_idxs']][:, None], axis=1)
+
+    if not os.path.exists(f'../log/{log_id}/tracker/'):
+        os.mkdir(f'../log/{log_id}/tracker/')
+
+    for key in ['Error (reg)', 'Percentage wrong', 'Mean Hz', 'Cross-entropy']:
+
+        if not os.path.exists(f'../log/{log_id}/tracker/{key}.csv'):
+            with open(f'../log/{log_id}/tracker/{key}.csv', 'w', newline='') as new_csv:
+                varname_writer = csv.writer(new_csv,
+                                        delimiter=',',
+                                        quotechar='"',
+                                        quoting=csv.QUOTE_MINIMAL)
+                varname_writer.writerow(['train', 'val'])
 
     for tv_type, M in (('train', Mt), ('val', Mv)):
         if M is None:  # Mv skipped
@@ -621,14 +695,20 @@ def update_W_log(W_log, Mt, Mv, W):
 
             ces[b] = np.mean(M['ce'].cpu().numpy()[b, :arr.shape[0]], axis=0)
             pwrong[b] = 100-100*np.mean(M['correct'].cpu().numpy()[b, :arr.shape[0]])
-            hz[b] = 1000*np.mean(np.mean(M['z'][:, b, :arr.shape[0]].cpu().numpy(), axis=1))
-            # print(np.mean(M['z'][:, b, :arr.shape[0]].cpu().numpy(), axis=1))
+            hz[b] = 1000*np.mean(M['zs'][:, b].cpu().numpy()/arr.shape[0])
 
         W_log['Cross-entropy'][tv_type].append(np.mean(ces))
         W_log['Mean Hz'][tv_type].append(np.mean(hz))
         W_log['Percentage wrong'][tv_type].append(np.mean(pwrong))
         W_log['Error (reg)'][tv_type].append(M['reg_error'])
 
+    for key in ['Error (reg)', 'Percentage wrong', 'Mean Hz', 'Cross-entropy']:
+        with open(f'../log/{log_id}/tracker/{key}.csv', 'a', newline='') as csvfile:
+            csvwriter = csv.writer(csvfile,
+                                   delimiter=',',
+                                   quotechar='"',
+                                   quoting=csv.QUOTE_MINIMAL)
+            csvwriter.writerow([W_log[key]['train'][-1], W_log[key]['val'][-1]])
     return W_log
 
 
@@ -753,3 +833,5 @@ def load_checkpoint(log_id, parent_dir='log'):
             filepath = subdir + os.sep + filename
             W[filename[:-4]] = torch.tensor(np.load(filepath))  # cut off '.npy'
     return W
+
+

@@ -87,7 +87,9 @@ def main(cfg):
             W_log = ut.update_W_log(W_log=W_log,
                                     Mt=M,
                                     Mv=Mv,
-                                    W=W)
+                                    W=W,
+                                    log_id=log_id)
+
             if not cfg["visualize_val"] and (adamvars['it'] == 0
                 or adamvars['it'] % cfg["plot_model_interval"] == 0):
                 vis.plot_M(M=M,

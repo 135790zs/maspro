@@ -1,8 +1,8 @@
 from numpy import exp
 cfg = {
-    "eprop_type": "random",  # in {global, random, symmetric, adaptive}
+    "eprop_type": "symmetric",  # in {global, random, symmetric, adaptive}
     "Optimizer": "Adam",
-    "neuron": "STDP-ALIF",  # in {ALIF, STDP-ALIF, Izhikevich}
+    "neuron": "ALIF",  # in {ALIF, STDP-ALIF, Izhikevich}
     "v_fix": False,
     "v_fix_psi": False,
     "fraction_ALIF": 0.25,  # def 0.25
@@ -16,6 +16,14 @@ cfg = {
     "gamma": 0.3,  # Bellec2: 0.3
     "thr": 1.6,  # Bellec3: 1.6
     "dt_refr": 2,  # Bellec3: 2
+
+    "IzhV1": 0.04,
+    "IzhV2": 5,
+    "IzhV3": 140,
+    "IzhA1": 0.004,
+    "IzhA2": -0.02,
+    "IzhReset": -65,
+    "IzhPsi": 30,
 
     "dropout": 0,
 
@@ -39,10 +47,10 @@ cfg = {
     "uniform_dist": False,
     "weightscale": 1,
 
-    "N_R": 200,
+    "N_R": 400,
     "N_Rec": 1,
 
-    "task": "TIMIT_small",
+    "task": "TIMIT",
     "wavs_fname": "../data/data_wavs",
     "phns_fname": "../data/data_phns",
 
@@ -57,14 +65,14 @@ cfg = {
     "train_out": True,
     "train_bias": True,
 
-    "Epochs": 500,  # def = 80
+    "Epochs": 400,  # def = 80
     "Track_neuron": True,
     "Track_synapse": False,
     "Repeats": 1,  # ms per epoch, def = 5
     "Interpolation": 'nearest',  # nearest, linear
-    "batch_size_train": 12,  # def = 32
-    "batch_size_val": 12,  # def = 32
-    "batch_size_test": 2,  # def = 32
+    "batch_size_train": 8,  # def = 32
+    "batch_size_val": 8,  # def = 32
+    "batch_size_test": 8,  # def = 32
     "maxlen": 778,
     "TIMIT_derivative": 2,
     "n_examples": {'train': 100, 'val': 100, 'test': 50},  # Re-process TIMIT!

@@ -5,7 +5,7 @@ from matplotlib import rcParams as rc
 rc['mathtext.fontset'] = 'stix'
 rc['font.family'] = 'STIXGeneral'
 
-RESET_FIX = False
+RESET_FIX = True
 ALIF = False
 
 nsteps = 1000

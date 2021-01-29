@@ -5,7 +5,7 @@ import json
 from scipy.interpolate import interp1d
 import time
 import torch
-from config2 import cfg
+from config import cfg
 
 if cfg["cuda"]:
     torch.set_default_tensor_type('torch.cuda.FloatTensor')
@@ -438,7 +438,7 @@ def initialize_W_log(cfg, W, sample_size=100):
     return W_log
 
 
-def update_W_log(W_log, Mt, Mv, W):
+def update_W_log(W_log, Mt, Mv, W, log_id):
     # weights sample
     for wtype, w in W.items():
         wcpu = w.cpu().numpy()

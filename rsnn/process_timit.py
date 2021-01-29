@@ -4,7 +4,7 @@ import numpy as np
 from scipy.fftpack import dct
 import matplotlib.pyplot as plt
 from python_speech_features import delta, mfcc
-from config2 import cfg
+from config import cfg
 
 def my_mfcc(signal, sample_rate):
     if not os.path.isfile("../vis/signal.pdf"):
