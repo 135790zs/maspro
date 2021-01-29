@@ -2,7 +2,7 @@ from numpy import exp
 cfg = {
     "eprop_type": "random",  # in {global, random, symmetric, adaptive}
     "Optimizer": "Adam",
-    "neuron": "ALIF",  # in {ALIF, STDP-ALIF, Izhikevich}
+    "neuron": "STDP-ALIF",  # in {ALIF, STDP-ALIF, Izhikevich}
     "v_fix": False,
     "v_fix_psi": False,
     "fraction_ALIF": 0.25,  # def 0.25

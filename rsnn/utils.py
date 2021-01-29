@@ -347,13 +347,22 @@ def eprop(cfg, X, T, n_steps, betas, W):
 
             # Z_in is incoming at current t, so from last t.
             M['z_in'][:, :, curr_nrn_t, r] = torch.cat((Z_prev_layer, Z_prev_time), axis=2)
-
-            M['vv'][:, :, curr_syn_t, r] = (
-                cfg["alpha"]
-                * M['vv'][:, :, prev_syn_t, r]
-                + M['z_in'][:, :, curr_nrn_t, r, None, :]
-                )
-
+            if cfg["neuron"] == "ALIF":
+                M['vv'][:, :, curr_syn_t, r] = (
+                    cfg["alpha"]
+                    * M['vv'][:, :, prev_syn_t, r]
+                    + M['z_in'][:, :, curr_nrn_t, r, None, :]
+                    )
+            elif cfg["neuron"] == "STDP-ALIF":
+                M['vv'][:, :, curr_syn_t, r] = (
+                    cfg["alpha"]
+                    * M['vv'][:, :, prev_syn_t, r]
+                    * (1 - M['z'][:, :, prev_nrn_t, r] - torch.where(
+                            M['tz'][:, :, r] == t-1 - cfg["dt_refr"],
+                            1,
+                            0))[..., None]
+                    + M['z_in'][:, :, curr_nrn_t, r, None, :]
+                    )
             # Can contract this further!
             M['I_in'][:, :, curr_nrn_t, r] = torch.sum(W['W_in'][:, None, r] * Z_prev_layer[:, :, None, :], axis=-1) # Checked correct
 
@@ -376,7 +385,11 @@ def eprop(cfg, X, T, n_steps, betas, W):
                 M['v'][:, :, curr_nrn_t, r] = ((
                       cfg["alpha"] * M['v'][:, :, prev_nrn_t, r]
                       + M['I'][:, :, curr_nrn_t, r]
-                      - M['z'][:, :, prev_nrn_t, r] * (A if cfg["v_fix"] else cfg["thr"]))
+                      - M['z'][:, :, prev_nrn_t, r] * cfg["alpha"] * M['v'][:, :, prev_nrn_t, r]
+                      - cfg["alpha"] * M['v'][:, :, prev_nrn_t, r] * torch.where(
+                            M['tz'][:, :, r] == t - cfg["dt_refr"],
+                            1,
+                            0))
                       )
 
             M['z'][:, :, curr_nrn_t, r] = torch.where(
@@ -384,6 +397,10 @@ def eprop(cfg, X, T, n_steps, betas, W):
                                   M['v'][:, :, curr_nrn_t, r] >= A),
                 1,
                 0)
+            M['tz'][:, :, r] = torch.where(M['z'][:, :, curr_nrn_t, r] != 0,
+                                           torch.ones_like(M['tz'][:, :, r])*t,
+                                           M['tz'][:, :, r])
+            M['zs'][:, :, r] += M['z'][:, :, curr_nrn_t, r]
 
             M['h'][:, :, curr_nrn_t, r] = (
                 ((1 / (A if cfg["v_fix"] else cfg["thr"])) if not cfg["v_fix_psi"] else 1)
@@ -394,15 +411,18 @@ def eprop(cfg, X, T, n_steps, betas, W):
                     0,
                     None))
 
-            M['h'][:, :, curr_nrn_t, r] = torch.where(
-                t - M['tz'][:, :, r] > cfg["dt_refr"],
-                M['h'][:, :, curr_nrn_t, r],
-                torch.zeros_like(M['h'][:, :, curr_nrn_t, r]))
+            if cfg["neuron"] == "ALIF":
+                M['h'][:, :, curr_nrn_t, r] = torch.where(
+                    t - M['tz'][:, :, r] >= cfg["dt_refr"],
+                    M['h'][:, :, curr_nrn_t, r],
+                    torch.zeros_like(M['h'][:, :, curr_nrn_t, r]))
+            elif cfg["neuron"] == "STDP-ALIF":
+                M['h'][:, :, curr_nrn_t, r] = torch.where(
+                    t - M['tz'][:, :, r] >= cfg["dt_refr"],
+                    M['h'][:, :, curr_nrn_t, r],
+                    torch.ones_like(M['h'][:, :, curr_nrn_t, r]) * cfg["gamma"])
 
-            M['tz'][:, :, r] = torch.where(M['z'][:, :, curr_nrn_t, r] != 0,
-                                           torch.ones_like(M['tz'][:, :, r])*t,
-                                           M['tz'][:, :, r])
-            M['zs'][:, :, r] += M['z'][:, :, curr_nrn_t, r]
+
 
             M['et'][:, :, curr_syn_t, r] = (
                 M['h'][:, :, curr_nrn_t, r, :, None]
