@@ -3,14 +3,14 @@ cfg = {
     "eprop_type": "random",  # in {global, random, symmetric, adaptive}
     "Optimizer": "Adam",
     "v_fix": False,
-    "v_fix_psi": True,
+    "v_fix_psi": False,
     "fraction_ALIF": 0.25,  # def 0.25
     "n_directions": 1,  # Reduces error from 36.1 to 32.9.
     "seed": None,  # 'None' for random seed
 
-    "alpha": 0.8,
-    "rho": 0.975,
-    "kappa": 0.25,
+    "alpha": 0.78,  # .78 for 1, .95 for 5
+    "rho": 0.975,  # .975 for 1, .995 for 5
+    "kappa": 0.717,
     "beta": 0.184,  # Bellec2: "order of 0.07", Bellec3: 0.184. Code: 1.8
     "gamma": 0.3,  # Bellec2: 0.3
     "thr": 1.6,  # Bellec3: 1.6
@@ -30,18 +30,18 @@ cfg = {
     "adam_eps": 1e-5,
 
     "weight_decay": 1e-2,  # Bellec3: 1e-2
-    "L2_reg": 1e-5,  # Bellec3: 1e-5
+    "L2_reg": 0,  # Bellec3: 1e-5
     "FR_target": 0.01,  # BellecCode: 0.01 (10hz)
-    "FR_reg": 50*32,  # Bellec3: 50
+    "FR_reg": 50,  # Bellec3: 50
 
     "batch_op": 'mean',
-    "uniform_dist": True,
+    "uniform_dist": False,
     "weightscale": 1,
 
-    "N_R": 400,
+    "N_R": 200,
     "N_Rec": 1,
 
-    "task": "TIMIT",
+    "task": "TIMIT_small",
     "wavs_fname": "../data/data_wavs",
     "phns_fname": "../data/data_phns",
 
@@ -61,17 +61,19 @@ cfg = {
     "Track_synapse": False,
     "Repeats": 1,  # ms per epoch, def = 5
     "Interpolation": 'nearest',  # nearest, linear
-    "batch_size_train": 32,  # def = 32
-    "batch_size_val": 32,  # def = 32
+    "batch_size_train": 12,  # def = 32
+    "batch_size_val": 12,  # def = 32
     "batch_size_test": 2,  # def = 32
     "maxlen": 778,
     "TIMIT_derivative": 2,
-    "n_examples": {'train': 370, 'val': 32, 'test': 50},
-    # # "n_examples": {'train': 3696, 'val': 400, 'test': 192},
+    "n_examples": {'train': 100, 'val': 100, 'test': 50},  # Re-process TIMIT!
+    # "n_examples": {'train': 3696, 'val': 400, 'test': 192},
     "plot_model_interval": 20,  # Per iter  #  State plot; 0 to disable plots
     "plot_tracker_interval": 10,  # Per it
     "state_save_interval": 50,
     "val_every_B": 10,
+    "max_v_batches": 1,
+    "visualize_val": False,
 
     "frame_size": 0.025,
     "frame_stride": 0.01,
@@ -100,7 +102,7 @@ lookup = {
     "z_in":    {"binary":True, "label": "z_{{in}}"},
     "y":       {"binary":False, "label": "y"},
     "t":       {"binary":True, "label": "\\pi^*"},
-    "p":       {"binary":True, "label": "\\pi"},
+    "p":       {"binary":False, "label": "\\pi"},
     "d":       {"binary":True, "label": "D"},
     "pm":      {"binary":True, "label": "\\pi_{{max}}"},
     "correct": {"binary":False, "label": "Correct"},

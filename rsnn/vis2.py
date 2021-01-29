@@ -204,7 +204,7 @@ def plot_GW(W, G, cfg, n_channels, n_phones, log_id):
         'out': (cfg["n_directions"]*cfg["N_R"], n_phones),
         'W_in': (cfg["N_R"], cfg["n_directions"]*cfg["N_Rec"]*cfg["N_R"]),
         'W_rec': (cfg["N_R"], cfg["n_directions"]*cfg["N_Rec"]*cfg["N_R"]),
-        'B': (cfg["n_directions"]*cfg["N_R"], n_phones),
+        'B': (cfg["n_directions"]*cfg["N_Rec"]*cfg["N_R"], n_phones),
     }
     rowidx = 0
     for wtype, g in G.items():

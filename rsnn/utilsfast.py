@@ -29,6 +29,9 @@ def initialize_model(cfg, inp_size, tar_size, batch_size, n_steps):
                  cfg["N_Rec"],
                  cfg["N_R"],
                  cfg["N_R"] * 2)
+    syn_shape_nobatch = (cfg["N_Rec"],
+                         cfg["N_R"],
+                         cfg["N_R"] * 2)
 
     out_shape = (batch_size,
                  tar_size)
@@ -46,8 +49,11 @@ def initialize_model(cfg, inp_size, tar_size, batch_size, n_steps):
     for var in ['zbar']:
         M[var] = torch.zeros(size=nrn_shape_single)
 
-    for var in ['vv', 'va', 'etbar', 'GW']:
+    for var in ['vv', 'va', 'etbar']:
         M[var] = torch.zeros(size=syn_shape)
+
+    for var in ['GW']:
+        M[var] = torch.zeros(size=syn_shape_nobatch)
 
     M['tz'] = torch.ones(size=nrn_shape, dtype=torch.int) * -cfg["dt_refr"]
 
@@ -64,11 +70,9 @@ def initialize_model(cfg, inp_size, tar_size, batch_size, n_steps):
     M["ce"] = torch.zeros(size=(batch_size, n_steps,))
     M["correct"] = torch.zeros(size=(batch_size, n_steps,))
 
-    M["Gout"] = torch.zeros(size=(batch_size,
-                                  cfg["N_R"],
+    M["Gout"] = torch.zeros(size=(cfg["N_R"],
                                   tar_size))
-    M["Gbias"] = torch.zeros(size=(batch_size,
-                                   tar_size))
+    M["Gbias"] = torch.zeros(size=(tar_size,))
 
     return M
 
@@ -252,7 +256,6 @@ def eprop(cfg, X, T, n_steps, betas, W):
         is_valid = torch.logical_not(torch.any(X[:, t] == -1, axis=1))
 
         for r in range(cfg["N_Rec"]):
-
             M['va'][:, r] = (M['h'][:, r, :, None] * M['vv'][:, r]
                 + (rho - (M['h'][:, r, :, None]
                                  * betas[None, r, :, None]))
@@ -262,7 +265,7 @@ def eprop(cfg, X, T, n_steps, betas, W):
 
             M['vv'][:, r] = alpha * M['vv'][:, r] + Z_in[:, None, :]
 
-            M['a'][:, r] = rho * M['a'][:, r] + M['z'][:, t, r]
+            M['a'][:, r] = rho * M['a'][:, r] + M['z'][:, t-1, r]
 
             A = thr + betas[None, r] * M['a'][:, r]
 
@@ -293,7 +296,7 @@ def eprop(cfg, X, T, n_steps, betas, W):
                 torch.zeros_like(M['h'][:, r]))
 
             M['tz'][:, r] = torch.where(M['z'][:, t, r] != 0, torch.ones_like(M['tz'][:, r])*t, M['tz'][:, r])
-            M['zs'][:, r] += M['z'][:, t, r]
+            M['zs'][:, r] += M['z'][:, t, r] * is_valid[:, None]
 
             ET = (
                 M['h'][:, r, :, None]
@@ -324,16 +327,15 @@ def eprop(cfg, X, T, n_steps, betas, W):
 
         loss_reg = (
             cfg["FR_reg"]
-            * 2 * t
-            / n_steps[:, None, None]
+            # * 2 * t
+            # / n_steps[:, None, None]
             * (M['zs'] / (t+1) - cfg["FR_target"]))
 
-        M['GW'] += loss_pred[:, :, :, None] * M['etbar'] * is_valid[:, None, None, None]
-        M['GW'] += loss_reg[:, :, :, None] * is_valid[:, None, None, None]
+        M['GW'] += torch.mean(loss_pred[:, :, :, None] * M['etbar'] * is_valid[:, None, None, None], axis=0)
+        M['GW'] += torch.mean(loss_reg[:, :, :, None] * is_valid[:, None, None, None], axis=0)
 
-
-        M['Gout'] += (D[:, None] * M['zbar'][:, :, None] * is_valid[:, None, None])
-        M['Gbias'] += D * is_valid[:, None]
+        M['Gout'] += torch.mean(D[:, None] * M['zbar'][:, :, None] * is_valid[:, None, None], axis=0)
+        M['Gbias'] += torch.mean(D * is_valid[:, None],axis=0)
 
 
     a = torch.arange(M['p'].shape[1])
@@ -342,20 +344,18 @@ def eprop(cfg, X, T, n_steps, betas, W):
 
     M['correct'] = (M['pm'] == T).all(axis=2)
     M['ce'] = -torch.sum(T * torch.log(1e-30 + M['p']), axis=2)
+    dev = M['zs'] / n_steps[:, None, None] - cfg["FR_target"]
     M['reg_error'] = 0.5 * torch.sum(
-        torch.mean(
-            (M['zs'] / n_steps[:, None, None] - cfg["FR_target"]),
-            axis=1)) ** 2
+        torch.sum(dev**2, axis=0))
 
     if cfg["L2_reg"]:
-        M['GW'] += cfg["L2_reg"] * W['W'] * is_valid[:, None, None, None]
+        M['GW'] += cfg["L2_reg"] * W['W']
 
-    # Sum over time, Mean over batch
     G = {}
     op = torch.sum if cfg["batch_op"] == 'sum' else torch.mean
-    G['W'] = op(M['GW'], axis=0)
-    G['out'] = op(M['Gout'], axis=0)
-    G['bias'] = op(M['Gbias'], axis=0)
+    G['W'] = M['GW']
+    G['out'] = M['Gout']
+    G['bias'] = M['Gbias']
 
 
     # Don't update dead weights
@@ -460,7 +460,7 @@ def update_W_log(W_log, Mt, Mv, W):
         pwrong = np.zeros(shape=(bsize))
 
         for b in range(bsize):
-            arr = X[0, b]
+            arr = X[b]
             while np.any(arr[-1] == -1):
                 arr = arr[:-1]
             ces[b] = np.mean(M['ce'].cpu().numpy()[b, :arr.shape[0]])
@@ -527,8 +527,8 @@ def sample_mbatches(cfg, n_samples, tvtype):
     ret = []
     samples = np.arange(n_samples)
 
-    rng = np.random.default_rng(seed=cfg["seed"])
-    rng.shuffle(samples)
+    # rng = np.random.default_rng(seed=cfg["seed"])
+    # rng.shuffle(samples)
 
     while samples.shape[0]:
         ret.append(samples[:cfg[f"batch_size_{tvtype}"]])
@@ -547,14 +547,16 @@ def load_data(cfg):
 
 
 
-    mintrain = np.amin(inps['train'], axis=(0, 1))
-    maxtrain = np.ptp(inps['train'], axis=(0, 1))
+    # mintrain = np.amin(inps['train'], axis=(0, 1))
+    # maxtrain = np.ptp(inps['train'], axis=(0, 1))
+    means = np.mean(inps['train'], axis=(0, 1))
+    stds = np.std(inps['train'], axis=(0, 1))
 
     for tvt_type in cfg['n_examples'].keys():
         # Normalize [0, 1]
 
-        inps[tvt_type] = np.where(inps[tvt_type] != -1, inps[tvt_type] - mintrain, -1)
-        inps[tvt_type] = np.where(inps[tvt_type] != -1, inps[tvt_type] / maxtrain, -1)
+        inps[tvt_type] = np.where(inps[tvt_type] != -1, (inps[tvt_type] - means) / np.maximum(stds, 1e-10), -1)
+        # inps[tvt_type] = np.where(inps[tvt_type] != -1, inps[tvt_type] / maxtrain, -1)
 
 
         # Add blank
@@ -567,7 +569,6 @@ def load_data(cfg):
 
         inps[tvt_type] = inps[tvt_type][:, :cfg["maxlen"]]
         tars[tvt_type] = tars[tvt_type][:, :cfg["maxlen"]]
-
     return inps, tars
 
 

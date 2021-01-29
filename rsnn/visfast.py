@@ -49,7 +49,7 @@ def plot_M(cfg, M, it, log_id, n_steps, inp_size):
     fig.suptitle(f"ID {log_id}, Iteration {it}", fontsize=20)
     row_idx = 0
     rng = np.random.default_rng(seed=cfg["seed"])
-    b = rng.choice(n_steps.size)
+    b = 0 # rng.choice(n_steps.size)
 
     for var in plotvars:
         axs.append(fig.add_subplot(gsc[row_idx]))
@@ -61,7 +61,7 @@ def plot_M(cfg, M, it, log_id, n_steps, inp_size):
                                       is_binary=lookup[var]["binary"]),
                        cmap=('RdYlGn' if var == 'correct' else
                                  'copper' if lookup[var]["binary"]
-                                 else 'coolwarm'),
+                                 else 'viridis'),
                        vmin=np.min(arr),
                        vmax=np.max(arr),
                        interpolation="none",  # better than nearest here
@@ -132,7 +132,7 @@ def plot_W(cfg, W_log, log_id):
                 axs[-1].plot(arr[arr >= 0], label=tvtype)
             axs[-1].legend()
             axs[-1].grid()
-            if k in ['Cross-entropy', 'Percentage wrong', 'Error (reg)']:
+            if k in ['Cross-entropy', 'Percentage wrong']:
                 axs[-1].set_yscale('log')
             axs[-1].set_ylabel(k,
                                rotation=0,

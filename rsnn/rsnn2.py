@@ -1,8 +1,10 @@
 import time
 import numpy as np
 from config2 import cfg as CFG
-import utilsfast as ut
-import visfast as vis
+# import utilsfast as ut
+# import visfast as vis
+import utils2 as ut
+import vis2 as vis
 
 
 
@@ -45,38 +47,20 @@ def main(cfg):
         for b_idx, batch_idxs in enumerate(batch_idxs_list):
             print((f"{'-'*10} Epoch {e}/{cfg['Epochs']}\tBatch {b_idx}/"
                    f"{len(batch_idxs_list)} {'-'*10}"), end='\r')
+
+
+
             # Validate occasionally
             if adamvars['it'] % cfg["val_every_B"] == 0:
-                valbatch = rng.choice(n_val, size=cfg["batch_size_val"])
-                X = inps['val'][valbatch]
-                T = tars['val'][valbatch]
-
-                # TODO: Consider interpolating and trimming in eprop function itself.
-                X, T = ut.interpolate_inputs(cfg=cfg,
-                                             inp=X,
-                                             tar=T,
-                                             stretch=cfg["Repeats"])
-                X, T = ut.trim_samples(X=X, T=T)
-
-                n_steps = ut.count_lengths(X=X)
-
-                _, Mv = ut.eprop(cfg=cfg,
-                                 X=X,
-                                 T=T,
-                                 n_steps=n_steps,
-                                 betas=betas,
-                                 W=W)
-
-                # Mean over batch and over time
-                ce = np.mean(np.mean(Mv['ce'].cpu().numpy()/n_steps[:, None],
-                                     axis=0),
-                             axis=0)
-                if best_val_ce is None or ce < best_val_ce:
-                    print(f"\nBest new validation error: {ce:.3f} "
-                          + (f"<-- {best_val_ce:.3f}\n")
-                             if best_val_ce is not None else '\n')
-                    best_val_ce = ce
-                    ut.save_checkpoint(W=W, cfg=cfg, log_id=log_id)
+                Mv, best_val_ce = validate(n_val=n_val,
+                              cfg=cfg,
+                              v_inps=inps['val'],
+                              v_tars=tars['val'],
+                              betas=betas,
+                              W=W,
+                              it=adamvars['it'],
+                              best_val_ce=best_val_ce,
+                              log_id=log_id)
             else:
                 Mv = None
 
@@ -104,8 +88,7 @@ def main(cfg):
                                     Mt=M,
                                     Mv=Mv,
                                     W=W)
-
-            if (adamvars['it'] == 0
+            if not cfg["visualize_val"] and (adamvars['it'] == 0
                 or adamvars['it'] % cfg["plot_model_interval"] == 0):
                 vis.plot_M(M=M,
                            cfg=cfg,
@@ -113,6 +96,7 @@ def main(cfg):
                            log_id=log_id,
                            n_steps=n_steps,
                            inp_size=n_channels)
+
             del M, Mv
 
             if (adamvars['it'] == 0
@@ -166,6 +150,7 @@ def main(cfg):
                         n_steps=n_steps,
                         betas=betas,
                         W=W)
+
         ce = np.mean(M['ce'].cpu().numpy(), axis=0)
         test_ce += np.mean(ce, axis=0) / len(batch_idxs_list)
         corr = np.mean(M['correct'].cpu().numpy(), axis=0)
@@ -174,8 +159,57 @@ def main(cfg):
     return test_ce, 1-test_corr
 
 
+def validate(n_val, cfg, v_inps, v_tars, betas, W, best_val_ce, log_id, it):
 
+    batch_idxs_list = ut.sample_mbatches(cfg=cfg, n_samples=n_val, tvtype='val')
+    ces = 0
 
+    for b_idx, batch_idxs in enumerate(batch_idxs_list):
+        if b_idx >= cfg["max_v_batches"]:
+            break
+        print((f"{'-'*10} Val batch {b_idx}/"
+               f"{min(len(batch_idxs_list), cfg['max_v_batches'])} {'-'*10}"),
+              end='\r')
+        X = v_inps[batch_idxs]
+        T = v_tars[batch_idxs]
+
+        # TODO: Consider interpolating and trimming in eprop function itself.
+        X, T = ut.interpolate_inputs(cfg=cfg,
+                                     inp=X,
+                                     tar=T,
+                                     stretch=cfg["Repeats"])
+        X, T = ut.trim_samples(X=X, T=T)
+
+        n_steps = ut.count_lengths(X=X)
+
+        _, Mv = ut.eprop(cfg=cfg,
+                         X=X,
+                         T=T,
+                         n_steps=n_steps,
+                         betas=betas,
+                         W=W)
+
+        # Mean over batch and over time
+        ce = np.mean(np.mean(Mv['ce'].cpu().numpy()/n_steps[:, None],
+                             axis=0),
+                     axis=0)
+        ces += ce
+
+    ces /= b_idx+1
+    if best_val_ce is None or ces < best_val_ce:
+        print(f"\nNew best validation error: {ces:.3f} "
+              + ((f"<-- {best_val_ce:.3f}\n")
+                 if best_val_ce is not None else '\n'))
+        best_val_ce = ces
+        ut.save_checkpoint(W=W, cfg=cfg, log_id=log_id)
+    if cfg["visualize_val"]:
+        vis.plot_M(M=Mv,
+                   cfg=cfg,
+                   it=it,
+                   log_id=log_id,
+                   n_steps=n_steps,
+                   inp_size=X.shape[-1])
+    return Mv, best_val_ce
 
 if __name__ == "__main__":
 

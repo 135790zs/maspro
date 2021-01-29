@@ -51,13 +51,13 @@ def initialize_model(cfg, inp_size, tar_size, batch_size, n_steps):
                       tar_size)
 
     for var in ['z', 'I', 'I_in', 'I_rec', 'h', 'v', 'a', 'zbar', 'loss', 'loss_reg', 'loss_pred']:
-        M[var] = torch.zeros(size=nrn_shape, dtype=torch.double)
+        M[var] = torch.zeros(size=nrn_shape, )
 
     for var in ['vv', 'va', 'et', 'etbar']:
-        M[var] = torch.zeros(size=syn_shape, dtype=torch.double)
+        M[var] = torch.zeros(size=syn_shape, )
 
     for var in ['GW_in', 'GW_rec']:
-        M[var] = torch.zeros(size=syn_shape_half, dtype=torch.double)
+        M[var] = torch.zeros(size=syn_shape_half, )
 
     nrn_timeless = (cfg["n_directions"],
                     batch_size,
@@ -68,15 +68,15 @@ def initialize_model(cfg, inp_size, tar_size, batch_size, n_steps):
     M['z_in'] = torch.zeros(size=nrn_shape_db)
 
     for var in ['y','d']:
-        M[var] = torch.zeros(size=out_shape, dtype=torch.double)
+        M[var] = torch.zeros(size=out_shape, )
 
     for var in ['p','pm']:
-        M[var] = torch.zeros(size=out_shape_long, dtype=torch.double)
+        M[var] = torch.zeros(size=out_shape_long, )
 
     M['ysub'] = torch.zeros(size=(cfg["n_directions"],
                                 batch_size,
                                 len_nrn_time,
-                                tar_size), dtype=torch.double)
+                                tar_size), )
 
     M["ce"] = torch.zeros(size=(batch_size, n_steps,))
     M["correct"] = torch.zeros(size=(batch_size, n_steps,))
@@ -323,7 +323,7 @@ def eprop(cfg, X, T, n_steps, betas, W):
         for b in range(M['x'].shape[1]):
             M['x'][1, b, :n_steps[b]] = torch.fliplr(M['x'][0, b, :n_steps[b]])
 
-    for t in torch.arange(0, max(n_steps), dtype=torch.int):
+    for t in np.arange(0, max(n_steps.cpu().numpy())):
         start = time.time()
         prev_syn_t, curr_syn_t = conn_t_idxs(track_synapse=cfg['Track_synapse'], t=t)
         prev_nrn_t, curr_nrn_t = conn_t_idxs(track_synapse=cfg['Track_neuron'], t=t)
@@ -387,9 +387,11 @@ def eprop(cfg, X, T, n_steps, betas, W):
             M['h'][:, :, curr_nrn_t, r] = torch.where(
                 t - M['tz'][:, :, r] > cfg["dt_refr"],
                 M['h'][:, :, curr_nrn_t, r],
-                0.)
+                torch.zeros_like(M['h'][:, :, curr_nrn_t, r]))
 
-            M['tz'][:, :, r] = torch.where(M['z'][:, :, curr_nrn_t, r] != 0, t, M['tz'][:, :, r])
+            M['tz'][:, :, r] = torch.where(M['z'][:, :, curr_nrn_t, r] != 0,
+                                           torch.ones_like(M['tz'][:, :, r])*t,
+                                           M['tz'][:, :, r])
             M['zs'][:, :, r] += M['z'][:, :, curr_nrn_t, r] * is_valid[None, :, None]
 
             M['et'][:, :, curr_syn_t, r] = (
@@ -440,8 +442,8 @@ def eprop(cfg, X, T, n_steps, betas, W):
 
         M['loss_reg'][:, :, curr_nrn_t] = (
             cfg["FR_reg"]
-            * 2 * t
-            / n_steps[None, :, None, None]
+            * 2 * t  # Initial means are less informative
+            / n_steps[None, :, None, None] ** 2  # Square corrects previous term
             * (M['zs'] / (t+1) - cfg["FR_target"])
             * is_valid[None, :, None, None])
 
@@ -470,7 +472,6 @@ def eprop(cfg, X, T, n_steps, betas, W):
         torch.mean(
             (M['zs'] / n_steps[None, :, None, None] - cfg["FR_target"]),
             axis=1)) ** 2
-    print(n_steps)
     # Sum over time, Mean over batch
     G = {}
     op = torch.sum if cfg["batch_op"] == 'sum' else torch.mean
@@ -677,14 +678,16 @@ def load_data(cfg):
 
 
 
-    mintrain = np.amin(inps['train'], axis=(0, 1))
-    maxtrain = np.ptp(inps['train'], axis=(0, 1))
+    # mintrain = np.amin(inps['train'], axis=(0, 1))
+    # maxtrain = np.ptp(inps['train'], axis=(0, 1))
+    means = np.mean(inps['train'], axis=(0, 1))
+    stds = np.std(inps['train'], axis=(0, 1))
 
     for tvt_type in cfg['n_examples'].keys():
         # Normalize [0, 1]
 
-        inps[tvt_type] = np.where(inps[tvt_type] != -1, inps[tvt_type] - mintrain, -1)
-        inps[tvt_type] = np.where(inps[tvt_type] != -1, inps[tvt_type] / maxtrain, -1)
+        inps[tvt_type] = np.where(inps[tvt_type] != -1, (inps[tvt_type] - means) / np.maximum(stds, 1e-10), -1)
+        # inps[tvt_type] = np.where(inps[tvt_type] != -1, inps[tvt_type] / maxtrain, -1)
 
 
         # Add blank
