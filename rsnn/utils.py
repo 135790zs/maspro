@@ -1,129 +1,121 @@
-import time
-import os
-import numpy as np
-from numba import jit, cuda, vectorize
-# import pytorch as torch
+
 import datetime
+import numpy as np
+import os
 import json
 from scipy.interpolate import interp1d
-# import cupy as cp
+import time
+import torch
+from config import cfg  # For cuda only
 
-def initialize_model(cfg, length, tar_size):
-    """ Initializes the variables used in predicting a single time series.
+if cfg["cuda"]:
+    torch.set_default_tensor_type('torch.cuda.FloatTensor')
+else:
+    torch.set_default_tensor_type('torch.FloatTensor')
 
-        These are the variables used in e-prop, and the reason they're
-        stored for every time step (rather than overwriting per time step)
-        is so the evolution of the state can be inspected after running.
-
-        V:       Neuron voltage
-        U:       Neuron threshold adaptation factor
-        Z:       Neuron outgoing spike train
-        Zbar:    Low-pass filter of outgoing spike train
-        TZ:      Neuron time of last outgoing spike
-        Z_in:    Neuron incoming spike train (nonbinary for first layer)
-        Z_inbar: Low-pass filter of incoming spike train
-        TZ_in:   Neuron time of last incoming spike
-        H:       Timestep pseudo-derivative
-        I:       Weighted input to neuron
-        EVV:     Synapse voltage eligibility
-        EVU:     Synapse threshold adaptation eligibility
-        ET:      Synapse eligibility trace
-        ET:      Loww-pass filter of ynapse eligibility trace
-        gW:      Network weights gradient
-        DW:      Network weights update
-        dW_out:  Output weights update
-        gW_out:  Output weights gradient
-        db_out:  Bias update
-        gb_out:  Bias gradient
-        T:       Timestep target
-        Y:       Timestep output
-        P:       Timestep probability vector
-        D:       Timestep probability minus target
-        Pmax:    Timestep prediction
-        CE:      Timestep cross-entropy loss
-        L:       Timestep learning signal
-        is_ALIF: Mask determining which neurons have adaptive thresholds
-    """
-
-    pruned_length = length if cfg["Track_synapse"] else 1
-
-    rng = np.random.default_rng(seed=cfg["seed"])
-
+def initialize_model(cfg, inp_size, tar_size, batch_size, n_steps):
     M = {}
-    neuron_shape = (cfg["n_directions"],
-                    length,
+
+    len_syn_time = n_steps if cfg["Track_synapse"] else 1
+    len_nrn_time = n_steps if cfg["Track_neuron"] else 1
+
+    nrn_shape = (cfg["n_directions"],
+                 batch_size,
+                 len_nrn_time,
+                 cfg["N_Rec"],
+                 cfg["N_R"])
+    nrn_shape_nobatch = (cfg["n_directions"],
+                 len_nrn_time,
+                 cfg["N_Rec"],
+                 cfg["N_R"])
+    nrn_shape_db = (cfg["n_directions"],
+                 batch_size,
+                 len_nrn_time,
+                 cfg["N_Rec"],
+                 cfg["N_R"]*2)
+    syn_shape = (cfg["n_directions"],
+                 batch_size,
+                 len_syn_time,
+                 cfg["N_Rec"],
+                 cfg["N_R"],
+                 cfg["N_R"] * 2)
+    syn_shape_half = (cfg["n_directions"],
+                      len_syn_time,
+                      cfg["N_Rec"],
+                      cfg["N_R"],
+                      cfg["N_R"])
+
+    out_shape = (batch_size,
+                 len_nrn_time,
+                 tar_size)
+
+    out_shape_long = (batch_size,
+                      n_steps,
+                      tar_size)
+
+    for var in ['z', 'I', 'I_in', 'I_rec', 'h', 'v', 'a', 'zbar', 'loss_pred']:
+        M[var] = torch.zeros(size=nrn_shape, )
+
+    for var in ['loss_reg']:
+        M[var] = torch.zeros(size=nrn_shape_nobatch, )
+
+    for var in ['vv', 'va', 'et', 'etbar']:
+        M[var] = torch.zeros(size=syn_shape, )
+
+    for var in ['GW_in', 'GW_rec']:
+        M[var] = torch.zeros(size=syn_shape_half, )
+
+    nrn_timeless = (cfg["n_directions"],
+                    batch_size,
                     cfg["N_Rec"],
-                    cfg["N_R"],)
+                    cfg["N_R"])
+    M['tz'] = torch.ones(size=nrn_timeless, dtype=torch.int) * -cfg["dt_refr"]
+    M['zs'] = torch.zeros(size=nrn_timeless)
+    M['z_in'] = torch.zeros(size=nrn_shape_db)
 
-    neuron_timeless_shape = (cfg["n_directions"],
-                             cfg["N_Rec"],
-                             cfg["N_R"],)
+    for var in ['y','d']:
+        M[var] = torch.zeros(size=out_shape, )
 
-    weight_shape = (cfg["n_directions"],
-                    pruned_length,
-                    cfg["N_Rec"],
-                    cfg["N_R"],
-                    cfg["N_R"] * 2,)
-    Z_in_shape = (cfg["n_directions"],
-                  length,
-                  cfg["N_Rec"],
-                  cfg["N_R"] * 2,)
+    for var in ['p','pm']:
+        M[var] = torch.zeros(size=out_shape_long, )
 
-    W_out_shape = (cfg["n_directions"],
-                   pruned_length,
-                   tar_size,
-                   cfg["N_R"],)
+    M['ysub'] = torch.zeros(size=(cfg["n_directions"],
+                                batch_size,
+                                len_nrn_time,
+                                tar_size), )
 
-    b_out_shape = (cfg["n_directions"],
-                   pruned_length,
-                   tar_size,)
+    M["ce"] = torch.zeros(size=(batch_size, n_steps,))
+    M["correct"] = torch.zeros(size=(batch_size, n_steps,))
 
-    T_shape = (length, tar_size,)
-
-    for T_var in ["T", "P", "Pmax", "D"]:
-        M[T_var] = np.zeros(shape=T_shape)
-
-    for neuronvar in ["Z", "V", "a", "H", "Zbar", "Z_prev", "I", "I_in", "I_rec", "L_std", "L_reg", "spikerate"]:
-        M[neuronvar] = np.zeros(shape=neuron_shape)
-
-    for weightvar in ["EVV", "EVU", "ET", "ETbar", 'gW']:
-        M[weightvar] = np.zeros(shape=weight_shape)
-
-    for z_in_var in ["Z_in", "Z_inbar"]:
-        M[z_in_var] = np.zeros(shape=Z_in_shape)
-
-    for W_out_var in ["gW_out"]:
-        M[W_out_var] = np.zeros(shape=W_out_shape)
-
-    for b_out_var in ["gb_out"]:
-        M[b_out_var] = np.zeros(shape=b_out_shape)
-
-    M["A"] = np.ones(shape=neuron_shape) * cfg["thr"]
-
-    M["TZ"] = np.ones(shape=neuron_timeless_shape) * -cfg["dt_refr"]
-
-    M["TZ_in"] = np.zeros(shape=(cfg["n_directions"],
-                                 cfg["N_Rec"],
-                                 cfg["N_R"] * 2,))
-
-    M["Y"] = np.zeros(shape=(cfg["n_directions"], length, tar_size,))
-    M["CE"] = np.zeros(shape=(length,))
-    M["Correct"] = np.zeros(shape=(length,))
+    M["Gout"] = torch.zeros(size=(cfg["n_directions"],
+                                  len_syn_time,
+                                  cfg["N_R"],
+                                  tar_size))
+    M["Gbias"] = torch.zeros(size=(len_syn_time,
+                                   tar_size))
 
     return M
 
-def initialize_betas(cfg):
-    rng = np.random.default_rng(seed=cfg["seed"])
-    betas = np.zeros(
-        shape=(cfg["n_directions"] * cfg["N_Rec"] * cfg["N_R"]))
 
-    betas[:int(betas.size * cfg["fraction_ALIF"])] = cfg["beta"]
-    rng.shuffle(betas)
-
-    betas = betas.reshape((cfg["n_directions"],
-                             cfg["N_Rec"],
-                             cfg["N_R"],))
-    return betas
+def initialize_gradients(cfg, tar_size, batch_size):
+    G = {}
+    G["W_in"] = torch.zeros(size=(cfg["n_directions"],
+                                  batch_size,
+                                  cfg["N_Rec"],
+                                  cfg["N_R"],
+                                  cfg["N_R"],))
+    G["W_rec"] = torch.zeros(size=(cfg["n_directions"],
+                                   batch_size,
+                                   cfg["N_Rec"],
+                                   cfg["N_R"],
+                                   cfg["N_R"],))
+    G["out"] = torch.zeros(size=(cfg["n_directions"],
+                               batch_size,
+                               cfg["N_R"],
+                               tar_size,))
+    G["bias"] = torch.zeros(size=(batch_size,
+                                tar_size,))
+    return G
 
 
 def initialize_weights(cfg, inp_size, tar_size):
@@ -134,8 +126,8 @@ def initialize_weights(cfg, inp_size, tar_size):
     over many epochs. They are also stored in an array such that the
     evolution of the weights over the number of epochs can be inspected.
 
-    W_out: Output weights
-    b_out: Bias
+    out:   Output weights
+    bias:  Bias
     W:     Network weights
     B:     Broadcast weights
     """
@@ -143,63 +135,66 @@ def initialize_weights(cfg, inp_size, tar_size):
     W = {}
     rng = np.random.default_rng(seed=cfg["seed"])
 
-    n_epochs = cfg["Epochs"] if cfg["Track_weights"] else 1
-    if cfg["weight_initialization"] == 'uniform':
-        W["W"] = rng.random(size=(n_epochs,
-                                  cfg["n_directions"],
+    W["W_in"] = rng.normal(size=(cfg["n_directions"],
+                                 cfg["N_Rec"],
+                                 cfg["N_R"],
+                                 cfg["N_R"],))
+    # Bellec: rd.randn(n_in, n_rec) / np.sqrt(n_in)
+    W['W_in'][:, 0, :, inp_size:] = 0  # From padded channels
+    W['W_in'][:, 0] /= np.sqrt(inp_size)
+    for r in range(cfg["N_Rec"]):
+        if r > 0:
+            W['W_in'][:, r] /= np.sqrt(cfg["N_R"])
+
+    W["W_rec"] = rng.normal(size=(cfg["n_directions"],
                                   cfg["N_Rec"],
                                   cfg["N_R"],
-                                  cfg["N_R"] * 2)) * 2 - 1
+                                  cfg["N_R"],))
+    # Bellec: rd.randn(n_rec, n_rec) / np.sqrt(n_rec)
+    W['W_rec'] /= np.sqrt(cfg["N_R"])
 
-        W["W_out"] = rng.random(size=(n_epochs,
-                                      cfg["n_directions"],
-                                      tar_size,
-                                      cfg["N_R"])) * 2 - 1
 
-    elif cfg["weight_initialization"] == 'normal':
-        W["W"] = rng.normal(size=(n_epochs,
-                                  cfg["n_directions"],
-                                  cfg["N_Rec"],
-                                  cfg["N_R"],
-                                  cfg["N_R"] * 2,),
-                            scale=0.5)
+    W["out"] = rng.normal(size=(cfg["n_directions"],
+                                cfg["N_R"],
+                                tar_size)) / np.sqrt(tar_size)
+    if cfg["uniform_dist"]:
+        W["W_in"] = rng.random(size=(cfg["n_directions"],
+                                 cfg["N_Rec"],
+                                 cfg["N_R"],
+                                 cfg["N_R"],)) * 2 - 1
 
-        W["W_out"] = rng.normal(size=(n_epochs,
-                                      cfg["n_directions"],
-                                      tar_size,
-                                      cfg["N_R"],),
-                                scale=0.25)
+        W['W_in'][:, 0, :, inp_size:] = 0  # From padded channels
+        W['W_in'][:, 0] /= np.sqrt(inp_size)
 
-    elif cfg["weight_initialization"] == 'bellec18':
-        """ See Supplementary information for: Long short-term
-        memory and learning-to-learn in networks of spiking
-        neurons """
-        W["W"] = rng.normal(size=(n_epochs,
-                                  cfg["n_directions"],
-                                  cfg["N_Rec"],
-                                  cfg["N_R"],
-                                  cfg["N_R"] * 2,))
-        # W['W'][0, :, :, :, cfg["N_R"]:] /= np.sqrt(cfg["N_R"])
-        # W['W'][0, :, :, :, :cfg["N_R"]] /= np.sqrt(cfg["N_R"])
-        W['W'][0] /= np.sqrt(cfg["N_R"]+inp_size)
-        W["W_out"] = rng.normal(size=(n_epochs,
-                                      cfg["n_directions"],
-                                      tar_size,
-                                      cfg["N_R"])) / np.sqrt(cfg["N_R"])
+        for r in range(cfg["N_Rec"]):
+            if r > 0:
+                W['W_in'][:, r] /= np.sqrt(cfg["N_R"])
 
-    W["b_out"] = np.zeros(shape=(n_epochs,
-                                 cfg["n_directions"],
-                                 tar_size,))
+        W["W_rec"] = rng.random(size=(cfg["n_directions"],
+                                      cfg["N_Rec"],
+                                      cfg["N_R"],
+                                      cfg["N_R"],)) * 2 - 1
+        W['W_rec'] /= np.sqrt(cfg["N_R"])
+
+
+        W["out"] = rng.random(size=(cfg["n_directions"],
+                                    cfg["N_R"],
+                                    tar_size)) * 2 - 1 / np.sqrt(tar_size)
+        W['out'] /= np.sqrt(tar_size)
+
+    for wtype in W.keys():
+        W[wtype] *= cfg["weightscale"]
 
     if cfg["one_to_one_output"]:
-        assert tar_size <= cfg["N_R"]
-        W["W_out"][0] = 0
+        W["out"] *= 0
         for s in range(cfg["n_directions"]):
-            np.fill_diagonal(W["W_out"][0, s, :, :], 1)
+            np.fill_diagonal(W["out"][s, :, :], 1.)
 
 
-    B_shape = (n_epochs,
-               cfg["n_directions"],
+
+    W["bias"] = np.zeros(shape=(tar_size,))
+
+    B_shape = (cfg["n_directions"],
                cfg["N_Rec"],
                cfg["N_R"],
                tar_size,)
@@ -207,354 +202,297 @@ def initialize_weights(cfg, inp_size, tar_size):
     if cfg["eprop_type"] == "random":  # Gaussian, variance of 1
         W["B"] = rng.normal(size=B_shape, scale=1)
 
-    elif cfg["eprop_type"] == "global":  # Gaussian, variance of 1
-        W["B"] = np.ones(shape=B_shape) * (1/np.sqrt(cfg["N_R"]*cfg["N_Rec"]))
-
     elif cfg["eprop_type"] == "adaptive":  # Gaussian, variance of 1/N
         W["B"] = rng.normal(size=B_shape, scale=np.sqrt(1 / cfg["N_R"]))
 
-    else:  # Symmetric: Uniform [0, 1]. Irrelevant, as it'll be overwritten
+    elif cfg["eprop_type"] == "symmetric":
         W["B"] = rng.random(size=B_shape) * 2 - 1
         for r in range(cfg["N_Rec"]):
             for s in range(cfg["n_directions"]):
-                W["B"][0, s, r] = W["W_out"][0, s].T
+                W["B"][s, r] = W["out"][s]
 
     # Drop all self-looping weights. A neuron cannot be connected with itself.
     for r in range(cfg["N_Rec"]):
         for s in range(cfg["n_directions"]):
-            np.fill_diagonal(W['W'][0, s, r, :, cfg["N_R"]:], 0)
+            np.fill_diagonal(W['W_rec'][s, r], 0)
 
-    # Randomly dropout a fraction of the (remaining) recurrent weights.
-    # inps = W['W'][0]
-    W['W'][0] = np.where(rng.random(W['W'][0].shape) < cfg["dropout"],
+    W['W_rec'] = np.where(rng.random(W['W_rec'].shape) < cfg["dropout"],
                          0,
-                         W['W'][0])
+                         W['W_rec'])
 
-    if cfg["one_to_one_input"]:
-        W['W'][0, :, 0, :, :inp_size] = 0
-        for s in range(cfg["n_directions"]):
-            np.fill_diagonal(W['W'][0, s, 0, :, :inp_size], 1)
-
-    W['W'][0, :, 0] *= cfg["weight_scaling"]
-
-    if cfg["load_checkpoints"]:
-        checkpoint = load_weights(log_id=cfg["load_checkpoints"], parent_dir='vault')
-        for wtype, arr in checkpoint.items():
-            W[wtype][0] = arr
-
-    if not cfg['recurrent']:
-        W['W'][0, :, :, :, cfg["N_R"]:] = 0
+    for wtype in ["W_in", "W_rec", "out", "bias", "B"]:
+        W[wtype] = torch.tensor(W[wtype])
 
     return W
 
 
-def initialize_DWs(cfg, tar_size):
-    DW = {}
-    DW["W"] = np.zeros(shape=(cfg["n_directions"],
-                              cfg["N_Rec"],
-                              cfg["N_R"],
-                              cfg["N_R"] * 2,))
+def update_weights(W, G, adamvars, e, cfg, it_per_e):
+    adamvars['it'] += 1
 
-    DW["W_out"] = np.zeros(shape=(cfg["n_directions"],
-                                  tar_size,
-                                  cfg["N_R"],))
-
-    DW["b_out"] = np.zeros(shape=(cfg["n_directions"],
-                                 tar_size,))
-    return DW
-
-
-def gW_tracker(cfg, tar_size):
-    GW = {}
-    GW["W"] = np.zeros(shape=(cfg["Epochs"],
-                              cfg["n_directions"],
-                              cfg["N_Rec"],
-                              cfg["N_R"],
-                              cfg["N_R"] * 2,))
-
-    GW["W_out"] = np.zeros(shape=(cfg["Epochs"],
-                                  cfg["n_directions"],
-                                  tar_size,
-                                  cfg["N_R"],))
-
-    GW["b_out"] = np.zeros(shape=(cfg["Epochs"],
-                                  cfg["n_directions"],
-                                 tar_size,))
-    return GW
-
-def initialize_tracking(cfg):
-    R = {'err': {}, '%wrong': {}, 'Hz': {}}
-    for tv_type in ['train', 'val']:
-        R['err'][tv_type] = np.ones(shape=(cfg["Epochs"])) * -1
-        R[f'%wrong'][tv_type] = np.ones(shape=(cfg["Epochs"])) * -1
-    R['Hz'] = np.ones(shape=(cfg["Epochs"],
-                             cfg["n_directions"],
-                             cfg["N_Rec"],
-                             cfg["N_R"])) * -1
-    R['eta'] = np.ones(shape=(cfg["Epochs"])) * -1
-    R['latest_val_err'] = None
-    R['optimal_val_err'] = None
-
-
-    return R
-
-
-def save_weights(W, epoch, log_id):
-    """ Saves well-performing weights to files, to be loaded later.
-
-    Every individual run gets its own weight checkpoints.
-    """
-
-    for k, v in W.items():
-        # Every type of weight (W, W_out, b_out, B) gets its own file.
-        np.save(f"../log/{log_id}/checkpoints/{k}", v[epoch])
-
-
-def load_weights(log_id, parent_dir='log'):
-    """ Load weights from file to be used in network again.
-
-    Mainly used for testing purposes, because the weights corresponding
-    to the lowest validation loss are stored.
-    """
-
-    W = {}
-    for subdir, _, files in os.walk(f"../{parent_dir}/{log_id}/checkpoints"):
-        for filename in files:
-            filepath = subdir + os.sep + filename
-            W[filename[:-4]] = np.load(filepath)  # cut off '.npy'
-    return W
-
-
-def interpolate_verrs(arr):
-    """ Interpolate missing validation accuracy and loss values.
-
-    These exist, because validation may not happen in all epochs.
-    """
-
-    # TODO: comments
-
-    retarr = arr
-    x0 = 0
-    y0 = arr[x0]
-    for idx, val in enumerate(arr):
-        retarr[idx] = val
-
-        if val != -1:
-            x0 = idx
-            y0 = val
+    for wtype in G.keys():
+        if not cfg[f"train_{wtype}"]:
             continue
+        eta = cfg[f"eta_{wtype}"]
+        if cfg["warmup"] and e == 0:
+            eta *= adamvars['it'] / it_per_e
 
-        x1 = np.argmax(arr[idx:] > -1) + idx
-        y1 = arr[x1]
-        w = (idx - x0) / (x1 - x0)
-        retarr[idx] = y0 * (1 - w) + y1 * w
+        eta *= (1 - cfg["eta_decay"]) ** adamvars['it']
 
-    return retarr
+        if cfg["Optimizer"] == "Adam":
+            adamvars[f"m{wtype}"] = (cfg["adam_beta1"] * adamvars[f"m{wtype}"]
+                                     + (1 - cfg["adam_beta1"]) * G[wtype])
+            adamvars[f"v{wtype}"] = (cfg["adam_beta2"] * adamvars[f"v{wtype}"]
+                                     + (1 - cfg["adam_beta2"]) * G[wtype] ** 2)
 
+            m = adamvars[f"m{wtype}"] / (1 - cfg["adam_beta1"] ** adamvars['it'])
+            v = adamvars[f"v{wtype}"] / (1 - cfg["adam_beta2"] ** adamvars['it'])
+            dw = -eta * (m / (torch.sqrt(v) + cfg["adam_eps"]))
 
-def temporal_filter(c, a, depth=0):
-    """ Low-pass filter of array `a' with smoothing factor `c'.
+        elif cfg["Optimizer"] == "RAdam":
 
-    The `depth' argument is used to limit the recusion depth.
-    Consequentially, only the last 32 steps are considered.
-    """
+            adamvars[f"m{wtype}"] = (cfg["adam_beta1"] * adamvars[f"m{wtype}"]
+                                     + (1 - cfg["adam_beta1"]) * G[wtype])
 
-    if depth == 32:  # Maximal depth reached.
-        return a[-1]
-    if a.shape[0] == 1:  # Can't go back further -- no previous values
-        return a[0]
-    return c * temporal_filter(c, a=a[:-1], depth=depth+1) + a[-1:]
+            adamvars[f"v{wtype}"] = (1 / cfg["adam_beta2"] * adamvars[f"v{wtype}"]
+                                     + (1 - cfg["adam_beta2"]) * G[wtype] ** 2)
 
+            m = adamvars[f"m{wtype}"] / (1 - cfg["adam_beta1"] ** adamvars['it'])
 
-def normalize(arr):
-    return np.interp(arr, (arr.min(), arr.max()), (-1, 1))
+            rinf = 2 / (1 - cfg["adam_beta2"]) - 1
 
+            rho = (rinf
+                   - 2 * adamvars['it'] * cfg["adam_beta2"] ** adamvars['it'] / (1 - cfg["adam_beta2"] ** adamvars['it']))
 
-# def eprop_EVV(cfg, EVV, Z_in, t, TZ, TZ_in, Z):
-#     """
-#     ALIF & LIF: Zbar
-#     checked
-#     """
-#     if not cfg["traub_trick"]:
-#         return cfg["alpha"] * EVV + Z_in
-#     else:
-#         print("WARNING: UNCOMMENT TZ_IN")
-#         # Repeating to match EVV. Repeating axis differ because Z_in concerns presynaptics.
-#         Zrep = np.repeat(a=Z[:, np.newaxis], repeats=EVV.shape[1], axis=1)
-#         TZrep = np.repeat(a=TZ[:, np.newaxis], repeats=EVV.shape[1], axis=1)
-#         Z_inrep = np.repeat(a=Z_in[np.newaxis, :], repeats=EVV.shape[0], axis=0)
-#         TZ_inrep = np.repeat(a=TZ_in[np.newaxis, :], repeats=EVV.shape[0], axis=0)
-#         return (cfg["alpha"] * EVV * (1
-#                                 - Zrep
-#                                 - np.less_equal((t - TZ_inrep), cfg["dt_refr"])
-#                                 - np.equal((t - TZrep), cfg["dt_refr"]))
-#                 + Z_inrep)
+            if rho > 4:
 
-def eprop_P(cfg, Y):
-    """ Softmax"""
-    maxx = np.max(Y)
-    m = Y - maxx
-    ex = np.exp(cfg["softmax_factor"] * m)
-    denom = np.sum(ex)
-    ret = ex / denom
-    return ret
+                l = torch.sqrt((1 - cfg["adam_beta2"] ** adamvars['it']) / (adamvars[f"v{wtype}"] + cfg["adam_eps"]))
 
+                upper = (rho - 4) * (rho - 2) * rinf
 
-# # @cuda.jit
-# # @vectorize(['float64(float64, float64)'], target='cuda')
-def einsum(a,b):
-    return (a*b.T).T
-    # ac = cp.asarray(a)
-    # bc = cp.asarray(b)
-    # return cp.asnumpy((a*b.T).T)
-    # return np.einsum("j, ji -> i", a, b, optimize='optimal')
-    # return
+                lower = (rinf - 4) * (rinf - 2) * rho
 
+                r = np.sqrt(upper / lower)
 
+                dw = -eta * m * r * l
 
-# @cuda.jit
-# def ET(H, V, B, U, E):
-#     # Define an array in the shared memory
-#     # The size and type of the arrays must be known at compile time
-#     sH = cuda.shared.array(shape=(NR,), dtype=float32)
-#     sV = cuda.shared.array(shape=(NR, NR*2), dtype=float32)
-#     sB = cuda.shared.array(shape=(NR,), dtype=float32)
-#     sU = cuda.shared.array(shape=(NR, NR*2), dtype=float32)
+        elif cfg["Optimizer"] == "Momentum":
+            adamvars[f"m{wtype}"] = cfg["adam_beta1"] * adamvars[f"m{wtype}"] - eta * G[wtype]
 
-#     x, y = cuda.grid(2)
+            dw = adamvars[f"m{wtype}"]
 
-#     tx = cuda.threadIdx.x
-#     ty = cuda.threadIdx.y
-#     bpg = cuda.gridDim.x    # blocks per grid
+        else:
+            print("Warning: undefined optimizer")
+            dw = -eta * m
 
-#     if x >= E.shape[0] and y >= E.shape[1]:
-#         # Quit if (x, y) is outside of valid E boundary
-#         return
+        W[wtype] += dw
 
-#     # Each thread computes one element in the result matrix.
-#     # The dot product is chunked into dot products of NR-long vectors.
-#     tmp = 0.
-#     for i in range(bpg):
-#         # Preload data into shared memory
-#         sH[tx] = H[x]
-#         sB[tx] = B[x]
-#         sV[tx, ty] = V[tx + i * NR, y]
-#         sU[tx, ty] = U[tx + i * NR, y]
+        if wtype == 'out' and cfg['eprop_type'] == 'adaptive':
+            W['B'] += dw
 
-#         # Wait until all threads finish preloading
-#         cuda.syncthreads()
+            W['out'] -= cfg["weight_decay"] * W['out']
+            W['B'] -= cfg["weight_decay"] * W['B']
 
-#         # Computes partial product on the shared memory
-#         for j in range(NR):
-#             tmp += sA[tx, j] * sB[j, ty]
+    if cfg["eprop_type"] == 'symmetric':
+        for s in range(cfg['n_directions']):
+            for r in range(cfg['N_Rec']):
+                W['B'][s, r] = W['out'][s]
 
-#         # Wait until all threads finish computing
-#         cuda.syncthreads()
-
-#     E[x, y] = tmp
-
-# def ET(H, EVV, betas, EVU):
-#     with tf.device(device):
-#         return H[:, tnp.newaxis] * (EVV - betas[:, tnp.newaxis] * EVU)
+    return W, adamvars
 
 
-    # M['H'][s, t, r, :, np.newaxis] * (
-    #     M['EVV'][s, curr_t, r] - M["betas"][s, r, :, np.newaxis] * M['EVU'][s, curr_t, r])
-def process_layer(cfg, M, t, s, r, W_rec, betas):
-    """ Process a single layer of the model at a single time step."""
-    # If not tracking state, the time dimensions of synaptic variables have
-    # length 1 and we overwrite those previous time steps at index 0.
-    start = time.time()
-    if cfg["Track_synapse"]:
-        prev_t = t-1
-        curr_t = t
-        next_t = t+1
-    else:
-        prev_t = 0
-        curr_t = 0
-        next_t = 0
-
-    # Pad any input with zeros to make it length N_R. Used to be able to dot
-    # product with weights.
-    M["Z_prev"][s, t, r] = M['Z'][s, t, r-1] if r > 0 else \
-        np.pad(M[f'X{s}'][t],
-               (0, cfg["N_R"] - M[f'X{s}'].shape[1]))
-
-    M["Z_in"][s, t, r] = np.concatenate((M["Z_prev"][s, t, r],
-                                         M['Z'][s, t-1, r]))
-
-    # Revert eprop functions EVV and V if using traub trick!
-    assert(not cfg["traub_trick"])
-
-    # EVU
-
-    M['EVU'][s, curr_t, r] = (M['H'][s, t-1, r, :, np.newaxis] * M['EVV'][s, prev_t, r]
-                              + (cfg["rho"] - M['H'][s, t-1, r] * betas)[:, np.newaxis] * M['EVU'][s, prev_t, r])
-
-    # EVV
-    M['EVV'][s, curr_t, r] = (cfg["alpha"] * M['EVV'][s, prev_t, r]
-                              + M["Z_in"][s, t, r])
-
-    # I
-    M['I_in'][s, t, r] = np.dot(W_rec[:, :cfg["N_R"]], M["Z_prev"][s, t, r])
-    M['I_rec'][s, t, r] = np.dot(W_rec[:, cfg["N_R"]:], M['Z'][s, t-1, r])
-
-    M['I'][s, t, r] = M['I_in'][s, t, r] + M['I_rec'][s, t, r]
-
-    # V
-    M['V'][s, t, r] =  (cfg["alpha"] * M['V'][s, t-1, r]
-                        + M['I'][s, t, r]
-                        - M['Z'][s, t-1, r] * (
-                            M['A'][s, t-1, r] if cfg["v_fix"] else cfg["thr"]))
-
-    # a
-    M['a'][s, t, r] = cfg['rho'] * M['a'][s, t-1, r] + M['Z'][s, t-1, r]
-    M['A'][s, t, r] = cfg['thr'] + betas * M['a'][s, t, r]
-
-    # Update the spikes Z of the neurons.
-    M['Z'][s, t, r] = np.where(
-        np.logical_and(t - M['TZ'][s, r] >= cfg["dt_refr"],
-                       M['V'][s, t, r] >= M['A'][s, t, r]),
-        1,
-        0)
-
-    # TZ is time of latest spike
-    M['TZ'][s, r, M['Z'][s, t, r]==1] = t
-
-    # Pseudoderivative H
-    M['H'][s, t, r] = ((1 / cfg["thr"] if not cfg["traub_trick"] else 1)
-                       * cfg["gamma"] * np.clip(
-                            a=1 - (abs((M['V'][s, t, r] - M['A'][s, t, r]
-                                       / cfg["thr"]))),
-                            a_min=0,
-                            a_max=None))
-
-    # ET
-    M['ET'][s, curr_t, r] = M['H'][s, t, r, :, np.newaxis] * (
-        M['EVV'][s, curr_t, r] - betas[:, np.newaxis] * M['EVU'][s, curr_t, r])
-
-    # Input layer always "spikes" (with nonbinary spike values Z=X).
-    # TZ_prev = M['TZ'][s, r-1] if r > 0 else \
-    #     np.ones(shape=(M['TZ'][s, r].shape)) * t
-
-    # M["TZ_in"][s, r] = np.concatenate((TZ_prev, M['TZ'][s, r]-1))
-
-    # M['Z_inbar'][s, t] = (cfg["alpha"] * (M['Z_inbar'][s, t-1] if t > 0 else 0)) + M['Z_in'][s, t]
-
-    M['ETbar'][s, curr_t, r] = cfg["kappa"] * M['ETbar'][s, prev_t, r] + M['ET'][s, curr_t, r]
-    M['Zbar'][s, t, r] = cfg["kappa"] * (M['Zbar'][s, t-1, r]) + M['Z'][s, t, r]
-    return M
+def eprop(cfg, X, T, n_steps, betas, W):
 
 
-def init_adam(cfg, tar_size):
-    return {
-        'mW': np.zeros(shape=(cfg["n_directions"], cfg["N_Rec"], cfg["N_R"], cfg["N_R"] * 2,)),
-        'vW': np.zeros(shape=(cfg["n_directions"], cfg["N_Rec"], cfg["N_R"], cfg["N_R"] * 2,)),
-        'mW_out': np.zeros(shape=(cfg["n_directions"], tar_size, cfg["N_R"],)),
-        'vW_out': np.zeros(shape=(cfg["n_directions"], tar_size, cfg["N_R"],)),
-        'mb_out': np.zeros(shape=(cfg["n_directions"], tar_size,)),
-        'vb_out': np.zeros(shape=(cfg["n_directions"], tar_size,)),
-    }
+    # Trim input down to layer size.
+    X = X[:, :, :cfg["N_R"]]
+    inp_size = X.shape[-1]
+
+    X = np.pad(X, ((0,0), (0,0), (0, cfg["N_R"] - inp_size)))
+
+    X = torch.tensor(X)
+    T = torch.tensor(T)
+    n_steps = torch.tensor(n_steps)
+
+    M = initialize_model(cfg=cfg,
+                         inp_size=inp_size,
+                         tar_size=T.shape[-1],
+                         batch_size=X.shape[0],
+                         n_steps=max(n_steps))
+
+    M['x'] = X[None, :]  # Insert subnetwork dimension
+    M['t'] = T
+
+    if cfg["n_directions"] == 2:
+        M['x'] = torch.cat((M['x'], M['x']))
+        for b in range(M['x'].shape[1]):
+            M['x'][1, b, :n_steps[b]] = torch.fliplr(M['x'][0, b, :n_steps[b]])
+
+    for t in np.arange(0, max(n_steps.cpu().numpy())):
+        start = time.time()
+        prev_syn_t, curr_syn_t = conn_t_idxs(track_synapse=cfg['Track_synapse'], t=t)
+        prev_nrn_t, curr_nrn_t = conn_t_idxs(track_synapse=cfg['Track_neuron'], t=t)
+        is_valid = torch.logical_not(torch.any(M['x'][0, :, t] == -1, axis=1))
+
+        for r in range(cfg["N_Rec"]):  # TODO: Can overwrite r instead of appending, except Z
+            # TODO: See which is_valid masks can be removed
+            M['va'][:, :, curr_syn_t, r] = (
+                M['h'][:, :, prev_nrn_t, r, :, None] * M['vv'][:, :, prev_syn_t, r]
+                + (cfg["rho"] - (M['h'][:, :, prev_nrn_t, r, :, None]
+                                 * betas[:, None, r, :, None]))
+                * M['va'][:, :, prev_syn_t, r])
+
+            Z_prev_layer = (M['z'][:, :, curr_nrn_t, r-1] if r
+                            else M['x'][:, :, t])
+            Z_prev_time = M['z'][:, :, prev_nrn_t, r]
+
+            # Z_in is incoming at current t, so from last t.
+            M['z_in'][:, :, curr_nrn_t, r] = torch.cat((Z_prev_layer, Z_prev_time), axis=2)
+
+            M['vv'][:, :, curr_syn_t, r] = (
+                cfg["alpha"]
+                * M['vv'][:, :, prev_syn_t, r]
+                + M['z_in'][:, :, curr_nrn_t, r, None, :]
+                )
+
+            # Can contract this further!
+            M['I_in'][:, :, curr_nrn_t, r] = torch.sum(W['W_in'][:, None, r] * Z_prev_layer[:, :, None, :], axis=-1) # Checked correct
+
+            M['I_rec'][:, :, curr_nrn_t, r] = torch.sum(W['W_rec'][:, None, r] * Z_prev_time[:, :, None, :], axis=-1) # Checked correct
+
+            M['I'][:, :, curr_nrn_t, r] = M['I_in'][:, :, curr_nrn_t, r] + M['I_rec'][:, :, curr_nrn_t, r]
+
+            M['a'][:, :, curr_nrn_t, r] = (cfg["rho"] * M['a'][:, :, prev_nrn_t, r]
+                                  + M['z'][:, :, prev_nrn_t, r])
+
+            A = cfg["thr"] + betas[:, None, r] * M['a'][:, :, curr_nrn_t, r]
+
+            if cfg["neuron"] == "ALIF":
+                M['v'][:, :, curr_nrn_t, r] = ((
+                      cfg["alpha"] * M['v'][:, :, prev_nrn_t, r]
+                      + M['I'][:, :, curr_nrn_t, r]
+                      - M['z'][:, :, prev_nrn_t, r] * (A if cfg["v_fix"] else cfg["thr"]))
+                      )
+            elif cfg["neuron"] == "STDP-ALIF":
+                M['v'][:, :, curr_nrn_t, r] = ((
+                      cfg["alpha"] * M['v'][:, :, prev_nrn_t, r]
+                      + M['I'][:, :, curr_nrn_t, r]
+                      - M['z'][:, :, prev_nrn_t, r] * (A if cfg["v_fix"] else cfg["thr"]))
+                      )
+
+            M['z'][:, :, curr_nrn_t, r] = torch.where(
+                torch.logical_and(t - M['tz'][:, :, r] > cfg["dt_refr"],
+                                  M['v'][:, :, curr_nrn_t, r] >= A),
+                1,
+                0)
+
+            M['h'][:, :, curr_nrn_t, r] = (
+                ((1 / (A if cfg["v_fix"] else cfg["thr"])) if not cfg["v_fix_psi"] else 1)
+                # (1 / cfg["thr"])
+                * cfg["gamma"]
+                * torch.clip(
+                    1 - (abs((M['v'][:, :, curr_nrn_t, r] - A) / cfg["thr"])),
+                    0,
+                    None))
+
+            M['h'][:, :, curr_nrn_t, r] = torch.where(
+                t - M['tz'][:, :, r] > cfg["dt_refr"],
+                M['h'][:, :, curr_nrn_t, r],
+                torch.zeros_like(M['h'][:, :, curr_nrn_t, r]))
+
+            M['tz'][:, :, r] = torch.where(M['z'][:, :, curr_nrn_t, r] != 0,
+                                           torch.ones_like(M['tz'][:, :, r])*t,
+                                           M['tz'][:, :, r])
+            M['zs'][:, :, r] += M['z'][:, :, curr_nrn_t, r]
+
+            M['et'][:, :, curr_syn_t, r] = (
+                M['h'][:, :, curr_nrn_t, r, :, None]
+                * (M['vv'][:, :, curr_syn_t, r]
+                   - betas[:, None, r, :, None] * M['va'][:, :, curr_syn_t, r])
+                )
+
+
+            M['etbar'][:, :, curr_syn_t, r] = (
+                cfg["kappa"]
+                * M['etbar'][:, :, prev_syn_t, r] + M['et'][:, :, curr_syn_t, r]
+                )
+            M['zbar'][:, :, curr_nrn_t, r] = (
+                cfg["kappa"]
+                * M['zbar'][:, :, prev_nrn_t, r] + M['z'][:, :, curr_nrn_t, r]
+                )
+
+        M['ysub'][:, :, curr_nrn_t] = (
+            torch.sum(
+                W['out'][:, None] * M['z'][:, :, curr_nrn_t, -1, :, None],
+                axis=-2)
+            + cfg["kappa"] * M['ysub'][:, :, prev_nrn_t])
+
+        M['y'][:, curr_nrn_t] = torch.sum(M['ysub'][:, :, curr_nrn_t], axis=0)
+
+        M['y'][:, curr_nrn_t] += W['bias']
+
+        M['p'][:, t] = torch.exp(M['y'][:, curr_nrn_t]
+                                    - torch.amax(M['y'][:, curr_nrn_t],
+                                 axis=1)[:, None])
+
+        M['p'][:, t] = M['p'][:, t] / torch.sum(M['p'][:, t], axis=1)[:, None]
+
+        M['d'][:, curr_nrn_t] = (M['p'][:, t] - T[:, t]) * is_valid[:, None]
+
+        M['loss_pred'][:, :, curr_nrn_t] = torch.sum(
+            W['B'][:, None, :, :] * M['d'][None, :, curr_nrn_t, None, None, :],  # Checked correct (for batch size 1)
+            axis=-1)
+
+        M['GW_in'][:, curr_syn_t] += torch.mean(
+            M['loss_pred'][:, :, curr_nrn_t, :, :, None]
+            * M['etbar'][:, :, curr_syn_t, :, :, :cfg["N_R"]], axis=1)
+        M['GW_rec'][:, curr_syn_t] += torch.mean(
+            M['loss_pred'][:, :, curr_nrn_t, :, :, None]
+            * M['etbar'][:, :, curr_syn_t, :, :, cfg["N_R"]:], axis=1)
+
+
+        M['loss_reg'][:, curr_nrn_t] = torch.mean(
+            cfg["FR_reg"]
+            * 2 * t  # Initial means are less informative
+            / n_steps[None, :, None, None] ** 2  # Square corrects previous term
+            * (M['zs'] / (t+1) - cfg["FR_target"]) * is_valid[None, :, None, None], axis=1)
+
+        M['GW_in'][:, curr_syn_t] += M['loss_reg'][:, curr_nrn_t, :, :, None]
+        M['GW_rec'][:, curr_syn_t] += M['loss_reg'][:, curr_nrn_t, :, :, None]
+
+        if cfg["L2_reg"]:
+            M['GW_in'][:, curr_syn_t] += cfg["L2_reg"] * W['W_in'] * is_valid[:, None, None]
+            M['GW_rec'][:, curr_syn_t] += cfg["L2_reg"] * W['W_rec'] * is_valid[:, None, None]
+
+        M['Gout'][:, curr_syn_t] += torch.mean(
+            M['d'][None, :, curr_nrn_t, None]
+            * M['zbar'][:, :, curr_nrn_t, -1, :, None]
+            * is_valid[None, :, None, None], axis=1)
+        M['Gbias'][curr_syn_t] += torch.mean(torch.sum(M['d'][:, curr_nrn_t] * is_valid[None, :, None],
+                                                       axis=0), axis=0)
+
+    a = torch.arange(M['p'].shape[1])
+    for b in range(M['p'].shape[0]):
+        M['pm'][b, a, M['p'][b].argmax(axis=1)] = 1
+
+    M['correct'] = (M['pm'] == M['t']).all(axis=2)
+
+    M['ce'] = -torch.sum(M['t'] * torch.log(1e-30 + M['p']), axis=2)
+    M['reg_error'] = 0.5 * torch.sum(
+        torch.mean(
+            (M['zs'] / n_steps[None, :, None, None] - cfg["FR_target"]),
+            axis=1)) ** 2
+    # Sum over time
+    G = {}
+    G['W_in'] = torch.sum(M['GW_in'], axis=1)
+    G['W_rec'] = torch.sum(M['GW_rec'], axis=1)
+    G['out'] = torch.sum(M['Gout'], axis=1)
+    G['bias'] = torch.sum(M['Gbias'], axis=0)
+
+    # Don't update dead weights
+    G['W_in'][W['W_in']==0] = 0
+    G['W_rec'][W['W_rec']==0] = 0
+
+    return G, M
 
 
 def prepare_log(cfg, log_id):
@@ -576,61 +514,122 @@ def prepare_log(cfg, log_id):
         json.dump(cfg0, fp)
 
 
-def get_log_id():
-    log_id = datetime.datetime.now().strftime('%Y-%m-%d-%H:%M:%S')
-    id_append = ""
-    count = 1
-    while os.path.isdir(f"../log/{log_id}{id_append}"):
-        id_append = f"_{count}"
-        count += 1
-    return log_id + id_append
+def init_adam(cfg, tar_size):
+    return {
+        'mW_in': torch.zeros(size=(cfg["n_directions"], cfg["N_Rec"], cfg["N_R"], cfg["N_R"])),
+        'vW_in': torch.zeros(size=(cfg["n_directions"], cfg["N_Rec"], cfg["N_R"], cfg["N_R"])),
+        'mW_rec': torch.zeros(size=(cfg["n_directions"], cfg["N_Rec"], cfg["N_R"], cfg["N_R"])),
+        'vW_rec': torch.zeros(size=(cfg["n_directions"], cfg["N_Rec"], cfg["N_R"], cfg["N_R"])),
+        'mout': torch.zeros(size=(cfg["n_directions"], cfg["N_R"], tar_size)),
+        'vout': torch.zeros(size=(cfg["n_directions"], cfg["N_R"], tar_size)),
+        'mbias': torch.zeros(size=(tar_size,)),
+        'vbias': torch.zeros(size=(tar_size,)),
+        'it': 0
+    }
 
 
-def get_elapsed_time(cfg, start_time, e, b, batch_size):
-    plustime = time.strftime('%H:%M:%S',
-                             time.gmtime(time.time()-start_time))
-    remtime = ''
-    if e:
-        timeperbatch = ((time.time() - start_time)
-                        / (e * batch_size + b))
-
-        remainingbatches = (cfg["Epochs"] - e) * batch_size + (batch_size - b)
-
-        if cfg["val_every_E"]:
-            remainingbatches += remainingbatches * (1/cfg["val_every_E"])
-
-        remtime = '\t-' + time.strftime('%H:%M:%S', time.gmtime(
-            timeperbatch * remainingbatches))
-
-    return plustime, remtime
-
-
-def load_data(cfg):
-
-    inps = {}
-    tars = {}
+def initialize_betas(cfg):
     rng = np.random.default_rng(seed=cfg["seed"])
-    for tvt_type in cfg['n_examples'].keys():
-        inps[tvt_type] = np.load(f"{cfg['wavs_fname']}_{tvt_type}_{cfg['task']}.npy")
+    betas = np.zeros(
+        shape=(cfg["n_directions"] * cfg["N_Rec"] * cfg["N_R"]))
 
-    mintrain = np.amin(inps['train'], axis=(0, 1))
-    maxtrain = np.ptp(inps['train'], axis=(0, 1))
+    betas[:int(betas.size * cfg["fraction_ALIF"])] = cfg["beta"]
+    rng.shuffle(betas)
 
-    for tvt_type in cfg['n_examples'].keys():
-        # Normalize [0, 1]
-
-        inps[tvt_type] = np.where(inps[tvt_type] != -1, inps[tvt_type] - mintrain, -1)
-        inps[tvt_type] = np.where(inps[tvt_type] != -1, inps[tvt_type] / maxtrain, -1)
-
-        tars[tvt_type] = np.load(f"{cfg['phns_fname']}_{tvt_type}_{cfg['task']}.npy")
-
-        shuf_idxs = np.arange(inps[tvt_type].shape[0])
-        rng.shuffle(shuf_idxs)
-        inps[tvt_type] = inps[tvt_type][shuf_idxs]
-        tars[tvt_type] = tars[tvt_type][shuf_idxs]
+    betas = betas.reshape((cfg["n_directions"],
+                             cfg["N_Rec"],
+                             cfg["N_R"],))
+    betas = torch.tensor(betas)
+    return betas
 
 
-    return inps, tars
+def conn_t_idxs(t, track_synapse):
+    if track_synapse:
+        return t-1, t
+    return 0, 0
+
+
+def initialize_W_log(cfg, W, sample_size=100):
+    W_log = {}
+
+    rng = np.random.default_rng(seed=cfg['seed'])
+    W_log['Cross-entropy'] = {'train': [], 'val': []}
+    W_log['Error (reg)'] = {'train': [], 'val': []}
+    W_log['Mean Hz'] = {'train': [], 'val': []}
+    W_log['Percentage wrong'] = {'train': [], 'val': []}
+
+    for wtype, w in W.items():
+        wf = w.flatten()
+        if wtype != 'bias':
+            ssize = min(wf.shape[0], sample_size)
+            idxs = rng.choice(ssize, size=ssize, replace=False)[:wf.shape[0]]
+        else:
+            idxs = np.arange(wf.shape[0])
+
+        W_log[f'{wtype}_idxs'] = idxs
+        W_log[wtype] = np.empty(shape=(idxs.size, 0))
+
+
+    return W_log
+
+
+def update_W_log(W_log, Mt, Mv, W):
+    # weights sample
+    for wtype, w in W.items():
+        wcpu = w.cpu().numpy()
+        W_log[wtype] = np.append(W_log[wtype], wcpu.flatten()[W_log[f'{wtype}_idxs']][:, None], axis=1)
+
+    for tv_type, M in (('train', Mt), ('val', Mv)):
+        if M is None:  # Mv skipped
+
+            W_log['Cross-entropy'][tv_type].append(-1)
+            W_log['Mean Hz'][tv_type].append(-1)
+            W_log['Percentage wrong'][tv_type].append(-1)
+            W_log['Error (reg)'][tv_type].append(-1)
+            continue
+
+        X = M['x'].cpu().numpy()
+        bsize = X.shape[1]
+        ces = np.zeros(shape=(bsize))
+        hz = np.zeros(shape=(bsize))
+        pwrong = np.zeros(shape=(bsize))
+
+        for b in range(bsize):
+            arr = X[0, b]
+            while np.any(arr[-1] == -1):
+                arr = arr[:-1]
+
+            ces[b] = np.mean(M['ce'].cpu().numpy()[b, :arr.shape[0]], axis=0)
+            pwrong[b] = 100-100*np.mean(M['correct'].cpu().numpy()[b, :arr.shape[0]])
+            hz[b] = 1000*np.mean(np.mean(M['z'][:, b, :arr.shape[0]].cpu().numpy(), axis=1))
+            # print(np.mean(M['z'][:, b, :arr.shape[0]].cpu().numpy(), axis=1))
+
+        W_log['Cross-entropy'][tv_type].append(np.mean(ces))
+        W_log['Mean Hz'][tv_type].append(np.mean(hz))
+        W_log['Percentage wrong'][tv_type].append(np.mean(pwrong))
+        W_log['Error (reg)'][tv_type].append(M['reg_error'])
+
+    return W_log
+
+
+def trim_samples(X, T=None):
+    # Crop -1's
+    while np.all(X[:, -1] == -1):
+        X = X[:, :-1]
+    if T is not None:
+        T = T[:, :X.shape[1]]
+        return X, T
+    return X
+
+
+def count_lengths(X):
+    n_steps = np.zeros(shape=(X.shape[0]), dtype=np.int32)
+    for idx, arr in enumerate(X):
+        while np.any(arr[-1, 0] == -1):
+            arr = arr[:-1]
+        n_steps[idx] = arr.shape[0]
+    return n_steps
+
 
 def interpolate_inputs(cfg, inp, tar, stretch):
     if inp.ndim == 2:
@@ -660,5 +659,77 @@ def interpolate_inputs(cfg, inp, tar, stretch):
 
     return inp, tar
 
-    # this_inps = np.repeat(this_inps, cfg["Repeats"], axis=0)
-    # this_tars = np.repeat(this_tars, cfg["Repeats"], axis=0)
+
+def sample_mbatches(cfg, n_samples, tvtype):
+    ret = []
+    samples = np.arange(n_samples)
+
+    rng = np.random.default_rng(seed=cfg["seed"])
+    rng.shuffle(samples)
+
+    while samples.shape[0]:
+        ret.append(samples[:cfg[f"batch_size_{tvtype}"]])
+        samples = samples[cfg[f"batch_size_{tvtype}"]:]
+
+    return ret
+
+
+def load_data(cfg):
+
+    inps = {}
+    tars = {}
+    rng = np.random.default_rng(seed=cfg["seed"])
+    for tvt_type in cfg['n_examples'].keys():
+        inps[tvt_type] = np.load(f"{cfg['wavs_fname']}_{tvt_type}_{cfg['task']}.npy")
+        tars[tvt_type] = np.load(f"{cfg['phns_fname']}_{tvt_type}_{cfg['task']}.npy")
+
+
+
+    # mintrain = np.amin(inps['train'], axis=(0, 1))
+    # maxtrain = np.ptp(inps['train'], axis=(0, 1))
+    means = np.mean(inps['train'], axis=(0, 1))
+    stds = np.std(inps['train'], axis=(0, 1))
+
+    for tvt_type in cfg['n_examples'].keys():
+        # Normalize [0, 1]
+
+        inps[tvt_type] = np.where(inps[tvt_type] != -1, (inps[tvt_type] - means) / np.maximum(stds, 1e-10), -1)
+        # inps[tvt_type] = np.where(inps[tvt_type] != -1, inps[tvt_type] / maxtrain, -1)
+
+
+        # Add blank
+        tars[tvt_type] = np.append(np.zeros_like(tars[tvt_type][:, :, :1]), tars[tvt_type], axis=2)
+
+        shuf_idxs = np.arange(inps[tvt_type].shape[0])
+        rng.shuffle(shuf_idxs)
+        inps[tvt_type] = inps[tvt_type][shuf_idxs]
+        tars[tvt_type] = tars[tvt_type][shuf_idxs]
+
+        inps[tvt_type] = inps[tvt_type][:, :cfg["maxlen"]]
+        tars[tvt_type] = tars[tvt_type][:, :cfg["maxlen"]]
+
+    return inps, tars
+
+
+def get_log_id():
+    log_id = datetime.datetime.now().strftime('%Y-%m-%d-%H:%M:%S')
+    id_append = ""
+    count = 1
+    while os.path.isdir(f"../log/{log_id}{id_append}"):
+        id_append = f"_{count}"
+        count += 1
+    return log_id + id_append
+
+
+def save_checkpoint(W, cfg, log_id):
+    for wtype, w in W.items():
+        np.save(f"../log/{log_id}/checkpoints/{wtype}", w.cpu().numpy())
+
+
+def load_checkpoint(log_id, parent_dir='log'):
+    W = {}
+    for subdir, _, files in os.walk(f"../{parent_dir}/{log_id}/checkpoints"):
+        for filename in files:
+            filepath = subdir + os.sep + filename
+            W[filename[:-4]] = torch.tensor(np.load(filepath))  # cut off '.npy'
+    return W
