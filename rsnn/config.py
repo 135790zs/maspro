@@ -4,26 +4,26 @@ cfg = {
     "Optimizer": "Adam",
     "neuron": "ALIF",  # in {ALIF, STDP-ALIF, Izhikevich}
     "v_fix": False,
-    "v_fix_psi": False,
+    "v_fix_psi": True,
     "fraction_ALIF": 0.25,  # def 0.25
     "n_directions": 1,  # Reduces error from 36.1 to 32.9.
     "seed": None,  # 'None' for random seed
 
-    "alpha": 0.78,  # .78 for 1, .95 for 5
+    "alpha": 0.8,  # .78 for 1, .95 for 5
     "rho": 0.975,  # .975 for 1, .995 for 5
-    "kappa": 0.717,
+    "kappa": 0.7,
     "beta": 0.184,  # Bellec2: "order of 0.07", Bellec3: 0.184. Code: 1.8
     "gamma": 0.3,  # Bellec2: 0.3
     "thr": 1.6,  # Bellec3: 1.6
     "dt_refr": 2,  # Bellec3: 2
 
-    "IzhV1": 0.04,
-    "IzhV2": 5,
-    "IzhV3": 140,
-    "IzhA1": 0.004,
-    "IzhA2": -0.02,
-    "IzhReset": -65,
-    "IzhPsi": 30,
+    # "IzhV1": 0.04,
+    # "IzhV2": 5,
+    # "IzhV3": 140,
+    # "IzhA1": 0.004,
+    # "IzhA2": -0.02,
+    # "IzhReset": -65,
+    # "IzhPsi": 30,
 
     "dropout": 0,
 
@@ -36,7 +36,7 @@ cfg = {
 
     "adam_beta1": 0.9,
     "adam_beta2": 0.999,
-    "adam_eps": 1e-5,
+    "adam_eps": 1e-8,
 
     "weight_decay": 1e-2,  # Bellec3: 1e-2
     "L2_reg": 0,  # Bellec3: 1e-5
@@ -47,7 +47,7 @@ cfg = {
     "uniform_dist": False,
     "weightscale": 1,
 
-    "N_R": 400,
+    "N_R": 100,
     "N_Rec": 1,
 
     "task": "TIMIT",
@@ -65,24 +65,29 @@ cfg = {
     "train_out": True,
     "train_bias": True,
 
-    "Epochs": 400,  # def = 80
-    "Track_neuron": True,
+    "Epochs": 80,  # def = 80
+    "Track_neuron": False,
     "Track_synapse": False,
     "Repeats": 1,  # ms per epoch, def = 5
-    "Interpolation": 'nearest',  # nearest, linear
-    "batch_size_train": 8,  # def = 32
-    "batch_size_val": 8,  # def = 32
-    "batch_size_test": 8,  # def = 32
+    "Interpolation": 'linear',  # nearest, linear
+    "batch_size_train": 32,  # def = 32
+    "batch_size_val": 32,  # def = 32
+    "batch_size_test": 32,  # def = 32
     "maxlen": 778,
     "TIMIT_derivative": 2,
-    "n_examples": {'train': 100, 'val': 100, 'test': 50},  # Re-process TIMIT!
+    "n_examples": {'train': 200, 'val': 100, 'test': 50},  # Re-process TIMIT!
     # "n_examples": {'train': 3696, 'val': 400, 'test': 192},
     "plot_model_interval": 20,  # Per iter  #  State plot; 0 to disable plots
     "plot_tracker_interval": 10,  # Per it
     "state_save_interval": 50,
     "val_every_B": 10,
-    "max_v_batches": 1,
     "visualize_val": False,
+    "early_stopping": True,
+
+    # Max batches per epoch
+    "max_train_batches": -1,
+    "max_val_batches": 13,
+    "max_test_batches": -1,
 
     "frame_size": 0.025,
     "frame_stride": 0.01,

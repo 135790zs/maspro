@@ -303,8 +303,17 @@ def update_weights(W, G, adamvars, e, cfg, it_per_e):
     return W, adamvars
 
 
-def eprop(cfg, X, T, n_steps, betas, W):
+def eprop(cfg, X, T, betas, W, grad=True):
 
+
+    X, T = interpolate_inputs(cfg=cfg,
+                                 inp=X,
+                                 tar=T,
+                                 stretch=cfg["Repeats"])
+
+    X, T = trim_samples(X=X, T=T)
+
+    n_steps = count_lengths(X=X)
 
     # Trim input down to layer size.
     X = X[:, :, :cfg["N_R"]]
@@ -340,13 +349,13 @@ def eprop(cfg, X, T, n_steps, betas, W):
             # TODO: See which is_valid masks can be removed
 
 
-            if cfg["neuron"] in ["ALIF", "STDP-ALIF"]:
+            if grad and cfg["neuron"] in ["ALIF", "STDP-ALIF"]:
                 M['va'][:, :, curr_syn_t, r] = (
                     M['h'][:, :, prev_nrn_t, r, :, None] * M['vv'][:, :, prev_syn_t, r]
                     + (cfg["rho"] - (M['h'][:, :, prev_nrn_t, r, :, None]
                                      * betas[:, None, r, :, None]))
                     * M['va'][:, :, prev_syn_t, r])
-            elif cfg["neuron"] == "Izhikevich":
+            elif grad and cfg["neuron"] == "Izhikevich":
                 oldva = M['va'][:, :, prev_syn_t, r]
                 M['va'][:, :, curr_syn_t, r] = (
                     cfg["IzhA1"] * (1 - M['z'][:, :, prev_nrn_t, r, :, None]) * M['vv'][:, :, prev_syn_t, r]
@@ -359,13 +368,13 @@ def eprop(cfg, X, T, n_steps, betas, W):
             # Z_in is incoming at current t, so from last t.
             M['z_in'][:, :, curr_nrn_t, r] = torch.cat((Z_prev_layer, Z_prev_time), axis=2)
 
-            if cfg["neuron"] == "ALIF":
+            if grad and cfg["neuron"] == "ALIF":
                 M['vv'][:, :, curr_syn_t, r] = (
                     cfg["alpha"]
                     * M['vv'][:, :, prev_syn_t, r]
                     + M['z_in'][:, :, curr_nrn_t, r, None, :]
                     )
-            elif cfg["neuron"] == "STDP-ALIF":
+            elif grad and cfg["neuron"] == "STDP-ALIF":
                 M['vv'][:, :, curr_syn_t, r] = (
                     cfg["alpha"]
                     * M['vv'][:, :, prev_syn_t, r]
@@ -375,7 +384,7 @@ def eprop(cfg, X, T, n_steps, betas, W):
                             0))[..., None]
                     + M['z_in'][:, :, curr_nrn_t, r, None, :]
                     )
-            elif cfg["neuron"] == "Izhikevich":
+            elif grad and cfg["neuron"] == "Izhikevich":
                 M['vv'][:, :, curr_syn_t, r] = (
                     (1 - M['z'][:, :, prev_nrn_t, r, :, None])
                     * (1 + (2 * cfg["IzhV1"] * M['v'][:, :, prev_nrn_t, r, :, None] + cfg["IzhV2"]))
@@ -454,6 +463,8 @@ def eprop(cfg, X, T, n_steps, betas, W):
                                            torch.ones_like(M['tz'][:, :, r])*t,
                                            M['tz'][:, :, r])
             M['zs'][:, :, r] += M['z'][:, :, curr_nrn_t, r] * is_valid[None, :, None]
+            if not grad:
+                continue
 
             if cfg["neuron"] in ['ALIF', "STDP-ALIF"]:
                 M['h'][:, :, curr_nrn_t, r] = (
@@ -507,15 +518,16 @@ def eprop(cfg, X, T, n_steps, betas, W):
                 axis=-2)
             + cfg["kappa"] * M['ysub'][:, :, prev_nrn_t])
 
-        M['y'][:, curr_nrn_t] = torch.sum(M['ysub'][:, :, curr_nrn_t], axis=0)
-
-        M['y'][:, curr_nrn_t] += W['bias']
+        M['y'][:, curr_nrn_t] = torch.sum(M['ysub'][:, :, curr_nrn_t], axis=0) + W['bias']
 
         M['p'][:, t] = torch.exp(M['y'][:, curr_nrn_t]
                                     - torch.amax(M['y'][:, curr_nrn_t],
                                  axis=1)[:, None])
 
         M['p'][:, t] = M['p'][:, t] / torch.sum(M['p'][:, t], axis=1)[:, None]
+
+        if not grad:  # Next steps all have to do with gradient calculation
+            continue
 
         M['d'][:, curr_nrn_t] = (M['p'][:, t] - T[:, t])
 
@@ -562,18 +574,21 @@ def eprop(cfg, X, T, n_steps, betas, W):
         torch.mean(
             (M['zs'] / n_steps[None, :, None, None] - cfg["FR_target"]),
             axis=1)) ** 2
-    # Sum over time
-    G = {}
-    G['W_in'] = torch.sum(M['GW_in'], axis=1)
-    G['W_rec'] = torch.sum(M['GW_rec'], axis=1)
-    G['out'] = torch.sum(M['Gout'], axis=1)
-    G['bias'] = torch.sum(M['Gbias'], axis=0)
 
-    # Don't update dead weights
-    G['W_in'][W['W_in']==0] = 0
-    G['W_rec'][W['W_rec']==0] = 0
+    if grad:
+        G = {}
+        # Sum over time
+        G['W_in'] = torch.sum(M['GW_in'], axis=1)
+        G['W_rec'] = torch.sum(M['GW_rec'], axis=1)
+        G['out'] = torch.sum(M['Gout'], axis=1)
+        G['bias'] = torch.sum(M['Gbias'], axis=0)
 
-    return G, M
+        # Don't update dead weights
+        G['W_in'][W['W_in']==0] = 0
+        G['W_rec'][W['W_rec']==0] = 0
+
+        return G, M, n_steps.cpu().numpy()
+    return None, M, n_steps.cpu().numpy()
 
 
 def prepare_log(cfg, log_id):
@@ -654,7 +669,30 @@ def initialize_W_log(cfg, W, sample_size=100):
     return W_log
 
 
-def update_W_log(W_log, Mt, Mv, W, log_id):
+def get_avgs(M, n_steps):
+    A = {}
+    batchsize = n_steps.shape[0]
+
+    ces = np.zeros(shape=(batchsize,))
+    hzs = np.zeros(shape=(batchsize,))
+    regerrs = np.zeros(shape=(batchsize,))
+    accs = np.zeros(shape=(batchsize,))
+
+    for b in range(batchsize):
+        ces[b] = np.mean(M['ce'][b, :n_steps[b]].cpu().numpy())
+        hzs[b] = np.mean(M['zs'][:, b].cpu().numpy() / n_steps[b])
+        regerrs[b] = M['reg_error'].cpu().numpy()
+        accs[b] = np.mean(M['correct'][b, :n_steps[b]].cpu().numpy())
+
+    A['ce'] = np.mean(ces)
+    A['hz'] = np.mean(hzs)
+    A['regerr'] = np.mean(regerrs)
+    A['acc'] = np.mean(accs)
+
+    return A
+
+
+def update_W_log(W_log, W, log_id, avgs_t, avgs_v):
     # weights sample
     for wtype, w in W.items():
         wcpu = w.cpu().numpy()
@@ -673,8 +711,8 @@ def update_W_log(W_log, Mt, Mv, W, log_id):
                                         quoting=csv.QUOTE_MINIMAL)
                 varname_writer.writerow(['train', 'val'])
 
-    for tv_type, M in (('train', Mt), ('val', Mv)):
-        if M is None:  # Mv skipped
+    for tv_type, avgs in (('train', avgs_t), ('val', avgs_v)):
+        if avgs is None:  # Mv skipped
 
             W_log['Cross-entropy'][tv_type].append(-1)
             W_log['Mean Hz'][tv_type].append(-1)
@@ -682,25 +720,10 @@ def update_W_log(W_log, Mt, Mv, W, log_id):
             W_log['Error (reg)'][tv_type].append(-1)
             continue
 
-        X = M['x'].cpu().numpy()
-        bsize = X.shape[1]
-        ces = np.zeros(shape=(bsize))
-        hz = np.zeros(shape=(bsize))
-        pwrong = np.zeros(shape=(bsize))
-
-        for b in range(bsize):
-            arr = X[0, b]
-            while np.any(arr[-1] == -1):
-                arr = arr[:-1]
-
-            ces[b] = np.mean(M['ce'].cpu().numpy()[b, :arr.shape[0]], axis=0)
-            pwrong[b] = 100-100*np.mean(M['correct'].cpu().numpy()[b, :arr.shape[0]])
-            hz[b] = 1000*np.mean(M['zs'][:, b].cpu().numpy()/arr.shape[0])
-
-        W_log['Cross-entropy'][tv_type].append(np.mean(ces))
-        W_log['Mean Hz'][tv_type].append(np.mean(hz))
-        W_log['Percentage wrong'][tv_type].append(np.mean(pwrong))
-        W_log['Error (reg)'][tv_type].append(M['reg_error'])
+        W_log['Cross-entropy'][tv_type].append(avgs['ce'])
+        W_log['Mean Hz'][tv_type].append(avgs['hz'])
+        W_log['Percentage wrong'][tv_type].append(100 - 100 * avgs['acc'])
+        W_log['Error (reg)'][tv_type].append(avgs['regerr'])
 
     for key in ['Error (reg)', 'Percentage wrong', 'Mean Hz', 'Cross-entropy']:
         with open(f'../log/{log_id}/tracker/{key}.csv', 'a', newline='') as csvfile:
@@ -795,10 +818,6 @@ def load_data(cfg):
 
         inps[tvt_type] = np.where(inps[tvt_type] != -1, (inps[tvt_type] - means) / np.maximum(stds, 1e-10), -1)
         # inps[tvt_type] = np.where(inps[tvt_type] != -1, inps[tvt_type] / maxtrain, -1)
-
-
-        # Add blank
-        tars[tvt_type] = np.append(np.zeros_like(tars[tvt_type][:, :, :1]), tars[tvt_type], axis=2)
 
         shuf_idxs = np.arange(inps[tvt_type].shape[0])
         rng.shuffle(shuf_idxs)

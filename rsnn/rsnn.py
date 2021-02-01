@@ -9,11 +9,6 @@ import vis as vis
 
 
 def main(cfg):
-    print(f"New thr: {cfg['thr']}")
-    print(f"New alpha: {cfg['alpha']}")
-    print(f"New beta: {cfg['beta']}")
-    print(f"New rho: {cfg['rho']}")
-    print(f"New kappa: {cfg['kappa']}")
     start_time = time.time()
     rng = np.random.default_rng(seed=cfg["seed"])
 
@@ -38,9 +33,11 @@ def main(cfg):
     W_log = ut.initialize_W_log(cfg=cfg, W=W)
 
     best_val_ce = None
+    flag_stop = False
 
     for e in range(cfg["Epochs"]):
-
+        if flag_stop:
+            break
         # Train on batched input samples
         batch_idxs_list = ut.sample_mbatches(cfg=cfg, n_samples=n_train, tvtype='train')
 
@@ -48,47 +45,53 @@ def main(cfg):
             print((f"{'-'*10} Epoch {e}/{cfg['Epochs']}\tBatch {b_idx}/"
                    f"{len(batch_idxs_list)} {'-'*10}"), end='\r')
 
-
-
             # Validate occasionally
             if adamvars['it'] % cfg["val_every_B"] == 0:
-                Mv, best_val_ce = validate(n_val=n_val,
-                              cfg=cfg,
-                              v_inps=inps['val'],
-                              v_tars=tars['val'],
-                              betas=betas,
-                              W=W,
-                              it=adamvars['it'],
-                              best_val_ce=best_val_ce,
-                              log_id=log_id)
+                Mv, avgs_v = feed_batch(
+                    n_samples=n_val,
+                    tvt_type='val',
+                    cfg=cfg,
+                    inps=inps['val'],
+                    tars=tars['val'],
+                    betas=betas,
+                    W=W,
+                    it=adamvars['it'],
+                    best_val_ce=best_val_ce,
+                    log_id=log_id)
+
+                if (cfg["early_stopping"]
+                        and best_val_ce is not None
+                        and avgs_v['ce'] >= best_val_ce):
+                    print(f"Stopping early, new ce {avgs_v['ce']:.3f} >= "
+                          f"previous best {best_val_ce:.3f}")
+                    flag_stop = True
+
+                elif best_val_ce is None or avgs_v['ce'] < best_val_ce:
+                    print(f"\nNew best validation error: {avgs_v['ce']:.3f} "
+                          + ((f"<-- {best_val_ce:.3f}\n")
+                             if best_val_ce is not None else '\n'))
+                    best_val_ce = avgs_v['ce']
+                    ut.save_checkpoint(W=W, cfg=cfg, log_id=log_id)
+
+                best_val_ce = avgs_v['ce']
             else:
-                Mv = None
+                avgs_v = None
 
-            X = inps['train'][batch_idxs]
-            T = tars['train'][batch_idxs]
+            G, M, n_steps = ut.eprop(cfg=cfg,
+                                     X=inps['train'][batch_idxs],
+                                     T=tars['train'][batch_idxs],
+                                     betas=betas,
+                                     W=W)
 
-            X, T = ut.interpolate_inputs(cfg=cfg,
-                                         inp=X,
-                                         tar=T,
-                                         stretch=cfg["Repeats"])
-
-            X, T = ut.trim_samples(X=X, T=T)
-
-            n_steps = ut.count_lengths(X=X)
-
-            G, M = ut.eprop(cfg=cfg,
-                            X=X,
-                            T=T,
-                            n_steps=n_steps,
-                            betas=betas,
-                            W=W)
+            avgs_t = ut.get_avgs(M=M,
+                               n_steps=n_steps)
 
 
             W_log = ut.update_W_log(W_log=W_log,
-                                    Mt=M,
-                                    Mv=Mv,
                                     W=W,
-                                    log_id=log_id)
+                                    log_id=log_id,
+                                    avgs_t=avgs_t,
+                                    avgs_v=avgs_v)
 
             if not cfg["visualize_val"] and (adamvars['it'] == 0
                 or adamvars['it'] % cfg["plot_model_interval"] == 0):
@@ -99,7 +102,7 @@ def main(cfg):
                            n_steps=n_steps,
                            inp_size=n_channels)
 
-            del M, Mv
+            del M
 
             if (adamvars['it'] == 0
                 or adamvars['it'] % cfg["plot_tracker_interval"] == 0):
@@ -113,6 +116,9 @@ def main(cfg):
                             n_channels=n_channels,
                             n_phones=n_phones)
 
+            if flag_stop:
+                break
+
             W, adamvars = ut.update_weights(cfg=cfg,
                                             e=e,
                                             W=W,
@@ -124,97 +130,51 @@ def main(cfg):
     # TEST
 
     Wopt = ut.load_checkpoint(log_id=log_id)
-    batch_idxs_list = ut.sample_mbatches(cfg=cfg, n_samples=n_test, tvtype='test')
 
-    test_corr = 0
-    test_ce = 0
+    _, avgs = feed_batch(
+        tvt_type='test',
+        n_samples=n_test,
+        cfg=cfg,
+        inps=inps['test'],
+        tars=tars['test'],
+        betas=betas,
+        W=Wopt,
+        best_val_ce=None,
+        log_id=None,
+        it=None)
 
-    for b_idx, batch_idxs in enumerate(batch_idxs_list):
-        print((f"{'-'*10} Test batch {b_idx}/"
-               f"{len(batch_idxs_list)} {'-'*10}"), end='\r')
-        # Validate occasionally
-
-        X = inps['test'][batch_idxs]
-        T = tars['test'][batch_idxs]
-
-        X, T = ut.interpolate_inputs(cfg=cfg,
-                                     inp=X,
-                                     tar=T,
-                                     stretch=cfg["Repeats"])
-
-        X, T = ut.trim_samples(X=X, T=T)
-
-        n_steps = ut.count_lengths(X=X)
-
-        _, M = ut.eprop(cfg=cfg,
-                        X=X,
-                        T=T,
-                        n_steps=n_steps,
-                        betas=betas,
-                        W=W)
-
-        ce = np.mean(M['ce'].cpu().numpy(), axis=0)
-        test_ce += np.mean(ce, axis=0) / len(batch_idxs_list)
-        corr = np.mean(M['correct'].cpu().numpy(), axis=0)
-        test_corr += np.mean(corr, axis=0) / len(batch_idxs_list)
-
-    return test_ce, 1-test_corr
+    return avgs['ce'], 100-100*avgs['acc']
 
 
-def validate(n_val, cfg, v_inps, v_tars, betas, W, best_val_ce, log_id, it):
+def feed_batch(tvt_type, n_samples, cfg, inps, tars, betas, W, best_val_ce, log_id, it):
 
-    batch_idxs_list = ut.sample_mbatches(cfg=cfg, n_samples=n_val, tvtype='val')
-    ces = 0
+    batch_idxs_list = ut.sample_mbatches(cfg=cfg, n_samples=n_samples, tvtype=tvt_type)
 
     for b_idx, batch_idxs in enumerate(batch_idxs_list):
-        if b_idx >= cfg["max_v_batches"]:
+
+        if b_idx == cfg[f"max_{tvt_type}_batches"]:
             break
-        print((f"{'-'*10} Val batch {b_idx}/"
-               f"{min(len(batch_idxs_list), cfg['max_v_batches'])} {'-'*10}"),
+        num_batches = min(len(batch_idxs_list), cfg[f"max_{tvt_type}_batches"])
+        if num_batches < 0:
+            num_batches = len(batch_idxs_list)
+
+        print((f"{'-'*10} {tvt_type} batch {b_idx}/"
+               f"{num_batches} {'-'*10}"),
               end='\r')
-        X = v_inps[batch_idxs]
-        T = v_tars[batch_idxs]
 
-        # TODO: Consider interpolating and trimming in eprop function itself.
-        X, T = ut.interpolate_inputs(cfg=cfg,
-                                     inp=X,
-                                     tar=T,
-                                     stretch=cfg["Repeats"])
-        X, T = ut.trim_samples(X=X, T=T)
+        _, M, n_steps = ut.eprop(cfg=cfg,
+                                 X=inps[batch_idxs],
+                                 T=tars[batch_idxs],
+                                 betas=betas,
+                                 W=W,
+                                 grad=False)
+        avgs = ut.get_avgs(M=M,
+                           n_steps=n_steps)
 
-        n_steps = ut.count_lengths(X=X)
-
-        _, Mv = ut.eprop(cfg=cfg,
-                         X=X,
-                         T=T,
-                         n_steps=n_steps,
-                         betas=betas,
-                         W=W)
-
-        # Mean over batch and over time
-        ce = np.mean(np.mean(Mv['ce'].cpu().numpy()/n_steps[:, None],
-                             axis=0),
-                     axis=0)
-        ces += ce
-
-    ces /= b_idx+1
-    if best_val_ce is None or ces < best_val_ce:
-        print(f"\nNew best validation error: {ces:.3f} "
-              + ((f"<-- {best_val_ce:.3f}\n")
-                 if best_val_ce is not None else '\n'))
-        best_val_ce = ces
-        ut.save_checkpoint(W=W, cfg=cfg, log_id=log_id)
-    if cfg["visualize_val"]:
-        vis.plot_M(M=Mv,
-                   cfg=cfg,
-                   it=it,
-                   log_id=log_id,
-                   n_steps=n_steps,
-                   inp_size=X.shape[-1])
-    return Mv, best_val_ce
+    return M, avgs
 
 if __name__ == "__main__":
 
-    ce, corr = main(cfg=CFG)
+    ce, acc = main(cfg=CFG)
     print(f"Test cross-entropy: {ce:.3f}")
-    print(f"Test error rate:    {100*corr:.1f}")
+    print(f"Test error rate:    {acc:.1f}")

@@ -137,7 +137,7 @@ def plot_W(cfg, W_log, log_id):
     for k, v in W_log.items():
         if type(v) == dict:
             axs.append(fig.add_subplot(gsc[len(axs), :]))
-            # v['val'] = interpolate_verrs(np.array(v['val']))
+
             for tvtype, arr in v.items():
                 arr = interpolate_verrs(np.array(arr))
                 axs[-1].plot(arr[arr >= 0], label=tvtype)

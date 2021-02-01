@@ -13,9 +13,9 @@ kappa = 0.9
 gamma = 0.3
 rho = 0.9975
 beta = 0.01
-A = 0.08*50
-B = 0.10*50
-C = 0.3*50
+A = 4
+B = 5
+C = 6
 
 thr = 30
 
@@ -28,9 +28,10 @@ reset = -65
 psi = 30
 
 
-allvars_n = ["I", "V", "A", "H", "TZ", "Z"]
+allvars_n = ["I", "V", 'dvdv', 'dvdu', 'dudv', 'dudu', "A", "H", "Z"]
 allvars_w = ["VV", "VA", "ET", "ETbar", "DW", 'W']
-plotvars = ["I", "V", "A", "Z", "H", "VV", "VA", "ET", "ETbar", "DW", 'W']
+allvars_t = ["TZ"]
+plotvars = ["I", "V", 'dvdv', 'dudv', "A", "Z", "H", "VV", "VA", "ET", "ETbar", "DW", 'W']
 
 M = {}
 
@@ -40,32 +41,31 @@ for var in allvars_n:
 for var in allvars_w:
     M[var] = np.zeros(shape=(nsteps,))
 
+for var in allvars_t:
+    M[var] = np.zeros(shape=(2,))
+
+i = 0
+j = 1
 for t in range(nsteps):
 
     if t < nsteps * 0.45:
-        M["I"][t, 0] = A
-        M["I"][t, 1] = B
-        if M["TZ"][t, 0] < M["TZ"][t, 1]:
-            M["I"][t, 0] = C
+        M["I"][t, i] = A
+        M["I"][t, j] = B
+        if M["TZ"][i] < M["TZ"][j]:
+            M["I"][t, i] = C
     else:
-        M["I"][t, 0] = B
-        M["I"][t, 1] = A
-        if M["TZ"][t, 1] < M["TZ"][t, 0]:
-            M["I"][t, 1] = C
-    i = 0
-    j = 1
-    M['VA'][t] = (a1 * (1 - M['Z'][t-1, j])
-                  * M['VV'][t-1]  # When afferent doesn't spike, slightly follow VV
-                  + (1 + a2) # decay factor
-                  * M['VA'][t-1])
-    # M['VA'][t] = 0
+        M["I"][t, i] = B
+        M["I"][t, j] = A
+        if M["TZ"][j] < M["TZ"][i]:
+            M["I"][t, j] = C
 
-    M['VV'][t] = ((1 - M['Z'][t-1, j])
-                  * (1 + 2 * v1 * M['V'][t-1, j] + v2)
-                  * M['VV'][t-1]  # When afferent neuron doesn't spike, decay w/ V
-                  - M['VA'][t-1]  # Refract according to VA
-                  + M['Z'][t-1, i])  # Increase if efferent
-    # M['VV'][t] = 0
+    M['dvdv'][t] = (1 - M['Z'][t-1]) * (6 + 0.08 * M['V'][t-1])
+    M['dvdu'][t] = -1
+    M['dudv'][t] = 0.004 * (1 - M['Z'][t-1])
+    M['dudu'][t] = 1 - 0.02
+
+    M['VV'][t] = M['dvdv'][t, j] * M['VV'][t-1] + M['dvdu'][t, j] * M['VA'][t-1] + M['Z'][t-1, i]
+    M['VA'][t] = M['dudv'][t, j] * M['VV'][t-1] + M['dudu'][t, j] * M['VA'][t-1]
 
     vt = M['V'][t-1] - (M['V'][t-1] - reset) * M['Z'][t-1]
     at = M['A'][t-1] + 2 * M['Z'][t-1]
@@ -74,12 +74,13 @@ for t in range(nsteps):
     M['A'][t] = at + a1 * vt + a2 * at
 
     M['Z'][t] = np.where(M['V'][t] >= thr, 1, 0)
-    M['V'][t] = np.where(M['Z'][t] == 1, reset, M['V'][t])
-    M['A'][t] = np.where(M['Z'][t] == 1, M['A'][t] + 2, M['A'][t])
+    M['A'][t] = np.where(M['V'][t] >= thr, M['A'][t] + 2, M['A'][t])
+    M['V'][t] = np.where(M['V'][t] >= thr, reset, M['V'][t])
 
-    M['TZ'][t] = np.where(M['Z'][t] == 1, t, M['TZ'][t])
+    M['TZ'] = np.where(M['Z'][t] == 1, t, M['TZ'])
     M['H'][t] = gamma * np.exp((np.clip(M['V'][t], None, psi) - psi) / psi)
     M['ET'][t] = M['H'][t, j] * M['VV'][t]
+
     M['ETbar'][t] = kappa * M['ETbar'][t-1] + M['ET'][t]
     M['DW'][t] = 1 * M['ETbar'][t]
     M['W'][t] = M['W'][t-1] + M['DW'][t]
@@ -93,6 +94,10 @@ axs = []
 
 lookup = {
     "V":     "$v^t_j$",
+    "dvdv":  "$dvdv$",
+    "dvdu":  "$dvdu$",
+    "dudv":  "$dudv$",
+    "dudu":  "$dudu$",
     "A":     "$a^t_j$",
     "Z":     "$z^t$",
     "I":     "$I^t$",
