@@ -79,7 +79,7 @@ if __name__ == "__main__":
                                     delimiter=',',
                                     quotechar='"',
                                     quoting=csv.QUOTE_MINIMAL)
-        varname_writer.writerow([x.name for x in search_space] + ['V-Error'] + ['T-Wrongs'])
+        varname_writer.writerow([x.name for x in search_space] + ['T-Error'] + ['T-Wrongs'])
 
     # perform optimization
     result = gp_minimize(evaluate_model,

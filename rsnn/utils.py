@@ -305,6 +305,7 @@ def update_weights(W, G, adamvars, e, cfg, it_per_e):
 
 def eprop(cfg, X, T, betas, W, grad=True):
 
+    start = time.time()
 
     X, T = interpolate_inputs(cfg=cfg,
                                  inp=X,
@@ -340,7 +341,6 @@ def eprop(cfg, X, T, betas, W, grad=True):
             M['x'][1, b, :n_steps[b]] = torch.fliplr(M['x'][0, b, :n_steps[b]])
 
     for t in np.arange(0, max(n_steps.cpu().numpy())):
-        start = time.time()
         prev_syn_t, curr_syn_t = conn_t_idxs(track_synapse=cfg['Track_synapse'], t=t)
         prev_nrn_t, curr_nrn_t = conn_t_idxs(track_synapse=cfg['Track_neuron'], t=t)
         is_valid = torch.logical_not(torch.any(M['x'][0, :, t] == -1, axis=1))
@@ -588,6 +588,7 @@ def eprop(cfg, X, T, betas, W, grad=True):
         G['W_rec'][W['W_rec']==0] = 0
 
         return G, M, n_steps.cpu().numpy()
+
     return None, M, n_steps.cpu().numpy()
 
 
@@ -826,6 +827,10 @@ def load_data(cfg):
 
         inps[tvt_type] = inps[tvt_type][:, :cfg["maxlen"]]
         tars[tvt_type] = tars[tvt_type][:, :cfg["maxlen"]]
+
+    if cfg["test_on_val"]:
+        inps['test'] = inps['val']
+        tars['test'] = tars['val']
 
     return inps, tars
 

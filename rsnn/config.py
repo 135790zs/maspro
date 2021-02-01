@@ -9,9 +9,9 @@ cfg = {
     "n_directions": 1,  # Reduces error from 36.1 to 32.9.
     "seed": None,  # 'None' for random seed
 
-    "alpha": 0.8,  # .78 for 1, .95 for 5
-    "rho": 0.975,  # .975 for 1, .995 for 5
-    "kappa": 0.7,
+    "alpha": 0.95,  # .78 for 1, .95 for 5
+    "rho": 0.995,  # .975 for 1, .995 for 5
+    "kappa": 0.717,
     "beta": 0.184,  # Bellec2: "order of 0.07", Bellec3: 0.184. Code: 1.8
     "gamma": 0.3,  # Bellec2: 0.3
     "thr": 1.6,  # Bellec3: 1.6
@@ -36,7 +36,7 @@ cfg = {
 
     "adam_beta1": 0.9,
     "adam_beta2": 0.999,
-    "adam_eps": 1e-8,
+    "adam_eps": 1e-5,
 
     "weight_decay": 1e-2,  # Bellec3: 1e-2
     "L2_reg": 0,  # Bellec3: 1e-5
@@ -47,7 +47,7 @@ cfg = {
     "uniform_dist": False,
     "weightscale": 1,
 
-    "N_R": 100,
+    "N_R": 400,
     "N_Rec": 1,
 
     "task": "TIMIT",
@@ -80,13 +80,14 @@ cfg = {
     "plot_model_interval": 20,  # Per iter  #  State plot; 0 to disable plots
     "plot_tracker_interval": 10,  # Per it
     "state_save_interval": 50,
-    "val_every_B": 10,
+    "val_every_B": 1,
     "visualize_val": False,
-    "early_stopping": True,
+    "early_stopping": False,
+    "test_on_val": True,
 
     # Max batches per epoch
     "max_train_batches": -1,
-    "max_val_batches": 13,
+    "max_val_batches": -1,
     "max_test_batches": -1,
 
     "frame_size": 0.025,

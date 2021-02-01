@@ -43,7 +43,7 @@ def main(cfg):
 
         for b_idx, batch_idxs in enumerate(batch_idxs_list):
             print((f"{'-'*10} Epoch {e}/{cfg['Epochs']}\tBatch {b_idx}/"
-                   f"{len(batch_idxs_list)} {'-'*10}"), end='\r')
+                   f"{len(batch_idxs_list)} {'-'*10}"))
 
             # Validate occasionally
             if adamvars['it'] % cfg["val_every_B"] == 0:
@@ -158,9 +158,7 @@ def feed_batch(tvt_type, n_samples, cfg, inps, tars, betas, W, best_val_ce, log_
         if num_batches < 0:
             num_batches = len(batch_idxs_list)
 
-        print((f"{'-'*10} {tvt_type} batch {b_idx}/"
-               f"{num_batches} {'-'*10}"),
-              end='\r')
+        print(f"{'-'*10} {tvt_type} batch {b_idx}/{num_batches} {'-'*10}")
 
         _, M, n_steps = ut.eprop(cfg=cfg,
                                  X=inps[batch_idxs],
