@@ -297,9 +297,7 @@ def update_weights(W, G, adamvars, e, cfg, it_per_e):
             W['B'] -= cfg["weight_decay"] * W['B']
 
     if cfg["eprop_type"] == 'symmetric':
-        for s in range(cfg['n_directions']):
-            for r in range(cfg['N_Rec']):
-                W['B'][s, r] = W['out'][s]
+        W['B'] = W['out']
 
     return W, adamvars
 

@@ -1,6 +1,6 @@
 from numpy import exp
 cfg = {
-    "eprop_type": "adaptive",  # in {global, random, symmetric, adaptive}
+    "eprop_type": "symmetric",  # in {global, random, symmetric, adaptive}
     "Optimizer": "Adam",
     "neuron": "ALIF",  # in {ALIF, STDP-ALIF, Izhikevich}
     "v_fix": True,
