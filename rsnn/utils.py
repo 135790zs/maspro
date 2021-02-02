@@ -92,6 +92,7 @@ def initialize_model(cfg, inp_size, tar_size, batch_size, n_steps):
 
     M["Gout"] = torch.zeros(size=(cfg["n_directions"],
                                   len_syn_time,
+                                  cfg["N_Rec"],
                                   cfg["N_R"],
                                   tar_size))
     M["Gbias"] = torch.zeros(size=(len_syn_time,
@@ -114,6 +115,7 @@ def initialize_gradients(cfg, tar_size, batch_size):
                                    cfg["N_R"],))
     G["out"] = torch.zeros(size=(cfg["n_directions"],
                                batch_size,
+                               cfg["N_Rec"],
                                cfg["N_R"],
                                tar_size,))
     G["bias"] = torch.zeros(size=(batch_size,
@@ -158,6 +160,7 @@ def initialize_weights(cfg, inp_size, tar_size):
 
 
     W["out"] = rng.normal(size=(cfg["n_directions"],
+                                cfg["N_Rec"],
                                 cfg["N_R"],
                                 tar_size)) / np.sqrt(tar_size)
     if cfg["uniform_dist"]:
@@ -181,6 +184,7 @@ def initialize_weights(cfg, inp_size, tar_size):
 
 
         W["out"] = rng.random(size=(cfg["n_directions"],
+                                    cfg["N_Rec"],
                                     cfg["N_R"],
                                     tar_size)) * 2 - 1 / np.sqrt(tar_size)
         W['out'] /= np.sqrt(tar_size)
@@ -209,10 +213,7 @@ def initialize_weights(cfg, inp_size, tar_size):
         W["B"] = rng.normal(size=B_shape, scale=np.sqrt(1 / cfg["N_R"]))
 
     elif cfg["eprop_type"] == "symmetric":
-        W["B"] = rng.random(size=B_shape) * 2 - 1
-        for r in range(cfg["N_Rec"]):
-            for s in range(cfg["n_directions"]):
-                W["B"][s, r] = W["out"][s]
+        W["B"] = W["out"]
 
     # Drop all self-looping weights. A neuron cannot be connected with itself.
     for r in range(cfg["N_Rec"]):
@@ -511,11 +512,18 @@ def eprop(cfg, X, T, betas, W, grad=True):
                 cfg["kappa"]
                 * M['zbar'][:, :, prev_nrn_t, r] + M['z'][:, :, curr_nrn_t, r]
                 )
+        # print()
+        # print(W['out'].shape)
+        # print(M['z'][:, :, curr_nrn_t].shape)
+        # print((W['out'][:, None] * M['z'][:, :, curr_nrn_t, :, :, None]).shape)
+        # print(torch.sum(
+        #         W['out'][:, None] * M['z'][:, :, curr_nrn_t, :, :, None],
+        #         axis=(-2, -3)).shape)
 
         M['ysub'][:, :, curr_nrn_t] = (
             torch.sum(
-                W['out'][:, None] * M['z'][:, :, curr_nrn_t, -1, :, None],
-                axis=-2)
+                W['out'][:, None] * M['z'][:, :, curr_nrn_t, :, :, None],
+                axis=(-2, -3))
             + cfg["kappa"] * M['ysub'][:, :, prev_nrn_t])
 
         M['y'][:, curr_nrn_t] = torch.sum(M['ysub'][:, :, curr_nrn_t], axis=0) + W['bias']

@@ -39,7 +39,7 @@ cfg = {
     "adam_eps": 1e-5,
 
     "weight_decay": 1e-2,  # Bellec3: 1e-2
-    "L2_reg": 0,  # Bellec3: 1e-5
+    "L2_reg": 1,  # Bellec3: 1e-5
     "FR_target": 0.01,  # BellecCode: 0.01 (10hz)
     "FR_reg": 50,  # Bellec3: 50
 
@@ -47,8 +47,8 @@ cfg = {
     "uniform_dist": False,
     "weightscale": 1,
 
-    "N_R": 400,
-    "N_Rec": 1,
+    "N_R": 32,
+    "N_Rec": 2,
 
     "task": "TIMIT",
     "wavs_fname": "../data/data_wavs",
@@ -65,13 +65,13 @@ cfg = {
     "train_bias": True,
 
     "Epochs": 80,  # def = 80
-    "Track_neuron": False,
+    "Track_neuron": True,
     "Track_synapse": False,
     "Repeats": 1,  # ms per epoch, def = 5
     "Interpolation": 'linear',  # nearest, linear
-    "batch_size_train": 32,  # def = 32
-    "batch_size_val": 32,  # def = 32
-    "batch_size_test": 32,  # def = 32
+    "batch_size_train": 64,  # def = 32
+    "batch_size_val": 64,  # def = 32
+    "batch_size_test": 64,  # def = 32
     "maxlen": 778,
     "TIMIT_derivative": 2,
     "n_examples": {'train': 200, 'val': 100, 'test': 50},  # Re-process TIMIT!
