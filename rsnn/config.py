@@ -1,16 +1,16 @@
 from numpy import exp
 cfg = {
-    "eprop_type": "symmetric",  # in {global, random, symmetric, adaptive}
+    "eprop_type": "adaptive",  # in {global, random, symmetric, adaptive}
     "Optimizer": "Adam",
     "neuron": "ALIF",  # in {ALIF, STDP-ALIF, Izhikevich}
-    "v_fix": False,
+    "v_fix": True,
     "v_fix_psi": True,
     "fraction_ALIF": 0.25,  # def 0.25
     "n_directions": 1,  # Reduces error from 36.1 to 32.9.
     "seed": None,  # 'None' for random seed
 
-    "alpha": 0.95,  # .78 for 1, .95 for 5
-    "rho": 0.995,  # .975 for 1, .995 for 5
+    "alpha": 0.78,  # .78 for 1, .95 for 5
+    "rho": 0.975,  # .975 for 1, .995 for 5
     "kappa": 0.717,
     "beta": 0.184,  # Bellec2: "order of 0.07", Bellec3: 0.184. Code: 1.8
     "gamma": 0.3,  # Bellec2: 0.3
@@ -27,12 +27,12 @@ cfg = {
 
     "dropout": 0,
 
-    "eta_W": 0.01,  # for fast
     "eta_W_in": 0.01,
     "eta_W_rec": 0.01,
     "eta_out": 0.01,
     "eta_bias": 0.01,
     "eta_decay": 0,
+    "warmup": True,
 
     "adam_beta1": 0.9,
     "adam_beta2": 0.999,
@@ -56,7 +56,6 @@ cfg = {
 
     "cuda": True,
 
-    "warmup": False,
     "one_to_one_output": False,
 
     "train_W": True,  # for fast
@@ -77,17 +76,17 @@ cfg = {
     "TIMIT_derivative": 2,
     "n_examples": {'train': 200, 'val': 100, 'test': 50},  # Re-process TIMIT!
     # "n_examples": {'train': 3696, 'val': 400, 'test': 192},
-    "plot_model_interval": 20,  # Per iter  #  State plot; 0 to disable plots
+    "plot_model_interval": 10,  # Per iter  #  State plot; 0 to disable plots
     "plot_tracker_interval": 10,  # Per it
-    "state_save_interval": 50,
-    "val_every_B": 1,
+    "state_save_interval": 10,
+    "val_every_B": 10,
     "visualize_val": False,
     "early_stopping": False,
     "test_on_val": True,
 
     # Max batches per epoch
     "max_train_batches": -1,
-    "max_val_batches": -1,
+    "max_val_batches": 13,
     "max_test_batches": -1,
 
     "frame_size": 0.025,
@@ -117,7 +116,7 @@ lookup = {
     "z_in":    {"binary":True, "label": "z_{{in}}"},
     "y":       {"binary":False, "label": "y"},
     "t":       {"binary":True, "label": "\\pi^*"},
-    "p":       {"binary":False, "label": "\\pi"},
+    "p":       {"binary":True, "label": "\\pi"},
     "d":       {"binary":True, "label": "D"},
     "pm":      {"binary":True, "label": "\\pi_{{max}}"},
     "correct": {"binary":False, "label": "Correct"},

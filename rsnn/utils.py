@@ -552,10 +552,6 @@ def eprop(cfg, X, T, betas, W, grad=True):
         M['GW_in'][:, curr_syn_t] += M['loss_reg'][:, curr_nrn_t, :, :, None]
         M['GW_rec'][:, curr_syn_t] += M['loss_reg'][:, curr_nrn_t, :, :, None]
 
-        if cfg["L2_reg"]:
-            M['GW_in'][:, curr_syn_t] += cfg["L2_reg"] * W['W_in'] * is_valid[:, None, None]
-            M['GW_rec'][:, curr_syn_t] += cfg["L2_reg"] * W['W_rec'] * is_valid[:, None, None]
-
         M['Gout'][:, curr_syn_t] += torch.mean(
             M['d'][None, :, curr_nrn_t, None]
             * M['zbar'][:, :, curr_nrn_t, -1, :, None]
@@ -582,6 +578,10 @@ def eprop(cfg, X, T, betas, W, grad=True):
         G['W_rec'] = torch.sum(M['GW_rec'], axis=1)
         G['out'] = torch.sum(M['Gout'], axis=1)
         G['bias'] = torch.sum(M['Gbias'], axis=0)
+
+        if cfg["L2_reg"]:
+            G['W_in'] += cfg["L2_reg"] * W['W_in']
+            G['W_rec'] += cfg["L2_reg"] * W['W_rec']
 
         # Don't update dead weights
         G['W_in'][W['W_in']==0] = 0
@@ -722,7 +722,7 @@ def update_W_log(W_log, W, log_id, avgs_t, avgs_v):
             continue
 
         W_log['Cross-entropy'][tv_type].append(avgs['ce'])
-        W_log['Mean Hz'][tv_type].append(avgs['hz'])
+        W_log['Mean Hz'][tv_type].append(1000*avgs['hz'])
         W_log['Percentage wrong'][tv_type].append(100 - 100 * avgs['acc'])
         W_log['Error (reg)'][tv_type].append(avgs['regerr'])
 

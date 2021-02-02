@@ -4,46 +4,38 @@ import csv
 from skopt import gp_minimize
 from skopt.space import Integer, Categorical, Real
 from skopt.utils import use_named_args
-from rsnn2 import main
-from config2 import cfg
+from rsnn import main
+from config import cfg
 
 # define the space of hyperparameters to search
 search_space = [
-    # Categorical(("random", "symmetric", "adaptive"), name='eprop_type'),
-    # Categorical(("uniform", "bellec18", "normal"), name='weight_initialization'),
-    # Categorical((False, True), name='update_input_weights'),
-    # Categorical((False, True), name='traub_trick'),
-    # Categorical((False, True), name='traub_trick'),
+
+    Categorical(('random', 'symmetric', 'adaptive'), name='eprop_type'),
     Categorical((False, True), name='v_fix'),
-    Categorical((False, True), name='t_fix'),
     Categorical((False, True), name='v_fix_psi'),
-    Categorical((False, True), name='div_over_time'),
-    Categorical((False, True), name='mp_by_et'),
-    # Integer(1, 2, name='n_directions'),
-    # Integer(2, 6, name="dt_refr"),
-    # Integer(0, 5, name="delay"),
-    # Real(0.2, 1, name="fraction_ALIF"),
-    # Real(1e-5, 5e-2, name='eta_b_out'),
-    # Real(1e-2, 5e-1, name='eta_init'),
-    # Real(0.2, 5, name='eta_slope'),
-    # Integer(0, 10, name='eta_init_loss'),
-    # Real(1, 5, name='thr'),
-    Real(0.7, 0.99, name="alpha"),
+    Categorical((False, True), name='uniform_dist'),
+    Integer(2, 4, name="dt_refr"),
+    Real(0.2, 1, name="fraction_ALIF"),
+
+    Real(1, 3, name='thr'),
+    Real(0.5, 0.99, name="alpha"),
     Real(0, 2.5, name="beta"),
-    Real(0.3, 0.95, name="kappa"),
+    Real(0.1, 0.9, name="kappa"),
     Real(0.9, 0.9999, name="rho"),
-    # Real(0.1, 0.7, name="gamma"),
-    # Real(0, 1e-1, name="weight_decay"),
-    # Real(0, 1e-3, name="L2_reg"),
-    # Real(0, .2, name="FR_target"),
-    Real(0, 50, name="FR_reg"),
-    # Real(.7, .9, name="dropout"),
+    Real(0.1, 1, name="gamma"),
+    Real(0, 0.05, name="weight_decay"),
+    Real(0, 1e-4, name="L2_reg"),
+    Real(0, .1, name="FR_target"),
+    Real(0, 200, name="FR_reg"),
+    Real(0.001, 0.03, name="eta_W_in"),
+    Real(0.001, 0.03, name="eta_W_rec"),
+    Real(0.001, 0.03, name="eta_out"),
+    Real(0.001, 0.03, name="eta_bias"),
     Real(0.1, 1, name="weight_scaling"),
-    # Real(0.8, 1.5, name="softmax_factor"),
-    # Real(1e-9, 1e-4, name="adam_eps"),
-    # Real(0.2, 0.99, name="adam_beta1"),
-    # Real(0.8, 0.9999, name="adam_beta2"),
-    # Integer(64, 600, name='N_R'),
+    Real(1e-9, 1e-4, name="adam_eps"),
+    Real(0.8, 0.999, name="adam_beta1"),
+    Real(0.8, 0.9999, name="adam_beta2"),
+    Real(0.2, 1, name="weight_scaling"),
 ]
 
 file_id = datetime.datetime.now().strftime('%Y-%m-%d-%H:%M:%S')
@@ -85,7 +77,7 @@ if __name__ == "__main__":
     result = gp_minimize(evaluate_model,
                          search_space,
                          n_calls=1000,
-                         n_initial_points=5)
+                         n_initial_points=30)
     # summarizing finding:
     print(result)
     print(f'Best Accuracy: {result.fun:.3f}')

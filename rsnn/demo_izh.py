@@ -7,15 +7,14 @@ rc['font.family'] = 'STIXGeneral'
 
 
 nsteps = 1000
-dt_ref = 20
-alpha = 0.99
+# dt_ref = 20
+# alpha = 0.99
 kappa = 0.9
 gamma = 0.3
-rho = 0.9975
-beta = 0.01
-A = 4
-B = 5
-C = 6
+# rho = 0.9975
+# beta = 0.01
+A = 5
+B = 1
 
 thr = 30
 
@@ -31,7 +30,7 @@ psi = 30
 allvars_n = ["I", "V", 'dvdv', 'dvdu', 'dudv', 'dudu', "A", "H", "Z"]
 allvars_w = ["VV", "VA", "ET", "ETbar", "DW", 'W']
 allvars_t = ["TZ"]
-plotvars = ["I", "V", 'dvdv', 'dudv', "A", "Z", "H", "VV", "VA", "ET", "ETbar", "DW", 'W']
+plotvars = ["I", "V", "A", "Z", "VV", "VA", "H", 'ET', 'W']
 
 M = {}
 
@@ -48,21 +47,25 @@ i = 0
 j = 1
 for t in range(nsteps):
 
-    if t < nsteps * 0.45:
-        M["I"][t, i] = A
-        M["I"][t, j] = B
-        if M["TZ"][i] < M["TZ"][j]:
-            M["I"][t, i] = C
-    else:
-        M["I"][t, i] = B
+    if t > nsteps * 0.55:
+        # pass
         M["I"][t, j] = A
+        if M["TZ"][i] < M["TZ"][j]:
+            M["I"][t, i] = B * (t - M["TZ"][j])
+    else:
+        # pass
+        M["I"][t, i] = A
         if M["TZ"][j] < M["TZ"][i]:
-            M["I"][t, j] = C
+            M["I"][t, j] = B * (t - M["TZ"][i])
 
-    M['dvdv'][t] = (1 - M['Z'][t-1]) * (6 + 0.08 * M['V'][t-1])
+    # If no postsynaptic spike, then VV follows V. Used to generate spike at presynaptic
+    M['dvdv'][t] = (1 - M['Z'][t-1]) * 0.5 * (1 + v2 + 2 * v1 * M['V'][t-1])
+    # sign of VV depends on sign of VA
     M['dvdu'][t] = -1
-    M['dudv'][t] = 0.004 * (1 - M['Z'][t-1])
-    M['dudu'][t] = 1 - 0.02
+    # if no postsynaptic spike, then VA follows VV slightly
+    M['dudv'][t] = a1 * (1 - M['Z'][t-1])
+    # VA decay factor
+    M['dudu'][t] = 1 + a2
 
     M['VV'][t] = M['dvdv'][t, j] * M['VV'][t-1] + M['dvdu'][t, j] * M['VA'][t-1] + M['Z'][t-1, i]
     M['VA'][t] = M['dudv'][t, j] * M['VV'][t-1] + M['dudu'][t, j] * M['VA'][t-1]
@@ -74,15 +77,13 @@ for t in range(nsteps):
     M['A'][t] = at + a1 * vt + a2 * at
 
     M['Z'][t] = np.where(M['V'][t] >= thr, 1, 0)
-    M['A'][t] = np.where(M['V'][t] >= thr, M['A'][t] + 2, M['A'][t])
-    M['V'][t] = np.where(M['V'][t] >= thr, reset, M['V'][t])
 
     M['TZ'] = np.where(M['Z'][t] == 1, t, M['TZ'])
     M['H'][t] = gamma * np.exp((np.clip(M['V'][t], None, psi) - psi) / psi)
     M['ET'][t] = M['H'][t, j] * M['VV'][t]
 
     M['ETbar'][t] = kappa * M['ETbar'][t-1] + M['ET'][t]
-    M['DW'][t] = 1 * M['ETbar'][t]
+    M['DW'][t] = 0.01 * M['ETbar'][t]
     M['W'][t] = M['W'][t-1] + M['DW'][t]
 
 fig = plt.figure(constrained_layout=False, figsize=(8, 6))
