@@ -6,13 +6,7 @@ rc['mathtext.fontset'] = 'stix'
 rc['font.family'] = 'STIXGeneral'
 
 
-nsteps = 1000
-# dt_ref = 20
-# alpha = 0.99
-kappa = 0.9
 gamma = 0.3
-# rho = 0.9975
-# beta = 0.01
 A = 5
 B = 1
 
@@ -22,10 +16,17 @@ v1 = 0.04
 v2 = 5
 v3 = 140
 a1 = 0.004
-a2 = -0.02
+a2 = 0.02
 reset = -65
-psi = 30
 
+dt = 0.25
+# FloatType a = 0.02,
+# FloatType b = 0.2,
+# FloatType c = -65,
+# FloatType d = 8,
+
+nsteps = int(5000 / dt)
+kappa = 0.9 * dt
 
 allvars_n = ["I", "V", 'dvdv', 'dvdu', 'dudv', 'dudu', "A", "H", "Z"]
 allvars_w = ["VV", "VA", "ET", "ETbar", "DW", 'W']
@@ -47,7 +48,7 @@ i = 0
 j = 1
 for t in range(nsteps):
 
-    if t > nsteps * 0.55:
+    if t < nsteps * 0.45:
         # pass
         M["I"][t, j] = A
         if M["TZ"][i] < M["TZ"][j]:
@@ -57,29 +58,26 @@ for t in range(nsteps):
         M["I"][t, i] = A
         if M["TZ"][j] < M["TZ"][i]:
             M["I"][t, j] = B * (t - M["TZ"][i])
+    print(M['V'][t-1, j])
+    M['VV'][t] = ((1 - M['Z'][t-1, j]) * (1 + (5 + 0.08 * M['V'][t-1, j]) * dt) * M['VV'][t-1]
+                  - dt * M['VA'][t-1]
+                  + dt * M['Z'][t-1, i])
 
-    # If no postsynaptic spike, then VV follows V. Used to generate spike at presynaptic
-    M['dvdv'][t] = (1 - M['Z'][t-1]) * 0.5 * (1 + v2 + 2 * v1 * M['V'][t-1])
-    # sign of VV depends on sign of VA
-    M['dvdu'][t] = -1
-    # if no postsynaptic spike, then VA follows VV slightly
-    M['dudv'][t] = a1 * (1 - M['Z'][t-1])
-    # VA decay factor
-    M['dudu'][t] = 1 + a2
+    M['VA'][t] = ((1 - M['Z'][t-1, j]) * dt * 0.004 * M['VV'][t-1]
+                  + (1 - dt * 0.02) * M['VA'][t-1])
 
-    M['VV'][t] = M['dvdv'][t, j] * M['VV'][t-1] + M['dvdu'][t, j] * M['VA'][t-1] + M['Z'][t-1, i]
-    M['VA'][t] = M['dudv'][t, j] * M['VV'][t-1] + M['dudu'][t, j] * M['VA'][t-1]
 
-    vt = M['V'][t-1] - (M['V'][t-1] - reset) * M['Z'][t-1]
-    at = M['A'][t-1] + 2 * M['Z'][t-1]
+    M['A'][t] = M['A'][t-1] + np.where(M['V'][t-1] >= 30, 8, 0)
+    M['V'][t] = np.where(M['V'][t-1] >= 30, -65, M['V'][t-1])
 
-    M['V'][t] = vt + v1 * vt ** 2 + v2 * vt + v3 - at + M["I"][t]
-    M['A'][t] = at + a1 * vt + a2 * at
+    M['V'][t] += dt * (0.04 * M['V'][t]**2 + 5 * M['V'][t] + 140 - M['A'][t] + M['I'][t])
+    M['A'][t] += dt * 0.02 * (0.2 * M['V'][t-1] - M['A'][t])
 
-    M['Z'][t] = np.where(M['V'][t] >= thr, 1, 0)
+    M['Z'][t] = np.where(M['V'][t] >= 30, 1, 0)
+    M['V'][t] = np.where(M['V'][t] > 30, 30, M['V'][t])
 
     M['TZ'] = np.where(M['Z'][t] == 1, t, M['TZ'])
-    M['H'][t] = gamma * np.exp((np.clip(M['V'][t], None, psi) - psi) / psi)
+    M['H'][t] = gamma * np.exp((np.clip(M['V'][t], None, 30) - 30) / 30)
     M['ET'][t] = M['H'][t, j] * M['VV'][t]
 
     M['ETbar'][t] = kappa * M['ETbar'][t-1] + M['ET'][t]

@@ -1,0 +1,99 @@
+\documentclass[t]{beamer}
+
+\setlength {\marginparwidth }{2cm}
+\setlength {\parskip}{0cm}
+\usepackage{todonotes}
+\usepackage{siunitx}
+\usepackage{subcaption}
+\usepackage{apacite}    % Use APA Citation
+\presetkeys{todonotes}{inline}{}
+\beamertemplatenavigationsymbolsempty
+\usefonttheme[onlymath]{serif}
+
+\usepackage{algpseudocode}
+\usepackage{enumitem,amssymb, yfonts, bm}
+\newlist{todolist}{itemize}{2}
+\setlist[todolist]{label=$\square$}
+\usepackage{pifont}
+\newcommand{\cmark}{\ding{51}}%
+\newcommand{\xmark}{\ding{55}}%
+\newcommand{\done}{\rlap{$\square$}{\raisebox{2pt}{\large\hspace{1pt}\cmark}}%
+\hspace{-2.5pt}}
+
+% \usetheme{AnnArbor}
+% \usetheme{Antibes}
+% \usetheme{Bergen}
+% \usetheme{Berkeley}https://www.sharelatex.com/project/5b12e1a4f84b363f6f336dab
+% \usetheme{Berlin}
+% \usetheme{Boadilla}
+% \usetheme{boxes}
+\usetheme{CambridgeUS}
+% \usetheme{Copenhagen}
+%\usetheme{Darmstadt}
+% \usetheme{default}
+%\usetheme{Frankfurt}
+%\usetheme{Goettingen}
+% \usetheme{Hannover}
+% \usetheme{Ilmenau}
+% \usetheme{JuanLesPins}
+\setlength{\parskip}{10pt}
+
+% \newcommand*\vc[1]%
+% {\begin{pmatrix}#1\end{pmatrix}}
+
+\newcommand*\vc[1]%
+{\left(\begin{array}{cccc}#1\end{array}\right)}
+
+
+\newcommand\eqdef{\ \mathrel{\overset{\makebox[0pt]{\mbox{\normalfont\scriptsize\rmfamily def}}}{=}}\ }
+
+\title[Eligibility propagation]{Improving eligibility propagation using Izhikevich neurons in a multilayer RSNN.\\\vspace{10pt}
+\large{Presentation 8: Collecting results}}
+
+\author[Werner]{Werner~van~der~Veen\\\footnotesize\texttt({w.k.van.der.veen.2@student.rug.nl})}\date{\today}
+
+\begin{document}
+
+\begin{frame}
+    \titlepage
+\end{frame}
+
+%======================================
+
+%\begin{frame}
+%    \tableofcontents
+%\end{frame}
+
+\small
+
+\section{Work done since previous meeting}
+\begin{frame}{Work done since previous meeting}
+  \begin{todolist}
+
+    \item[\done] Reproduced Bellec's performance.\\
+    $\rightarrow$ some inaccuracies in Bellec's report led to delay, e.g. normalization procedure.
+    \item[\done] Did some longer runs and parameter sweeps.
+
+  \end{todolist}
+
+\end{frame}
+
+\section{Current performance}
+\begin{frame}{Current performance}
+  (show figures)
+\end{frame}
+
+\section{Next steps}
+\begin{frame}{Next steps}
+  \begin{todolist}
+
+    \item Sweep for good parameter settings for single and multi-layer setups with ALIF, STDP-ALIF, and Izhikevich neurons;
+    \item Meanwhile, plot demo interactions of synapses of these neurons.
+    \item Gather final performance (accuracy and CE), training information, learning curves, and plots;
+    \item Draft thesis based on results.
+
+  \end{todolist}
+\end{frame}
+
+
+\end{document}

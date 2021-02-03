@@ -242,51 +242,14 @@ def update_weights(W, G, adamvars, e, cfg, it_per_e):
 
         eta *= (1 - cfg["eta_decay"]) ** adamvars['it']
 
-        if cfg["Optimizer"] == "Adam":
-            adamvars[f"m{wtype}"] = (cfg["adam_beta1"] * adamvars[f"m{wtype}"]
-                                     + (1 - cfg["adam_beta1"]) * G[wtype])
-            adamvars[f"v{wtype}"] = (cfg["adam_beta2"] * adamvars[f"v{wtype}"]
-                                     + (1 - cfg["adam_beta2"]) * G[wtype] ** 2)
+        adamvars[f"m{wtype}"] = (cfg["adam_beta1"] * adamvars[f"m{wtype}"]
+                                 + (1 - cfg["adam_beta1"]) * G[wtype])
+        adamvars[f"v{wtype}"] = (cfg["adam_beta2"] * adamvars[f"v{wtype}"]
+                                 + (1 - cfg["adam_beta2"]) * G[wtype] ** 2)
 
-            m = adamvars[f"m{wtype}"] / (1 - cfg["adam_beta1"] ** adamvars['it'])
-            v = adamvars[f"v{wtype}"] / (1 - cfg["adam_beta2"] ** adamvars['it'])
-            dw = -eta * (m / (torch.sqrt(v) + cfg["adam_eps"]))
-
-        elif cfg["Optimizer"] == "RAdam":
-
-            adamvars[f"m{wtype}"] = (cfg["adam_beta1"] * adamvars[f"m{wtype}"]
-                                     + (1 - cfg["adam_beta1"]) * G[wtype])
-
-            adamvars[f"v{wtype}"] = (1 / cfg["adam_beta2"] * adamvars[f"v{wtype}"]
-                                     + (1 - cfg["adam_beta2"]) * G[wtype] ** 2)
-
-            m = adamvars[f"m{wtype}"] / (1 - cfg["adam_beta1"] ** adamvars['it'])
-
-            rinf = 2 / (1 - cfg["adam_beta2"]) - 1
-
-            rho = (rinf
-                   - 2 * adamvars['it'] * cfg["adam_beta2"] ** adamvars['it'] / (1 - cfg["adam_beta2"] ** adamvars['it']))
-
-            if rho > 4:
-
-                l = torch.sqrt((1 - cfg["adam_beta2"] ** adamvars['it']) / (adamvars[f"v{wtype}"] + cfg["adam_eps"]))
-
-                upper = (rho - 4) * (rho - 2) * rinf
-
-                lower = (rinf - 4) * (rinf - 2) * rho
-
-                r = np.sqrt(upper / lower)
-
-                dw = -eta * m * r * l
-
-        elif cfg["Optimizer"] == "Momentum":
-            adamvars[f"m{wtype}"] = cfg["adam_beta1"] * adamvars[f"m{wtype}"] - eta * G[wtype]
-
-            dw = adamvars[f"m{wtype}"]
-
-        else:
-            print("Warning: undefined optimizer")
-            dw = -eta * m
+        m = adamvars[f"m{wtype}"] / (1 - cfg["adam_beta1"] ** adamvars['it'])
+        v = adamvars[f"v{wtype}"] / (1 - cfg["adam_beta2"] ** adamvars['it'])
+        dw = -eta * (m / (torch.sqrt(v) + cfg["adam_eps"]))
 
         W[wtype] += dw
 
@@ -391,10 +354,14 @@ def eprop(cfg, X, T, betas, W, grad=True):
                     - oldva
                     + M['z_in'][:, :, curr_nrn_t, r, None, :])
 
-            # Can contract this further!
-            M['I_in'][:, :, curr_nrn_t, r] = torch.sum(W['W_in'][:, None, r] * Z_prev_layer[:, :, None, :], axis=-1) # Checked correct
 
-            M['I_rec'][:, :, curr_nrn_t, r] = torch.sum(W['W_rec'][:, None, r] * Z_prev_time[:, :, None, :], axis=-1) # Checked correct
+            if r == 0:
+                M['I_in'][:, :, curr_nrn_t, r] = torch.sum(W['W_in'][:, None, r, :, :inp_size] * Z_prev_layer[:, :, None, :inp_size], axis=-1)
+
+            else:
+                M['I_in'][:, :, curr_nrn_t, r] = torch.sum(W['W_in'][:, None, r] * Z_prev_layer[:, :, None, :], axis=-1)
+
+            M['I_rec'][:, :, curr_nrn_t, r] = torch.sum(W['W_rec'][:, None, r] * Z_prev_time[:, :, None, :], axis=-1)
 
             M['I'][:, :, curr_nrn_t, r] = M['I_in'][:, :, curr_nrn_t, r] + M['I_rec'][:, :, curr_nrn_t, r]
 
@@ -664,8 +631,10 @@ def initialize_W_log(cfg, W, sample_size=100):
     for wtype, w in W.items():
         wf = w.flatten()
         if wtype != 'bias':
+            # Don't log zero weights
+            wfidxs = np.argwhere(wf.cpu().numpy()!=0).flatten()
             ssize = min(wf.shape[0], sample_size)
-            idxs = rng.choice(ssize, size=ssize, replace=False)[:wf.shape[0]]
+            idxs = rng.choice(wfidxs, size=ssize, replace=False)[:wf.shape[0]]
         else:
             idxs = np.arange(wf.shape[0])
 

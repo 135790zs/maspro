@@ -9,9 +9,9 @@ cfg = {
     "n_directions": 1,  # Reduces error from 36.1 to 32.9.
     "seed": None,  # 'None' for random seed
 
-    "alpha": 0.78,  # .78 for 1, .95 for 5
+    "alpha": 0.8,  # .78 for 1, .95 for 5
     "rho": 0.975,  # .975 for 1, .995 for 5
-    "kappa": 0.717,
+    "kappa": 0.8,
     "beta": 0.184,  # Bellec2: "order of 0.07", Bellec3: 0.184. Code: 1.8
     "gamma": 0.3,  # Bellec2: 0.3
     "thr": 1.6,  # Bellec3: 1.6
@@ -39,7 +39,7 @@ cfg = {
     "adam_eps": 1e-5,
 
     "weight_decay": 1e-2,  # Bellec3: 1e-2
-    "L2_reg": 1,  # Bellec3: 1e-5
+    "L2_reg": 0,  # Bellec3: 1e-5
     "FR_target": 0.01,  # BellecCode: 0.01 (10hz)
     "FR_reg": 50,  # Bellec3: 50
 
@@ -47,7 +47,7 @@ cfg = {
     "uniform_dist": False,
     "weightscale": 1,
 
-    "N_R": 32,
+    "N_R": 400,
     "N_Rec": 2,
 
     "task": "TIMIT",
@@ -65,13 +65,13 @@ cfg = {
     "train_bias": True,
 
     "Epochs": 80,  # def = 80
-    "Track_neuron": True,
+    "Track_neuron": False,
     "Track_synapse": False,
     "Repeats": 1,  # ms per epoch, def = 5
     "Interpolation": 'linear',  # nearest, linear
-    "batch_size_train": 64,  # def = 32
-    "batch_size_val": 64,  # def = 32
-    "batch_size_test": 64,  # def = 32
+    "batch_size_train": 16,  # def = 32
+    "batch_size_val": 16,  # def = 32
+    "batch_size_test": 16,  # def = 32
     "maxlen": 778,
     "TIMIT_derivative": 2,
     "n_examples": {'train': 200, 'val': 100, 'test': 50},  # Re-process TIMIT!
