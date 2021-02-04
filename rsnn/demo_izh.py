@@ -12,31 +12,27 @@ B = 1
 
 thr = 30
 
-v1 = 0.04
-v2 = 5
-v3 = 140
-a1 = 0.004
-a2 = 0.02
 reset = -65
 
-dt = 0.25
+dt = 1
 # FloatType a = 0.02,
 # FloatType b = 0.2,
 # FloatType c = -65,
 # FloatType d = 8,
 
-nsteps = int(5000 / dt)
+nsteps = int(1000 / dt)
 kappa = 0.9 * dt
 
 allvars_n = ["I", "V", 'dvdv', 'dvdu', 'dudv', 'dudu', "A", "H", "Z"]
-allvars_w = ["VV", "VA", "ET", "ETbar", "DW", 'W']
+allvars_w = ["VV", "VA", 'VV1', "VV2", 'VV3', 'VA1', 'VA2', "ET", "ETbar", "DW", 'W']
 allvars_t = ["TZ"]
-plotvars = ["I", "V", "A", "Z", "VV", "VA", "H", 'ET', 'W']
+plotvars = ["I", "V", "A", "Z", 'VV1', "VV2", 'VV3', 'VV', 'VA1', 'VA2', "VA", "H", 'ET', 'W']
 
 M = {}
 
 for var in allvars_n:
     M[var] = np.zeros(shape=(nsteps, 2))
+M['V'] = np.ones_like(M['V']) * -65
 
 for var in allvars_w:
     M[var] = np.zeros(shape=(nsteps,))
@@ -48,7 +44,7 @@ i = 0
 j = 1
 for t in range(nsteps):
 
-    if t < nsteps * 0.45:
+    if t > nsteps * 0.45:
         # pass
         M["I"][t, j] = A
         if M["TZ"][i] < M["TZ"][j]:
@@ -58,17 +54,25 @@ for t in range(nsteps):
         M["I"][t, i] = A
         if M["TZ"][j] < M["TZ"][i]:
             M["I"][t, j] = B * (t - M["TZ"][i])
-    print(M['V'][t-1, j])
-    M['VV'][t] = ((1 - M['Z'][t-1, j]) * (1 + (5 + 0.08 * M['V'][t-1, j]) * dt) * M['VV'][t-1]
-                  - dt * M['VA'][t-1]
-                  + dt * M['Z'][t-1, i])
+    # M["I"][t, i] += np.random.random()*2
+    # M["I"][t, j] += np.random.random()*2
+    # TUNE THE 0.99's!!
 
-    M['VA'][t] = ((1 - M['Z'][t-1, j]) * dt * 0.004 * M['VV'][t-1]
-                  + (1 - dt * 0.02) * M['VA'][t-1])
+    # Magnitude on orange spike
+    M['VV1'][t] = (1 - M['Z'][t-1, j]) * (1 + (5 + 0.08 * M['V'][t-1, j]) * dt) * M['VV'][t-1]
+    M['VV2'][t] = - dt * M['VA'][t-1]
+    M['VV3'][t] = dt * M['Z'][t-1, i]
+    M['VV'][t] = M['VV1'][t] + M['VV2'][t] + M['VV3'][t]
+
+    # Magnitude on orange spike
+    M['VA1'][t] = (1 - M['Z'][t-1, j]) * dt * 0.004 * M['VV'][t-1]
+    # M['VA1'][t] = (1 - M['Z'][t-1, j]) * (2 * M['H'][t-1, j] + dt * 0.004 - dt * 0.04 * M['H'][t-1, j]) * M['VV'][t-1]
+    M['VA2'][t] = (1 - dt * 0.02) * M['VA'][t-1]
+    M['VA'][t] = (M['VA1'][t] + M ['VA2'][t])
 
 
-    M['A'][t] = M['A'][t-1] + np.where(M['V'][t-1] >= 30, 8, 0)
-    M['V'][t] = np.where(M['V'][t-1] >= 30, -65, M['V'][t-1])
+    # M['A'][t] = M['A'][t-1] + np.where(M['V'][t-1] >= 30, 8, 0)
+    # M['V'][t] = np.where(M['V'][t-1] >= 30, -65, M['V'][t-1])
 
     M['V'][t] += dt * (0.04 * M['V'][t]**2 + 5 * M['V'][t] + 140 - M['A'][t] + M['I'][t])
     M['A'][t] += dt * 0.02 * (0.2 * M['V'][t-1] - M['A'][t])
@@ -103,7 +107,12 @@ lookup = {
     "ET":    "$e_{{ji}}^t$",
     "ETbar": "$\\bar{{e}}_{{ji}}^t$",
     "VV":    "$\\epsilon_{{v, ji}}^t$",
+    "VV1":   "$\\epsilon1_{{v, ji}}^t$",
+    "VV2":   "$\\epsilon2_{{v, ji}}^t$",
+    "VV3":   "$\\epsilon3_{{v, ji}}^t$",
     "VA":   "$\\epsilon_{{a, ji}}^t$",
+    "VA1":   "$\\epsilon1_{{a, ji}}^t$",
+    "VA2":   "$\\epsilon2_{{a, ji}}^t$",
     "H":     "$\\psi_j^t$",
     "DW":    "$\\Delta W_{{ji}}^t$",
     "W":    "$W_{{ji}}^t$",
