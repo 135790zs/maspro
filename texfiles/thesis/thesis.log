@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017/Debian) (preloaded format=pdflatex 2020.11.2)  28 DEC 2020 16:19
+This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017/Debian) (preloaded format=pdflatex 2020.11.2)  4 FEB 2021 16:08
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -2422,6 +2422,17 @@ Package tocbasic Info: character protrusion at lot deactivated on input line 39
 
  (./Chapters/Chapter01.tex
 Chapter 1.
+Package hyperref Info: bookmark level for unknown todo defaults to 0 on input l
+ine 17.
+
+LaTeX Warning: Marginpar on page 1 moved.
+
+
+LaTeX Warning: Marginpar on page 1 moved.
+
+
+LaTeX Warning: Marginpar on page 1 moved.
+
 [1
 
 
@@ -2431,21 +2442,39 @@ Chapter 1.
 
 
 
-] [2]) [3]
+] [2]) [3] [4]
 \openout2 = `Chapters/Chapter02.aux'.
 
  (./Chapters/Chapter02.tex
 Chapter 2.
-[4
+[5
 
 
 
 
-] [5] [6] [7] [8] [9] [10] [11] [12] [13]) [14] [15]
+] [6] [7] [8] [9]
+LaTeX Font Info:    Try loading font information for T1+cmss on input line 97.
+ (/usr/share/texlive/texmf-dist/tex/latex/base/t1cmss.fd
+File: t1cmss.fd 2014/09/29 v2.5h Standard LaTeX font definitions
+)
+Package microtype Info: Loading generic protrusion settings for font family
+(microtype)             `cmss' (encoding: T1).
+(microtype)             For optimal results, create family-specific settings.
+(microtype)             See the microtype manual for details.
+
+! Extra \right.
+l.97 ...$\mathbf{h}^t_j \eqdef v^t_j, a^t_j\right]
+                                                  $.
+I'm ignoring a \right that had no matching \left.
+
+
+LaTeX Warning: Reference `eq:thresholdpotential' on page 10 undefined on input 
+line 109.
+
+[10] [11] [12] [13]) [14] [15]
 \openout2 = `Chapters/Chapter03.aux'.
 
-
-(./Chapters/Chapter03.tex
+ (./Chapters/Chapter03.tex
 Chapter 3.
 [16
 
@@ -2483,7 +2512,7 @@ See the caption package documentation for explanation.
 
 LaTeX Warning: Reference `fig:signal' on page 18 undefined on input line 82.
 
-<gfx/signal.pdf, id=381, 462.52798pt x 346.89601pt>
+<gfx/signal.pdf, id=422, 462.52798pt x 346.89601pt>
 File: gfx/signal.pdf Graphic file (type pdf)
 <use gfx/signal.pdf>
 Package pdftex.def Info: gfx/signal.pdf  used on input line 85.
@@ -2497,7 +2526,7 @@ See the caption package documentation for explanation.
 LaTeX Warning: Reference `fig:signalemph' on page 19 undefined on input line 98
 .
 
-<gfx/signalemph.pdf, id=396, 462.52798pt x 346.89601pt>
+<gfx/signalemph.pdf, id=436, 462.52798pt x 346.89601pt>
 File: gfx/signalemph.pdf Graphic file (type pdf)
 <use gfx/signalemph.pdf>
 Package pdftex.def Info: gfx/signalemph.pdf  used on input line 101.
@@ -2514,13 +2543,11 @@ See the caption package documentation for explanation.
 
 LaTeX Warning: Reference `fig:hamming' on page 20 undefined on input line 126.
 
-<gfx/hamming.pdf, id=437, 361.35pt x 361.35pt>
+<gfx/hamming.pdf, id=476, 361.35pt x 361.35pt>
 File: gfx/hamming.pdf Graphic file (type pdf)
 <use gfx/hamming.pdf>
 Package pdftex.def Info: gfx/hamming.pdf  used on input line 129.
 (pdftex.def)             Requested size: 151.19897pt x 151.19804pt.
-Package hyperref Info: bookmark level for unknown todo defaults to 0 on input l
-ine 134.
 
 Package caption Warning: \label without proper reference on input line 147.
 See the caption package documentation for explanation.
@@ -2529,7 +2556,7 @@ See the caption package documentation for explanation.
 LaTeX Warning: Reference `fig:magframes' on page 20 undefined on input line 143
 .
 
-<gfx/magframes.pdf, id=440, 462.52798pt x 346.89601pt>
+<gfx/magframes.pdf, id=479, 462.52798pt x 346.89601pt>
 File: gfx/magframes.pdf Graphic file (type pdf)
 <use gfx/magframes.pdf>
 Package pdftex.def Info: gfx/magframes.pdf  used on input line 146.
@@ -2542,7 +2569,7 @@ See the caption package documentation for explanation.
 LaTeX Warning: Reference `fig:powframes' on page 20 undefined on input line 156
 .
 
-<gfx/powframes.pdf, id=442, 462.52798pt x 346.89601pt>
+<gfx/powframes.pdf, id=481, 462.52798pt x 346.89601pt>
 File: gfx/powframes.pdf Graphic file (type pdf)
 <use gfx/powframes.pdf>
 Package pdftex.def Info: gfx/powframes.pdf  used on input line 160.
@@ -2560,7 +2587,7 @@ See the caption package documentation for explanation.
 LaTeX Warning: Reference `fig:filterbank' on page 22 undefined on input line 20
 8.
 
-<gfx/fbanks.pdf, id=549, 462.52798pt x 346.89601pt>
+<gfx/fbanks.pdf, id=583, 462.52798pt x 346.89601pt>
 File: gfx/fbanks.pdf Graphic file (type pdf)
 <use gfx/fbanks.pdf>
 Package pdftex.def Info: gfx/fbanks.pdf  used on input line 211.
@@ -2573,7 +2600,7 @@ See the caption package documentation for explanation.
 LaTeX Warning: Reference `fig:spectrogram' on page 22 undefined on input line 2
 16.
 
-<gfx/spectrogram.pdf, id=551, 462.52798pt x 346.89601pt>
+<gfx/spectrogram.pdf, id=585, 462.52798pt x 346.89601pt>
 File: gfx/spectrogram.pdf Graphic file (type pdf)
 <use gfx/spectrogram.pdf>
 Package pdftex.def Info: gfx/spectrogram.pdf  used on input line 220.
@@ -2590,7 +2617,7 @@ See the caption package documentation for explanation.
 
 LaTeX Warning: Reference `fig:mfccs' on page 23 undefined on input line 237.
 
-<gfx/mfcc.pdf, id=588, 462.52798pt x 346.89601pt>
+<gfx/mfcc.pdf, id=621, 462.52798pt x 346.89601pt>
 File: gfx/mfcc.pdf Graphic file (type pdf)
 <use gfx/mfcc.pdf>
 Package pdftex.def Info: gfx/mfcc.pdf  used on input line 241.
@@ -2651,7 +2678,7 @@ Chapter 4.
 
 
 ] [39]
-Overfull \vbox (13.94351pt too high) has occurred while \output is active []
+Overfull \vbox (96.54353pt too high) has occurred while \output is active []
 
 
 [40] [41]) [42] [43]
@@ -2668,7 +2695,65 @@ Chapter 5.
 Overfull \vbox (13.94351pt too high) has occurred while \output is active []
 
 
-[46] [47]) [48] [49]
+[46] [47] [48]
+! Undefined control sequence.
+\endtcolorbox ...\else \unskip \fi \tcb@after@box 
+                                                  \end {tcb@savebox}\tcb@res...
+l.27 \end{tcolorbox}
+                    
+The control sequence at the end of the top line
+of your error message was never \def'ed. If you have
+misspelled it (e.g., `\hobx'), type `I' and the correct
+spelling (e.g., `I\hbox'). Otherwise just continue,
+and I'll forget about whatever was undefined.
+
+! You can't use `\unskip' in vertical mode.
+\endtcb@savebox ->\par \unskip 
+                               \ifvoid \@mpfootins \else \vskip \skip \@mpfo...
+l.27 \end{tcolorbox}
+                    
+Sorry...I usually can't take things from the current page.
+Try `I\vskip-\lastskip' instead.
+
+! Extra \endgroup.
+\color@endgroup ->\endgraf \endgroup 
+                                     
+l.27 \end{tcolorbox}
+                    
+Things are pretty mixed up, but I think the worst is over.
+
+! Too many }'s.
+\endtcb@savebox ...efalse \color@endgroup \egroup 
+                                                  \expandafter \@iiiparbox \...
+l.27 \end{tcolorbox}
+                    
+You've closed more groups than you opened.
+Such booboos are generally harmless, so keep going.
+
+! Undefined control sequence.
+\endtcb@savebox ...pandafter \@iiiparbox \@mpargs 
+                                                  {\unvbox \@tempboxa }
+l.27 \end{tcolorbox}
+                    
+The control sequence at the end of the top line
+of your error message was never \def'ed. If you have
+misspelled it (e.g., `\hobx'), type `I' and the correct
+spelling (e.g., `I\hbox'). Otherwise just continue,
+and I'll forget about whatever was undefined.
+
+)
+Runaway argument?
+! File ended while scanning use of \@iiiparbox.
+<inserted text> 
+                \par 
+l.58 \include{Chapters/Chapter05}
+                                 
+I suspect you have forgotten a `}', causing me
+to read past where you wanted me to stop.
+I'll try to recover; but if the error is serious,
+you'd better type `E' or `X' now and fix your file.
+
+[49]
 \openout2 = `Chapters/Chapter06.aux'.
 
  (./Chapters/Chapter06.tex
@@ -2703,32 +2788,32 @@ Underfull \hbox (badness 10000) in alignment at lines 39--39
 ] [56]
 \openout2 = `FrontBackmatter/Bibliography.aux'.
 
- (./FrontBackmatter/Bibliography.tex
+ (./FrontBackmatter/Bibliography.tex [57
+
+
+
+
+
+
+]
 Overfull \hbox (5.85368pt too wide) in paragraph at lines 12--12
 \T1/cmr/m/n/10.95 (-20) NLP Mod-els: A Con-cise Overview.^^Q In: \T1/cmr/m/it/1
 0.95 (-20) arXiv preprint arXiv:2004.08900\T1/cmr/m/n/10.95 (-20) . 
  []
 
-[57
-
-
-
-
-
-
-]) [58]
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 76.
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 76.
+) [58]
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 77.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 77.
  (./thesis.aux (./FrontBackmatter/Titlepage.aux)
 (./FrontBackmatter/Titleback.aux) (./FrontBackmatter/Contents.aux)
 (./Chapters/Chapter01.aux) (./Chapters/Chapter02.aux) (./Chapters/Chapter03.aux
 ) (./Chapters/Chapter04.aux) (./Chapters/Chapter05.aux)
 (./Chapters/Chapter06.aux) (./Chapters/Chapter0A.aux)
 (./FrontBackmatter/Bibliography.aux))
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 76.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 76.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 77.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 77.
 Package rerunfilecheck Info: File `thesis.out' has not changed.
-(rerunfilecheck)             Checksum: 6177DAB9979223A15557BD6C3AF2E5BB;2836.
+(rerunfilecheck)             Checksum: 594975E28A7EDEAA1C3D7D4F4A730F7F;2947.
 
 
 LaTeX Warning: There were undefined references.
@@ -2741,36 +2826,38 @@ Package logreq Info: Writing requests to 'thesis.run.xml'.
 
  ) 
 Here is how much of TeX's memory you used:
- 47459 strings out of 492982
- 946771 string characters out of 6134896
- 1499080 words of memory out of 5000000
- 49889 multiletter control sequences out of 15000+600000
- 566721 words of font info for 202 fonts, out of 8000000 for 9000
+ 47594 strings out of 492982
+ 949487 string characters out of 6134896
+ 1509271 words of memory out of 5000000
+ 49994 multiletter control sequences out of 15000+600000
+ 568365 words of font info for 207 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 73i,23n,90p,10509b,2202s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 73i,23n,90p,10509b,2204s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/share/texmf/fonts/enc/dvips/cm-super/cm-super-t1.enc}</usr/share/texliv
 e/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb></usr/share/texlive/texm
-f-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb></usr/share/texlive/texmf-dist
-/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/share/texlive/texmf-dist/fonts
-/type1/public/amsfonts/cm/cmmi6.pfb></usr/share/texlive/texmf-dist/fonts/type1/
-public/amsfonts/cm/cmmi8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/
-amsfonts/cm/cmr10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfont
-s/cm/cmr6.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr
-8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb>
-</usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/s
-hare/texlive/texmf-dist/fonts/type1/public/amsfonts/euler/eurb10.pfb></usr/shar
-e/texmf/fonts/type1/public/cm-super/sfbx1095.pfb></usr/share/texmf/fonts/type1/
-public/cm-super/sfcc1000.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfcc
-1095.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfcc1200.pfb></usr/share
-/texmf/fonts/type1/public/cm-super/sfrm0800.pfb></usr/share/texmf/fonts/type1/p
-ublic/cm-super/sfrm1000.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfrm1
-095.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfrm1200.pfb></usr/share/
-texmf/fonts/type1/public/cm-super/sfti1095.pfb></usr/share/texmf/fonts/type1/pu
-blic/cm-super/sftt1095.pfb>
-Output written on thesis.pdf (62 pages, 648729 bytes).
+f-dist/fonts/type1/public/amsfonts/cm/cmbx8.pfb></usr/share/texlive/texmf-dist/
+fonts/type1/public/amsfonts/cm/cmex10.pfb></usr/share/texlive/texmf-dist/fonts/
+type1/public/amsfonts/cm/cmmi10.pfb></usr/share/texlive/texmf-dist/fonts/type1/
+public/amsfonts/cm/cmmi6.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/
+amsfonts/cm/cmmi8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfont
+s/cm/cmr10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cm
+r6.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb><
+/usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/s
+hare/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/share/te
+xlive/texmf-dist/fonts/type1/public/amsfonts/euler/eurb10.pfb></usr/share/texmf
+/fonts/type1/public/cm-super/sfbx1095.pfb></usr/share/texmf/fonts/type1/public/
+cm-super/sfcc1000.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfcc1095.pf
+b></usr/share/texmf/fonts/type1/public/cm-super/sfcc1200.pfb></usr/share/texmf/
+fonts/type1/public/cm-super/sfrm0800.pfb></usr/share/texmf/fonts/type1/public/c
+m-super/sfrm1000.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfrm1095.pfb
+></usr/share/texmf/fonts/type1/public/cm-super/sfrm1200.pfb></usr/share/texmf/f
+onts/type1/public/cm-super/sfss0800.pfb></usr/share/texmf/fonts/type1/public/cm
+-super/sfti1095.pfb></usr/share/texmf/fonts/type1/public/cm-super/sftt1095.pfb>
+
+Output written on thesis.pdf (62 pages, 673375 bytes).
 PDF statistics:
- 876 PDF objects out of 1000 (max. 8388607)
- 683 compressed objects within 7 object streams
- 169 named destinations out of 1000 (max. 500000)
- 62349 words of extra memory for PDF output out of 74296 (max. 10000000)
+ 920 PDF objects out of 1000 (max. 8388607)
+ 724 compressed objects within 8 object streams
+ 188 named destinations out of 1000 (max. 500000)
+ 63389 words of extra memory for PDF output out of 74296 (max. 10000000)
 

@@ -15,29 +15,31 @@
 \BOOKMARK [2][-]{subsection.2.2.3}{2.2.3 Learning procedure}{section.2.2}% 15
 \BOOKMARK [2][-]{subsection.2.2.4}{2.2.4 Deriving e-prop from RNNs}{section.2.2}% 16
 \BOOKMARK [1][-]{section.2.3}{2.3 Synaptic scaling}{chapter.2}% 17
-\BOOKMARK [1][-]{section.2.4}{2.4 Metaplasticity}{chapter.2}% 18
-\BOOKMARK [1][-]{section.2.5}{2.5 Network topology}{chapter.2}% 19
-\BOOKMARK [0][]{chapter.3}{3 Method}{}% 20
-\BOOKMARK [1][-]{section.3.1}{3.1 Data Preprocessing}{chapter.3}% 21
-\BOOKMARK [2][-]{subsection.3.1.1}{3.1.1 The TIMIT speech corpus}{section.3.1}% 22
-\BOOKMARK [2][-]{subsection.3.1.2}{3.1.2 Data splitting}{section.3.1}% 23
-\BOOKMARK [2][-]{subsection.3.1.3}{3.1.3 Engineering features}{section.3.1}% 24
-\BOOKMARK [1][-]{section.3.2}{3.2 Enhancing e-prop}{chapter.3}% 25
-\BOOKMARK [2][-]{subsection.3.2.1}{3.2.1 Multilayer architecture}{section.3.2}% 26
-\BOOKMARK [2][-]{subsection.3.2.2}{3.2.2 Other neuron types}{section.3.2}% 27
-\BOOKMARK [1][-]{section.3.3}{3.3 Regularization}{chapter.3}% 28
-\BOOKMARK [2][-]{subsection.3.3.1}{3.3.1 Firing rate regularization}{section.3.3}% 29
-\BOOKMARK [2][-]{subsection.3.3.2}{3.3.2 Ridge regression}{section.3.3}% 30
-\BOOKMARK [2][-]{subsection.3.3.3}{3.3.3 Weight decay}{section.3.3}% 31
-\BOOKMARK [2][-]{subsection.3.3.4}{3.3.4 Synaptic scaling}{section.3.3}% 32
-\BOOKMARK [2][-]{subsection.3.3.5}{3.3.5 Metaplasticity}{section.3.3}% 33
-\BOOKMARK [1][-]{section.3.4}{3.4 Synaptic delay}{chapter.3}% 34
-\BOOKMARK [1][-]{section.3.5}{3.5 Bidirectional network}{chapter.3}% 35
-\BOOKMARK [1][-]{section.3.6}{3.6 Optimizer}{chapter.3}% 36
-\BOOKMARK [1][-]{section.3.7}{3.7 Learning rate annealing}{chapter.3}% 37
-\BOOKMARK [1][-]{section.3.8}{3.8 Hyperparameter optimization}{chapter.3}% 38
-\BOOKMARK [0][]{chapter.4}{4 Results}{}% 39
-\BOOKMARK [0][]{chapter.5}{5 Discussion}{}% 40
-\BOOKMARK [0][]{chapter.6}{6 Conclusion}{}% 41
-\BOOKMARK [0][]{appendix.A}{A Appendix}{}% 42
-\BOOKMARK [0][]{section*.27}{ Bibliography}{}% 43
+\BOOKMARK [1][-]{section.2.4}{2.4 Network topology}{chapter.2}% 18
+\BOOKMARK [0][]{chapter.3}{3 Method}{}% 19
+\BOOKMARK [1][-]{section.3.1}{3.1 Data Preprocessing}{chapter.3}% 20
+\BOOKMARK [2][-]{subsection.3.1.1}{3.1.1 The TIMIT speech corpus}{section.3.1}% 21
+\BOOKMARK [2][-]{subsection.3.1.2}{3.1.2 Data splitting}{section.3.1}% 22
+\BOOKMARK [2][-]{subsection.3.1.3}{3.1.3 Engineering features}{section.3.1}% 23
+\BOOKMARK [1][-]{section.3.2}{3.2 Enhancing e-prop}{chapter.3}% 24
+\BOOKMARK [2][-]{subsection.3.2.1}{3.2.1 Multilayer architecture}{section.3.2}% 25
+\BOOKMARK [2][-]{subsection.3.2.2}{3.2.2 Other neuron types}{section.3.2}% 26
+\BOOKMARK [1][-]{section.3.3}{3.3 Regularization}{chapter.3}% 27
+\BOOKMARK [2][-]{subsection.3.3.1}{3.3.1 Firing rate regularization}{section.3.3}% 28
+\BOOKMARK [2][-]{subsection.3.3.2}{3.3.2 Ridge regression}{section.3.3}% 29
+\BOOKMARK [2][-]{subsection.3.3.3}{3.3.3 Weight decay}{section.3.3}% 30
+\BOOKMARK [2][-]{subsection.3.3.4}{3.3.4 Synaptic scaling}{section.3.3}% 31
+\BOOKMARK [2][-]{subsection.3.3.5}{3.3.5 Metaplasticity}{section.3.3}% 32
+\BOOKMARK [1][-]{section.3.4}{3.4 Synaptic delay}{chapter.3}% 33
+\BOOKMARK [1][-]{section.3.5}{3.5 Bidirectional network}{chapter.3}% 34
+\BOOKMARK [1][-]{section.3.6}{3.6 Optimizer}{chapter.3}% 35
+\BOOKMARK [1][-]{section.3.7}{3.7 Learning rate annealing}{chapter.3}% 36
+\BOOKMARK [1][-]{section.3.8}{3.8 Hyperparameter optimization}{chapter.3}% 37
+\BOOKMARK [0][]{chapter.4}{4 Results}{}% 38
+\BOOKMARK [1][-]{section.4.1}{4.1 ALIF}{chapter.4}% 39
+\BOOKMARK [1][-]{section.4.2}{4.2 STDP-ALIF}{chapter.4}% 40
+\BOOKMARK [1][-]{section.4.3}{4.3 Izhikevich}{chapter.4}% 41
+\BOOKMARK [0][]{chapter.5}{5 Discussion}{}% 42
+\BOOKMARK [0][]{chapter.6}{6 Conclusion}{}% 43
+\BOOKMARK [0][]{appendix.A}{A Appendix}{}% 44
+\BOOKMARK [0][]{section*.36}{ Bibliography}{}% 45

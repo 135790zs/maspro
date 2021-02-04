@@ -55,20 +55,69 @@
 \section{Eligibility Propagation}
 
     \subsection{Network model}
-        \begin{tcolorbox}[colback=orange]
-        - Network model (formal, see Bellec)
+        An eligibility propagation model $\mathcal{M}$ is defined by a tuple $\left<M, f\right>$,
+        where $M$ is a function
+        \begin{equation}
+        \mathbf{h}^t_j = M\left(\mathbf{h}_j^{t-1}, \mathbf{z}^{t-1}, \mathbf{x}^t, \mathbf{W}_j\right)
+        \end{equation}
+        that defines the hidden state $\mathbf{h}_j^t$ of a neuron $j$ at a discrete time step $t$, where $\mathbf{z^{t-1}}$ is the observable state of all neurons at the previous time step, $\mathbf{x}^t$ is the model input vector at time $t$, and $\mathbf{W}_j$ is the weight vector of afferent synapses.
+        The update of the observable state of a neuron $j$ at time $t$ is defined by
+        \begin{equation}
+        z^t_j = f\left(\mathbf{h}_j^t\right).
+        \end{equation}
+        This formalization means that e-prop is a \emph{local} training method, because a neuron's observable state depends only on its own hidden state, and the hidden state depends only on observable signals that are directly connected to it.
+        E-prop is also an \emph{online} training method, because both the hidden and observable state of a neuron depend only on variables in the previous time point.
 
-        \vspace{14cm}
+    \subsection{Neuron models}
+
+        \paragraph{LIF neuron}
+        In \cite{bellec2020solution}, the leaky integrate-and-fire (LIF) neuron model is formulated in the context of e-prop, along with a variant (viz. ALIF) that has an adaptive threshold. \todo{connect to synaptic scaling}
+        The observable state of a LIF model is given by
+        \begin{equation}
+        z^t_j = H\left(v_j^t-v_\text{th}\right),
+        \end{equation}
+        where $H$ is the Heaviside step function\todo{cite}, and $v_\text{th}$ is the threshold constant.
+        Consequently, the observable state $z^t_j \in \{0, 1\}$ is binary, and denotes the spike activity of a neuron.
+        These spikes are the only communication between neurons in the model.
+        The LIF neuron model has a single state $h^t_j$ that contains only an activity value $v^t_j$ and evolves over time according to the equation
+        \begin{equation}
+        v^{t+1}_j = \alpha v_j^t + \sum_{i\neq j}W^\text{rec}_{ji}z_i^t + \sum_i W^\text{in}_{ji}x_i^{t+1} - z_j^tv_
+        \text{th},
+        \end{equation}
+        where $W^\text{rec}_{ji}$ is a synapse weight from neuron $i$ to neuron $j$, $\alpha$ is a constant decay factor.
+        Whenever $j$ spikes (i.e., $z_j^t = 1$), the activity of the neuron is reduced to a value near 0 by the term $-z^t_jv_\text{th}$.
+        Furthermore, $z^t_j$ is fixed to 0 for $T^\text{refr}$ time steps to model neuronal refractoriness that is also present in biological neurons\todo{cite}.
+        \begin{tcolorbox}[colback=orange]
+        - DEMO FIGURE
+        \vspace{10cm}
 
         \end{tcolorbox}
 
-    \subsection{Neuron models}
+        \paragraph{ALIF neuron}
+        The adaptive LIF (ALIF) neuron introduces a threshold adaptation variable $a^t_j$ to the hidden state of the neuron, such that $\mathbf{h}^t_j \eqdef \left[v^t_j, a^t_j\right]$.
+        In an ALIF neuron, the spiking threshold increases after a spike, and otherwise decreases back to a baseline threshold $v_\text{th}$.
+        The observable state of an ALIF neuron is therefore described by
+        \begin{equation}
+        z^t_j = H\left(v_j^t - v_\text{th} - \beta a^t_j\right)
+        \end{equation}
+        and
+        \begin{equation}
+        a^{t+1}_j = \rho a^t_j + z^t_j,
+        \end{equation}
+        where $\rho$ is an adaptation decay constant.
+
+        In this paper, the LIF neuron is generalized as an ALIF neuron for which $\beta=0$, effectively cancelling the effect of the threshold adaptation value $a^t_j$ on the observable state $z^t_j$ in Equation \ref{eq:thresholdpotential}.
+        Therefore, only the e-prop derivations for the ALIF neurons will be described in the following sections.
+
         \begin{tcolorbox}[colback=orange]
-        - LIF
-        - ALIF
+        - Mention SFA
           - Mention GLIF (Bellec2)
-        - (include figures)
-        \vspace{18cm}
+        \vspace{5cm}
+
+        \end{tcolorbox}
+        \begin{tcolorbox}[colback=orange]
+        - DEMO FIGURE
+        \vspace{10cm}
 
         \end{tcolorbox}
 
@@ -99,13 +148,6 @@
 
     \end{tcolorbox}
 
-\section{Metaplasticity}
-
-    \begin{tcolorbox}[colback=orange]
-    - Metaplasticity (in brain, if applicable)
-    \vspace{10cm}
-
-    \end{tcolorbox}
 
 \section{Network topology}
 

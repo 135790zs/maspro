@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017/Debian) (preloaded format=pdflatex 2020.11.2)  8 DEC 2020 11:34
+This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017/Debian) (preloaded format=pdflatex 2020.11.2)  19 JAN 2021 13:32
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1341,158 +1341,6 @@ File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 
 {/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}] [2
 
-] (./bellecdiagram.tex) [3
-
-]
-<eligibility.pdf, id=81, 322.10336pt x 141.51181pt>
-File: eligibility.pdf Graphic file (type pdf)
-<use eligibility.pdf>
-Package pdftex.def Info: eligibility.pdf  used on input line 107.
-(pdftex.def)             Requested size: 273.83728pt x 120.30934pt.
- [4
-
- <./eligibility.pdf>] [5
-
-] [6
-
-]
-<demo_bellec_lif.pdf, id=128, 526.76799pt x 388.13051pt>
-File: demo_bellec_lif.pdf Graphic file (type pdf)
-<use demo_bellec_lif.pdf>
-Package pdftex.def Info: demo_bellec_lif.pdf  used on input line 143.
-(pdftex.def)             Requested size: 273.83728pt x 201.7698pt.
-
-Overfull \vbox (1.21878pt too high) detected at line 143
- []
-
-[7
-
- <./demo_bellec_lif.pdf>]
-<timitperformance.png, id=170, 1567.8575pt x 1021.8175pt>
-File: timitperformance.png Graphic file (type png)
-<use timitperformance.png>
-Package pdftex.def Info: timitperformance.png  used on input line 153.
-(pdftex.def)             Requested size: 273.83728pt x 178.46213pt.
-
-Overfull \vbox (3.07776pt too high) detected at line 153
- []
-
-[8
-
- <./timitperformance.png>]
-<demo_traub_lif.pdf, id=179, 522.09428pt x 388.13051pt>
-File: demo_traub_lif.pdf Graphic file (type pdf)
-<use demo_traub_lif.pdf>
-Package pdftex.def Info: demo_traub_lif.pdf  used on input line 164.
-(pdftex.def)             Requested size: 266.98991pt x 198.49472pt.
-
-Overfull \vbox (23.4437pt too high) detected at line 164
- []
-
-[9
-
- <./demo_traub_lif.pdf>]
-<BellecDiagramML.pdf, id=222, 495.77219pt x 846.0408pt>
-File: BellecDiagramML.pdf Graphic file (type pdf)
-<use BellecDiagramML.pdf>
-Package pdftex.def Info: BellecDiagramML.pdf  used on input line 176.
-(pdftex.def)             Requested size: 213.70601pt x 58.07318pt.
- [10
-
- <./BellecDiagramML.pdf>]
-<BellecDiagramBi.pdf, id=253, 495.77219pt x 846.0408pt>
-File: BellecDiagramBi.pdf Graphic file (type pdf)
-<use BellecDiagramBi.pdf>
-Package pdftex.def Info: BellecDiagramBi.pdf  used on input line 205.
-(pdftex.def)             Requested size: 273.83728pt x 137.28134pt.
-
-Overfull \vbox (10.53209pt too high) detected at line 205
- []
-
-[11
-
- <./BellecDiagramBi.pdf>] [12
-
-] [13
-
-]
-<latest_metric.pdf, id=318, 552.84981pt x 493.76471pt>
-File: latest_metric.pdf Graphic file (type pdf)
-<use latest_metric.pdf>
-Package pdftex.def Info: latest_metric.pdf  used on input line 236.
-(pdftex.def)             Requested size: 342.2953pt x 142.23059pt.
- [14
-
- <./latest_metric.pdf>]
-<state_195.pdf, id=380, 552.14201pt x 1052.27443pt>
-File: state_195.pdf Graphic file (type pdf)
-<use state_195.pdf>
-Package pdftex.def Info: state_195.pdf  used on input line 244.
-(pdftex.def)             Requested size: 112.95807pt x 190.82117pt.
- [15
-
- <./state_195.pdf>]
-<state_0.pdf, id=499, 545.24811pt x 1052.27443pt>
-File: state_0.pdf Graphic file (type pdf)
-<use state_0.pdf>
-Package pdftex.def Info: state_0.pdf  used on input line 257.
-(pdftex.def)             Requested size: 205.37926pt x 24.47044pt.
-<state_25.pdf, id=501, 548.29109pt x 1052.27443pt>
-File: state_25.pdf Graphic file (type pdf)
-<use state_25.pdf>
-Package pdftex.def Info: state_25.pdf  used on input line 257.
-(pdftex.def)             Requested size: 205.37926pt x 24.33365pt.
-<state_50.pdf, id=503, 536.88391pt x 1052.27443pt>
-File: state_50.pdf Graphic file (type pdf)
-<use state_50.pdf>
-Package pdftex.def Info: state_50.pdf  used on input line 257.
-(pdftex.def)             Requested size: 205.37926pt x 24.85109pt.
-<state_75.pdf, id=505, 539.05608pt x 1052.27443pt>
-File: state_75.pdf Graphic file (type pdf)
-<use state_75.pdf>
-Package pdftex.def Info: state_75.pdf  used on input line 257.
-(pdftex.def)             Requested size: 205.37926pt x 24.75096pt.
-<state_100.pdf, id=507, 539.05608pt x 1052.27443pt>
-File: state_100.pdf Graphic file (type pdf)
-<use state_100.pdf>
-Package pdftex.def Info: state_100.pdf  used on input line 257.
-(pdftex.def)             Requested size: 205.37926pt x 24.75096pt.
-<state_150.pdf, id=509, 542.31827pt x 1052.27443pt>
-File: state_150.pdf Graphic file (type pdf)
-<use state_150.pdf>
-Package pdftex.def Info: state_150.pdf  used on input line 257.
-(pdftex.def)             Requested size: 205.37926pt x 24.60228pt.
-File: state_195.pdf Graphic file (type pdf)
-<use state_195.pdf>
-Package pdftex.def Info: state_195.pdf  used on input line 257.
-(pdftex.def)             Requested size: 205.37926pt x 24.16414pt.
- [16
-
- <./state_0.pdf> <./state_25.pdf> <./state_50.pdf> <./state_75.pdf> <./state_10
-0.pdf> <./state_150.pdf>] [17
-
-]
-<scatters.pdf, id=1186, 571.21057pt x 614.8163pt>
-File: scatters.pdf Graphic file (type pdf)
-<use scatters.pdf>
-Package pdftex.def Info: scatters.pdf  used on input line 294.
-(pdftex.def)             Requested size: 219.06877pt x 208.5103pt.
-
-Overfull \vbox (7.95927pt too high) detected at line 294
- []
-
-[18
-
- <./scatters.pdf>]
-<all.pdf, id=1261, 1202.91608pt x 1291.96495pt>
-File: all.pdf Graphic file (type pdf)
-<use all.pdf>
-Package pdftex.def Info: all.pdf  used on input line 302.
-(pdftex.def)             Requested size: 205.37926pt x 220.5774pt.
- [19
-
- <./all.pdf>] [20
-
 ]
 \tf@nav=\write6
 \openout6 = `1208.nav'.
@@ -1503,49 +1351,62 @@ Package pdftex.def Info: all.pdf  used on input line 302.
 \tf@snm=\write8
 \openout8 = `1208.snm'.
 
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 317.
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 317.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 71.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 71.
  (./1208.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 317.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 317.
-Package rerunfilecheck Info: File `1208.out' has not changed.
-(rerunfilecheck)             Checksum: 55EB9C6713604DAFCFEC41F83A884DD3;415.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 71.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 71.
+
+
+Package rerunfilecheck Warning: File `1208.out' has changed.
+(rerunfilecheck)                Rerun to get outlines right
+(rerunfilecheck)                or use package `bookmark'.
+
+Package rerunfilecheck Info: Checksums for `1208.out':
+(rerunfilecheck)             Before: 55EB9C6713604DAFCFEC41F83A884DD3;415
+(rerunfilecheck)             After:  24EB713989172FA6BAC7FB33CD4EE866;67.
  ) 
 Here is how much of TeX's memory you used:
- 33514 strings out of 492982
- 680267 string characters out of 6134896
- 717992 words of memory out of 5000000
- 36444 multiletter control sequences out of 15000+600000
- 552857 words of font info for 106 fonts, out of 8000000 for 9000
+ 33258 strings out of 492982
+ 675636 string characters out of 6134896
+ 715024 words of memory out of 5000000
+ 36263 multiletter control sequences out of 15000+600000
+ 541176 words of font info for 62 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 65i,18n,100p,10378b,749s stack positions out of 5000i,500n,10000p,200000b,80000s
-</usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb></us
-r/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb></usr/shar
-e/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/share/texl
-ive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi12.pfb></usr/share/texlive/te
-xmf-dist/fonts/type1/public/amsfonts/cm/cmmi5.pfb></usr/share/texlive/texmf-dis
-t/fonts/type1/public/amsfonts/cm/cmmi6.pfb></usr/share/texlive/texmf-dist/fonts
-/type1/public/amsfonts/cm/cmmi7.pfb></usr/share/texlive/texmf-dist/fonts/type1/
-public/amsfonts/cm/cmmi9.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/
-amsfonts/cmextra/cmmib7.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/a
-msfonts/cm/cmr10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts
-/cm/cmr6.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr7
-.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></u
-sr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmss10.pfb></usr/sha
-re/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmss12.pfb></usr/share/tex
-live/texmf-dist/fonts/type1/public/amsfonts/cm/cmss8.pfb></usr/share/texlive/te
-xmf-dist/fonts/type1/public/amsfonts/cm/cmss9.pfb></usr/share/texlive/texmf-dis
-t/fonts/type1/public/amsfonts/cm/cmssi10.pfb></usr/share/texlive/texmf-dist/fon
-ts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texlive/texmf-dist/fonts/typ
-e1/public/amsfonts/cm/cmsy5.pfb></usr/share/texlive/texmf-dist/fonts/type1/publ
-ic/amsfonts/cm/cmsy7.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsf
-onts/cm/cmtt10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/c
-m/cmtt9.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/symbols/
-msam10.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/zapfding/uzdr.pfb>
-Output written on 1208.pdf (20 pages, 6318326 bytes).
+ 65i,15n,100p,10378b,715s stack positions out of 5000i,500n,10000p,200000b,80000s
+pdfTeX warning (dest): name{Navigation20} has been referenced but does not ex
+ist, replaced by a fixed one
+
+pdfTeX warning (dest): name{Outline0.5} has been referenced but does not exist,
+ replaced by a fixed one
+
+pdfTeX warning (dest): name{Outline0.4} has been referenced but does not exist,
+ replaced by a fixed one
+
+pdfTeX warning (dest): name{Outline0.3} has been referenced but does not exist,
+ replaced by a fixed one
+
+pdfTeX warning (dest): name{Outline0.2.3.9} has been referenced but does not ex
+ist, replaced by a fixed one
+
+pdfTeX warning (dest): name{Outline0.2.2.7} has been referenced but does not ex
+ist, replaced by a fixed one
+
+pdfTeX warning (dest): name{Outline0.2.1.5} has been referenced but does not ex
+ist, replaced by a fixed one
+
+pdfTeX warning (dest): name{Outline0.2} has been referenced but does not exist,
+ replaced by a fixed one
+
+</usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmss10.pfb></usr/
+share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmss12.pfb></usr/share/
+texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmss8.pfb></usr/share/texlive
+/texmf-dist/fonts/type1/public/amsfonts/cm/cmss9.pfb></usr/share/texlive/texmf-
+dist/fonts/type1/public/amsfonts/cm/cmtt9.pfb>
+Output written on 1208.pdf (2 pages, 51804 bytes).
 PDF statistics:
- 1602 PDF objects out of 1728 (max. 8388607)
- 642 compressed objects within 7 object streams
- 49 named destinations out of 1000 (max. 500000)
- 283 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 95 PDF objects out of 1000 (max. 8388607)
+ 75 compressed objects within 1 object stream
+ 14 named destinations out of 1000 (max. 500000)
+ 125 words of extra memory for PDF output out of 10000 (max. 10000000)
 

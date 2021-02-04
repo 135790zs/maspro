@@ -1,7 +1,7 @@
 \documentclass[t]{beamer}
 
-\setlength {\marginparwidth }{2cm} 
-\setlength {\parskip}{0cm} 
+\setlength {\marginparwidth }{2cm}
+\setlength {\parskip}{0cm}
 \usepackage{todonotes}
 \usepackage{siunitx}
 \usepackage{subcaption}
@@ -68,20 +68,20 @@
 \section{Project overview}
 \begin{frame}{A quick project overview}
 	Task: using eligibility propagation to classify phonemes.
-	
+
 	Challenges:
 	\begin{itemize}[label=--]
 		\item Desired bio-plasubility requires online and local learning rules.
 		\item Spiking and reccurent network: no good learning algorithm yet.
 	\end{itemize}
-	
+
 	My own contribution: investigate the benefits of
 	\begin{itemize}[label=--]
 		\item stacking multiple recurrent layers;
 		\item using Izhikevich neurons;
 		\item various regularization methods.
 	\end{itemize}
-		
+
 \end{frame}
 
 \section{Background}
@@ -94,31 +94,31 @@
 
 
 \begin{frame}{The e-prop learning algorithm -- Main equation}
-	
+
 	\begin{align*}
-		\frac{dE}{dW_{ji}} 
+		\frac{dE}{dW_{ji}}
 		&= \sum_tL_j^t \cdot e_{ji}^t
 	\end{align*}
-	
+
 	\begin{figure}[!ht]
 		\includegraphics[width=0.8\linewidth]{eligibility.pdf}
 	\end{figure}
-	
+
 \end{frame}
 
 \subsection{Key equations}
 \begin{frame}{The e-prop learning algorithm -- basic equations ($L^t_j$)}
-	
+
 	\begin{align*}
-		\frac{dE}{dW_{ji}} 
+		\frac{dE}{dW_{ji}}
 		&= \sum_tL_j^t \cdot e_{ji}^t
 	\end{align*}
-	
+
 	\begin{align*}
 L^t_j &\eqdef \frac{\partial E}{\partial z^t_j}\\ &= \sum_kB_{jk}\left(\pi^t_k-\pi_k^{*,t}\right)
 \end{align*}
 	(proof omitted for brevity)
-	
+
 \end{frame}
 
 \begin{frame}{The e-prop learning algorithm -- basic equations ($e^t_{ji}$)}
@@ -127,29 +127,29 @@ L^t_j &\eqdef \frac{\partial E}{\partial z^t_j}\\ &= \sum_kB_{jk}\left(\pi^t_k-\
 e^t_{ji} &\eqdef \frac{\partial z_j^t}{\partial\mathbf{h}_j^t}\underbrace{\sum_{t'\leq t}\frac{\partial\mathbf{h}^t_j}{\partial\mathbf{h}_j^{t-1}} \cdots \frac{\partial\mathbf{h}_j^{t'+1}}{\partial\mathbf{h}_j^{t'}}\cdot\frac{\partial\mathbf{h}_j^{t'}}{\partial W_{ji}}}_{\eqdef \bm{\varepsilon}_{ji}^t}\\
 &= \psi_j^t\bar{z}^{t-1}_i\qquad\text{(for LIF neurons in Bellec et al.)}
 \end{align*}
-	
-	
+
+
 \end{frame}
 
 
 \subsection{Bellec et al}
 
 \begin{frame}{The e-prop learning algorithm -- Original LIF}
-	
+
 	\begin{figure}[!ht]
 		\includegraphics[width=0.8\linewidth]{demo_bellec_lif.pdf}
 	\end{figure}
-	
+
 \end{frame}
 
 \begin{frame}{Previous results}
 \tiny{
 Bellec, G., Scherr, F., Subramoney, A., Hajek, E., Salaj, D., Legenstein, R., \& Maass, W. (2020). A solution to the learning dilemma for recurrent networks of spiking neurons.}
-	
+
 \begin{figure}[!ht]
 		\includegraphics[width=0.8\linewidth]{timitperformance.png}
 	\end{figure}
-	
+
 \end{frame}
 
 \subsection{Traub et al}
@@ -160,7 +160,7 @@ Traub, M., Butz, M. V., Baayen, R. H., \& Otte, S. (2020, September). Learning P
 	\begin{figure}[!ht]
 		\includegraphics[width=0.78\linewidth]{demo_traub_lif.pdf}
 	\end{figure}
-	
+
 \end{frame}
 
 \section{Proposal}
@@ -172,7 +172,7 @@ Traub, M., Butz, M. V., Baayen, R. H., \& Otte, S. (2020, September). Learning P
 	\end{figure}
 \item Evaluate model designs such as neuron type (e.g. Izhikevich); synaptic delay; and regularization such as metaplasticity and synaptic scaling.
 \end{itemize}
-	
+
 \end{frame}
 
 \section{Current state}
@@ -198,7 +198,7 @@ Traub, M., Butz, M. V., Baayen, R. H., \& Otte, S. (2020, September). Learning P
     	\item Synaptic delays.
     \end{todolist}
   \end{todolist}
-  
+
 \begin{tikzpicture}[remember picture,overlay]
     \node[xshift=-2cm,yshift=-6.5cm] at (current page.north east) {\includegraphics[clip, trim=0cm 21cm 0cm 0cm, width=0.8\linewidth]{BellecDiagramBi.pdf}};
 \end{tikzpicture}
@@ -213,7 +213,7 @@ Traub, M., Butz, M. V., Baayen, R. H., \& Otte, S. (2020, September). Learning P
     \item[\done] Implemented Bayesian hyperparameter optimization using Gaussian processes;
     \item Worked on synaptic delay but not yet finished.
   \end{todolist}
-  
+
 \end{frame}
 
 

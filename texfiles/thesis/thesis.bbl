@@ -281,6 +281,33 @@
       \field{title}{Do we have brain to spare?}
       \field{year}{2005}
     \endentry
+    \entry{drubach2000brain}{book}{}
+      \name{author}{1}{}{%
+        {{uniquename=0,uniquepart=base,hash=f82cce823b2aa2c2a2e3559b58012d9f}{%
+           family={Drubach},
+           familyi={D\bibinitperiod},
+           given={Daniel},
+           giveni={D\bibinitperiod},
+           givenun=0}}%
+      }
+      \list{publisher}{1}{%
+        {Prentice Hall}%
+      }
+      \strng{namehash}{f82cce823b2aa2c2a2e3559b58012d9f}
+      \strng{fullhash}{f82cce823b2aa2c2a2e3559b58012d9f}
+      \strng{bibnamehash}{f82cce823b2aa2c2a2e3559b58012d9f}
+      \strng{authorbibnamehash}{f82cce823b2aa2c2a2e3559b58012d9f}
+      \strng{authornamehash}{f82cce823b2aa2c2a2e3559b58012d9f}
+      \strng{authorfullhash}{f82cce823b2aa2c2a2e3559b58012d9f}
+      \field{sortinit}{D}
+      \field{sortinithash}{2ef1bd9a78cc71eb74d7231c635177b8}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{year}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{The brain explained}
+      \field{year}{2000}
+    \endentry
     \entry{fayek2016}{misc}{}
       \name{author}{1}{}{%
         {{uniquename=0,uniquepart=base,hash=02bf21efbaa9133205a5997f384dc5ab}{%
@@ -608,12 +635,12 @@
            given={Yoshua},
            giveni={Y\bibinitperiod},
            givenun=0}}%
-        {{uniquename=0,uniquepart=base,hash=9a8750ccdb2a4cf14d2655face1ce016}{%
+        {{uniquename=1,uniquepart=given,hash=9a8750ccdb2a4cf14d2655face1ce016}{%
            family={Hinton},
            familyi={H\bibinitperiod},
            given={Geoffrey},
            giveni={G\bibinitperiod},
-           givenun=0}}%
+           givenun=1}}%
       }
       \list{publisher}{1}{%
         {Nature Publishing Group}%
@@ -710,6 +737,50 @@
       \field{journaltitle}{arXiv preprint arXiv:1910.10683}
       \field{title}{Exploring the limits of transfer learning with a unified text-to-text transformer}
       \field{year}{2019}
+    \endentry
+    \entry{rumelhart1986learning}{article}{}
+      \name{author}{3}{}{%
+        {{uniquename=0,uniquepart=base,hash=d198ae71c61c758b90826c452447133f}{%
+           family={Rumelhart},
+           familyi={R\bibinitperiod},
+           given={David\bibnamedelima E},
+           giveni={D\bibinitperiod\bibinitdelim E\bibinitperiod},
+           givenun=0}}%
+        {{uniquename=1,uniquepart=given,hash=5aeb1de9b6c6f00a078230c628e6f41c}{%
+           family={Hinton},
+           familyi={H\bibinitperiod},
+           given={Geoffrey\bibnamedelima E},
+           giveni={G\bibinitperiod\bibinitdelim E\bibinitperiod},
+           givenun=1}}%
+        {{uniquename=0,uniquepart=base,hash=f0fac00adb48128fc1f7750b2d8e7065}{%
+           family={Williams},
+           familyi={W\bibinitperiod},
+           given={Ronald\bibnamedelima J},
+           giveni={R\bibinitperiod\bibinitdelim J\bibinitperiod},
+           givenun=0}}%
+      }
+      \list{publisher}{1}{%
+        {Nature Publishing Group}%
+      }
+      \strng{namehash}{6c0c2652b5e4e9258c40ce50c5704c6b}
+      \strng{fullhash}{6c0c2652b5e4e9258c40ce50c5704c6b}
+      \strng{bibnamehash}{6c0c2652b5e4e9258c40ce50c5704c6b}
+      \strng{authorbibnamehash}{6c0c2652b5e4e9258c40ce50c5704c6b}
+      \strng{authornamehash}{6c0c2652b5e4e9258c40ce50c5704c6b}
+      \strng{authorfullhash}{6c0c2652b5e4e9258c40ce50c5704c6b}
+      \field{sortinit}{R}
+      \field{sortinithash}{da6b42bd3ab22fee61abed031ee405f7}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{year}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{nature}
+      \field{number}{6088}
+      \field{title}{Learning representations by back-propagating errors}
+      \field{volume}{323}
+      \field{year}{1986}
+      \field{pages}{533\bibrangedash 536}
+      \range{pages}{4}
     \endentry
     \entry{schmidhuber2015deep}{article}{}
       \name{author}{1}{}{%

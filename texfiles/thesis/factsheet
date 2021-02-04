@@ -27,6 +27,11 @@ NEUROMORPHICS:
 - Neuromorphics are attracting strong interest because of their massive parallelism, high energy efficiency, good error tolerance, and good ability to implement cognitive functions (Wang2020b/1-6).
 - Nanodevices that emulate biological synapses with learning functions can benefit neuromorphics (Wang2020b/7-13), particularly the two-terminal memristor (Wang2020b/14-19).
 - More recently, the focus in neuromorphics is low power consumption (Yu2020/5-7)
+- Neuromorphic computing typically uses sparse, event-based communication and physically colocalized memory and computation (Zenke2021/29,30)
+- Colocalized memory and computation in Von Neumann machines has been implemented in Google's TPU, Graphcore's IPU, and Cerebras' CS-1. (Zenke2021).
+- Address event representation allows large networks of VLSI neurons and synapses to communicate asynchronously (Zenke2021/31,32)
+- Emulating neural dynamics on a physical substrate is more efficient but requires constraints to match the brain's timescales (Zenke2021/40).
+- Feedback connections, for which the brain uses neurotransmitters, may become problematic in large-scale neuromorphic systems.
 
 
 BIOLOGICAL HEBBIAN/STDP / BRAIN:
@@ -70,7 +75,9 @@ OTHER/UNKNOWN:
 - Three-factor Hebbian learning in RSNN is competitive with BPTT [Bellec1]
 - R-STDP can have predictable learning effect. [Legenstein2008]
 - Brain is different from deep ANNs <Bellec1>
+- The brain is an inherently time-dependent dynamical system (Zenke2021/37,38) that relies on biophysical processes, recurrence, and feedback of its physical substrate for computation (Zenke2021/30,39).
 - Von Neumann computers fundamentally different from brain (Yu2020/1)
+- Deep Learning is energy inefficient because it suffers from the Von Neumann bottleneck (Zenke2021)
 - BPTT is implausible for brain (Bellec2019/5)
 - Backpropagation is biologically implausible (Weidel2020/l.26).
 - RNNs superior for temporal dimension (Bellec1)
