@@ -15,43 +15,46 @@
 \contentsline {subsection}{\numberline {2.2.2}{Neuron models}}{9}{subsection.2.2.2}
 \contentsline {paragraph}{{LIF neuron}}{9}{paragraph*.5}
 \contentsline {paragraph}{{ALIF neuron}}{10}{paragraph*.9}
-\contentsline {subsection}{\numberline {2.2.3}{Learning procedure}}{12}{subsection.2.2.3}
-\contentsline {subsection}{\numberline {2.2.4}{Deriving e-prop from RNNs}}{13}{subsection.2.2.4}
-\contentsline {section}{\numberline {2.3}{Synaptic scaling}}{14}{section.2.3}
-\contentsline {section}{\numberline {2.4}{Network topology}}{15}{section.2.4}
-\contentsline {chapter}{\numberline {3}{Method}}{17}{chapter.3}
-\contentsline {section}{\numberline {3.1}{Data Preprocessing}}{17}{section.3.1}
-\contentsline {subsection}{\numberline {3.1.1}{The TIMIT speech corpus}}{17}{subsection.3.1.1}
-\contentsline {subsection}{\numberline {3.1.2}{Data splitting}}{18}{subsection.3.1.2}
-\contentsline {subsection}{\numberline {3.1.3}{Engineering features}}{18}{subsection.3.1.3}
-\contentsline {paragraph}{{Pre-emphasis}}{19}{paragraph*.13}
-\contentsline {paragraph}{{Framing}}{19}{paragraph*.15}
-\contentsline {paragraph}{{Short-term power spectra}}{20}{paragraph*.18}
-\contentsline {paragraph}{{Mel filterbank}}{21}{paragraph*.22}
-\contentsline {paragraph}{{Mel-frequency cepstral coefficients}}{22}{paragraph*.26}
-\contentsline {paragraph}{{Target output}}{23}{paragraph*.32}
-\contentsline {section}{\numberline {3.2}{Enhancing e-prop}}{24}{section.3.2}
-\contentsline {subsection}{\numberline {3.2.1}{Multilayer architecture}}{25}{subsection.3.2.1}
-\contentsline {subsection}{\numberline {3.2.2}{Other neuron types}}{26}{subsection.3.2.2}
-\contentsline {subsubsection}{\numberline {3.2.2.1}{STDP-LIF}}{27}{subsubsection.3.2.2.1}
-\contentsline {subsubsection}{\numberline {3.2.2.2}{Izhikevich neuron}}{28}{subsubsection.3.2.2.2}
-\contentsline {section}{\numberline {3.3}{Regularization}}{29}{section.3.3}
-\contentsline {subsection}{\numberline {3.3.1}{Firing rate regularization}}{30}{subsection.3.3.1}
-\contentsline {subsection}{\numberline {3.3.2}{Ridge regression}}{31}{subsection.3.3.2}
-\contentsline {subsection}{\numberline {3.3.3}{Weight decay}}{31}{subsection.3.3.3}
-\contentsline {subsection}{\numberline {3.3.4}{Synaptic scaling}}{32}{subsection.3.3.4}
-\contentsline {subsection}{\numberline {3.3.5}{Metaplasticity}}{32}{subsection.3.3.5}
-\contentsline {section}{\numberline {3.4}{Synaptic delay}}{33}{section.3.4}
-\contentsline {section}{\numberline {3.5}{Bidirectional network}}{34}{section.3.5}
-\contentsline {section}{\numberline {3.6}{Optimizer}}{35}{section.3.6}
-\contentsline {section}{\numberline {3.7}{Learning rate annealing}}{36}{section.3.7}
-\contentsline {section}{\numberline {3.8}{Hyperparameter optimization}}{37}{section.3.8}
-\contentsline {chapter}{\numberline {4}{Results}}{40}{chapter.4}
-\contentsline {section}{\numberline {4.1}{ALIF}}{40}{section.4.1}
-\contentsline {section}{\numberline {4.2}{STDP-ALIF}}{40}{section.4.2}
-\contentsline {section}{\numberline {4.3}{Izhikevich}}{40}{section.4.3}
-\contentsline {chapter}{\numberline {5}{Discussion}}{46}{chapter.5}
-\contentsline {chapter}{\numberline {6}{Conclusion}}{52}{chapter.6}
-\contentsline {chapter}{\numberline {A}{Appendix}}{55}{appendix.A}
+\contentsline {subsection}{\numberline {2.2.3}{Deriving e-prop from RNNs}}{11}{subsection.2.2.3}
+\contentsline {subsection}{\numberline {2.2.4}{Learning procedure}}{13}{subsection.2.2.4}
+\contentsline {subsubsection}{\numberline {2.2.4.1}{Eligibility trace}}{13}{subsubsection.2.2.4.1}
+\contentsline {subsubsection}{\numberline {2.2.4.2}{Gradients}}{16}{subsubsection.2.2.4.2}
+\contentsline {paragraph}{{Error metric}}{16}{paragraph*.13}
+\contentsline {section}{\numberline {2.3}{Synaptic scaling}}{17}{section.2.3}
+\contentsline {section}{\numberline {2.4}{Network topology}}{18}{section.2.4}
+\contentsline {chapter}{\numberline {3}{Method}}{19}{chapter.3}
+\contentsline {section}{\numberline {3.1}{Data Preprocessing}}{19}{section.3.1}
+\contentsline {subsection}{\numberline {3.1.1}{The TIMIT speech corpus}}{19}{subsection.3.1.1}
+\contentsline {subsection}{\numberline {3.1.2}{Data splitting}}{20}{subsection.3.1.2}
+\contentsline {subsection}{\numberline {3.1.3}{Engineering features}}{20}{subsection.3.1.3}
+\contentsline {paragraph}{{Pre-emphasis}}{21}{paragraph*.18}
+\contentsline {paragraph}{{Framing}}{21}{paragraph*.20}
+\contentsline {paragraph}{{Short-term power spectra}}{22}{paragraph*.23}
+\contentsline {paragraph}{{Mel filterbank}}{23}{paragraph*.27}
+\contentsline {paragraph}{{Mel-frequency cepstral coefficients}}{24}{paragraph*.31}
+\contentsline {paragraph}{{Target output}}{25}{paragraph*.37}
+\contentsline {section}{\numberline {3.2}{Enhancing e-prop}}{26}{section.3.2}
+\contentsline {subsection}{\numberline {3.2.1}{Multilayer architecture}}{27}{subsection.3.2.1}
+\contentsline {subsection}{\numberline {3.2.2}{Other neuron types}}{28}{subsection.3.2.2}
+\contentsline {subsubsection}{\numberline {3.2.2.1}{STDP-LIF}}{29}{subsubsection.3.2.2.1}
+\contentsline {subsubsection}{\numberline {3.2.2.2}{Izhikevich neuron}}{30}{subsubsection.3.2.2.2}
+\contentsline {section}{\numberline {3.3}{Regularization}}{31}{section.3.3}
+\contentsline {subsection}{\numberline {3.3.1}{Firing rate regularization}}{32}{subsection.3.3.1}
+\contentsline {subsection}{\numberline {3.3.2}{Ridge regression}}{33}{subsection.3.3.2}
+\contentsline {subsection}{\numberline {3.3.3}{Weight decay}}{33}{subsection.3.3.3}
+\contentsline {subsection}{\numberline {3.3.4}{Synaptic scaling}}{34}{subsection.3.3.4}
+\contentsline {subsection}{\numberline {3.3.5}{Metaplasticity}}{34}{subsection.3.3.5}
+\contentsline {section}{\numberline {3.4}{Synaptic delay}}{35}{section.3.4}
+\contentsline {section}{\numberline {3.5}{Bidirectional network}}{36}{section.3.5}
+\contentsline {section}{\numberline {3.6}{Optimizer}}{37}{section.3.6}
+\contentsline {section}{\numberline {3.7}{Learning rate annealing}}{38}{section.3.7}
+\contentsline {section}{\numberline {3.8}{Hyperparameter optimization}}{39}{section.3.8}
+\contentsline {chapter}{\numberline {4}{Results}}{42}{chapter.4}
+\contentsline {section}{\numberline {4.1}{ALIF}}{42}{section.4.1}
+\contentsline {section}{\numberline {4.2}{STDP-ALIF}}{42}{section.4.2}
+\contentsline {section}{\numberline {4.3}{Izhikevich}}{42}{section.4.3}
+\contentsline {chapter}{\numberline {5}{Discussion}}{48}{chapter.5}
+\contentsline {chapter}{\numberline {6}{Conclusion}}{54}{chapter.6}
+\contentsline {chapter}{\numberline {A}{Appendix}}{57}{appendix.A}
 \vspace {\beforebibskip }
-\contentsline {chapter}{\numberline {}{Bibliography}}{57}{section*.36}
+\contentsline {chapter}{\numberline {}{Bibliography}}{59}{section*.41}

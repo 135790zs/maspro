@@ -1940,15 +1940,17 @@
     <bcf:citekey order="13">hopfield1982neural</bcf:citekey>
     <bcf:citekey order="14">bellec2020solution</bcf:citekey>
     <bcf:citekey order="15">bellec2020solution</bcf:citekey>
-    <bcf:citekey order="16">garofolo1993darpa</bcf:citekey>
-    <bcf:citekey order="17">labov2008atlas</bcf:citekey>
-    <bcf:citekey order="18">kucera1967computational</bcf:citekey>
-    <bcf:citekey order="19">hultzsch1964tables</bcf:citekey>
-    <bcf:citekey order="20">graves2005framewise</bcf:citekey>
-    <bcf:citekey order="21">bellec2020solution</bcf:citekey>
-    <bcf:citekey order="22">fayek2016</bcf:citekey>
-    <bcf:citekey order="23">SASPWEB2011</bcf:citekey>
-    <bcf:citekey order="24">stevens1937scale</bcf:citekey>
+    <bcf:citekey order="16">bellec2020solution</bcf:citekey>
+    <bcf:citekey order="17">bellec2020solution</bcf:citekey>
+    <bcf:citekey order="18">garofolo1993darpa</bcf:citekey>
+    <bcf:citekey order="19">labov2008atlas</bcf:citekey>
+    <bcf:citekey order="20">kucera1967computational</bcf:citekey>
+    <bcf:citekey order="21">hultzsch1964tables</bcf:citekey>
+    <bcf:citekey order="22">graves2005framewise</bcf:citekey>
+    <bcf:citekey order="23">bellec2020solution</bcf:citekey>
+    <bcf:citekey order="24">fayek2016</bcf:citekey>
+    <bcf:citekey order="25">SASPWEB2011</bcf:citekey>
+    <bcf:citekey order="26">stevens1937scale</bcf:citekey>
   </bcf:section>
   <!-- SORTING TEMPLATES -->
   <bcf:sortingtemplate name="nyt">
