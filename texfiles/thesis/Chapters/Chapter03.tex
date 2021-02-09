@@ -26,7 +26,7 @@
 		        All  & 438 (70\%) & 192 (30\%) & 630 (100\%) \\
 		        \bottomrule
 		    \end{tabularx}
-		    \caption[TIMIT Dialect Regions]{Distibution of speakers' dialect regions and sexes. Speakers of the innominate dialect region 8 relocated often during their childhood.}  \label{tab:dialects}
+		    \caption[TIMIT Dialect Regions]{Distribution of speakers' dialect regions and sexes. Speakers of the innominate dialect region 8 relocated often during their childhood.}  \label{tab:dialects}
 		\end{table}
 
 		The sentence text can be categorized into 2 \emph{dialect} sentences, 450 \emph{phonetically compact} sentences, and 1890 \emph{phonetically diverse} sentences.
@@ -258,7 +258,7 @@
 			They are represented in one-hot vector encoding.
 			Since the dataset contains 61 different phones, this is also the length of these vectors.
 
-			Figure \ref{fig:source_mfcc_target} illustrates the waveform data and its framewise aligned MFCCs and target output.
+			Figure \ref{fig:source_mfcc_target} illustrates the waveform data and its frame-wise aligned MFCCs and target output.
 
 			\todo{side-by-side with original text and phonemes, label as fig:source\_mfcc\_target}
 
@@ -276,26 +276,67 @@
 \section{Enhancing e-prop}
 
 	\begin{tcolorbox}[colback=orange]
-	-
-	\vspace{5cm}
+	preamble
 
 	\end{tcolorbox}
 
-	\subsection{Multilayer architecture}
+	\subsection{Multi-layer architecture}
 		\begin{tcolorbox}[colback=orange]
 
 		- English, visual and formal descriptions.
 
-		\vspace{20cm}
 		\end{tcolorbox}
+
+		The multi-layer e-prop architecture can be described in the same formal model as its single-layer counterpart, in which the hidden state is based on temporally (i.e., online) and spatially locally available information at a neuron $j$:
+
+        \begin{equation}
+        \mathbf{h}^t_j = M\left(\mathbf{h}_j^{t-1}, \mathbf{z}^{t-1}, \mathbf{x}^t, \mathbf{W}_j\right).\tag{\ref{eq:model} revisited}
+        \end{equation}
+        For the multi-layer architecture, however, neurons in deeper layers no longer depend on the input, but on the observable states of the previous layer at the same time step, such that at every time step, a full pass through the network is made.
+        We modify the indexing notation accordingly, in order to directly refer to neurons and weights in a particular layer $r \in [1\mathrel{{.}\,{.}}\nobreak R]$:
+        \begin{equation}\label{eq:ml_model}
+        \mathbf{h}^t_{rj} = \begin{cases}
+        M\left(\mathbf{h}_{rj}^{t-1}, \mathbf{z}_r^{t-1}, \mathbf{x}^t, \mathbf{W}_{rj}\right)       & \mbox{if } r = 1\\
+        M\left(\mathbf{h}_{rj}^{t-1}, \mathbf{z}_r^{t-1}, \mathbf{z}_{r-1}^t, \mathbf{W}_{rj}\right) & \mbox{otherwise,}
+        \end{cases}
+        \end{equation}
+        where $\mathbf{h}^t_{rj}$ (resp. $z^t_{rj}$) is the hidden state (resp. observable state) of a neuron $j$ in layer $r$. and $\mathbf{W}_{rj} = \mathbf{W}^\text{in}_{rj} \cup \mathbf{W}^\text{rec}_{rj}$ is the set of afferent weights to neuron $j$ in layer $r$.
+
+        Similarly, the observable state can be modeled by
+        \begin{equation}\label{eq:ml_model_obs}
+        z^t_{rj} = f\left(\mathbf{h}_{rj}^t\right)
+        \end{equation}
+        and the network output by
+        \begin{equation}\label{eq:ml_model_obs}
+        y^t_k = \kappa y^{t-1}_k + \sum_{j,r}W^\text{out}_{rkj}z_{rj}^t + b_k,
+        \end{equation}
+        where $W^\text{out}_{rkj}$ is a weight between neuron $j$ in layer $r$ and output neuron $k$.
+        Note that the summation over $r$ entails that the output layer is connected to all neurons in all layers in the network.
+        This allows trainable broadcast weights in earlier layers, such as those found in symmetric and adaptive e-prop.
+
+        \paragraph{Multi-layer ALIF neurons}
+        An ALIF neuron in a multi-layer architecture is similar to one in a single-layer architecture (see Section \ref{sec:alif}).
+        The only difference, apart from the layer indexing, is its activity update.
+        For a multi-layer ALIF neuron, the activity value is given by
+        \begin{equation}\label{eq:ml_alifV}
+        v^{t+1}_{rj} = \alpha v_{rj}^t + \sum_{i\neq j}W^\text{rec}_{rji}z_i^t + \sum_i W^\text{in}_{rji}I - z_{rj}^tv_
+        \text{th},
+        \end{equation}
+        where
+        \begin{equation}
+        I = \begin{cases}
+        	x^{t+1}_i       &\mbox{if } r = 1 \\
+            z^{t+1}_{r-1,i} &\mbox{otherwise.}
+            \end{cases}
+        \end{equation}
+
 
 	\subsection{Other neuron types}
 		\begin{tcolorbox}[colback=orange]
 
 		- Shoutout to Traub
-		- Argue in favor of different models (refer to brain, simplicity vs. plausibility tradeoff). E.g.: built-in refractory
+		- Argue in favor of different models (refer to brain, simplicity vs. plausibility trade-off). E.g.: built-in refractory
 
-		\vspace{20cm}
 		\end{tcolorbox}
 		\subsubsection{STDP-LIF}
 			\begin{tcolorbox}[colback=orange]
@@ -304,37 +345,64 @@
 			- Also mention and motivate v-fix and psi-fix.
 			- Mention Bellec's reset too.
 
-			\vspace{10cm}
 			\end{tcolorbox}
 		\subsubsection{Izhikevich neuron}
 			\begin{tcolorbox}[colback=orange]
 
 			- STDP-LIF (intuition, maths, graphs)
 
-			\vspace{20cm}
 			\end{tcolorbox}
 
 \section{Regularization}
 
 	\begin{tcolorbox}[colback=orange]
-	- What, why, how?
-	\vspace{8cm}
+	preamble: explain why this is used (bioplausibility (natural constraints) and generalizability)
 
 	\end{tcolorbox}
 
 	\subsection{Firing rate regularization}
 		\begin{tcolorbox}[colback=orange]
-		- What, why, how?
+		- What, why?
 		- Bioplausible?
-		\vspace{12cm}
 
 		\end{tcolorbox}
+		Firing rate is implemented by adding a regularization term $E_\text{reg}$ to the loss function that penalizes neurons that have a firing rate that is too low or too high:
+		\begin{equation}
+			E_\text{reg} = \frac{1}{2}\sum_j\left(f^\text{target} - f^{\text{av}, t}_{rj}\right)^2,
+		\end{equation}
+		where $f^\text{target}$ is a target firing rate of \SI{10}{\Hz}, and
+		\begin{equation}
+		f^{\text{av},t}_{rj} = \frac{1}{t} z^{\text{total},t}_{rj}
+		\end{equation}
+		is the running average spike frequency, where $z^{\text{total},t}$ accumulates spikes emitted by neuron $j$ in layer $r$ up to (and including) time step $t$.
+		Note that $z^{\text{total},0} = 0$, \ie, the accumulation resets at every new training sample.
+		By implementing this sum as a hidden variable, e-prop remains an online training algorithm when firing rate regularization is implemented.
+
+		To insert the regularization term into the e-prop framework, we compute the weight update that regularizes the firing rate toward $f^\text{target}$ through gradient descent, similarly to the main e-prop weight update (Equation \ref{eq:eprop_grd}):
+		\begin{equation}
+		\frac{\partial E_\text{reg}}{\partial z_{rj}^t} = \left(f^\text{target} - f^{\text{av}, t}_{rj}\right).
+		\end{equation}
+		Note that this regularization loss differs from the firing rate regularization in \cite{bellec2020solution}, in which the firing rate is calculated in an offline fashion, by retroactively computing the average firing rate based on all spikes instead of only accumulated spikes.
+		Note also that in \cite{bellec2020solution}, $\frac{\partial E_\text{reg}}{\partial z_{rj}^t}$ is multiplied with the eligibility trace $e^t_{rji}$, as in Equation \ref{eq:eprop_grd} to obtain the weight update, whereas in this report, the eligibility trace is omitted, resulting in a number of benefits:
+		\begin{enumerate}
+			\item It allows silent neurons that have infrequently spiking afferent neurons to more easily increase their firing rate, because their low afferent eligibility traces no longer nullifies the regularization gradient, and thereby results in a better empirical learning performance;
+			\item It is more efficient in emulations on von Neumann machines, because the element-wise multiplication of $\frac{\partial E_\text{reg}}{\partial z_{rj}^t}$ and the eligibility trace is a relatively large computation on the order $\Theta\!\left(n^2\right)$ that no longer needs to be computed.
+			\item It is more intuitive, as only the gradient of the firing rate is used to compute the weight update.
+		\end{enumerate}
+		We apply the weight update $\Delta W_{rji}$ of the regularization gradient using
+		\begin{equation}
+		\Delta_\text{reg} W_{rji} = -\eta\ c_\text{reg}\sum_t\left(f^\text{target} - f^{\text{av}, t}_{rj}\right).
+		\end{equation}
+		Note that the regularization gradients can be combined and accumulated over time on the same synaptic variable as the normal gradients, facilitating practical implementation of the learning procedure in both software emulations and neuromorphic embeddings:
+		\begin{equation}
+		\Delta W_{rji} = -\eta\ \sum_t\left(c_\text{reg}\left(f^\text{target} - f^{\text{av}, t}_{rj}\right) + L^t_{rj}\cdot\bar{e}^t_{rji}).
+		\end{equation}
+
 
 	\subsection{Ridge regression}
 		\begin{tcolorbox}[colback=orange]
 		- What, why, how?
 		- Bioplausible?
-		\vspace{7cm}
 
 		\end{tcolorbox}
 
@@ -342,61 +410,27 @@
 		\begin{tcolorbox}[colback=orange]
 		- What, why, how?
 		- Bioplausible?
-		\vspace{6cm}
 
 		\end{tcolorbox}
 
-	\subsection{Synaptic scaling}
-		\begin{tcolorbox}[colback=orange]
-		- What, why, how?
-		- Bioplausible?
-		\vspace{6cm}
-
-		\end{tcolorbox}
-
-	\subsection{Metaplasticity}
-		\begin{tcolorbox}[colback=orange]
-		- What, why, how?
-		- Bioplausible?
-		\vspace{6cm}
-
-		\end{tcolorbox}
-
-\section{Synaptic delay}
-	\begin{tcolorbox}[colback=orange]
-	- I/A
-	- What, why, how?
-	\vspace{10cm}
-
-	\end{tcolorbox}
 
 \section{Bidirectional network}
 	\begin{tcolorbox}[colback=orange]
 	- I/A
 	- What, why, how?
-	\vspace{15cm}
 
 	\end{tcolorbox}
 
-\section{Optimizer}
+\section{Optimizer}\label{sec:adam}
 	\begin{tcolorbox}[colback=orange]
 	- Show how Adam works, and how it replaces SGD
-	\vspace{15cm}
 
 	\end{tcolorbox}
 
-\section{Learning rate annealing}
-	\begin{tcolorbox}[colback=orange]
-	- I/A
-	- How, what, why?
-	\vspace{10cm}
-
-	\end{tcolorbox}
 
 \section{Hyperparameter optimization}
 	\begin{tcolorbox}[colback=orange]
 	- What, why, how?
-	\vspace{20cm}
 
 	\end{tcolorbox}
 

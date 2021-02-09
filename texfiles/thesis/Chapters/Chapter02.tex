@@ -10,7 +10,6 @@
       - But how can these synaptic changes lead to long-term behaviorial changes?
       - STDP requires modulatory signals (bailey2000heterosynaptic)
 
-    \vspace{6cm}
     \end{tcolorbox}
 
     \subsection{Spike-timing dependent plasticity}
@@ -19,7 +18,6 @@
         - R-STDP
         - (and other variants if they're relevant)
 
-        \vspace{10cm}
 
         \end{tcolorbox}
 
@@ -28,7 +26,6 @@
         \begin{tcolorbox}[colback=orange]
         - Biological plausilibity, (how does it happen in brain?)
         - Error-related negativity (see Bellec1)
-        \vspace{10cm}
 
         \end{tcolorbox}
 
@@ -38,7 +35,6 @@
             - Broadcasting methods
               - Broadcast alignment (see Bellec1)
               - In brain
-            \vspace{6cm}
 
             \end{tcolorbox}
 
@@ -48,7 +44,6 @@
         - Why necessary?
         - Bioplausibility
 
-        \vspace{12cm}
 
         \end{tcolorbox}
 
@@ -89,7 +84,6 @@
         Furthermore, $z^t_j$ is fixed to 0 for $T^\text{refr}$ time steps to model neuronal refractoriness that is also present in biological neurons\todo{cite}.
         \begin{tcolorbox}[colback=orange]
         - DEMO FIGURE
-        \vspace{10cm}
 
         \end{tcolorbox}
 
@@ -112,12 +106,10 @@
         \begin{tcolorbox}[colback=orange]
         - Mention SFA
           - Mention GLIF (Bellec2)
-        \vspace{5cm}
 
         \end{tcolorbox}
         \begin{tcolorbox}[colback=orange]
         - DEMO FIGURE
-        \vspace{10cm}
 
         \end{tcolorbox}
 
@@ -216,19 +208,13 @@
         \frac{\partial a^{t+1}_j}{\partial v^t_j} & \frac{\partial a^{t+1}_j}{\partial a^t_j}
         \end{pmatrix}
         \end{equation}
-        The presence of $z$, and its relation with the step function $H$ in the hidden state updates in Equation \ref{eq:alifV} and Equation \ref{eq:alifA} seems problematic for computing these partial derivates, because the derivative $\frac{\partial z^t_j}{\partial v^t_j}$ is nonexistent.
+        The presence of $z^t_j$, and its relation with the Heaviside step function $H(\cdot)$ in the hidden state updates in Equation \ref{eq:alifV} and Equation \ref{eq:alifA} seems problematic for computing these partial derivates, because the derivative $\frac{\partial z^t_j}{\partial v^t_j}$ is nonexistent.
         This is overcome by replacing it with a simple nonlinear function called a pseudo-derivative.
         Outside of the refractory period of a neuron $j$, this pseudo-derivative has the form
         \begin{equation}
         \psi_j^t = \gamma \max\left(0, 1 - \left|\frac{v_j^t - v_\text{th} - \beta a^t_j}{v_\text{th}}\right|\right)
         \end{equation}
-        where $\gamma$ is a dampening constant.
-        During the refractory period, the pseudo-derivative is set to 0.
-
-        \begin{tcolorbox}[colback=orange]
-        - Plot of pseudo-derivative overlayed with voltage, adaptation and spikes.
-        \vspace{7cm}
-        \end{tcolorbox}
+        where $\gamma$ is a dampening constant, which is set to 0 during the neuron's refractory period.
 
         Now, the partial derivatives in the hidden state derivative can be computed:
         \begin{align}
@@ -313,10 +299,13 @@
         \subsubsection{Gradients}
         Gradient descent is used to apply the weight updates, such that weights are updated by a small fraction $\eta$ in the negative direction of the estimated gradient of the loss function with respect to the model weights:
         \begin{equation}\label{eq:eprop_grd}
-        \Delta W = -\eta\widehat{\frac{dE}{dW_{ji}}} \eqdef -\eta\sum_t\frac{\partial E}{\partial z^t_j}e^t_{ji}
+        \Delta W = -\eta\widehat{\frac{dE}{dW_{ji}}} \eqdef -\eta\sum_t\frac{\partial E}{\partial z^t_j}e^t_{ji}.
         \end{equation}
+        Note that for clarity, this section describes e-prop using the stochastic gradient descent.
+        In the actual implementation, the Adam optimization algorithm \citep{kingma2014adam} is used (see Section \ref{sec:adam}).
+
         \paragraph{Error metric}
-        In the TIMIT framewise phone classification task, there are $K=61$ output neurons $y^t_k$ where $k \in [1\mathrel{{.}\,{.}}\nobreak K]$.
+        In the TIMIT frame-wise phone classification task, there are $K=61$ output neurons $y^t_k$ where $k \in [1\mathrel{{.}\,{.}}\nobreak K]$.
         These are computed according to
         \begin{equation}\label{eq:bellec_y}
         y^t_k = \kappa y^{t-1}_k + \sum_jW^\text{out}_{kj}z^t_j + b_k,
@@ -352,15 +341,25 @@
         Recall that the estimated loss gradient $\frac{dE}{dW_{ji}}$ is approximated by $\sum_t \frac{\partial E}{\partial z^t_j}e^t_{ji}$.
         Therefore, after inserting Equation \ref{eq:learningsignal_after_output} in Equation \ref{eq:eprop_grd}, the weight update is computed by
         \begin{align}
-        \Delta W &= -\eta\sum_{t'}\frac{\partial E}{\partial z^{t'}_j}e^{t'}_{ji}\\
+        \Delta W_{ji} &= -\eta\sum_{t'}\frac{\partial E}{\partial z^{t'}_j}e^{t'}_{ji}\\
         &= -\eta\sum_{t'}\sum_kB_{jk}\sum_{t'\geq t}\left(\pi^{t'}_k - \pi^{*,t}_k\right)\kappa^{t'-t}e^{t'}_{ji}\\
         &= -\eta\sum_{k, t'}B_{jk}\sum_{t'\geq t}\left(\pi^{t'}_k - \pi^{*,t}_k\right)\kappa^{t'-t}e^{t'}_{ji}\\
-        &= -\eta\sum_t\underbrace{\sum_kB_{jk}\left(\pi^{t'}_k - \pi^{*,t}_k\right)}_{=L^t_j}\underbrace{\sum_{t'\leq t}\kappa^{t'-t}e^{t'}_{ji}}_{\eqdef \bar{e}^t_{ji}}
+        &= -\eta\sum_t\underbrace{\sum_kB_{jk}\left(\pi^{t'}_k - \pi^{*,t}_k\right)}_{=L^t_j}\underbrace{\sum_{t'\leq t}\kappa^{t'-t}e^{t'}_{ji}}_{\eqdef \bar{e}^t_{ji}}\label{dwlast},
         \end{align}
+        where $W_{ji}$ is an input or recurrent weight.
+        By implementing $\bar{e}_{ji}$ as a low-pass filter (with factor $\kappa$) of the eligibility trace, the weight update in Equation \ref{dwlast} is implemented as a local and online learning algorithm.
+
+        The training algorithm for the output weights $W^\text{out}$ and bias $b$ can be directly derived from gradient descent:
+        \begin{equation}
+        \Delta W^\text{out}_{kj} = -\eta \sum_t\left(\pi^t_k - \pi^{*,t}_k\right)\sum_{t'\leq t}\kappa^{t'-t}z^t_j
+        \end{equation}
+        and
+        \begin{equation}
+        \Delta b_k = -\eta \sum_t\left(\pi^t_k - \pi^{*,t}_k\right)
+        \end{equation}
 
     \begin{tcolorbox}[colback=orange]
     - Full demo plot including eligibility vector, trace, and simulated learning signal
-    \vspace{10cm}
 
     \end{tcolorbox}
 
@@ -368,7 +367,6 @@
 
     \begin{tcolorbox}[colback=orange]
     - Synaptic Scaling (in brain, if applicable)
-    \vspace{10cm}
 
     \end{tcolorbox}
 
@@ -379,6 +377,5 @@
       - Network topology (e.g. multilayer) (but keep relevant)
       - Mainly focus on how brain does it. Cite often! Don't hypothesize on effects, just describe with sources.
       - Also denote a subsection on effects of topologies in related ANNs (preferably (R)SNNs).
-    \vspace{15cm}
 
     \end{tcolorbox}

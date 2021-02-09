@@ -543,6 +543,37 @@
       \field{title}{Tables of transitional frequencies of English phonemes}
       \field{year}{1964}
     \endentry
+    \entry{kingma2014adam}{article}{}
+      \name{author}{2}{}{%
+        {{uniquename=0,uniquepart=base,hash=847f19f00e14489d6d3965c725ad8e00}{%
+           family={Kingma},
+           familyi={K\bibinitperiod},
+           given={Diederik\bibnamedelima P},
+           giveni={D\bibinitperiod\bibinitdelim P\bibinitperiod},
+           givenun=0}}%
+        {{uniquename=0,uniquepart=base,hash=8aa66e8231cc2fdbe67aa4f18ca970c6}{%
+           family={Ba},
+           familyi={B\bibinitperiod},
+           given={Jimmy},
+           giveni={J\bibinitperiod},
+           givenun=0}}%
+      }
+      \strng{namehash}{d3c447dd6a8128be65f9fb21a8835831}
+      \strng{fullhash}{d3c447dd6a8128be65f9fb21a8835831}
+      \strng{bibnamehash}{d3c447dd6a8128be65f9fb21a8835831}
+      \strng{authorbibnamehash}{d3c447dd6a8128be65f9fb21a8835831}
+      \strng{authornamehash}{d3c447dd6a8128be65f9fb21a8835831}
+      \strng{authorfullhash}{d3c447dd6a8128be65f9fb21a8835831}
+      \field{sortinit}{K}
+      \field{sortinithash}{9fd838a31ba64d981e8f44562bd33f89}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{year}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{arXiv preprint arXiv:1412.6980}
+      \field{title}{Adam: A method for stochastic optimization}
+      \field{year}{2014}
+    \endentry
     \entry{kucera1967computational}{book}{}
       \name{author}{3}{}{%
         {{uniquename=0,uniquepart=base,hash=ef73e445d2fca9bdab69b4f5e03862bf}{%
