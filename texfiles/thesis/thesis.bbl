@@ -254,6 +254,82 @@
       \field{pages}{738385}
       \range{pages}{1}
     \endentry
+    \entry{del1954quantal}{article}{}
+      \name{author}{2}{}{%
+        {{uniquename=0,uniquepart=base,hash=362019b75e6b5046965b8aeab5221b04}{%
+           family={Del\bibnamedelima Castillo},
+           familyi={D\bibinitperiod\bibinitdelim C\bibinitperiod},
+           given={J},
+           giveni={J\bibinitperiod},
+           givenun=0}}%
+        {{uniquename=0,uniquepart=base,hash=cdd1ddcf8c22670732a4474456b4bf8b}{%
+           family={Katz},
+           familyi={K\bibinitperiod},
+           given={B3},
+           giveni={B\bibinitperiod},
+           givenun=0}}%
+      }
+      \list{publisher}{1}{%
+        {Wiley Online Library}%
+      }
+      \strng{namehash}{4024618818f09622f67cc22aadffed41}
+      \strng{fullhash}{4024618818f09622f67cc22aadffed41}
+      \strng{bibnamehash}{4024618818f09622f67cc22aadffed41}
+      \strng{authorbibnamehash}{4024618818f09622f67cc22aadffed41}
+      \strng{authornamehash}{4024618818f09622f67cc22aadffed41}
+      \strng{authorfullhash}{4024618818f09622f67cc22aadffed41}
+      \field{sortinit}{D}
+      \field{sortinithash}{2ef1bd9a78cc71eb74d7231c635177b8}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{year}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{The Journal of physiology}
+      \field{number}{3}
+      \field{title}{Quantal components of the end-plate potential}
+      \field{volume}{124}
+      \field{year}{1954}
+      \field{pages}{560\bibrangedash 573}
+      \range{pages}{14}
+    \endentry
+    \entry{diaz2006target}{article}{}
+      \name{author}{2}{}{%
+        {{uniquename=0,uniquepart=base,hash=2c4f0ec93aa28b7ae97c8bb89dcae887}{%
+           family={Diaz-Rios},
+           familyi={D\bibinithyphendelim R\bibinitperiod},
+           given={Manuel},
+           giveni={M\bibinitperiod},
+           givenun=0}}%
+        {{uniquename=0,uniquepart=base,hash=743fe7c5c23e93f802082bd061fbe0bc}{%
+           family={Miller},
+           familyi={M\bibinitperiod},
+           given={Mark\bibnamedelima W},
+           giveni={M\bibinitperiod\bibinitdelim W\bibinitperiod},
+           givenun=0}}%
+      }
+      \list{publisher}{1}{%
+        {Marine Biological Laboratory}%
+      }
+      \strng{namehash}{a639a4c96b058400827a4604cc35f03b}
+      \strng{fullhash}{a639a4c96b058400827a4604cc35f03b}
+      \strng{bibnamehash}{a639a4c96b058400827a4604cc35f03b}
+      \strng{authorbibnamehash}{a639a4c96b058400827a4604cc35f03b}
+      \strng{authornamehash}{a639a4c96b058400827a4604cc35f03b}
+      \strng{authorfullhash}{a639a4c96b058400827a4604cc35f03b}
+      \field{sortinit}{D}
+      \field{sortinithash}{2ef1bd9a78cc71eb74d7231c635177b8}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{year}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{The Biological Bulletin}
+      \field{number}{3}
+      \field{title}{Target-specific regulation of synaptic efficacy in the feeding central pattern generator of Aplysia: potential substrates for behavioral plasticity?}
+      \field{volume}{210}
+      \field{year}{2006}
+      \field{pages}{215\bibrangedash 229}
+      \range{pages}{15}
+    \endentry
     \entry{drachman2005we}{misc}{}
       \name{author}{1}{}{%
         {{uniquename=0,uniquepart=base,hash=efd338305c817c157bd80cf6f0434d5a}{%
@@ -881,6 +957,49 @@
       \field{title}{The Cost of Training NLP Models: A Concise Overview}
       \field{year}{2020}
     \endentry
+    \entry{siddoway2014molecular}{article}{}
+      \name{author}{3}{}{%
+        {{uniquename=0,uniquepart=base,hash=be771fb96452d7ad2afcc8717b4425f9}{%
+           family={Siddoway},
+           familyi={S\bibinitperiod},
+           given={Benjamin},
+           giveni={B\bibinitperiod},
+           givenun=0}}%
+        {{uniquename=0,uniquepart=base,hash=1f29800ee74cb67f1a82f98633f32a6d}{%
+           family={Hou},
+           familyi={H\bibinitperiod},
+           given={Hailong},
+           giveni={H\bibinitperiod},
+           givenun=0}}%
+        {{uniquename=0,uniquepart=base,hash=84cc03c62a7c5ad5cb5cf3d11896ec9c}{%
+           family={Xia},
+           familyi={X\bibinitperiod},
+           given={Houhui},
+           giveni={H\bibinitperiod},
+           givenun=0}}%
+      }
+      \list{publisher}{1}{%
+        {Elsevier}%
+      }
+      \strng{namehash}{ff24c2789ea0a34ea04326dbc6e71420}
+      \strng{fullhash}{ff24c2789ea0a34ea04326dbc6e71420}
+      \strng{bibnamehash}{ff24c2789ea0a34ea04326dbc6e71420}
+      \strng{authorbibnamehash}{ff24c2789ea0a34ea04326dbc6e71420}
+      \strng{authornamehash}{ff24c2789ea0a34ea04326dbc6e71420}
+      \strng{authorfullhash}{ff24c2789ea0a34ea04326dbc6e71420}
+      \field{sortinit}{S}
+      \field{sortinithash}{322b1d5276f2f6c1bccdcd15920dbee6}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{year}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{Neuropharmacology}
+      \field{title}{Molecular mechanisms of homeostatic synaptic downscaling}
+      \field{volume}{78}
+      \field{year}{2014}
+      \field{pages}{38\bibrangedash 44}
+      \range{pages}{7}
+    \endentry
     \entry{SASPWEB2011}{book}{}
       \name{author}{1}{}{%
         {{uniquename=0,uniquepart=base,hash=d4e614c8bb031ace758f4e6e9f538f89}{%
@@ -980,6 +1099,44 @@
       \field{year}{1937}
       \field{pages}{185\bibrangedash 190}
       \range{pages}{6}
+    \endentry
+    \entry{turrigiano2000hebb}{article}{}
+      \name{author}{2}{}{%
+        {{uniquename=0,uniquepart=base,hash=e8329e901984e1878b2332bae85dbcdc}{%
+           family={Turrigiano},
+           familyi={T\bibinitperiod},
+           given={Gina\bibnamedelima G},
+           giveni={G\bibinitperiod\bibinitdelim G\bibinitperiod},
+           givenun=0}}%
+        {{uniquename=0,uniquepart=base,hash=7f07779888c6e1ce618fef6068bb318f}{%
+           family={Nelson},
+           familyi={N\bibinitperiod},
+           given={Sacha\bibnamedelima B},
+           giveni={S\bibinitperiod\bibinitdelim B\bibinitperiod},
+           givenun=0}}%
+      }
+      \list{publisher}{1}{%
+        {Elsevier}%
+      }
+      \strng{namehash}{785f2beed63e394f6b8af7f3c8df98c9}
+      \strng{fullhash}{785f2beed63e394f6b8af7f3c8df98c9}
+      \strng{bibnamehash}{785f2beed63e394f6b8af7f3c8df98c9}
+      \strng{authorbibnamehash}{785f2beed63e394f6b8af7f3c8df98c9}
+      \strng{authornamehash}{785f2beed63e394f6b8af7f3c8df98c9}
+      \strng{authorfullhash}{785f2beed63e394f6b8af7f3c8df98c9}
+      \field{sortinit}{T}
+      \field{sortinithash}{6f7aff9db9dcfeb7f95fd5bbd2f78df9}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{year}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{Current opinion in neurobiology}
+      \field{number}{3}
+      \field{title}{Hebb and homeostasis in neuronal plasticity}
+      \field{volume}{10}
+      \field{year}{2000}
+      \field{pages}{358\bibrangedash 364}
+      \range{pages}{7}
     \endentry
   \enddatalist
 \endrefsection

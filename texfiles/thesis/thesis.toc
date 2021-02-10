@@ -41,11 +41,10 @@
 \contentsline {subsubsection}{\numberline {3.2.2.2}{Izhikevich neuron}}{21}{subsubsection.3.2.2.2}
 \contentsline {section}{\numberline {3.3}{Regularization}}{22}{section.3.3}
 \contentsline {subsection}{\numberline {3.3.1}{Firing rate regularization}}{22}{subsection.3.3.1}
-\contentsline {subsection}{\numberline {3.3.2}{Ridge regression}}{23}{subsection.3.3.2}
-\contentsline {subsection}{\numberline {3.3.3}{Weight decay}}{23}{subsection.3.3.3}
+\contentsline {subsection}{\numberline {3.3.2}{L2 normalization}}{23}{subsection.3.3.2}
 \contentsline {section}{\numberline {3.4}{Bidirectional network}}{23}{section.3.4}
-\contentsline {section}{\numberline {3.5}{Optimizer}}{23}{section.3.5}
-\contentsline {section}{\numberline {3.6}{Hyperparameter optimization}}{23}{section.3.6}
+\contentsline {section}{\numberline {3.5}{Optimizer}}{24}{section.3.5}
+\contentsline {section}{\numberline {3.6}{Hyperparameter optimization}}{24}{section.3.6}
 \contentsline {chapter}{\numberline {4}{Results}}{25}{chapter.4}
 \contentsline {section}{\numberline {4.1}{ALIF}}{25}{section.4.1}
 \contentsline {section}{\numberline {4.2}{STDP-ALIF}}{25}{section.4.2}
@@ -54,4 +53,4 @@
 \contentsline {chapter}{\numberline {6}{Conclusion}}{29}{chapter.6}
 \contentsline {chapter}{\numberline {A}{Appendix}}{31}{appendix.A}
 \vspace {\beforebibskip }
-\contentsline {chapter}{\numberline {}{Bibliography}}{33}{section*.43}
+\contentsline {chapter}{\numberline {}{Bibliography}}{33}{section*.44}

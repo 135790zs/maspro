@@ -363,7 +363,7 @@
 	\subsection{Firing rate regularization}
 		\begin{tcolorbox}[colback=orange]
 		- What, why?
-		- Bioplausible?
+		- Bioplausible? Quote "Activity-dependent regulation of vesicular glutamate and GABA transporters: A means to scale quantal size"
 
 		\end{tcolorbox}
 		Firing rate is implemented by adding a regularization term $E_\text{reg}$ to the loss function that penalizes neurons that have a firing rate that is too low or too high:
@@ -399,19 +399,20 @@
 		\end{equation}
 
 
-	\subsection{Ridge regression}
-		\begin{tcolorbox}[colback=orange]
-		- What, why, how?
-		- Bioplausible?
+	\subsection{L2 normalization}
+		To regularize weights around 0, a small fraction (parametrized by $c_\text{L2}$) of the value of the weight is added to its gradient value at every weight update:
+		\begin{equation}
+		\Delta_\text{L2} W_{rji} = -\eta\ c_\text{L2} \cdot W_{rji},
+		\end{equation}
+		which can be added to the full weight update as an extra term:
+		\begin{equation}
+		\Delta W_{rji} = -\eta\left(c_\text{L2} \cdot W_{rji} + \sum_t\left(c_\text{reg}\left(f^\text{target} - f^{\text{av}, t}_{rj}\right) + L^t_{rj}\cdot\bar{e}^t_{rji}\right)\right).
+		\end{equation}
+		The statistical motivation for this extra term is that by softly restricting the weights, the network is less likely to overfit on the training data\todo{ref}.
 
-		\end{tcolorbox}
-
-	\subsection{Weight decay}
-		\begin{tcolorbox}[colback=orange]
-		- What, why, how?
-		- Bioplausible?
-
-		\end{tcolorbox}
+		The biological motivation is that biological synapses are regularized by a multiplicative factor to decrease the strength of individual synapses to the same proportion \citep{turrigiano2000hebb}, likely counteracting the run-away effects that the positive feedback of STDP naturally induces \citep{siddoway2014molecular}.
+		Moreover, there are natural bounds of the strength of a biological synapse, measured by the amplitude of the postsynaptic potential, because the number of neurotransmitter vesicles and release sites is physically limite \citep{del1954quantal}.
+		These natural limits are approximately \SI{0.4}{\mV} to \SI{20}{\mV} \citep{diaz2006target}.
 
 
 \section{Bidirectional network}
@@ -422,10 +423,26 @@
 	\end{tcolorbox}
 
 \section{Optimizer}\label{sec:adam}
-	\begin{tcolorbox}[colback=orange]
-	- Show how Adam works, and how it replaces SGD
 
-	\end{tcolorbox}
+	For simplicity, in this report weight updates are described using stochastic gradient descent:
+	\begin{equation}
+		\Delta W_{rji} = -\eta \sum_t L^t_{rj}\cdot\bar{e}^t_{rji}.
+	\end{equation}
+	However, the results described in Chapter \ref{ch:results} are obtained using Adam (or Adaptive Moment Estimation) \citep{kingma2014adam}.
+	This optimization method tracks running averages of the gradient and its second moment (resp. $M_{rji}$ and $V_{rji}$).
+	The Adam weight update in the context of multi-layer e-prop is given by:
+	\begin{align}
+	M_{rji}^{(i+1)} &= \beta_1 M_{rji}^{(i)} + \left(1 - \beta_1\right)G^{(i)}_{rji} \\
+	V_{rji}^{(i+1)} &= \beta_2 V_{rji}^{(i)} + \left(1 - \beta_2\right)\left(G^{(i)}_{rji}\right)^2 \\
+	\widehat{M}_{rji} &= \frac{M_{rji}^{(i+1)}}{1 - \beta_1^{i+1}} \\
+	\widehat{V}_{rji} &= \frac{V_{rji}^{(i+1)}}{1 - \beta_2^{i+1}} \\
+	\Delta W_{rji}^{(i+1)} &= -\eta \frac{\widehat{M}_{rji}}{\sqrt{\widehat{V}_{rji}} + 10^{-5}},
+	\end{align}
+	where $G^{(i)}$ is the estimated gradient $\sum_t L^t_{rj}\cdot\bar{e}^t_{rji}$ at weight update $i$, and $\beta_1=0.9$ and $\beta_2=0.999$ are the forgetting factors for the gradient and its second moment, respectively.
+	The firing rate and L2 regularization terms are omitted here for clarity.
+	Note that the forgetting factors are not indexed, but raised to the power of $i+1$, in computing the bias-corrected estimates $\widehat{M}_{rji}$ and $\widehat{V}_{rji}$.
+	Note also that minibatches are used to more accurately estimate the gradient and enable a stabler descent in the error landscape.
+	The value of $G^{(i)}_{rji}$ is computed as the mean over the minibatch.
 
 
 \section{Hyperparameter optimization}

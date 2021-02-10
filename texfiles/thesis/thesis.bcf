@@ -1954,6 +1954,11 @@
     <bcf:citekey order="27">stevens1937scale</bcf:citekey>
     <bcf:citekey order="28">bellec2020solution</bcf:citekey>
     <bcf:citekey order="29">bellec2020solution</bcf:citekey>
+    <bcf:citekey order="30">turrigiano2000hebb</bcf:citekey>
+    <bcf:citekey order="31">siddoway2014molecular</bcf:citekey>
+    <bcf:citekey order="32">del1954quantal</bcf:citekey>
+    <bcf:citekey order="33">diaz2006target</bcf:citekey>
+    <bcf:citekey order="34">kingma2014adam</bcf:citekey>
   </bcf:section>
   <!-- SORTING TEMPLATES -->
   <bcf:sortingtemplate name="nyt">

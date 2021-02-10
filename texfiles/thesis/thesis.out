@@ -26,16 +26,15 @@
 \BOOKMARK [2][-]{subsection.3.2.2}{3.2.2 Other neuron types}{section.3.2}% 26
 \BOOKMARK [1][-]{section.3.3}{3.3 Regularization}{chapter.3}% 27
 \BOOKMARK [2][-]{subsection.3.3.1}{3.3.1 Firing rate regularization}{section.3.3}% 28
-\BOOKMARK [2][-]{subsection.3.3.2}{3.3.2 Ridge regression}{section.3.3}% 29
-\BOOKMARK [2][-]{subsection.3.3.3}{3.3.3 Weight decay}{section.3.3}% 30
-\BOOKMARK [1][-]{section.3.4}{3.4 Bidirectional network}{chapter.3}% 31
-\BOOKMARK [1][-]{section.3.5}{3.5 Optimizer}{chapter.3}% 32
-\BOOKMARK [1][-]{section.3.6}{3.6 Hyperparameter optimization}{chapter.3}% 33
-\BOOKMARK [0][]{chapter.4}{4 Results}{}% 34
-\BOOKMARK [1][-]{section.4.1}{4.1 ALIF}{chapter.4}% 35
-\BOOKMARK [1][-]{section.4.2}{4.2 STDP-ALIF}{chapter.4}% 36
-\BOOKMARK [1][-]{section.4.3}{4.3 Izhikevich}{chapter.4}% 37
-\BOOKMARK [0][]{chapter.5}{5 Discussion}{}% 38
-\BOOKMARK [0][]{chapter.6}{6 Conclusion}{}% 39
-\BOOKMARK [0][]{appendix.A}{A Appendix}{}% 40
-\BOOKMARK [0][]{section*.43}{ Bibliography}{}% 41
+\BOOKMARK [2][-]{subsection.3.3.2}{3.3.2 L2 normalization}{section.3.3}% 29
+\BOOKMARK [1][-]{section.3.4}{3.4 Bidirectional network}{chapter.3}% 30
+\BOOKMARK [1][-]{section.3.5}{3.5 Optimizer}{chapter.3}% 31
+\BOOKMARK [1][-]{section.3.6}{3.6 Hyperparameter optimization}{chapter.3}% 32
+\BOOKMARK [0][]{chapter.4}{4 Results}{}% 33
+\BOOKMARK [1][-]{section.4.1}{4.1 ALIF}{chapter.4}% 34
+\BOOKMARK [1][-]{section.4.2}{4.2 STDP-ALIF}{chapter.4}% 35
+\BOOKMARK [1][-]{section.4.3}{4.3 Izhikevich}{chapter.4}% 36
+\BOOKMARK [0][]{chapter.5}{5 Discussion}{}% 37
+\BOOKMARK [0][]{chapter.6}{6 Conclusion}{}% 38
+\BOOKMARK [0][]{appendix.A}{A Appendix}{}% 39
+\BOOKMARK [0][]{section*.44}{ Bibliography}{}% 40

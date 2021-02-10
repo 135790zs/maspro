@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017/Debian) (preloaded format=pdflatex 2020.11.2)  9 FEB 2021 15:59
+This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017/Debian) (preloaded format=pdflatex 2020.11.2)  10 FEB 2021 14:35
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -2519,7 +2519,7 @@ See the caption package documentation for explanation.
 
 LaTeX Warning: Reference `fig:signal' on page 14 undefined on input line 82.
 
-<gfx/signal.pdf, id=469, 462.52798pt x 346.89601pt>
+<gfx/signal.pdf, id=443, 462.52798pt x 346.89601pt>
 File: gfx/signal.pdf Graphic file (type pdf)
 <use gfx/signal.pdf>
 Package pdftex.def Info: gfx/signal.pdf  used on input line 85.
@@ -2533,7 +2533,7 @@ See the caption package documentation for explanation.
 LaTeX Warning: Reference `fig:signalemph' on page 15 undefined on input line 98
 .
 
-<gfx/signalemph.pdf, id=483, 462.52798pt x 346.89601pt>
+<gfx/signalemph.pdf, id=458, 462.52798pt x 346.89601pt>
 File: gfx/signalemph.pdf Graphic file (type pdf)
 <use gfx/signalemph.pdf>
 Package pdftex.def Info: gfx/signalemph.pdf  used on input line 101.
@@ -2550,7 +2550,7 @@ See the caption package documentation for explanation.
 
 LaTeX Warning: Reference `fig:hamming' on page 16 undefined on input line 126.
 
-<gfx/hamming.pdf, id=523, 361.35pt x 361.35pt>
+<gfx/hamming.pdf, id=498, 361.35pt x 361.35pt>
 File: gfx/hamming.pdf Graphic file (type pdf)
 <use gfx/hamming.pdf>
 Package pdftex.def Info: gfx/hamming.pdf  used on input line 129.
@@ -2563,7 +2563,7 @@ See the caption package documentation for explanation.
 LaTeX Warning: Reference `fig:magframes' on page 16 undefined on input line 143
 .
 
-<gfx/magframes.pdf, id=526, 462.52798pt x 346.89601pt>
+<gfx/magframes.pdf, id=501, 462.52798pt x 346.89601pt>
 File: gfx/magframes.pdf Graphic file (type pdf)
 <use gfx/magframes.pdf>
 Package pdftex.def Info: gfx/magframes.pdf  used on input line 146.
@@ -2576,7 +2576,7 @@ See the caption package documentation for explanation.
 LaTeX Warning: Reference `fig:powframes' on page 16 undefined on input line 156
 .
 
-<gfx/powframes.pdf, id=528, 462.52798pt x 346.89601pt>
+<gfx/powframes.pdf, id=503, 462.52798pt x 346.89601pt>
 File: gfx/powframes.pdf Graphic file (type pdf)
 <use gfx/powframes.pdf>
 Package pdftex.def Info: gfx/powframes.pdf  used on input line 160.
@@ -2594,7 +2594,7 @@ See the caption package documentation for explanation.
 LaTeX Warning: Reference `fig:filterbank' on page 18 undefined on input line 20
 8.
 
-<gfx/fbanks.pdf, id=627, 462.52798pt x 346.89601pt>
+<gfx/fbanks.pdf, id=602, 462.52798pt x 346.89601pt>
 File: gfx/fbanks.pdf Graphic file (type pdf)
 <use gfx/fbanks.pdf>
 Package pdftex.def Info: gfx/fbanks.pdf  used on input line 211.
@@ -2607,7 +2607,7 @@ See the caption package documentation for explanation.
 LaTeX Warning: Reference `fig:spectrogram' on page 18 undefined on input line 2
 16.
 
-<gfx/spectrogram.pdf, id=629, 462.52798pt x 346.89601pt>
+<gfx/spectrogram.pdf, id=604, 462.52798pt x 346.89601pt>
 File: gfx/spectrogram.pdf Graphic file (type pdf)
 <use gfx/spectrogram.pdf>
 Package pdftex.def Info: gfx/spectrogram.pdf  used on input line 220.
@@ -2624,7 +2624,7 @@ See the caption package documentation for explanation.
 
 LaTeX Warning: Reference `fig:mfccs' on page 19 undefined on input line 237.
 
-<gfx/mfcc.pdf, id=666, 462.52798pt x 346.89601pt>
+<gfx/mfcc.pdf, id=641, 462.52798pt x 346.89601pt>
 File: gfx/mfcc.pdf Graphic file (type pdf)
 <use gfx/mfcc.pdf>
 Package pdftex.def Info: gfx/mfcc.pdf  used on input line 241.
@@ -2691,17 +2691,17 @@ With luck, this will get me unwedged. But if you
 really didn't forget anything, try typing `2' now; then
 my insertion and my current dilemma will both disappear.
 
-) [23]
+[23]) [24]
 \openout2 = `Chapters/Chapter04.aux'.
 
  (./Chapters/Chapter04.tex
 Chapter 4.
-[24
+) [25
 
 
 
 
-]) [25]
+]
 \openout2 = `Chapters/Chapter05.aux'.
 
  (./Chapters/Chapter05.tex
@@ -2766,15 +2766,9 @@ Package atveryend Info: Empty hook `AfterLastShipout' on input line 78.
 (./FrontBackmatter/Bibliography.aux))
 Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 78.
 Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 78.
+Package rerunfilecheck Info: File `thesis.out' has not changed.
+(rerunfilecheck)             Checksum: C51DE2B17C16F09259A1FBD75A63E1BB;2587.
 
-
-Package rerunfilecheck Warning: File `thesis.out' has changed.
-(rerunfilecheck)                Rerun to get outlines right
-(rerunfilecheck)                or use package `bookmark'.
-
-Package rerunfilecheck Info: Checksums for `thesis.out':
-(rerunfilecheck)             Before: ECD2F3BCD2D598002F1EC41BBFB9CE6C;2948
-(rerunfilecheck)             After:  D258834CCA9A923332D4AB062AB95781;2659.
 
 LaTeX Warning: There were undefined references.
 
@@ -2786,52 +2780,40 @@ Package logreq Info: Writing requests to 'thesis.run.xml'.
 
  ) 
 Here is how much of TeX's memory you used:
- 47666 strings out of 492982
- 950658 string characters out of 6134896
- 1508231 words of memory out of 5000000
- 50015 multiletter control sequences out of 15000+600000
- 569083 words of font info for 217 fonts, out of 8000000 for 9000
+ 47697 strings out of 492982
+ 951410 string characters out of 6134896
+ 1508688 words of memory out of 5000000
+ 50034 multiletter control sequences out of 15000+600000
+ 569255 words of font info for 219 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 73i,23n,91p,10509b,2140s stack positions out of 5000i,500n,10000p,200000b,80000s
-pdfTeX warning (dest): name{section.3.8} has been referenced but does not exi
-st, replaced by a fixed one
-
-pdfTeX warning (dest): name{section.3.7} has been referenced but does not exist
-, replaced by a fixed one
-
-pdfTeX warning (dest): name{subsection.3.3.5} has been referenced but does not 
-exist, replaced by a fixed one
-
-pdfTeX warning (dest): name{subsection.3.3.4} has been referenced but does not 
-exist, replaced by a fixed one
-
-{/usr/share/texmf/fonts/enc/dvips/cm-super/cm-super-t1.enc}</usr/share/texlive/
-texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb></usr/share/texlive/texmf-
-dist/fonts/type1/public/amsfonts/cm/cmbx8.pfb></usr/share/texlive/texmf-dist/fo
-nts/type1/public/amsfonts/cm/cmex10.pfb></usr/share/texlive/texmf-dist/fonts/ty
-pe1/public/amsfonts/cm/cmmi10.pfb></usr/share/texlive/texmf-dist/fonts/type1/pu
-blic/amsfonts/cm/cmmi6.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/am
-sfonts/cm/cmmi8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/
-cm/cmr10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr6
-.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></u
-sr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/sha
-re/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy6.pfb></usr/share/texl
-ive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/share/texlive/tex
-mf-dist/fonts/type1/public/amsfonts/euler/eurb10.pfb></usr/share/texlive/texmf-
-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb></usr/share/texmf/fonts/typ
-e1/public/cm-super/sfbx1095.pfb></usr/share/texmf/fonts/type1/public/cm-super/s
-fcc1000.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfcc1095.pfb></usr/sh
-are/texmf/fonts/type1/public/cm-super/sfcc1200.pfb></usr/share/texmf/fonts/type
-1/public/cm-super/sfrm0600.pfb></usr/share/texmf/fonts/type1/public/cm-super/sf
-rm0800.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfrm1000.pfb></usr/sha
-re/texmf/fonts/type1/public/cm-super/sfrm1095.pfb></usr/share/texmf/fonts/type1
-/public/cm-super/sfrm1200.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfs
-s0800.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfti1095.pfb></usr/shar
-e/texmf/fonts/type1/public/cm-super/sftt1095.pfb>
-Output written on thesis.pdf (38 pages, 732062 bytes).
+ 73i,23n,91p,10509b,2142s stack positions out of 5000i,500n,10000p,200000b,80000s
+{/usr/share/texmf/fonts/enc/dvips/cm-super/cm-super-t1.enc}</usr/share/texliv
+e/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb></usr/share/texlive/texm
+f-dist/fonts/type1/public/amsfonts/cm/cmbx8.pfb></usr/share/texlive/texmf-dist/
+fonts/type1/public/amsfonts/cm/cmex10.pfb></usr/share/texlive/texmf-dist/fonts/
+type1/public/amsfonts/cm/cmmi10.pfb></usr/share/texlive/texmf-dist/fonts/type1/
+public/amsfonts/cm/cmmi6.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/
+amsfonts/cm/cmmi8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfont
+s/cm/cmr10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cm
+r6.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb><
+/usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/s
+hare/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy6.pfb></usr/share/te
+xlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/share/texlive/t
+exmf-dist/fonts/type1/public/amsfonts/euler/eurb10.pfb></usr/share/texlive/texm
+f-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb></usr/share/texmf/fonts/t
+ype1/public/cm-super/sfbx1095.pfb></usr/share/texmf/fonts/type1/public/cm-super
+/sfcc1000.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfcc1095.pfb></usr/
+share/texmf/fonts/type1/public/cm-super/sfcc1200.pfb></usr/share/texmf/fonts/ty
+pe1/public/cm-super/sfrm0600.pfb></usr/share/texmf/fonts/type1/public/cm-super/
+sfrm0800.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfrm1000.pfb></usr/s
+hare/texmf/fonts/type1/public/cm-super/sfrm1095.pfb></usr/share/texmf/fonts/typ
+e1/public/cm-super/sfrm1200.pfb></usr/share/texmf/fonts/type1/public/cm-super/s
+fss0800.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfti1095.pfb></usr/sh
+are/texmf/fonts/type1/public/cm-super/sftt1095.pfb>
+Output written on thesis.pdf (38 pages, 739318 bytes).
 PDF statistics:
- 920 PDF objects out of 1000 (max. 8388607)
- 745 compressed objects within 8 object streams
- 220 named destinations out of 1000 (max. 500000)
- 63389 words of extra memory for PDF output out of 74296 (max. 10000000)
+ 915 PDF objects out of 1000 (max. 8388607)
+ 740 compressed objects within 8 object streams
+ 228 named destinations out of 1000 (max. 500000)
+ 63349 words of extra memory for PDF output out of 74296 (max. 10000000)
 
