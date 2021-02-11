@@ -323,7 +323,7 @@
         \text{th},
         \end{equation}
         where
-        \begin{equation}
+        \begin{equation}\label{eq:inpVml}
         I = \begin{cases}
         	x^{t+1}_i       &\mbox{if } r = 1 \\
             z^{t+1}_{r-1,i} &\mbox{otherwise.}
@@ -333,36 +333,140 @@
 
 	\subsection{Other neuron types}
 		\begin{tcolorbox}[colback=orange]
-
-		- Shoutout to Traub
 		- Argue in favor of different models (refer to brain, simplicity vs. plausibility trade-off). E.g.: built-in refractory
 
+		- Explain that ALIF displays no STDP, which is believed to be crucial for biological learning and forming associations and memory.
+
 		\end{tcolorbox}
+		In this section, the multi-layer STDP-ALIF and Izhikevich neuron models are presented.
+		The advantage of these models over the standard ALIF model is that they naturally elicit STDP.
+		Additionally, the Izhikevich model has an implicit refractory mechanism that is built into its system of equations, as opposed to the (STDP-)ALIF model that requires an explicit timer variable in a neuron's hidden state.
+
+		The Izhikevich neuron model was first presented by \cite{traub2020learning} only in a single-synapse demo demonstrating its STDP properties.
+		In this report, the performance of the e-prop Izhikevich model is experimentally validated in a learning task for the first time.
+		\cite{traub2020learning} also described the STDP-LIF, which is a non-adaptive modification of the standard LIF neuron.
+		Here, its adaptive counterpart, the STDP-ALIF model, is derived and validated as well.
+		This allows for a direct comparison between the ALIF and STDP-ALIF models, such that the effects of STDP can be more precisely analyzed.
+
 		\subsubsection{STDP-LIF}
+
 			\begin{tcolorbox}[colback=orange]
+			- STDP-ALIF (graphs)
 
-			- STDP-LIF (intuition, maths, graphs)
 			- Also mention and motivate v-fix and psi-fix.
-			- Mention Bellec's reset too.
 
+			- Mention Bellec's reset too.
 			\end{tcolorbox}
+
+			The key change between the ALIF and STDP-ALIF neuron is that the latter is reset to zero at a spike event, and when its refractory period of $\delta t_\text{ref}$ time steps ends.
+			Recall that in contrast, the standard ALIF neuron uses a soft reset by including a term $-z^t_{rj}v_\text{thr}$ in its activation update equation (Equation \ref{eq:ml_alifV}).
+
+			The activation update of the STDP-ALIF neuron is therefore:
+			\begin{equation}\label{eq:ml_stdpalifV}
+	        v^{t+1}_{rj} = \alpha v_{rj}^t + \sum_{i\neq j}W^\text{rec}_{rji}z_i^t + \sum_i W^\text{in}_{rji}I -z^t_{rj}\alpha v^t_{rj} - z_{rj}^{t-\delta t_\text{ref}}\alpha v^t_{rj},
+	        \end{equation}
+	        where, again, $I$ is the network input if $r=1$, otherwise it is the observable state of the preceding layer (see Equation \ref{eq:inpVml}).
+
+	        The hidden state derivative changes accordingly:
+	        \begin{align}
+	        \frac{\partial v_{rj}^{t+1}}{\partial v^t_{rj}} &= \alpha - z^t_{rj}\alpha - \alpha z_{rj}^{t-\delta t_\text{ref}}\\
+	        &= \alpha\left(1 - z^t_{rj} - z_{rj}^{t-\delta t_\text{ref}}\right).
+	        \end{align}
+	        Note that the absence of $a^t_{rj}$ in the new activation update entails that the other entries of the hidden state Jacobian are equal to those of the ALIF model, \ie, $\frac{\partial v^{t+1}_{rj}}{\partial a^t_{rj}}=0$, $\frac{\partial a^{t+1}_{rj}}{\partial v^t_{rj}}=\psi^t_{rj}$, and $\frac{\partial a^{t+1}_{rj}}{\partial a^t_{rj}} = \rho - \psi^t_{rj}\beta$.
+
+
+	        Using these values, we compute the new eligibility trace:
+	        \begin{align}
+	        \mathbf{\epsilon}^{t+1}_{rji} &= \frac{\partial\mathbf{h}^{t+1}_{rj}}{\partial\mathbf{h}^t_{rj}}\cdot\mathbf{\epsilon}^t_{rji} + \frac{\partial\mathbf{h}^{t+1}_{rj}}{\partial W_{rji}}\\
+	        &= \begin{pmatrix}[1.5]
+	        \alpha\left(1 - z^t_{rj} - z_{rj}^{t-\delta t_\text{ref}}\right)\epsilon_{rji, v}^t + z_{ri}^{t-1}\\
+	        \psi^t_{rj}\epsilon^t_{rji, v} + \left(\rho - \psi^t_{rj}\beta\right)\epsilon^t_{rji,a}
+	        \end{pmatrix}\label{eq:ml_stdpalif_evector}
+	        \end{align}
+	        Note that the observable state of the afferent neuron $z_{ri}^{t-1}$ in Equation \ref{eq:ml_stdpalif_evector} changes to $z_{r-1, i}^t$ if $\epsilon^{t+1}_{rji}$ corresponds to a weight between layer $r-1$ and $r$ and $r > 1$.
+	        If the weight is instead between the network input and the first layer, then it changes to $x^t_i$.
+	        Note also that this corrects an error in the STDP-LIF model described in \cite{traub2020learning}, where the observable state at the current time step $t$ is accessed instead of $t-1$, thereby diverging from the e-prop model in Equation \ref{eq:ml_model}.
+
+	        The eligibility trace remains \todo{is this true? Critically review how Traub handles pseudo-derivatives in z, and check if dzdh remains the same}
+	        \begin{align}
+	        e^{t}_{rji} &= \frac{\partial z^{t}_{rj}}{\partial\mathbf{h}^{t}_{rj}} \cdot \mathbf{\epsilon}^{t}_{rji}\\
+	        &= \psi^t_{rj}\left(\epsilon^t_{rji, v} - \beta\epsilon^t_{rji, a}\right).
+	        \end{align}
+
+	        By resetting the neuron activation at spike time and after the refractory time, STDP is introduced in the system by clamping the pseudo-derivative to a negative value, instead of 0, during the refractory time:
+
+	        \begin{equation}
+	        \psi^t_{rj} = \begin{cases}
+	        -\gamma&\mbox{if } t - t_{z_{rj}} < \delta t_\text{ref}\\
+	        \gamma\max\left(0, 1 - \left|\frac{v^t_{rj}-v_\text{th}}{v_\text{th}}\right|\right)&\mbox{otherwise}
+	        \end{cases}
+	        \end{equation}
+
 		\subsubsection{Izhikevich neuron}
 			\begin{tcolorbox}[colback=orange]
-
-			- STDP-LIF (intuition, maths, graphs)
-
+			- Izhikevich (graphs)
 			\end{tcolorbox}
+
+			The standard system of equations of the Izhikevich neuron is described by
+			\begin{align}
+			v' &= 0.04v^2 + 5v + 140 - u + I\\
+			a' &= 0.004v - 0.02a,
+			\end{align}
+			where $v'$ and $a'$ are the values of the activation value $v$ and recovery variable $a$ at the next time point, and $I$ is the current input to the neuron.
+			Following \cite{traub2020learning}, the activation reset and refractory period are built into this system of equations by replacing $v$ and $a$ by respectively:
+			\begin{align}
+			\tilde{v}^t_{rj} &= v^t_{rj} - \left(v^t_{rj} + 65\right)z^t_{rj}\\
+			\tilde{a}^t_{rj} &= a^t_{rj} + 2z^t_{rj},
+			\end{align}
+			such that when a spike event occurs (\ie, $z^t_{rj} = 1$), the activation value is reset to its baseline value of $-65$, and the recovery variable increases by 2.
+			We describe this ``self-resetting'' Izhikevich neuron in the context of multi-layer e-prop as follows:
+			\begin{align}
+			v^{t+1}_{rj} &= \tilde{v}^t_{rj} + 0.04\left(\tilde{v}^t_{rj}\right)^2 + 5\tilde{v}^t_{rj} + 140 - \tilde{u}^t_{rj} + I^t_{rj}\\
+			u^{t+1}_{rj} &= \tilde{u}^t_{rj} + 0.004\tilde{v}^t_{rj}-0.02\tilde{u}^t_{rj}.
+			\end{align}
+			The partial derivatives of the hidden state $\mathbf{h}^t_{rj}$ can then be computed:
+			\begin{align}
+			\frac{\partial v^{t+1}_{rj}}{\partial v^t_{rj}} &= \left(1-z^t_{rj}\right)\left(6+0.08v^t_{rj}\right)\\
+			\frac{\partial a^{t+1}_{rj}}{\partial v^t_{rj}} &= -1\\
+			\frac{\partial v^{t+1}_{rj}}{\partial a^t_{rj}} &= 0.004\left(1-z^t_{rj}\right)\\
+			\frac{\partial a^{t+1}_{rj}}{\partial a^t_{rj}} &= 0.98.
+			\end{align}
+			The eligibility vector is then computed as
+			Using these values, we compute the new eligibility trace:
+	        \begin{align}
+	        \mathbf{\epsilon}^{t+1}_{rji} &= \frac{\partial\mathbf{h}^{t+1}_{rj}}{\partial\mathbf{h}^t_{rj}}\cdot\mathbf{\epsilon}^t_{rji} + \frac{\partial\mathbf{h}^{t+1}_{rj}}{\partial W_{rji}}\\
+	        &= \begin{pmatrix}[1.5]
+	        \left(1-z^t_{rj}\right)\left(6+0.08v^t_{rj}\right)\epsilon^t_{rji, v} -\epsilon^t_{rji, a} + z_{ri}^{t-1}\\
+	        0.004\left(1-z^t_{rj}\right)\epsilon^t_{rji, v} + 0.98\epsilon^t_{rji, a}
+	        \end{pmatrix}\label{eq:ml_izhikevich_evector}
+	        \end{align}
+	        As in \cite{traub2020learning}, the pseudo-derivative is defined as
+	        \begin{equation}
+	        \psi^t_{rj} = \gamma\ \exp\left(\frac{\min\left(v^t_{rj}, 30\right) - 30}{30}\right),
+	        \end{equation}
+	        such that
+	        \begin{equation}
+	        \begin{pmatrix}[1.5]\frac{\partial z^t_{rj}}{\partial v^t_{rj}}\\\frac{\partial z^t_{rj}}{\partial u^t_{rj}}\end{pmatrix}
+	        = \begin{pmatrix}[1.5]\psi^t_{rj}\\0\end{pmatrix}
+	        \end{equation}
+	        and therefore only $\epsilon^t_{rji, v}$ is used in computing the eligibility trace:
+	        \begin{align}
+	        e^t_{rji} &= \left(\psi^t_{rj}\ 0\right)\begin{pmatrix}[1.5]\epsilon^t_{rji, v}\\\epsilon^t_{rji, a}\end{pmatrix} \\
+	        &= \psi^t_{rj}\epsilon^t_{rji, v}.
+	        \end{align}
+
+
 
 \section{Regularization}
 
 	\begin{tcolorbox}[colback=orange]
 	preamble: explain why this is used (bioplausibility (natural constraints) and generalizability)
-
 	\end{tcolorbox}
 
 	\subsection{Firing rate regularization}
 		\begin{tcolorbox}[colback=orange]
 		- What, why?
+
 		- Bioplausible? Quote "Activity-dependent regulation of vesicular glutamate and GABA transporters: A means to scale quantal size"
 
 		\end{tcolorbox}
@@ -395,7 +499,7 @@
 		\end{equation}
 		Note that the regularization gradients can be combined and accumulated over time on the same synaptic variable as the normal gradients, facilitating practical implementation of the learning procedure in both software emulations and neuromorphic embeddings:
 		\begin{equation}
-		\Delta W_{rji} = -\eta\ \sum_t\left(c_\text{reg}\left(f^\text{target} - f^{\text{av}, t}_{rj}\right) + L^t_{rj}\cdot\bar{e}^t_{rji}).
+		\Delta W_{rji} = -\eta\ \sum_t\left(c_\text{reg}\left(f^\text{target} - f^{\text{av}, t}_{rj}\right) + L^t_{rj}\cdot\bar{e}^t_{rji}\right).
 		\end{equation}
 
 

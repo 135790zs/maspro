@@ -1100,6 +1100,54 @@
       \field{pages}{185\bibrangedash 190}
       \range{pages}{6}
     \endentry
+    \entry{traub2020learning}{inproceedings}{}
+      \name{author}{4}{}{%
+        {{uniquename=0,uniquepart=base,hash=270dea4824a43ab76ea3e96e383626d3}{%
+           family={Traub},
+           familyi={T\bibinitperiod},
+           given={Manuel},
+           giveni={M\bibinitperiod},
+           givenun=0}}%
+        {{uniquename=0,uniquepart=base,hash=2973c9afbfab03ae1675e52825dfd338}{%
+           family={Butz},
+           familyi={B\bibinitperiod},
+           given={Martin\bibnamedelima V},
+           giveni={M\bibinitperiod\bibinitdelim V\bibinitperiod},
+           givenun=0}}%
+        {{uniquename=0,uniquepart=base,hash=d4190559f3d841399d1bf37c565a5a4b}{%
+           family={Baayen},
+           familyi={B\bibinitperiod},
+           given={R\bibnamedelima Harald},
+           giveni={R\bibinitperiod\bibinitdelim H\bibinitperiod},
+           givenun=0}}%
+        {{uniquename=0,uniquepart=base,hash=7b08a30e13abc0baa7cea317e33dd6f9}{%
+           family={Otte},
+           familyi={O\bibinitperiod},
+           given={Sebastian},
+           giveni={S\bibinitperiod},
+           givenun=0}}%
+      }
+      \list{organization}{1}{%
+        {Springer}%
+      }
+      \strng{namehash}{38ee93b2957032f4e79e54d6fafb481c}
+      \strng{fullhash}{60fe63eea107f908dbe5d71e2c8f9ea4}
+      \strng{bibnamehash}{38ee93b2957032f4e79e54d6fafb481c}
+      \strng{authorbibnamehash}{38ee93b2957032f4e79e54d6fafb481c}
+      \strng{authornamehash}{38ee93b2957032f4e79e54d6fafb481c}
+      \strng{authorfullhash}{60fe63eea107f908dbe5d71e2c8f9ea4}
+      \field{sortinit}{T}
+      \field{sortinithash}{6f7aff9db9dcfeb7f95fd5bbd2f78df9}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{year}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{booktitle}{International Conference on Artificial Neural Networks}
+      \field{title}{Learning Precise Spike Timings with Eligibility Traces}
+      \field{year}{2020}
+      \field{pages}{659\bibrangedash 669}
+      \range{pages}{11}
+    \endentry
     \entry{turrigiano2000hebb}{article}{}
       \name{author}{2}{}{%
         {{uniquename=0,uniquepart=base,hash=e8329e901984e1878b2332bae85dbcdc}{%

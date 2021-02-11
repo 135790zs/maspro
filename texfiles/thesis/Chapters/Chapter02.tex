@@ -203,7 +203,7 @@
         The hidden state derivative $\frac{\mathbf{h}^{t+1}_j}{\mathbf{h}^t_j}$ must be computed to derive the eligibility vector.
         This hidden state derivative is expressed by a $2\times2$ matrix of partial hidden state derivatives:
         \begin{equation}
-        \frac{\mathbf{h}^{t+1}_j}{\mathbf{h}^t_j} = \begin{pmatrix}
+        \frac{\mathbf{h}^{t+1}_j}{\mathbf{h}^t_j} = \begin{pmatrix}[1.5]
         \frac{\partial v^{t+1}_j}{\partial v^t_j} & \frac{\partial v^{t+1}_j}{\partial a^t_j}\\
         \frac{\partial a^{t+1}_j}{\partial v^t_j} & \frac{\partial a^{t+1}_j}{\partial a^t_j}
         \end{pmatrix}
@@ -260,7 +260,7 @@
         0
         \end{pmatrix}\label{eq:evector_b}\\
         &=
-        \begin{pmatrix}
+        \begin{pmatrix}[1.5]
         \alpha \cdot\epsilon_{ji, v}^t + z_i^{t-1}\\
         \psi^t_j\epsilon^t_{ji, v} + \left(\rho-\psi^t_j\beta\right)\epsilon^t_{ji, a}
         \end{pmatrix}

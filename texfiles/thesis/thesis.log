@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017/Debian) (preloaded format=pdflatex 2020.11.2)  10 FEB 2021 14:35
+This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017/Debian) (preloaded format=pdflatex 2020.11.2)  11 FEB 2021 11:44
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -2478,7 +2478,7 @@ Overfull \hbox (29.30035pt too wide) detected at line 141
 
 LaTeX Warning: Reference `sec:gradient' on page 6 undefined on input line 160.
 
-[6] [7] [8] [9]) [10] [11]
+[6] [7] [8] [9] [10]) [11]
 \openout2 = `Chapters/Chapter03.aux'.
 
  (./Chapters/Chapter03.tex
@@ -2680,48 +2680,37 @@ ifier (name{equation.3.2.10}) has been already used, duplicate ignored
                                                   \fi \fi 
 l.305         S
                imilarly, the observable state can be modeled by] [21] [22]
-! Missing \right. inserted.
-<inserted text> 
-                \right .
-l.399 		\end{equation}
-                      
-I've inserted something that you may have forgotten.
-(See the <inserted text> above.)
-With luck, this will get me unwedged. But if you
-really didn't forget anything, try typing `2' now; then
-my insertion and my current dilemma will both disappear.
-
-[23]) [24]
+[23] [24] [25] [26]) [27]
 \openout2 = `Chapters/Chapter04.aux'.
 
  (./Chapters/Chapter04.tex
 Chapter 4.
-) [25
-
-
-
-
-]
-\openout2 = `Chapters/Chapter05.aux'.
-
- (./Chapters/Chapter05.tex
-Chapter 5.
-[26
-
-
-
-
-]) [27]
-\openout2 = `Chapters/Chapter06.aux'.
-
- (./Chapters/Chapter06.tex
-Chapter 6.
 [28
 
 
 
 
-]) [29] [30
+]) [29]
+\openout2 = `Chapters/Chapter05.aux'.
+
+ (./Chapters/Chapter05.tex
+Chapter 5.
+[30
+
+
+
+
+]) [31]
+\openout2 = `Chapters/Chapter06.aux'.
+
+ (./Chapters/Chapter06.tex
+Chapter 6.
+[32
+
+
+
+
+]) [33] [34
 
 
 
@@ -2735,14 +2724,14 @@ Underfull \hbox (badness 10000) in alignment at lines 39--39
 [][][] 
  []
 
-) [31
+) [35
 
 
 
-] [32]
+] [36]
 \openout2 = `FrontBackmatter/Bibliography.aux'.
 
- (./FrontBackmatter/Bibliography.tex [33
+ (./FrontBackmatter/Bibliography.tex [37
 
 
 
@@ -2755,19 +2744,24 @@ Overfull \hbox (5.85368pt too wide) in paragraph at lines 12--12
 0.95 (-20) arXiv preprint arXiv:2004.08900\T1/cmr/m/n/10.95 (-20) . 
  []
 
-) [34]
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 78.
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 78.
+) [38]
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 85.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 85.
  (./thesis.aux (./FrontBackmatter/Titlepage.aux)
 (./FrontBackmatter/Titleback.aux) (./FrontBackmatter/Contents.aux)
 (./Chapters/Chapter01.aux) (./Chapters/Chapter02.aux) (./Chapters/Chapter03.aux
 ) (./Chapters/Chapter04.aux) (./Chapters/Chapter05.aux)
 (./Chapters/Chapter06.aux) (./Chapters/Chapter0A.aux)
-(./FrontBackmatter/Bibliography.aux))
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 78.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 78.
+(./FrontBackmatter/Bibliography.aux)
+
+Package mparhack Warning: Marginpars may have changed.
+(mparhack)                Rerun to get them right.
+
+)
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 85.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 85.
 Package rerunfilecheck Info: File `thesis.out' has not changed.
-(rerunfilecheck)             Checksum: C51DE2B17C16F09259A1FBD75A63E1BB;2587.
+(rerunfilecheck)             Checksum: 25779B3439943BA81B430158AEA446E9;2587.
 
 
 LaTeX Warning: There were undefined references.
@@ -2775,18 +2769,22 @@ LaTeX Warning: There were undefined references.
 
 LaTeX Warning: There were multiply-defined labels.
 
+
+Package biblatex Warning: Please rerun LaTeX.
+(biblatex)                Page breaks have changed.
+
 Package logreq Info: Writing requests to 'thesis.run.xml'.
 \openout1 = `thesis.run.xml'.
 
  ) 
 Here is how much of TeX's memory you used:
- 47697 strings out of 492982
- 951410 string characters out of 6134896
- 1508688 words of memory out of 5000000
- 50034 multiletter control sequences out of 15000+600000
- 569255 words of font info for 219 fonts, out of 8000000 for 9000
+ 47773 strings out of 492982
+ 952658 string characters out of 6134896
+ 1511178 words of memory out of 5000000
+ 50074 multiletter control sequences out of 15000+600000
+ 569529 words of font info for 223 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 73i,23n,91p,10509b,2142s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 73i,23n,91p,10509b,2191s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/share/texmf/fonts/enc/dvips/cm-super/cm-super-t1.enc}</usr/share/texliv
 e/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb></usr/share/texlive/texm
 f-dist/fonts/type1/public/amsfonts/cm/cmbx8.pfb></usr/share/texlive/texmf-dist/
@@ -2810,10 +2808,10 @@ hare/texmf/fonts/type1/public/cm-super/sfrm1095.pfb></usr/share/texmf/fonts/typ
 e1/public/cm-super/sfrm1200.pfb></usr/share/texmf/fonts/type1/public/cm-super/s
 fss0800.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfti1095.pfb></usr/sh
 are/texmf/fonts/type1/public/cm-super/sftt1095.pfb>
-Output written on thesis.pdf (38 pages, 739318 bytes).
+Output written on thesis.pdf (42 pages, 754086 bytes).
 PDF statistics:
- 915 PDF objects out of 1000 (max. 8388607)
- 740 compressed objects within 8 object streams
- 228 named destinations out of 1000 (max. 500000)
+ 970 PDF objects out of 1000 (max. 8388607)
+ 791 compressed objects within 8 object streams
+ 256 named destinations out of 1000 (max. 500000)
  63349 words of extra memory for PDF output out of 74296 (max. 10000000)
 
