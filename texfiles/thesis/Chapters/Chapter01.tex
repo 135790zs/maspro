@@ -15,8 +15,8 @@ CNNs were also inspired by neuroscience; the connectivity pattern between units 
 However, DL-based methods are starting to show diminishing returns; training some state-of-the-art models can require so much data and computing power that only a small number of organizations has the resources to train and deploy them.
 The computational processes of self-driving cars, for example, consume on the order of a thousand watts.
 IFLYTEK-CV, which is one of the best-performing systems in the LFW challenge for facial recognition, was trained using a dataset of 3.8 million face images of 85 thousant individuals.\todo{from vigneron2020, but cite original}
-ResNet\todo{cite} has been trained for 3 weeks on a 8-GPU server \todo{specify} consuming about 1 GWh.\todo{from vigneron2020, but cite original}
-For a more extreme example, training the 11-billion parameter version of Google's T5 model \citep{raffel2019exploring} is estimated to cost more than \$1.3 million per run\citep{sharir2020cost}.
+ResNet \todo{cite} has been trained for 3 weeks on a 8-GPU server \todo{specify} consuming about 1 GWh. \todo{from vigneron2020, but cite original}
+As a more extreme example, training the 11-billion parameter version of Google's T5 model \citep{raffel2019exploring} is estimated to cost more than \$1.3 million per run \citep{sharir2020cost}.
 This contrasts strongly with the energy consumption of the human brain, which is made up of around 86 billion neurons \citep{azevedo2009equal} and 100--500 trillion synapses \citep{drachman2005we}, consumes approximately \SI{20}{\watt} \citep{sokoloff1960metabolism,drubach2000brain}, and does not require as much data to learn patterns.
 This difference in power consumption is crucial for computations in mobile low-power or small-scale devices.
 
@@ -24,33 +24,52 @@ One reason why the human brain is more energy-efficient is that its computationa
 Connections in DL models, on the other hand, are represented by multiplications between the often large matrices of the floating-point weight values of these connections and the activation values of the efferent units \citep{lecun2015deep}.
 Backpropagation, which has become the de-facto standard for training DL models, is a biologically implausible learning algorithm that trains models by propagating the error back into the network, further raising computational costs.
 
-Spiking neural networks (SNNs) are another step towards biological plausibility of connectionist models.
-SNNs use neurons that do not relay continous activation values at every propagation cycle, but spike once when they reach a threshold value.
-The concept of SNNs dates back to the 1980s \citep{hopfield1982neural}, but since spike-based activation is differentiable, gradient descent is not as effective as in ANNs to minimize the loss.
+Spiking neural networks (SNNs) are another step towards biological plausibility of connectionist models, and their concept dates back to the 1980s \citep{hopfield1982neural}.
+SNNs use neurons that do not relay continuous activation values at every propagation cycle, but spike once when they reach a threshold value.
+However, spike-based activation is not differentiable, gradient descent is not as effective as in ANNs to minimize the loss.
 Consequentially, the lack of suitable training methods has limited the popularity of SNNs.
 
-Neuromorphic computing is an emerging technology that, like the human brain, peforms computation in a physical subtrate.
+Neuromorphic computing is an emerging technology that, like the human brain, performs computation in an analog substrate.
 This technology has the potential to offer more energy-efficient computation than the von Neumann architecture that is standard in training DL models.
-Due to the centralized nature of von Neumann computers, simulated SNNs do not enjoy the energy efficiency as networks of biological neurons.
-In theory, however, the massively parallel and decentralized neuromorphic computers can efficiently run SNNs.
-This requires a learning algorithm that is both spatially and temporally local (\ie, neurons and synapses can only change their state based on information that is available at the same timestep and immediately adjacent to that neuron or synapse).
+Due to the centralized nature of von Neumann computers, emulated SNNs do not benefit from this energy efficiency as much as networks of biological neurons.
+However, neuromorphic systems are decentralized, analog, and massively parallel, and may be orders of magnitude more efficient in running SNNs than digital computers.
+This requires a learning algorithm that is both spatially and temporally local (\ie, neurons and synapses can only change their state based on information that is available at the same time step and immediately adjacent to that neuron or synapse).
+However, finding such a learning algorithm that performs competitively with continuously-valued neural networks is an active field of research.
 
-This report examines functional modifications to \emph{eligibility propagation} (e-prop), which is a spatially and temporally local learning algorithm for SNNs that suggests a promising approach to train SNNs in a neuromorphic architecture \citep{bellec2020solution}.
+% It has long been understood that spike-timing-dependent plasticity (STDP), which is related to Hebbian learning plays a major role in biological learning and memory consolidation \todo{cite}.
+A major factor in biological learning and memory consolidation is classical Hebbian learning, which is often summarized by ``cells that fire together, wire together'', but only if there is a causal relationship between these cells.
+This causal relationship in biological neural networks is caused by a synapse that connects cells.
+Applying Hebbian learning in a spiking neural network will generally lead to a positive feedback loop, because cells that wire together, fire together, and thus results in runaway excitation.
+
+To learn any task or train any response, such as in classical conditioning, a learning signal, indicating a reward or punishment, should be present.
+In the human brain, the neurotransmitter dopamine is behaviorally related to novelty and reward prediction \citep{li2003dopamine,schultz2007behavioral}.
+Three-factor Hebbian learning incorporates such a learning signal, such that when the learning signal is positive, the connection between two interacting cells reinforces, and when it is negative, it weakens \citep{fremaux2016neuromodulated}.
+Including such a learning signal has been demonstrated to improve the performance of Hebbian learning \citep{porr2007learning}.
+
+Spike-timing-dependent plasticity (STDP) is a learning algorithm that is closely related to classical Hebbian learning.
+In STDP, the temporal difference ... FINISH THIS
+
+% Three-factor Hebbian learning has inspired many SNN learning algorithms
+
+
 
 \begin{tcolorbox}[colback=orange]
-- Brief historical overview of 3F-Hebbian (use my own literature trace)
-    - Explain 3F-Hebbian (mention bioplausibility: online \& local)
-
-
+- Brief paragraph on Hebbian learning
 
 \end{tcolorbox}
 
+
+
+Recent research by \cite{bellec2020solution} suggests that \emph{eligibility propagation} (e-prop), which is a spatially and temporally local learning algorithm for SNNs, may be a promising approach to train biologically plausible SNNs in a neuromorphic architecture.
 \begin{tcolorbox}[colback=orange]
 
 - E-prop approximates BPTT using RSNNs by using eligibility traces and learning signals. Also mathematical link (only intuition!)
-
+- Multi-layer architectures have shown (?) to improve performance in ANNs, RNNs, and SNNs. Argue why, briefly. This is the motivation for examining multi-layer e-prop models.
 
 \end{tcolorbox}
+
+In this report, results from \cite{bellec2020solution} are reproduced, an experimental validation is performed on two new e-prop neuron models proposed by \cite{traub2020learning}, and the performance of e-prop in a multi-layer network is examined.
+
 
 \begin{tcolorbox}[colback=orange]
 
