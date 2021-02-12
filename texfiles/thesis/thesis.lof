@@ -10,17 +10,23 @@
 \ttl@tocsep 
 \ttl@tocsep 
 \ttl@tocsep 
+\contentsline {figure}{\numberline {2.1}{\ignorespaces .\relax }}{10}{figure.caption.9}
 \ttl@tocsep 
-\contentsline {figure}{\numberline {3.1}{\ignorespaces A raw waveform signal from the TIMIT dataset.\relax }}{15}{figure.caption.17}
-\contentsline {figure}{\numberline {3.2}{\ignorespaces Pre-emphasis}}{15}{figure.caption.19}
-\contentsline {figure}{\numberline {3.3}{\ignorespaces The magnitudes of the DFT of a frame.\relax }}{16}{figure.caption.21}
-\contentsline {figure}{\numberline {3.4}{\ignorespaces The magnitudes of the DFT of a frame.\relax }}{17}{figure.caption.25}
-\contentsline {figure}{\numberline {3.5}{\ignorespaces A power spectrum of a frame.\relax }}{17}{figure.caption.26}
-\contentsline {figure}{\numberline {3.6}{\ignorespaces The Mel-spaced filterbanks.\relax }}{18}{figure.caption.29}
-\contentsline {figure}{\numberline {3.7}{\ignorespaces An example of a spectrogram.\relax }}{18}{figure.caption.30}
-\contentsline {figure}{\numberline {3.8}{\ignorespaces An example of Mel-frequency cepstral coefficients that are given as input to the system.\relax }}{19}{figure.caption.35}
-\contentsline {figure}{\numberline {3.9}{\ignorespaces An alignment of a sample signal with its MFCCs and target phones.\relax }}{20}{figure.caption.39}
+\contentsline {figure}{\numberline {3.1}{\ignorespaces A raw waveform signal from the TIMIT dataset.\relax }}{15}{figure.caption.21}
+\contentsline {figure}{\numberline {3.2}{\ignorespaces Pre-emphasis}}{15}{figure.caption.23}
+\contentsline {figure}{\numberline {3.3}{\ignorespaces The magnitudes of the DFT of a frame.\relax }}{16}{figure.caption.25}
+\contentsline {figure}{\numberline {3.4}{\ignorespaces The magnitudes of the DFT of a frame.\relax }}{17}{figure.caption.29}
+\contentsline {figure}{\numberline {3.5}{\ignorespaces A power spectrum of a frame.\relax }}{17}{figure.caption.30}
+\contentsline {figure}{\numberline {3.6}{\ignorespaces The Mel-spaced filterbanks.\relax }}{18}{figure.caption.33}
+\contentsline {figure}{\numberline {3.7}{\ignorespaces An example of a spectrogram.\relax }}{18}{figure.caption.34}
+\contentsline {figure}{\numberline {3.8}{\ignorespaces An example of Mel-frequency cepstral coefficients that are given as input to the system.\relax }}{19}{figure.caption.39}
+\contentsline {figure}{\numberline {3.9}{\ignorespaces An alignment of a sample signal with its MFCCs and target phones.\relax }}{20}{figure.caption.43}
+\contentsline {figure}{\numberline {3.10}{\ignorespaces .\relax }}{25}{figure.caption.47}
 \ttl@tocsep 
+\contentsline {figure}{\numberline {4.1}{\ignorespaces \relax }}{29}{figure.caption.53}
+\contentsline {figure}{\numberline {4.2}{\ignorespaces \relax }}{30}{figure.caption.55}
+\contentsline {figure}{\numberline {4.3}{\ignorespaces \relax }}{30}{figure.caption.57}
+\contentsline {figure}{\numberline {4.4}{\ignorespaces \relax }}{31}{figure.caption.58}
 \ttl@tocsep 
 \ttl@tocsep 
 \ttl@tocsep 

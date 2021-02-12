@@ -9,21 +9,23 @@ cfg = {
     "n_directions": 1,  # Reduces error from 36.1 to 32.9.
     "seed": None,  # 'None' for random seed
 
+    # ALIF
     "alpha": 0.8,  # .78 for 1, .95 for 5
     "rho": 0.975,  # .975 for 1, .995 for 5
     "kappa": 0.8,
     "beta": 0.184,  # Bellec2: "order of 0.07", Bellec3: 0.184. Code: 1.8
     "gamma": 0.3,  # Bellec2: 0.3
-    "thr": 1.6,  # Bellec3: 1.6
     "dt_refr": 2,  # Bellec3: 2
 
-    # "IzhV1": 0.04,
-    # "IzhV2": 5,
-    # "IzhV3": 140,
-    # "IzhA1": 0.004,
-    # "IzhA2": -0.02,
-    # "IzhReset": -65,
-    # "IzhPsi": 30,
+    "thr": 1.6,  # Bellec3: 1.6
+
+    # Izhikevich
+    "IzhV1": 0.04,
+    "IzhV2": 5,
+    "IzhV3": 140,
+    "IzhA1": 0.004,
+    "IzhA2": -0.02,
+    "IzhReset": -65,
 
     "dropout": 0,
 
@@ -32,7 +34,7 @@ cfg = {
     "eta_out": 0.01,
     "eta_bias": 0.01,
     "eta_decay": 0,
-    "warmup": True,
+    "warmup": False,
 
     "adam_beta1": 0.9,
     "adam_beta2": 0.999,
@@ -47,7 +49,7 @@ cfg = {
     "uniform_dist": False,
     "weightscale": 1,
 
-    "N_R": 400,
+    "N_R": 800,
     "N_Rec": 2,
 
     "task": "TIMIT",
@@ -64,14 +66,14 @@ cfg = {
     "train_out": True,
     "train_bias": True,
 
-    "Epochs": 80,  # def = 80
+    "Epochs": 5,  # def = 80
     "Track_neuron": False,
     "Track_synapse": False,
     "Repeats": 1,  # ms per epoch, def = 5
     "Interpolation": 'linear',  # nearest, linear
-    "batch_size_train": 16,  # def = 32
-    "batch_size_val": 16,  # def = 32
-    "batch_size_test": 16,  # def = 32
+    "batch_size_train": 32,  # def = 32
+    "batch_size_val": 32,  # def = 32
+    "batch_size_test": 32,  # def = 32
     "maxlen": 778,
     "TIMIT_derivative": 2,
     "n_examples": {'train': 200, 'val': 100, 'test': 50},  # Re-process TIMIT!
@@ -81,12 +83,12 @@ cfg = {
     "state_save_interval": 10,
     "val_every_B": 10,
     "visualize_val": False,
-    "early_stopping": False,
+    "early_stopping": True,
     "test_on_val": True,
 
     # Max batches per epoch
     "max_train_batches": -1,
-    "max_val_batches": 13,
+    "max_val_batches": 20,
     "max_test_batches": -1,
 
     "frame_size": 0.025,

@@ -5,16 +5,20 @@ from matplotlib import rcParams as rc
 rc['mathtext.fontset'] = 'stix'
 rc['font.family'] = 'STIXGeneral'
 
+np.random.seed(1)
 
 gamma = 0.3
 A = 5
-B = 1
+B = 5
+r = 0
 
 thr = 30
 
 reset = -65
 
 dt = 1
+
+mode = 'onoff'
 # FloatType a = 0.02,
 # FloatType b = 0.2,
 # FloatType c = -65,
@@ -23,10 +27,10 @@ dt = 1
 nsteps = int(1000 / dt)
 kappa = 0.9 * dt
 
-allvars_n = ["I", "V", 'dvdv', 'dvdu', 'dudv', 'dudu', "A", "H", "Z"]
-allvars_w = ["VV", "VA", 'VV1', "VV2", 'VV3', 'VA1', 'VA2', "ET", "ETbar", "DW", 'W']
+allvars_n = ["I", "V", "Vt", "At", 'dvdv', 'dvdu', 'dudv', 'dudu', "A", "H", "Z"]
+allvars_w = ["VV", "VA", "ET", "ETbar", "DW", 'W']
 allvars_t = ["TZ"]
-plotvars = ["I", "V", "A", "Z", 'VV1', "VV2", 'VV3', 'VV', 'VA1', 'VA2', "VA", "H", 'ET', 'W']
+plotvars = ["I", "V", "A", "Z", "H", 'VV', "VA", 'ET', 'W']
 
 M = {}
 
@@ -43,42 +47,37 @@ for var in allvars_t:
 i = 0
 j = 1
 for t in range(nsteps):
+    if mode == 'onoff':
+        if t < nsteps * 0.5:
+            # pass
+            M["I"][t, j] = A + np.random.random()*r
+            if M["TZ"][i] < M["TZ"][j]:
+                M["I"][t, i] = (B + np.random.random()*r) * (t - M["TZ"][j])
+        else:
+            # pass
+            M["I"][t, i] = A + np.random.random()*r
+            if M["TZ"][j] < M["TZ"][i]:
+                M["I"][t, j] = (B + np.random.random()*r) * (t - M["TZ"][i])
+    elif mode == 'cont':
+        M['I'][t, i] = np.random.random() * r
+        M['I'][t, j] = np.random.random() * r
 
-    if t > nsteps * 0.45:
-        # pass
-        M["I"][t, j] = A
-        if M["TZ"][i] < M["TZ"][j]:
-            M["I"][t, i] = B * (t - M["TZ"][j])
-    else:
-        # pass
-        M["I"][t, i] = A
-        if M["TZ"][j] < M["TZ"][i]:
-            M["I"][t, j] = B * (t - M["TZ"][i])
-    # M["I"][t, i] += np.random.random()*2
-    # M["I"][t, j] += np.random.random()*2
-    # TUNE THE 0.99's!!
+    M['VA'][t] = 0.004 * dt * (1 - M['Z'][t-1, j]) * M['VV'][t-1] \
+                 + (1 - 0.02 * dt) * M['VA'][t-1]
 
-    # Magnitude on orange spike
-    M['VV1'][t] = (1 - M['Z'][t-1, j]) * (1 + (5 + 0.08 * M['V'][t-1, j]) * dt) * M['VV'][t-1]
-    M['VV2'][t] = - dt * M['VA'][t-1]
-    M['VV3'][t] = dt * M['Z'][t-1, i]
-    M['VV'][t] = M['VV1'][t] + M['VV2'][t] + M['VV3'][t]
-
-    # Magnitude on orange spike
-    M['VA1'][t] = (1 - M['Z'][t-1, j]) * dt * 0.004 * M['VV'][t-1]
-    # M['VA1'][t] = (1 - M['Z'][t-1, j]) * (2 * M['H'][t-1, j] + dt * 0.004 - dt * 0.04 * M['H'][t-1, j]) * M['VV'][t-1]
-    M['VA2'][t] = (1 - dt * 0.02) * M['VA'][t-1]
-    M['VA'][t] = (M['VA1'][t] + M ['VA2'][t])
+    M['VV'][t] = (1 - M['Z'][t-1, j]) \
+                   * (1 + (0.08 * 1.09 * M['V'][t-1, j] + 5) * dt) \
+                   * M['VV'][t-1] \
+                 - dt * M['VA'][t-1] \
+                 + M['Z'][t-1, i]
 
 
-    # M['A'][t] = M['A'][t-1] + np.where(M['V'][t-1] >= 30, 8, 0)
-    # M['V'][t] = np.where(M['V'][t-1] >= 30, -65, M['V'][t-1])
-
-    M['V'][t] += dt * (0.04 * M['V'][t]**2 + 5 * M['V'][t] + 140 - M['A'][t] + M['I'][t])
-    M['A'][t] += dt * 0.02 * (0.2 * M['V'][t-1] - M['A'][t])
-
+    M['Vt'][t] = M['V'][t-1] - (M['V'][t-1] + 65) * M['Z'][t-1]
+    M['At'][t] = M['A'][t-1] + 2 * M['Z'][t-1]
+    M['V'][t] = M['Vt'][t] + dt * (0.04 * M['Vt'][t] ** 2 + 5 * M['Vt'][t] + 140 - M['At'][t] + M['I'][t])
+    M['A'][t] = M['At'][t] + dt * (0.004 * M['Vt'][t] - 0.02 * M['At'][t])
     M['Z'][t] = np.where(M['V'][t] >= 30, 1, 0)
-    M['V'][t] = np.where(M['V'][t] > 30, 30, M['V'][t])
+
 
     M['TZ'] = np.where(M['Z'][t] == 1, t, M['TZ'])
     M['H'][t] = gamma * np.exp((np.clip(M['V'][t], None, 30) - 30) / 30)
@@ -91,17 +90,19 @@ for t in range(nsteps):
 fig = plt.figure(constrained_layout=False, figsize=(8, 6))
 gsc = fig.add_gridspec(nrows=len(plotvars),
                        ncols=1,
-                       hspace=0.075,
+                       hspace=0.15,
                        wspace=0.5)
 axs = []
 
 lookup = {
-    "V":     "$v^t_j$",
+    "V":     "$v^t$",
     "dvdv":  "$dvdv$",
     "dvdu":  "$dvdu$",
     "dudv":  "$dudv$",
     "dudu":  "$dudu$",
-    "A":     "$a^t_j$",
+    "A":     "$a^t$",
+    "At":     "$\\tilde{{a}}^t_j$",
+    "Vt":     "$\\tilde{{v}}^t_j$",
     "Z":     "$z^t$",
     "I":     "$I^t$",
     "ET":    "$e_{{ji}}^t$",
@@ -120,7 +121,7 @@ lookup = {
 
 for var in plotvars:
     axs.append(fig.add_subplot(gsc[len(axs), :]))
-    arr = M[var]
+    arr = M[var] if var != 'H' else M[var][:, 0]
     # arr = arr[:, 0] if arr.ndim > 1 else arr
     axs[-1].plot(arr, linewidth=0.7)
     axs[-1].grid()

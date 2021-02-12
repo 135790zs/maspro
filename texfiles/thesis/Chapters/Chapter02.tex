@@ -82,10 +82,13 @@
         where $W^\text{rec}_{ji}$ is a synapse weight from neuron $i$ to neuron $j$, $\alpha$ is a constant decay factor.
         Whenever $j$ spikes (i.e., $z_j^t = 1$), the activity of the neuron is reduced to a value near 0 by the term $-z^t_jv_\text{th}$.
         Furthermore, $z^t_j$ is fixed to 0 for $T^\text{refr}$ time steps to model neuronal refractoriness that is also present in biological neurons\todo{cite}.
-        \begin{tcolorbox}[colback=orange]
-        - DEMO FIGURE
 
-        \end{tcolorbox}
+        \begin{figure}[ht]
+            \centering
+            \includegraphics[width=\linewidth]{gfx/simplealif}
+            \label{fig:simplealif}
+            \caption{.}\todo{caption and reference to fig}
+        \end{figure}
 
         \paragraph{ALIF neuron}
         The adaptive LIF (ALIF) neuron introduces a threshold adaptation variable $a^t_j$ to the hidden state of the neuron, such that $\mathbf{h}^t_j \eqdef \left[v^t_j, a^t_j\right]$.
@@ -358,10 +361,12 @@
         \Delta b_k = -\eta \sum_t\left(\pi^t_k - \pi^{*,t}_k\right)
         \end{equation}
 
-    \begin{tcolorbox}[colback=orange]
-    - Full demo plot including eligibility vector, trace, and simulated learning signal
-
-    \end{tcolorbox}
+        \begin{figure}[ht]
+            \centering
+            \includegraphics[width=\linewidth]{gfx/alif}
+            \label{fig:alif}
+            \caption{.}\todo{caption and reference to fig}
+        \end{figure}
 
 \section{Synaptic scaling}
 

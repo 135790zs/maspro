@@ -342,7 +342,7 @@
 		The advantage of these models over the standard ALIF model is that they naturally elicit STDP.
 		Additionally, the Izhikevich model has an implicit refractory mechanism that is built into its system of equations, as opposed to the (STDP-)ALIF model that requires an explicit timer variable in a neuron's hidden state.
 
-		The Izhikevich neuron model was first presented by \cite{traub2020learning} only in a single-synapse demo demonstrating its STDP properties.
+		The Izhikevich neuron model was first presented by \cite{traub2020learning} only in a single-synapse demonstration of its STDP properties.
 		In this report, the performance of the e-prop Izhikevich model is experimentally validated in a learning task for the first time.
 		\cite{traub2020learning} also described the STDP-LIF, which is a non-adaptive modification of the standard LIF neuron.
 		Here, its adaptive counterpart, the STDP-ALIF model, is derived and validated as well.
@@ -351,8 +351,6 @@
 		\subsubsection{STDP-LIF}
 
 			\begin{tcolorbox}[colback=orange]
-			- STDP-ALIF (graphs)
-
 			- Also mention and motivate v-fix and psi-fix.
 
 			- Mention Bellec's reset too.
@@ -401,11 +399,16 @@
 	        \gamma\max\left(0, 1 - \left|\frac{v^t_{rj}-v_\text{th}}{v_\text{th}}\right|\right)&\mbox{otherwise}
 	        \end{cases}
 	        \end{equation}
+	        The factor of the pseudo-derivative and the eligibility vector can therefore produce both positive or negative eligibility traces and gradients.
+
+	        \begin{figure}[ht]
+	            \centering
+	            \includegraphics[width=\linewidth]{gfx/stdpalif}
+	            \label{fig:stdpalif}
+	            \caption{.}\todo{caption and reference to fig}
+	        \end{figure}
 
 		\subsubsection{Izhikevich neuron}
-			\begin{tcolorbox}[colback=orange]
-			- Izhikevich (graphs)
-			\end{tcolorbox}
 
 			The standard system of equations of the Izhikevich neuron is described by
 			\begin{align}
@@ -455,13 +458,19 @@
 	        &= \psi^t_{rj}\epsilon^t_{rji, v}.
 	        \end{align}
 
+        \begin{figure}[ht]
+            \centering
+            \includegraphics[width=\linewidth]{gfx/demo_izh}
+            \label{fig:demo_izh}
+            \caption{.}\todo{caption and reference to fig}
+        \end{figure}
+
 
 
 \section{Regularization}
 
-	\begin{tcolorbox}[colback=orange]
-	preamble: explain why this is used (bioplausibility (natural constraints) and generalizability)
-	\end{tcolorbox}
+	Firing rate regularization and L2 regularization are applied to improve the stability of the learning process and the generalizability of the resulting model.
+	These two regularization methods are motivated by biological plausibility, ease of implementation in the e-prop framework, and improved empirical performance.
 
 	\subsection{Firing rate regularization}
 		\begin{tcolorbox}[colback=orange]
@@ -503,7 +512,7 @@
 		\end{equation}
 
 
-	\subsection{L2 normalization}
+	\subsection{L2 regularization}
 		To regularize weights around 0, a small fraction (parametrized by $c_\text{L2}$) of the value of the weight is added to its gradient value at every weight update:
 		\begin{equation}
 		\Delta_\text{L2} W_{rji} = -\eta\ c_\text{L2} \cdot W_{rji},
@@ -519,12 +528,12 @@
 		These natural limits are approximately \SI{0.4}{\mV} to \SI{20}{\mV} \citep{diaz2006target}.
 
 
-\section{Bidirectional network}
-	\begin{tcolorbox}[colback=orange]
-	- I/A
-	- What, why, how?
+% \section{Bidirectional network}
+% 	\begin{tcolorbox}[colback=orange]
+% 	- I/A
+% 	- What, why, how?
 
-	\end{tcolorbox}
+% 	\end{tcolorbox}
 
 \section{Optimizer}\label{sec:adam}
 
