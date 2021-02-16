@@ -57,7 +57,7 @@
 	\subsection{Data splitting}
 		The TIMIT dataset is split into a training, validation and testing set as in \cite{graves2005framewise} and \cite{bellec2020solution}.
 		The training set is used to train the network synaptic weights according to the e-prop algorithm.
-		The validation set is used to obtain a well-performing set of hyperparameters, and to anneal the learning rate (see Section \ref{sec:lr_annealing}).
+		The validation set is used to obtain a well-performing set of hyperparameters.
 		The testing set is used to evaluate the performance of the network after the hyperparameters are obtained.
 
 		The TIMIT corpus documentation offers a suggested partitioning of the training and testing data, which is based on the following criteria:
@@ -542,7 +542,7 @@
 		\Delta W_{rji} = -\eta \sum_t L^t_{rj}\cdot\bar{e}^t_{rji}.
 	\end{equation}
 	However, the results described in Chapter \ref{ch:results} are obtained using Adam (or Adaptive Moment Estimation) \citep{kingma2014adam}.
-	This optimization method tracks running averages of the gradient and its second moment (resp. $M_{rji}$ and $V_{rji}$).
+	This optimization method tracks running averages of the gradient and its second moment (resp. $M_{rji}$ and $V_{rji}$), and fits the local and online constraints of e-prop, because the running averages are tracked per individual synapse.
 	The Adam weight update in the context of multi-layer e-prop is given by:
 	\begin{align}
 	M_{rji}^{(i+1)} &= \beta_1 M_{rji}^{(i)} + \left(1 - \beta_1\right)G^{(i)}_{rji} \\
