@@ -1,17 +1,25 @@
 [0] Config.pm:302> INFO - This is Biber 2.9
 [0] Config.pm:305> INFO - Logfile is 'thesis.blg'
-[37] biber:313> INFO - === do feb 11, 2021, 09:13:36
-[52] Biber.pm:371> INFO - Reading 'thesis.bcf'
-[87] Biber.pm:857> INFO - Found 28 citekeys in bib section 0
-[94] Biber.pm:3981> INFO - Processing section 0
-[100] Biber.pm:4154> INFO - Looking for bibtex format file 'Bibliography.bib' for section 0
-[102] bibtex.pm:1468> INFO - LaTeX decoding ...
-[135] bibtex.pm:1294> INFO - Found BibTeX data source 'Bibliography.bib'
-[217] Utils.pm:169> WARN - year field 'accessed <date>' in entry 'SASPWEB2011' is not an integer - this will probably not sort properly.
-[263] UCollate.pm:68> INFO - Overriding locale 'en-US' defaults 'variable = shifted' with 'variable = non-ignorable'
-[263] UCollate.pm:68> INFO - Overriding locale 'en-US' defaults 'normalization = NFD' with 'normalization = prenormalized'
-[263] Biber.pm:3809> INFO - Sorting list 'nyt/global//global/global' of type 'entry' with template 'nyt' and locale 'en-US'
-[263] Biber.pm:3815> INFO - No sort tailoring available for locale 'en-US'
-[284] bbl.pm:617> INFO - Writing 'thesis.bbl' with encoding 'UTF-8'
-[299] bbl.pm:720> INFO - Output to thesis.bbl
-[299] Biber.pm:110> INFO - WARNINGS: 1
+[14] biber:313> INFO - === di feb 16, 2021, 12:53:02
+[27] Biber.pm:371> INFO - Reading 'thesis.bcf'
+[64] Biber.pm:857> INFO - Found 120 citekeys in bib section 0
+[71] Biber.pm:3981> INFO - Processing section 0
+[77] Biber.pm:4154> INFO - Looking for bibtex format file 'Bibliography.bib' for section 0
+[80] bibtex.pm:1468> INFO - LaTeX decoding ...
+[173] bibtex.pm:1294> INFO - Found BibTeX data source 'Bibliography.bib'
+[175] Utils.pm:169> WARN - Duplicate entry key: 'sacramento2018dendritic' in file 'Bibliography.bib', skipping ...
+[176] Utils.pm:169> WARN - Duplicate entry key: 'maass1997networks' in file 'Bibliography.bib', skipping ...
+[176] Utils.pm:169> WARN - Duplicate entry key: 'sterling2015principles' in file 'Bibliography.bib', skipping ...
+[177] Utils.pm:169> WARN - Duplicate entry key: 'yagishita2014critical' in file 'Bibliography.bib', skipping ...
+[177] Utils.pm:169> WARN - Duplicate entry key: 'gerstner2018eligibility' in file 'Bibliography.bib', skipping ...
+[177] Utils.pm:169> WARN - Duplicate entry key: 'schultz2007behavioral' in file 'Bibliography.bib', skipping ...
+[177] Utils.pm:169> WARN - Duplicate entry key: 'porr2007learning' in file 'Bibliography.bib', skipping ...
+[177] Utils.pm:169> WARN - Duplicate entry key: 'legenstein2008learning' in file 'Bibliography.bib', skipping ...
+[617] Utils.pm:169> WARN - year field 'accessed <date>' in entry 'SASPWEB2011' is not an integer - this will probably not sort properly.
+[762] UCollate.pm:68> INFO - Overriding locale 'en-US' defaults 'variable = shifted' with 'variable = non-ignorable'
+[762] UCollate.pm:68> INFO - Overriding locale 'en-US' defaults 'normalization = NFD' with 'normalization = prenormalized'
+[762] Biber.pm:3809> INFO - Sorting list 'nyt/global//global/global' of type 'entry' with template 'nyt' and locale 'en-US'
+[762] Biber.pm:3815> INFO - No sort tailoring available for locale 'en-US'
+[837] bbl.pm:617> INFO - Writing 'thesis.bbl' with encoding 'UTF-8'
+[904] bbl.pm:720> INFO - Output to thesis.bbl
+[904] Biber.pm:110> INFO - WARNINGS: 9

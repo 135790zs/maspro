@@ -26,13 +26,6 @@
 \pagenumbering{roman}
 \pagestyle{plain}
 \newcommand\eqdef{\ \mathrel{\overset{\makebox[0pt]{\mbox{\normalfont\scriptsize\sffamily def}}}{=}}\ }
-\makeatletter
-\renewcommand*\env@matrix[1][\arraystretch]{%
-  \edef\arraystretch{#1}%
-  \hskip -\arraycolsep
-  \let\@ifnextchar\new@ifnextchar
-  \array{*\c@MaxMatrixCols c}}
-\makeatother
 
 
 %********************************************************************
@@ -91,7 +84,7 @@
     - Accuracy
     - Tradeoffs between network size and accuracy (not necessarily same hparams)
     - Time/manifold dynamics
-    - Effects of parameter changesdiaz2006target
+    - Effects of parameter changes
     - Effects of weight freezes (also include only training output or not at all)
     - Energy
     - Robustness (initialization, data, and hparam).
@@ -99,7 +92,7 @@
 
 * DISCUSSION
   - Try link/explain results with existing research. Show knowledge of the field.
-  - Also nuace using some of the peer reviews comments. Don't overblow.
+  - Also nuance using some of the peer reviews comments. Don't overblow.
   - Advantages of e-prop RSNN
     - Computational cost of backprop vs BA.
   - Interaction between per-synapse broadcast and Adam (per-synapse momentum)?

@@ -1,0 +1,152 @@
+ELSEWHERE
+	- LIF (burkitt2006review)
+	- RSNNs consisting only of LIF neurons do not reach good performance with BPTT (Bellec2019/3).
+	- The cortex contains neurons with Spike-Frequency Adaptation (Bellec2019/2).
+	- Including neurons with SFA improves performance of RNNs (Bellec2019/3)
+	- A RSNN with mixed LIF and ALIF neurons can reach similar performance using BPTT as a LSTM (Bellec2019/3).
+	- Homeostatic mechanisms are necessary for stable biological neuronal and network function (Elbez2020/20) [related to adaptive thresholds].
+	- The brain actively maintains traces of spiking activity by e.g. (CaMKII enzymes) (Bellec2019/9).
+	- Pseudoderivatives have been used to approximate gradient descent in feedforward SNNs (Bellec2019/40-44).
+	- Pseudoderivatives for spikes have been used in (Bellec2019/45-46).
+	- TIMIT is one of the most commonly used benchmarks for temporal processing capabilities of RNNs. (greff2016lstm)
+	- With input preprocessing such as Gaussian receptive fields, even simple models such as a single-layer IF neurons achieve an F1-score of 99% in the Fisher's Iris dataset, comparable to MLPs (Sboev2020a).
+
+I 1-1 Human brain is efficient
+	- The brain is an inherently time-dependent dynamical system (Zenke2021/37,38) that relies on biophysical processes, recurrence, and feedback of its physical substrate for computation (Zenke2021/30,39).
+I 1-2 ANN general explanation. Also RNN
+	- BPTT (Traub/14)
+	- RNNs superior for temporal dimension (Bellec1)
+I 1-3 ANNs high cost with examples, reason for most popular is backprop (TT)
+	- Brain is different from deep ANNs <Bellec1>
+	- Von Neumann computers fundamentally different from brain (Yu2020/1)
+	- Deep Learning is energy inefficient because it suffers from the Von Neumann bottleneck (Zenke2021)
+I 1-4 SNN general explanation
+	- SNNs (maass1997networks)
+	- Deep SNNs can reach classification performances comparable to CNNs (Zhou2020/41-43).
+	- SNNs have shown very good performance in visual processing (Zhou2020/41,44,45) and speech recognition (Zhou2020/46,47).
+I 1-5 Previous RNN/SNN learning algo's. Mention drawbacks
+	- Attempts have been made to apply backprop to SNNs (hong2010cooperative; xu2013supervised, Sboev2020a/12-14, Weidel2020/l.28)
+	- BPTT can be applied to training recurrent SNNs (Traub/1, Bellec2019/3,4).
+	- RTRL is a computationally expensive and local method that can learn tasks in RNNs by using gradient descent (Bellec2019/8).
+	- Approximations of RTRL that are less computationally expensive but still nonlocal are described in (Bellec2019/48-51) and only works for supervised regression in generic nonspiking networks.
+	- Some RSNN training methods rely on control theory to train a chaotic reservoir of neurons (Bellec2019/32-34)
+	- The FORCE training method can train RSNN but is nonlocal (Bellec2019/35,36).
+I 3-1 Neuromorphics general explanation. Emphasize contemporary relevance
+	- Neuromorphics (Sboev2020/1-3)
+	- More recently, the focus in neuromorphics is low power consumption (Yu2020/5-7)
+	- Neuromorphic architectures are more parallel and consume less power (Yu2020/3, Zhang2020/2)
+	- Neuromorphic computing typically uses sparse, event-based communication and physically colocalized memory and computation (Zenke2021/29,30)
+	- Colocalized memory and computation in Von Neumann machines has been implemented in Google's TPU, Graphcore's IPU, and Cerebras' CS-1. (Zenke2021).
+	- Neuromorphics are more efficient for machine learning than VN (Yu2020/4, Sboev2020/4)
+	- Energy consumption of CMOS artificial neurons is several orders of magnitude lower than conventional artificial neurons, and 2-3 orders of magnitude lower than biological neurons (Elbez2020).
+	- Neuromorphics are attracting strong interest because of their massive parallelism, high energy efficiency, good error tolerance, and good ability to implement cognitive functions (Wang2020b/1-6).
+	- BPTT is implausible for neuromorphic (Bellec1)
+	- SNNs emerged as an ideal biologically inspired neuromorphics paradigm for realizing energy-efficient on-chip intelligence hardware (Zhou2020/27,28)
+
+	- Neuromorphic SNNs have been used to mimic the BCM-rule as a typical case of STDP (unknown: probably in Wang2020a or Tang2020?).
+	- BCM has been demonstrated using rate-based presynaptic spikes in memristors (Wang2020b/34-36).
+	- Triplet-STDP has been emulated in memristors (Wang2020b/??).
+	- Neuromorphics have been used in realizing LIF SNNs in field-programmable gate arrays, obtaining competitive image classification performance with a 6-order of magnitude speedup compared to simulations (Zhang2020).
+	- Neuromorhic RSNNs have been implemented (Bellec2019/6,7).
+	- E-prop is better suited for neuromorphic hardware and would provide a qualitative jump in performance (Bellec2019).
+
+I 2-1 Human brain can do it, so try bioplausibility. Local & online.
+	- BPTT is implausible for brain (Bellec2019/5)
+	- Backpropagation is biologically implausible (Weidel2020/l.26).
+	- There exists an online but nonlocal RNN training method based on gradient descent (williams1989learning).
+I 2-2 Human brain biological learning. HEBB
+	- STDP happens (abbott2000synaptic for review; Zhou2020/29-35; kandel2000principles)
+	- STDP types in SNNs (vigneron2020critical).
+	- STDP happens in primate visual cortex (Traub/8)
+	- STDP is a fundamental learning principle in the brain (Traub2020/5)
+	- STDP forms associations between memory traces in SNNs, which are crucial for cognitive brain function (Pokorny2020).
+	- Local clustering of temporally correlated inputs on dendritic branches may counteract the problem of catastrophic forgetting (Limbacher2020).
+	+ Three-factor Hebbian learning (fremaux2016neuromodulated)
+	+ Three-factor Hebbian learning outperforms classical Hebbian learning (porr2007learning)
+	- STDP requires modulatory signals to happen (bailey2000heterosynaptic)
+	- Dopamine signaling has a behavioral and functional role in the primary motor cortex (Athalye2020/8-11).
+	- Dopamine synapse modulation involves dendritic spine enlargement during a very narrow time window, known as reinforcement plasticity (dang2006disrupted).
+	- Dopamine gates neuroplasiticity corticostriatal synapses (legenstein2008/6,7) and within the cortex (Legenstein2008/8)
+	+ Dopamine is behaviorally related to novelty and reward prediction (Legenstein2008/5, li2003dopamine).
+	- Dopamine learning signals have been found not to be global, but to be specific for local populations of neurons (Bellec2019/14,15).
+	- Acetylcholine gates synaptic plasticity in the cortex (Legenstein2008/9)
+	- Neural firing are related (like neurotransmitters) to induction of ERN (Bellec2019/13).
+	- If in the brain an eligibility trace is followed by a learning signal, synaptic plasticity occurs (Bellec2019/10-12).
+	- Suggested that brain solves credit assignment problem by combining local eligibility traces with neuromodulator-based reward signals (Traub2020/6)
+I 2-3 Necessity of learning signals
+	- R-STDP can have predictable learning effect. [Legenstein2008]
+	- SNNs with STDP can exhibit classical and operant conditioning (Lobov2020).
+	- Three-factor Hebbian learning in RSNN is competitive with BPTT [Bellec1]
+	- R-STDP was used to train a stable lane keeping controller (Bing2020)
+	- R-STDP has been used for mapless navigation but suffers from catastrophic forgetting and lack of policy evaluation (Tang2020/13).
+	- R-STDP was used to recognize action sequences present in a video (source unknown but conclusion of one of the papers).
+	- R-STDP can lead to both spatial and temporal pattern classification. [Legenstein2008]
+	- R-STDP can solve difficult credit assignment. [Legenstein2008]
+	- R-STDP does not endanger stability of network even for long time periods [Legenstein2008]
+	- Gradient descent has been used to train neuromodulated LSTMs (outperform convertional LSTMs) (Miconi2020).
+	- Convolutional SNNs with unsupervised STDP outperform CNNs in melanoma skin lesion classification in accuracy, efficiency, and simplicity (Zhou2020).
+	- Phasic rewards at the end of a trial can train chaotic RNNs in tasks that require context-dependent associations and memory maintenance, in neural dynamics that resemble those observed during cognitive tasks (miconi2017biologically).
+	- SNNs with unsupervised STDP can learn spatio-temporal patterns of input signals, especially online (Zhou2020/36-38).
+I 3-2 Cite for future importance of neuromorphics in edge devices etc.
+
+I 2-3b Eligibility traces
+	- Eligibility trace proposed by (izhikevich2007solving) and (florian2007reinforcement)
+	- Eligibility traces can solve a number of interesting learning tasks (izhikevich2007solving, legenstein2008learning, and bellec2020solution)
+	- Eligibility traces overcome credit assignment problem in prefrontal cortex (stolyarova2018solving).
+	- Synaptic plasticity was reached by combining learning signals and eligibility traces in feedforward SNNs (Bellec2019/40,42,43). These methods would not be local in RSNNs (see Bellec2019 why). (Bellec2019/40) suggests need to extend their approach to RSNNs.
+	- Neuromodulated eligibility traces have been experimentally demonstrated to perform Hebbian learning to allow stable learning in a RNN (he2015distinct).
+	- Random broadcast alignment can perform as effectively as backpropagation in some tasks in feedforward ANNs (Bellec2019/16,17) and multi-layer SNNs (Bellec2019/18).
+	- Random broadcast alignment has poor performance in deep feedforward networks for complex image classification tasks (bartunov2018assessing)
+	- Random broadcast alignment has been suggested to provide a diversity of feature detectors for task-relevant network inputs (Bellec2019).
+I 2-4 E-prop intuition
+	- E-prop better RSNN learning performance than previously known methods [Bellec1]
+	- The general form of the eligibility trace collects all contributions of the loss gradient that can be locally and online computed (Bellec2019).
+I 3-3 E-prop is low-power, because spikes and no backprop. Competitive with LSTM
+I 4-1 Multilayer architectures are good in ANNs (e.g. DL) because abstracting in CNNs
+	- SNNs with multiple hidden layers can extract more complex features to obtain high classification performance (Zhou2020/39,40).
+I 4-2 Multilayer shown to represent multiple timescales in RNNs
+I 4-3 Traub showed STDP with modified eprop in two new neuron models
+	- STDP can only happen in eligibility-trace based learning when the neuron model provides a negated gradient signal in the case when a presynaptic signal arrives too late (Traub2020) RELATE TO ERN!
+I 4-4 "In this paper..."
+
+D 1-1 STDP modification on ALIF neuron works well. Explain why.
+D 1-2 Izhikevich neuron works poorly, because unstable eligibility vector dynamics
+D 1-3 Multilayer shows no immediate improvement. Slower learning, but >= same theoretical limits because full readout.
+D 2-1 Hypothetical improvement: better initial weight distribution for multi-layer, preventing fading activation
+	- Initial synaptic weights significantly affect the performance of STDP-based SNNs (Kim2020) (higher initials = better).
+	- SNN-based control tasks were successfully performed by manually setting network weights (see Bing2020 p.22 for sources)
+D 2-2 " ": distributed FRs, Beta's, alpha's, feedback signals, etc.
+	- E-prop provides a hypothesis for the functional role of the experimentally found (Bellec2019/14) diversity of dopamine signals to different populations of neurons (Bellec2019).
+D 2-3 Dropout improved performance -- effect of lattice? Biomotivation: neurons tend to connect nearby
+	- Unsupervised learning and clustered connectivity can improve R-STDP (weidel2020).
+D 2-4 Examine pruning and growing, give biomotivation. Grow layered structure automatically?
+	- Synaptic connections are pruned during the early stages of human brain development (Elbez2020/8).
+	- Larger SNNs are generally needed to obtain a good performance (Elbez2020).
+	- A compression technique exists that can compress 75% of a SNN while preserving performance (Elbez2020).
+	- SNN pruning after training can remove 50% of synapses and keep 90% of accuracy (Elbez2020/17).
+	- SNN pruning during training can remove 75% of synapses and keep 90% of accuracy (Elbez2020/18).
+	- By integrating stochastic synaptic rewiring (Bellec2019/24) into sparse LSNNs, short-term memory can emerge (Bellec2019).
+D 2-5 Synaptic delay for new temporal information carrier? Biomotivation!
+	- Triplet-STDP (Wang2020b/33,40-42)
+D 2-6 With neuromorphics rising, neuroscience improving, & DL hitting hard limits, exciting future for bioplausible SNNs.
+	- High-level simulation platforms that can integrate memristive device models and their putative non-idealities into crossbar architectures within DL systems (Lammie2020).
+	- Hierarchical neuromorphic network-on-chips have been used to address the scalability issue of SNNs (Zhang2020/6).
+	- Neuromorphics can be used for complex neural network operations (Yu2020/5)
+	- Address event representation allows large networks of VLSI neurons and synapses to communicate asynchronously (Zenke2021/31,32)
+	- Neuromorphics can be used in applying deep SNNs in medical applications.
+	- Neuromorphics have been presented that support large-scale conductance-based SNNs (Zhang2020/8,9, Markovic2020/104,105).
+	- Neuromorphics have been used for mapless navigation with 75x lower power and slightly better performance (Tang2020).
+	- Neuromorphic SNNs have been used for low-power solutions for localization and mapping of mobile robots (Tang2020/9), for planning (Tang2020/10) and control (Tang2020/11).
+	- Neuromorphic Izhikevich neurons on field-programmable gate arrays have yielded better performance than LIF (Zhang2020/12).
+	- Neuromorphic chips do not incorporate the latest progresses of the field due to manufacturing delays (Markovic2020).
+	- Neuromorphic self-repairing SNNs that mimic biological self-repair can detect up to 40% fault density while maintaining performance (Zhang2020/7).
+	- More physics and material science is requires to build efficient neuromorphic architectures (Markovic2020).
+	- Some cross-fertilization between neuromorphics and quantum computing is starting to take place (Markovic2020/68,69), as quantum superposition and entanglement may be used to process information in parallel and in a high-dimensional state space (Markovic2020/101-103).
+	- Lasers have been used to build efficient and easily implemented STDP-based photonic neuromorphic systems (Wang2020a; Xiang2020).
+	- Nanodevices that emulate biological synapses with learning functions can benefit neuromorphics (Wang2020b/7-13), particularly the two-terminal memristor (Wang2020b/14-19).
+	- The learning principles of biological NNs are not explored enough to design engineering solutions (gorban2019unreasonable, Zhang2020/3).
+	- Feedback connections, for which the brain uses neurotransmitters, may become problematic in large-scale neuromorphic systems.
+	- Emulating neural dynamics on a physical substrate is more efficient but requires constraints to match the brain's timescales (Zenke2021/40).
+	- Future work on e-prop could explore a combination with attention-based models in order to cover multiple timescales (Bellec2019).
+	- It was suggested that re-entering of neural dynamics happens on two time scales (Athalye2020).
+	- E-prop suggests that the experimentally found diverse time constants of the firing activity of populations of neurons in different brain areas (Bellec2019/30) are correlated with their capability to handle corresponding ranges of delays in temporal credit assignment for learning. (Bellec2019)

@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017/Debian) (preloaded format=pdflatex 2020.11.2)  12 FEB 2021 12:22
+This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017/Debian) (preloaded format=pdflatex 2020.11.2)  16 FEB 2021 12:55
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -2425,18 +2425,15 @@ Package tocbasic Info: character protrusion at lot deactivated on input line 39
 
  (./Chapters/Chapter01.tex
 Chapter 1.
-Package hyperref Info: bookmark level for unknown todo defaults to 0 on input l
-ine 17.
-
-LaTeX Warning: Marginpar on page 1 moved.
-
-
-LaTeX Warning: Marginpar on page 1 moved.
-
-
-LaTeX Warning: Marginpar on page 1 moved.
-
-[1
+LaTeX Font Info:    Try loading font information for T1+cmtt on input line 23.
+(/usr/share/texlive/texmf-dist/tex/latex/base/t1cmtt.fd
+File: t1cmtt.fd 2014/09/29 v2.5h Standard LaTeX font definitions
+)
+Package microtype Info: Loading generic protrusion settings for font family
+(microtype)             `cmtt' (encoding: T1).
+(microtype)             For optimal results, create family-specific settings.
+(microtype)             See the microtype manual for details.
+ [1
 
 
 
@@ -2445,25 +2442,31 @@ LaTeX Warning: Marginpar on page 1 moved.
 
 
 
-]) [2]
+] [2] [3] [4]
+[5] [6]) [7]
 \openout2 = `Chapters/Chapter02.aux'.
 
  (./Chapters/Chapter02.tex
 Chapter 2.
-[3
+[8
 
 
 
 
-]
-<gfx/simplealif.pdf, id=314, 513.21736pt x 386.50026pt>
+] [9]
+Package hyperref Info: bookmark level for unknown todo defaults to 0 on input l
+ine 69.
+
+
+LaTeX Warning: Marginpar on page 10 moved.
+
+<gfx/simplealif.pdf, id=553, 513.21736pt x 386.50026pt>
 File: gfx/simplealif.pdf Graphic file (type pdf)
 <use gfx/simplealif.pdf>
 Package pdftex.def Info: gfx/simplealif.pdf  used on input line 88.
 (pdftex.def)             Requested size: 336.0pt x 253.05042pt.
 
-
-LaTeX Warning: Marginpar on page 4 moved.
+LaTeX Warning: Marginpar on page 10 moved.
 
 LaTeX Font Info:    Try loading font information for T1+cmss on input line 94.
 (/usr/share/texlive/texmf-dist/tex/latex/base/t1cmss.fd
@@ -2475,25 +2478,26 @@ Package microtype Info: Loading generic protrusion settings for font family
 (microtype)             See the microtype manual for details.
 
 
-LaTeX Warning: Reference `eq:thresholdpotential' on page 4 undefined on input l
-ine 106.
+LaTeX Warning: Reference `eq:thresholdpotential' on page 10 undefined on input 
+line 106.
 
-[4]
+[10]
 Overfull \hbox (29.30035pt too wide) detected at line 144
 []
  []
 
-[5]
+[11]
 
-LaTeX Warning: Reference `sec:gradient' on page 6 undefined on input line 163.
+LaTeX Warning: Reference `sec:gradient' on page 12 undefined on input line 163.
 
-[6] [7] [8] [9]
-<gfx/alif.pdf, id=412, 516.73048pt x 386.4839pt>
+
+[12] [13] [14] [15]
+<gfx/alif.pdf, id=650, 516.73048pt x 386.4839pt>
 File: gfx/alif.pdf Graphic file (type pdf)
 <use gfx/alif.pdf>
 Package pdftex.def Info: gfx/alif.pdf  used on input line 366.
 (pdftex.def)             Requested size: 336.0pt x 251.31181pt.
- [10 <./gfx/simplealif.pdf>]) [11]
+ [16 <./gfx/simplealif.pdf>]) [17]
 
 ! LaTeX Error: Float(s) lost.
 
@@ -2501,7 +2505,7 @@ See the LaTeX manual or LaTeX Companion for explanation.
 Type  H <return>  for immediate help.
  ...                                              
                                                   
-l.63 \include{Chapters/Chapter02}
+l.56 \include{Chapters/Chapter02}
                                  
 You've lost some text.  Try typing  <return>  to proceed.
 If that doesn't work, type  X <return>  to quit.
@@ -2510,7 +2514,7 @@ If that doesn't work, type  X <return>  to quit.
 
 (./Chapters/Chapter03.tex
 Chapter 3.
-[12
+[18
 
 
 
@@ -2525,47 +2529,38 @@ Underfull \hbox (badness 10000) in alignment at lines 51--51
 [][][][][]
  []
 
-LaTeX Font Info:    Try loading font information for T1+cmtt on input line 55.
-(/usr/share/texlive/texmf-dist/tex/latex/base/t1cmtt.fd
-File: t1cmtt.fd 2014/09/29 v2.5h Standard LaTeX font definitions
-)
-Package microtype Info: Loading generic protrusion settings for font family
-(microtype)             `cmtt' (encoding: T1).
-(microtype)             For optimal results, create family-specific settings.
-(microtype)             See the microtype manual for details.
 
-
-LaTeX Warning: Reference `sec:lr_annealing' on page 13 undefined on input line 
+LaTeX Warning: Reference `sec:lr_annealing' on page 19 undefined on input line 
 60.
 
-[13]
+[19]
 
 Package caption Warning: \label without proper reference on input line 86.
 See the caption package documentation for explanation.
 
 
-LaTeX Warning: Reference `fig:signal' on page 14 undefined on input line 82.
+LaTeX Warning: Reference `fig:signal' on page 20 undefined on input line 82.
 
-<gfx/signal.pdf, id=476, 462.52798pt x 346.89601pt>
+<gfx/signal.pdf, id=712, 462.52798pt x 346.89601pt>
 File: gfx/signal.pdf Graphic file (type pdf)
 <use gfx/signal.pdf>
 Package pdftex.def Info: gfx/signal.pdf  used on input line 85.
 (pdftex.def)             Requested size: 151.19897pt x 113.4015pt.
-[14]
+[20]
 
 Package caption Warning: \label without proper reference on input line 102.
 See the caption package documentation for explanation.
 
 
-LaTeX Warning: Reference `fig:signalemph' on page 15 undefined on input line 98
+LaTeX Warning: Reference `fig:signalemph' on page 21 undefined on input line 98
 .
 
-<gfx/signalemph.pdf, id=491, 462.52798pt x 346.89601pt>
+<gfx/signalemph.pdf, id=726, 462.52798pt x 346.89601pt>
 File: gfx/signalemph.pdf Graphic file (type pdf)
 <use gfx/signalemph.pdf>
 Package pdftex.def Info: gfx/signalemph.pdf  used on input line 101.
 (pdftex.def)             Requested size: 151.19897pt x 113.4015pt.
-[15 <./gfx/signal.pdf> <./gfx/signalemph.pdf
+[21 <./gfx/signal.pdf> <./gfx/signalemph.pdf
 
 pdfTeX warning: pdflatex (file ./gfx/signalemph.pdf): PDF inclusion: multiple p
 dfs with page group included in a single page
@@ -2575,9 +2570,9 @@ Package caption Warning: \label without proper reference on input line 130.
 See the caption package documentation for explanation.
 
 
-LaTeX Warning: Reference `fig:hamming' on page 16 undefined on input line 126.
+LaTeX Warning: Reference `fig:hamming' on page 22 undefined on input line 126.
 
-<gfx/hamming.pdf, id=531, 361.35pt x 361.35pt>
+<gfx/hamming.pdf, id=766, 361.35pt x 361.35pt>
 File: gfx/hamming.pdf Graphic file (type pdf)
 <use gfx/hamming.pdf>
 Package pdftex.def Info: gfx/hamming.pdf  used on input line 129.
@@ -2587,10 +2582,10 @@ Package caption Warning: \label without proper reference on input line 147.
 See the caption package documentation for explanation.
 
 
-LaTeX Warning: Reference `fig:magframes' on page 16 undefined on input line 143
+LaTeX Warning: Reference `fig:magframes' on page 22 undefined on input line 143
 .
 
-<gfx/magframes.pdf, id=534, 462.52798pt x 346.89601pt>
+<gfx/magframes.pdf, id=769, 462.52798pt x 346.89601pt>
 File: gfx/magframes.pdf Graphic file (type pdf)
 <use gfx/magframes.pdf>
 Package pdftex.def Info: gfx/magframes.pdf  used on input line 146.
@@ -2600,15 +2595,15 @@ Package caption Warning: \label without proper reference on input line 161.
 See the caption package documentation for explanation.
 
 
-LaTeX Warning: Reference `fig:powframes' on page 16 undefined on input line 156
+LaTeX Warning: Reference `fig:powframes' on page 22 undefined on input line 156
 .
 
-<gfx/powframes.pdf, id=536, 462.52798pt x 346.89601pt>
+<gfx/powframes.pdf, id=771, 462.52798pt x 346.89601pt>
 File: gfx/powframes.pdf Graphic file (type pdf)
 <use gfx/powframes.pdf>
 Package pdftex.def Info: gfx/powframes.pdf  used on input line 160.
 (pdftex.def)             Requested size: 151.19897pt x 113.4015pt.
-[16 <./gfx/hamming.pdf>] [17 <./gfx/magframes.pdf> <./gfx/powframes.pdf
+[22 <./gfx/hamming.pdf>] [23 <./gfx/magframes.pdf> <./gfx/powframes.pdf
 
 pdfTeX warning: pdflatex (file ./gfx/powframes.pdf): PDF inclusion: multiple pd
 fs with page group included in a single page
@@ -2618,10 +2613,10 @@ Package caption Warning: \label without proper reference on input line 212.
 See the caption package documentation for explanation.
 
 
-LaTeX Warning: Reference `fig:filterbank' on page 18 undefined on input line 20
+LaTeX Warning: Reference `fig:filterbank' on page 24 undefined on input line 20
 8.
 
-<gfx/fbanks.pdf, id=638, 462.52798pt x 346.89601pt>
+<gfx/fbanks.pdf, id=871, 462.52798pt x 346.89601pt>
 File: gfx/fbanks.pdf Graphic file (type pdf)
 <use gfx/fbanks.pdf>
 Package pdftex.def Info: gfx/fbanks.pdf  used on input line 211.
@@ -2631,15 +2626,15 @@ Package caption Warning: \label without proper reference on input line 221.
 See the caption package documentation for explanation.
 
 
-LaTeX Warning: Reference `fig:spectrogram' on page 18 undefined on input line 2
+LaTeX Warning: Reference `fig:spectrogram' on page 24 undefined on input line 2
 16.
 
-<gfx/spectrogram.pdf, id=640, 462.52798pt x 346.89601pt>
+<gfx/spectrogram.pdf, id=873, 462.52798pt x 346.89601pt>
 File: gfx/spectrogram.pdf Graphic file (type pdf)
 <use gfx/spectrogram.pdf>
 Package pdftex.def Info: gfx/spectrogram.pdf  used on input line 220.
 (pdftex.def)             Requested size: 151.19897pt x 113.4015pt.
-[18 <./gfx/fbanks.pdf> <./gfx/spectrogram.pdf
+[24 <./gfx/fbanks.pdf> <./gfx/spectrogram.pdf
 
 pdfTeX warning: pdflatex (file ./gfx/spectrogram.pdf): PDF inclusion: multiple 
 pdfs with page group included in a single page
@@ -2649,9 +2644,9 @@ Package caption Warning: \label without proper reference on input line 242.
 See the caption package documentation for explanation.
 
 
-LaTeX Warning: Reference `fig:mfccs' on page 19 undefined on input line 237.
+LaTeX Warning: Reference `fig:mfccs' on page 25 undefined on input line 237.
 
-<gfx/mfcc.pdf, id=679, 462.52798pt x 346.89601pt>
+<gfx/mfcc.pdf, id=909, 462.52798pt x 346.89601pt>
 File: gfx/mfcc.pdf Graphic file (type pdf)
 <use gfx/mfcc.pdf>
 Package pdftex.def Info: gfx/mfcc.pdf  used on input line 241.
@@ -2661,7 +2656,7 @@ Package caption Warning: \label without proper reference on input line 272.
 See the caption package documentation for explanation.
 
 
-LaTeX Warning: Reference `fig:source_mfcc_target' on page 19 undefined on input
+LaTeX Warning: Reference `fig:source_mfcc_target' on page 25 undefined on input
  line 250.
 
 
@@ -2669,7 +2664,7 @@ Package caption Warning: \label without proper reference on input line 272.
 See the caption package documentation for explanation.
 
 
-LaTeX Warning: Reference `fig:source_mfcc_target' on page 19 undefined on input
+LaTeX Warning: Reference `fig:source_mfcc_target' on page 25 undefined on input
  line 261.
 
 
@@ -2700,26 +2695,26 @@ File: gfx/mfcc.pdf Graphic file (type pdf)
 <use gfx/mfcc.pdf>
 Package pdftex.def Info: gfx/mfcc.pdf  used on input line 270.
 (pdftex.def)             Requested size: 151.19897pt x 113.4015pt.
-[19 <./gfx/mfcc.pdf>] [20pdfTeX warning (ext4): destination with the same ident
+[25 <./gfx/mfcc.pdf>] [26pdfTeX warning (ext4): destination with the same ident
 ifier (name{equation.3.2.10}) has been already used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
 l.305         S
-               imilarly, the observable state can be modeled by] [21] [22]
-<gfx/stdpalif.pdf, id=746, 522.09428pt x 386.4839pt>
+               imilarly, the observable state can be modeled by] [27] [28]
+<gfx/stdpalif.pdf, id=975, 522.09428pt x 386.4839pt>
 File: gfx/stdpalif.pdf Graphic file (type pdf)
 <use gfx/stdpalif.pdf>
 Package pdftex.def Info: gfx/stdpalif.pdf  used on input line 406.
 (pdftex.def)             Requested size: 336.0pt x 248.7406pt.
 
-[23]
-<gfx/demo_izh.pdf, id=764, 525.26236pt x 386.4839pt>
+[29]
+<gfx/demo_izh.pdf, id=996, 525.26236pt x 386.4839pt>
 File: gfx/demo_izh.pdf Graphic file (type pdf)
 <use gfx/demo_izh.pdf>
 Package pdftex.def Info: gfx/demo_izh.pdf  used on input line 463.
 (pdftex.def)             Requested size: 336.0pt x 247.2309pt.
- [24] [25 <./gfx/stdpalif.pdf>] [26] [27]) [28]
+ [30] [31 <./gfx/stdpalif.pdf>] [32]) [33]
 
 ! LaTeX Error: Float(s) lost.
 
@@ -2727,7 +2722,7 @@ See the LaTeX manual or LaTeX Companion for explanation.
 Type  H <return>  for immediate help.
  ...                                              
                                                   
-l.64 \include{Chapters/Chapter03}
+l.57 \include{Chapters/Chapter03}
                                  
 You've lost some text.  Try typing  <return>  to proceed.
 If that doesn't work, type  X <return>  to quit.
@@ -2736,7 +2731,13 @@ If that doesn't work, type  X <return>  to quit.
 
 (./Chapters/Chapter04.tex
 Chapter 4.
-<gfx/percwrong.pdf, id=860, 389.31384pt x 225.84814pt>
+[34
+
+
+
+
+]
+<gfx/percwrong.pdf, id=1087, 389.31384pt x 225.84814pt>
 File: gfx/percwrong.pdf Graphic file (type pdf)
 <use gfx/percwrong.pdf>
 Package pdftex.def Info: gfx/percwrong.pdf  used on input line 9.
@@ -2746,7 +2747,7 @@ Overfull \hbox (53.3129pt too wide) in paragraph at lines 9--11
  [][] 
  []
 
-<gfx/crossentropy.pdf, id=861, 388.62376pt x 225.84814pt>
+<gfx/crossentropy.pdf, id=1088, 388.62376pt x 225.84814pt>
 File: gfx/crossentropy.pdf Graphic file (type pdf)
 <use gfx/crossentropy.pdf>
 Package pdftex.def Info: gfx/crossentropy.pdf  used on input line 17.
@@ -2756,7 +2757,7 @@ Overfull \hbox (52.62282pt too wide) in paragraph at lines 17--19
  [][] 
  []
 
-<gfx/hz.pdf, id=862, 383.73048pt x 225.84814pt>
+<gfx/hz.pdf, id=1089, 383.73048pt x 225.84814pt>
 File: gfx/hz.pdf Graphic file (type pdf)
 <use gfx/hz.pdf>
 Package pdftex.def Info: gfx/hz.pdf  used on input line 25.
@@ -2766,7 +2767,7 @@ Overfull \hbox (47.72955pt too wide) in paragraph at lines 25--27
  [][] 
  []
 
-<gfx/regerr.pdf, id=863, 393.97188pt x 226.25592pt>
+<gfx/regerr.pdf, id=1090, 393.97188pt x 226.25592pt>
 File: gfx/regerr.pdf Graphic file (type pdf)
 <use gfx/regerr.pdf>
 Package pdftex.def Info: gfx/regerr.pdf  used on input line 31.
@@ -2781,36 +2782,31 @@ Overfull \hbox (64.6151pt too wide) in paragraph at lines 47--47
 [] []\T1/cmr/m/sc/10.95/80ls (-20) 3 lay-ers[] [] 
  []
 
-) [29
-
-
-
-
- <./gfx/percwrong.pdf>] [30 <./gfx/crossentropy.pdf> <./gfx/hz.pdf
+) [35 <./gfx/percwrong.pdf>] [36 <./gfx/crossentropy.pdf> <./gfx/hz.pdf
 
 pdfTeX warning: pdflatex (file ./gfx/hz.pdf): PDF inclusion: multiple pdfs with
  page group included in a single page
->] [31 <./gfx/regerr.pdf>]
+>] [37 <./gfx/regerr.pdf>]
 \openout2 = `Chapters/Chapter05.aux'.
 
  (./Chapters/Chapter05.tex
 Chapter 5.
-[32
+[38
 
 
 
 
-]) [33]
+]) [39]
 \openout2 = `Chapters/Chapter06.aux'.
 
  (./Chapters/Chapter06.tex
 Chapter 6.
-[34
+[40
 
 
 
 
-]) [35] [36
+]) [41] [42
 
 
 
@@ -2824,51 +2820,52 @@ Underfull \hbox (badness 10000) in alignment at lines 39--39
 [][][] 
  []
 
-) [37
+) [43
 
 
 
-] [38]
+] [44]
 \openout2 = `FrontBackmatter/Bibliography.aux'.
 
- (./FrontBackmatter/Bibliography.tex [39
+ (./FrontBackmatter/Bibliography.tex [45
 
 
 
 
 
 
-]
+] [46] [47] [48] [49]
+Overfull \hbox (18.14105pt too wide) in paragraph at lines 12--12
+\T1/cmr/m/n/10.95 (-20) mate the back-prop-a-ga-tion al-go-rithm.^^Q In: \T1/cm
+r/m/it/10.95 (-20) arXiv preprint arXiv:1810.11393\T1/cmr/m/n/10.95 (-20) . 
+ []
+
+
+Overfull \hbox (16.51152pt too wide) in paragraph at lines 12--12
+\T1/cmr/m/n/10.95 (-20) ing and neu-ral net-works in hard-ware.^^Q In: \T1/cmr/
+m/it/10.95 (-20) arXiv preprint arXiv:1705.06963\T1/cmr/m/n/10.95 (-20) . 
+ []
+
+
 Overfull \hbox (5.85368pt too wide) in paragraph at lines 12--12
 \T1/cmr/m/n/10.95 (-20) NLP Mod-els: A Con-cise Overview.^^Q In: \T1/cmr/m/it/1
 0.95 (-20) arXiv preprint arXiv:2004.08900\T1/cmr/m/n/10.95 (-20) . 
  []
 
-) [40]
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 85.
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 85.
+[50]) [51]
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 78.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 78.
  (./thesis.aux (./FrontBackmatter/Titlepage.aux)
 (./FrontBackmatter/Titleback.aux) (./FrontBackmatter/Contents.aux)
 (./Chapters/Chapter01.aux) (./Chapters/Chapter02.aux) (./Chapters/Chapter03.aux
 ) (./Chapters/Chapter04.aux) (./Chapters/Chapter05.aux)
 (./Chapters/Chapter06.aux) (./Chapters/Chapter0A.aux)
-(./FrontBackmatter/Bibliography.aux)
+(./FrontBackmatter/Bibliography.aux))
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 78.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 78.
+Package rerunfilecheck Info: File `thesis.out' has not changed.
+(rerunfilecheck)             Checksum: 82ED7C98F4EAF4BC5F64276E64BF70DB;2468.
 
-Package mparhack Warning: Marginpars may have changed.
-(mparhack)                Rerun to get them right.
-
-)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 85.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 85.
-
-
-Package rerunfilecheck Warning: File `thesis.out' has changed.
-(rerunfilecheck)                Rerun to get outlines right
-(rerunfilecheck)                or use package `bookmark'.
-
-Package rerunfilecheck Info: Checksums for `thesis.out':
-(rerunfilecheck)             Before: 5F456EE593518D9A2CCD6C094EAB72B1;2540
-(rerunfilecheck)             After:  D3261364C568EB3FA44F26EF55C76747;2540.
 
 LaTeX Warning: There were undefined references.
 
@@ -2884,82 +2881,42 @@ Package logreq Info: Writing requests to 'thesis.run.xml'.
 
  ) 
 Here is how much of TeX's memory you used:
- 47904 strings out of 492982
- 955268 string characters out of 6134896
- 1515629 words of memory out of 5000000
- 50168 multiletter control sequences out of 15000+600000
- 569466 words of font info for 222 fonts, out of 8000000 for 9000
+ 48363 strings out of 492982
+ 968566 string characters out of 6134896
+ 1517838 words of memory out of 5000000
+ 50503 multiletter control sequences out of 15000+600000
+ 571689 words of font info for 240 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 73i,23n,92p,10509b,2126s stack positions out of 5000i,500n,10000p,200000b,80000s
-pdfTeX warning (dest): name{table.caption.56} has been referenced but does no
-t exist, replaced by a fixed one
-
-pdfTeX warning (dest): name{table.caption.18} has been referenced but does not 
-exist, replaced by a fixed one
-
-pdfTeX warning (dest): name{table.caption.17} has been referenced but does not 
-exist, replaced by a fixed one
-
-pdfTeX warning (dest): name{figure.caption.52} has been referenced but does not
- exist, replaced by a fixed one
-
-pdfTeX warning (dest): name{figure.caption.51} has been referenced but does not
- exist, replaced by a fixed one
-
-pdfTeX warning (dest): name{figure.caption.49} has been referenced but does not
- exist, replaced by a fixed one
-
-pdfTeX warning (dest): name{figure.caption.41} has been referenced but does not
- exist, replaced by a fixed one
-
-pdfTeX warning (dest): name{figure.caption.37} has been referenced but does not
- exist, replaced by a fixed one
-
-pdfTeX warning (dest): name{figure.caption.32} has been referenced but does not
- exist, replaced by a fixed one
-
-pdfTeX warning (dest): name{figure.caption.31} has been referenced but does not
- exist, replaced by a fixed one
-
-pdfTeX warning (dest): name{figure.caption.28} has been referenced but does not
- exist, replaced by a fixed one
-
-pdfTeX warning (dest): name{figure.caption.27} has been referenced but does not
- exist, replaced by a fixed one
-
-pdfTeX warning (dest): name{figure.caption.19} has been referenced but does not
- exist, replaced by a fixed one
-
-pdfTeX warning (dest): name{section*.57} has been referenced but does not exist
-, replaced by a fixed one
-
-{/usr/share/texmf/fonts/enc/dvips/cm-super/cm-super-t1.enc}</usr/share/texlive/
-texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb></usr/share/texlive/texmf-
-dist/fonts/type1/public/amsfonts/cm/cmbx8.pfb></usr/share/texlive/texmf-dist/fo
-nts/type1/public/amsfonts/cm/cmex10.pfb></usr/share/texlive/texmf-dist/fonts/ty
-pe1/public/amsfonts/cm/cmmi10.pfb></usr/share/texlive/texmf-dist/fonts/type1/pu
-blic/amsfonts/cm/cmmi6.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/am
-sfonts/cm/cmmi8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/
-cm/cmr10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr6
-.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></u
-sr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/sha
-re/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy6.pfb></usr/share/texl
-ive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/share/texlive/tex
-mf-dist/fonts/type1/public/amsfonts/euler/eurb10.pfb></usr/share/texlive/texmf-
-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb></usr/share/texmf/fonts/typ
-e1/public/cm-super/sfbx1095.pfb></usr/share/texmf/fonts/type1/public/cm-super/s
-fcc1000.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfcc1095.pfb></usr/sh
-are/texmf/fonts/type1/public/cm-super/sfcc1200.pfb></usr/share/texmf/fonts/type
-1/public/cm-super/sfrm0600.pfb></usr/share/texmf/fonts/type1/public/cm-super/sf
-rm0800.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfrm1000.pfb></usr/sha
-re/texmf/fonts/type1/public/cm-super/sfrm1095.pfb></usr/share/texmf/fonts/type1
-/public/cm-super/sfrm1200.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfs
-s0800.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfti1095.pfb></usr/shar
-e/texmf/fonts/type1/public/cm-super/sftt1095.pfb>
-Output written on thesis.pdf (44 pages, 884810 bytes).
+ 73i,23n,98p,10509b,3118s stack positions out of 5000i,500n,10000p,200000b,80000s
+{/usr/share/texmf/fonts/enc/dvips/cm-super/cm-super-t1.enc}</usr/share/texliv
+e/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb></usr/share/texlive/texm
+f-dist/fonts/type1/public/amsfonts/cm/cmbx8.pfb></usr/share/texlive/texmf-dist/
+fonts/type1/public/amsfonts/cm/cmex10.pfb></usr/share/texlive/texmf-dist/fonts/
+type1/public/amsfonts/cm/cmmi10.pfb></usr/share/texlive/texmf-dist/fonts/type1/
+public/amsfonts/cm/cmmi6.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/
+amsfonts/cm/cmmi8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfont
+s/cm/cmr10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cm
+r6.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb><
+/usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/s
+hare/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy6.pfb></usr/share/te
+xlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/share/texlive/t
+exmf-dist/fonts/type1/public/amsfonts/euler/eurb10.pfb></usr/share/texlive/texm
+f-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb></usr/share/texmf/fonts/t
+ype1/public/cm-super/sfbx1095.pfb></usr/share/texmf/fonts/type1/public/cm-super
+/sfcc1000.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfcc1095.pfb></usr/
+share/texmf/fonts/type1/public/cm-super/sfcc1200.pfb></usr/share/texmf/fonts/ty
+pe1/public/cm-super/sfrm0600.pfb></usr/share/texmf/fonts/type1/public/cm-super/
+sfrm0800.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfrm0900.pfb></usr/s
+hare/texmf/fonts/type1/public/cm-super/sfrm1000.pfb></usr/share/texmf/fonts/typ
+e1/public/cm-super/sfrm1095.pfb></usr/share/texmf/fonts/type1/public/cm-super/s
+frm1200.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfss0800.pfb></usr/sh
+are/texmf/fonts/type1/public/cm-super/sfti1095.pfb></usr/share/texmf/fonts/type
+1/public/cm-super/sftt0900.pfb></usr/share/texmf/fonts/type1/public/cm-super/sf
+tt1095.pfb>
+Output written on thesis.pdf (55 pages, 978037 bytes).
 PDF statistics:
- 1260 PDF objects out of 1440 (max. 8388607)
- 880 compressed objects within 9 object streams
- 287 named destinations out of 1000 (max. 500000)
- 63381 words of extra memory for PDF output out of 74296 (max. 10000000)
+ 1528 PDF objects out of 1728 (max. 8388607)
+ 1132 compressed objects within 12 object streams
+ 378 named destinations out of 1000 (max. 500000)
+ 63885 words of extra memory for PDF output out of 74296 (max. 10000000)
 
