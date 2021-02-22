@@ -26,7 +26,7 @@ For instance, ResNet \citep{he2016deep} has been trained for 3 weeks on a 8-GPU 
 A more extreme case is the 11-billion parameter version of Google's T5 model \citep{raffel2019exploring}, which is estimated to cost more than \$1.3 million per training run \citep{sharir2020cost}.
 This difference in power consumption precludes computations in mobile low-power or small-scale devices, which now requires at least a connection to a cloud computing server.
 
-The energy consumption of DL contrasts strongly with the that of the human brain, which can learn patterns using far less energy and data.
+The energy consumption of DL contrasts strongly with that of the human brain, which can learn patterns using far less energy and data.
 This is because despite the biologically inspired foundation, deep ANNs are fundamentally different from the brain, which is an inherently time-dependent dynamical system \citep{sacramento2018dendritic, wozniak2020deep} that relies on biophysical processes, recurrence, and feedback of its physical substrate for computation \citep{sterling2015principles,bhalla2014molecular}.
 Deep ANNs are implemented on von Neumann architectures \citep{von1993first}, \ie, a system with a central processing unit (CPU) and separate memory, which are significantly different from the working model of the brain \citep{schuman2017survey}.
 
@@ -44,8 +44,8 @@ The human brain, in contrast, is unlikely to use backpropagation, BPTT, or gradi
 Spiking neural networks (SNNs) \citep{maass1997networks,gerstner2002spiking} are another step towards biological plausibility of connectionist models.
 The concept dates back to the 1980s \citep{hopfield1982neural}; nevertheless, they are sometimes considered as the third generation of ANNs \citep{maass1997networks}.
 SNNs use neurons that do not relay continuous activation values at every propagation cycle, but spike once when they reach a threshold value.
-SNNs are competitive to ANNs in terms of accuracy and computational power, as well in they ability to display precise spike timings \citep{lobo2020spiking}.
-Their sparse firing regimes also offer improved interpretability of their behavior as compared to traditional ANNs \cite{soltic2010knowledge}, which is desired in areas such as medicine or aviation.
+SNNs are competitive to ANNs in terms of accuracy and computational power, as well in their ability to display precise spike timings \citep{lobo2020spiking}.
+Their sparse firing regimes also offer improved interpretability of their behavior as compared to traditional ANNs \citet{soltic2010knowledge}, which is desired in areas such as medicine or aviation.
 
 However, SNNs have not been as popular as ANNs.
 One reason for this is that spike-based activation is not differentiable.
@@ -53,8 +53,8 @@ As a consequence, backpropagation cannot be directly used to move in the negativ
 
 Similarly, it has been demonstrated that BPTT can be applied to recurrent SNNs (RSNNs) \citep{huh2017gradient,bellec2018long}.
 Some RSNN training methods rely on control theory to train a chaotic reservoir of neurons \citep{thalmeier2016learning,gilra2017predicting}.
-Information locality can be preserved in some of there methods \citep{alemi2018learning}, \ie, a neuron or synapse can only access information of itself, or the communication of synapses or neurons (resp.) with which it is directly connected.
-The FORCE training method \citep{nicola2017supervised}, in contrast, can also train RSNNs but it nonlocal.
+Information locality can be preserved in some of these methods \citep{alemi2018learning}, \ie, a neuron or synapse can only access information of itself, or the communication of synapses or neurons (resp.) with which it is directly connected.
+The FORCE training method \citep{nicola2017supervised}, in contrast, can also train RSNNs but is nonlocal and therefore not suited for biologically plausible implementations.
 This body of research led to increased understanding of training SNNs and how to obtain better learning performances.
 For instance, both single- and multi-layer SNNs have shown good performance in visual processing \citep{escobar2009action,kheradpisheh2018stdp,liu2017fast} and speech recognition \citep{tavanaei2017bio,dong2018unsupervised}.
 While DL was rapidly becoming popular during the 2010s, there was no clear learning algorithm for SNNs that could compete with ANNs.
@@ -67,7 +67,7 @@ A central advantage of NC is energy efficiency \citep{hasler1990vlsi,lee1990para
 This energy efficiency, combined with NC's massive parallelism \citep{monroe2014neuromorphic}, makes VLSIs particularly relevant for implementing SNNs.
 
 Like SNNs, neuromorphic systems typically use parse, event-based communication and physically colocalized memory and computation \citep{sterling2015principles,neftci2018data}.
-Although colocalized memory and computation has also been implemented in von Neumann machines, such as Google's TPU\footnote{see \texttt{https://cloud.google.com/tpu/docs/tpus}. Last accessed January 2021}, Graphcore's IPU\footnote{see \texttt{https://www.graphcore.ai/products/ipu}. Last accessed January 2021}, or Cerebras' CS-1\footnote{see \texttt{https://cerebras.net/product/\#chip}. Last accessed January 2021}, neuromorphic systems are more efficient for running ANNs \citep{merolla2014million,rajendran2019low}.
+Although colocalized memory and computation has also been implemented in von Neumann machines, such as Google's TPU\footnote{See \texttt{https://cloud.google.com/tpu/docs/tpus}. Last accessed January 2021}, Graphcore's IPU\footnote{See \texttt{https://www.graphcore.ai/products/ipu}. Last accessed January 2021}, or Cerebras' CS-1\footnote{See \texttt{https://cerebras.net/product/\#chip}. Last accessed January 2021}, neuromorphic systems are more efficient for running ANNs \citep{merolla2014million,rajendran2019low}.
 The energy consumption of CMOS artificial neurons is several orders of magnitude lower than that of neurons in an ANN, and even 2--3 times lower than the energy consumption of biological neurons \citep{elbez2020progressive}.
 Neuromorphic systems are also more tolerant to device variation \citep{yu2013low}.
 
@@ -87,7 +87,7 @@ They cannot access future information, nor past information if it was not explic
 The brain also adheres to these two constraints.
 Most learning algorithms for SNNs are rooted in a form of Hebbian learning, which is a major factor in biological learning and memory consolidation.
 Classical Hebbian learning is often summarized by ``cells that fire together, wire together'', if there is a causal relationship between these cells, such as a postsynaptic potential on a connecting synapse.
-Direct application of Hebbian learning in a spiking neural network will generally lead to a positive feedback loop, because ``wiring cells together'', or increasing the synaptic strength, will in turn increase the likelihood they they also fire together \citep{zenke2017temporal}.
+Direct application of Hebbian learning in a spiking neural network will generally lead to a positive feedback loop, because ``wiring cells together'', or increasing the synaptic strength, will in turn increase the likelihood that they also fire together \citep{zenke2017temporal}.
 Furthermore, classical Hebbian learning describes no way for a synapse to weaken.
 
 Spike-timing-dependent plasticity (STDP) \citep{abbott2000synaptic,caporale2008spike} is a type of Hebbian learning that incorporates temporal causality: if neuron $B$ spikes right after neuron $A$, then the synapse is strengthened.
@@ -97,7 +97,7 @@ It is widely known that STDP is a fundamental learning principle in the human br
 STDP by itself can be used as an unsupervised learning algorithm or to forming associations in classical conditioning \citep{diehl2015unsupervised,kim2018demonstration}.
 Furthermore, it has been demonstrated to form associations between memory traces in SNNs, which are crucial for cognitive brain function \citep{pokorny2020stdp}.
 To allow supervised learning, or operant conditioning, a learning signal is required to influence the direction of the synapse weight change: a positive learning signal will reinforce the association (long-term potentiation), and a negative learning signal weakens it (long term depression) \citep{lobov2020spatial}.
-STDP with a learning signal is known as reward-modulated STDP (R-STDP) \citep{legenstein2008learning} in the field of SNNs and three-factor Hebbian learning in neuroscience \citep{fremaux2016neuromodulated}, outperforming its classical two-factor counterpart \citep{porr2007learning} because learning signals are crucial for maintaining long-term memory \citep{bailey2000heterosynaptic}.
+STDP with a learning signal is known as reward-modulated STDP (R-STDP) \citep{legenstein2008learning} in the field of SNNs and three-factor Hebbian learning in neuroscience \citep{fremaux2016neuromodulated}, outperforming its classical two-factor counterpart \citep{porr2007learning} because learning signals are crucial for maintaining long-term memory \citep{bailey2000heterosynaptic} and behavioral changes.
 
 Neurotransmitters are used to modulate the learning signal in the brain.
 Dopamine, for instance, which has a central behavioral and functional role in the primary motor cortex \citep{barnes2005activity,dang2006disrupted}, has been shown to modulate synapses through dendritic spine enlargement during a very narrow time window \citep{dang2006disrupted}.
@@ -110,9 +110,9 @@ However, R-STDP by itself does not solve the credit assignment problem, which re
 In that case, when the learning signal is presented, the neurons have long spiked, and it is not clear which synapses elicited the behavior that is rewarded or punished.
 Recent research suggests that the brain uses \emph{eligibility traces} \citep{izhikevich2007solving,florian2007reinforcement} to solve the credit assignment problem \citep{stolyarova2018solving,gerstner2018eligibility}.
 An eligibility trace of a synapse is elicited when a neuron spikes, and fades away slowly enough that a delayed learning signal can still modulate the synaptic plasticity through R-STDP \citep{cassenaer2012conditional,yagishita2014critical,gerstner2018eligibility}.
-Synaptic plasticity was demonstrated using synaptic plasticity in deep feedforward SNNs \citep{zenke2018superspike,neftci2017event,kaiser2020synaptic} and could be implemented in feedforward VLSIs, but \cite{zenke2018superspike} notes that these methods are applicable for RSNNs.
+Synaptic plasticity was demonstrated using synaptic plasticity in deep feedforward SNNs \citep{zenke2018superspike,neftci2017event,kaiser2020synaptic} and could be implemented in feedforward VLSIs, but \citet{zenke2018superspike} notes that these methods are applicable for RSNNs.
 Eligibility traces have also been shown to solve difficult credit assignment problems in SNNs using R-STDP \citep{legenstein2008learning, bellec2020solution} and in RNNs \citep{he2015distinct}, and have a predictable learning effect \citep{legenstein2008learning}.
-R-STDP in SNNs has been used to solve a number of tasks, including training a stable lane keeping controller \citep{bing2020indirect}, but can suffer from catastrophic forgetting and lack of policy evaluation in mapless navogation \citep{bing2018end}.
+R-STDP in SNNs has been used to solve a number of tasks, including training a stable lane keeping controller \citep{bing2020indirect}, but can suffer from catastrophic forgetting and lack of policy evaluation in mapless navigation \citep{bing2018end}.
 
 \paragraph{Eligibility propagation}
 Eligibility propagation (e-prop) \citep{bellec2020solution} is a local and online learning algorithm for RSNNs that can be mathematically derived as an approximation to BPTT (see also Section \ref{sec:derivefromBPTT}).
@@ -122,7 +122,7 @@ This has been suggested to provide a diversity of feature detectors for task-rel
 Broadcast alignment can perform as effectively as backpropagation in some tasks in feedforward ANNs \citep{lillicrap2016random,nokland2016direct} and multi-layer SNNs \citep{samadi2017deep,clopath2010connectivity}, but performs poorly in deep feedforward ANNs for complex image classification tasks \citep{bartunov2018assessing}.
 
 The local and online properties of e-prop make it a biologically plausible learning algorithm that can be implemented on VLSIs.
-E-prop has been demonstrated to work for a large variety of tasks, including on classifying phones (\ie, speech sounds), for which it performs competitively with LSTMs, a popular RNN architecture that uses BPTT.
+E-prop has been demonstrated to work for a large variety of tasks, including on classifying phones (\ie, speech sounds), for which it performs competitively with LSTMs \citep{graves2013speech}, a popular RNN architecture that uses BPTT.
 
 So far, only the LIF and adaptive LIF (ALIF) neuron models have been used in e-prop. In \citet{traub2020learning}, a functional modification was made to the LIF model such that STDP can occur.
 In particular, STDP occurs when the neuron model provides a negated gradient signal in the case when a presynaptic signal arrives too late.
@@ -131,11 +131,14 @@ This resembles the biological phenomenon of error-related negativity (ERN) \cite
 However, these STDP-modified neurons were shown only in a single-synapse demo to illustrate the STDP properties, not in a full learning task.
 
 \paragraph{Multi-layer RSNNs}
+
+The human neocortex, which is responsible for processing sensory information, controlling motor output, and mediating higher-order cognitive functions, is organized into six recurrent layers of spiking neurons \citep{greig2013molecular}.
+
 The discovery of backpropagation allowed gradient descent--based training of multi-layer ANNs, which significantly increased their performance.
 Multi-layer CNNs show higher levels of abstraction in deeper layers of the network.
 For instance, early convolutional filters identify lines and edges, while deeper filters identify more complex shapes.
-In RNNs, stacking recurrent layers results in a similar abstraction---but it is temporal instead of spatial.
-Deeper layers exhibit slower time dynamics than shallow layers, suggesting that they ignore small variations in the input signal and integrate larger temporal patterns.
+In RNNs, stacking recurrent layers results in a similar abstraction---but it is temporal instead of spatial \citep{hermans2013training,gallicchio2017deep}.
+Deeper RNN layers exhibit slower time dynamics and longer memory spans than shallow layers \citep{gallicchio2018short}, suggesting that they ignore small variations in the input signal and integrate larger temporal patterns.
 It is unclear if these findings extrapolate to RSNNs.
 
 \paragraph{This research}

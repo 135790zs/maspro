@@ -5,7 +5,7 @@
 
 	\subsection{The TIMIT speech corpus}
 		TIMIT is a speech corpus that contains phonemically transcribed speech~\citep{garofolo1993darpa}, comprising 6300 sentences, 10 spoken by each of the 630 speakers.
-		To include a broad range of dialects all speakers lived in 8 different geographical regions in the United States (as categorized in \cite{labov2008atlas}) during their childhood years.
+		To include a broad range of dialects all speakers lived in 8 different geographical regions in the United States (as categorized in \citet{labov2008atlas}) during their childhood years.
 		Table~\ref{tab:dialects} breaks down the precise composition of the dialect distribution.
 
 		\begin{table}[ht]
@@ -55,7 +55,7 @@
 		Each of the sentences is encoded in as a waveform signal in \texttt{.wav} format, and is accompanied by a corresponding text file indicating which phones are pronounced in the waveform, and between which pairs of sample points.
 
 	\subsection{Data splitting}
-		The TIMIT dataset is split into a training, validation and testing set as in \cite{graves2005framewise} and \cite{bellec2020solution}.
+		The TIMIT dataset is split into a training, validation and testing set as in \citet{graves2005framewise} and \citet{bellec2020solution}.
 		The training set is used to train the network synaptic weights according to the e-prop algorithm.
 		The validation set is used to obtain a well-performing set of hyperparameters.
 		The testing set is used to evaluate the performance of the network after the hyperparameters are obtained.
@@ -77,7 +77,7 @@
 
 	\subsection{Engineering features}
 
-		In this subsection, we describe the preprocessing pipeline as in \cite{fayek2016}, which can be summarized by applying a pre-emphasis filter on the waveforms, then slicing the waveform in short frames, taking their short-term power spectra, computing 26 filterbanks, and finally obtain 12 Mel-Frequency Cepstrum Coefficients (MFCCs).
+		In this subsection, we describe the preprocessing pipeline as in \citet{fayek2016}, which can be summarized by applying a pre-emphasis filter on the waveforms, then slicing the waveform in short frames, taking their short-term power spectra, computing 26 filterbanks, and finally obtain 12 Mel-Frequency Cepstrum Coefficients (MFCCs).
 		We align these MFCCs with the phones found in the TIMIT dataset.
 		An example of a waveform signal is given in Figure \ref{fig:signal}.
 			\begin{figure}[ht]
@@ -131,11 +131,12 @@
 			    \caption{The magnitudes of the DFT of a frame.}
 			\end{figure}
 			This window is applied to reduce the spectral leakage, which manifests itself though sidelobes in the power spectra.
-			Applying the Hamming window reduces the sidelobes to near-equiripple conditions \citep{SASPWEB2011}.\todo{plot for illustration}.
+			Applying the Hamming window reduces the sidelobes to near-equiripple conditions, minimizing the leakage \citep{SASPWEB2011}.
 
 		\paragraph{Short-term power spectra}
 
-			We obtain the power spectra $P_i$ for each frame by first taking the absolute $K$-point discrete Fourier transform (DFT) of the frame samples $x_i(n)$\todo{don't bother with eqn, just call mathbb(F)}
+			We obtain the power spectra $P_i$ for each frame by first taking the absolute $K$-point discrete Fourier transform (DFT) of the frame samples $x_i(n)$/
+			% \todo{don't bother with eqn, just call mathbb(F)}
 			\begin{equation}\label{eq:magframes}
 				X_k = \left|\sum_{n=0}^{N-1}x_i(n)\cdot e^{-\frac{i2\pi}{N}kn}\right|,
 			\end{equation}
@@ -149,7 +150,6 @@
 			\end{figure}
 
 			We obtain the power spectrum using the equation
-
 			\begin{equation}\label{eq:powframes}
 				P = \frac{{X_k}^2}{K},
 			\end{equation}
@@ -159,7 +159,7 @@
 				\centering
 			    \includegraphics[width=.45\linewidth]{gfx/powframes}
 			    \label{fig:powframes}
-			    \caption{A power spectrum of a frame.}
+			    \caption{The power spectrum of a frame.}
 			\end{figure}
 
 		\paragraph{Mel filterbank}
@@ -192,7 +192,7 @@
 
 			The resulting 40 filterbanks with their corresponding Mels and frequencies are listed in Table \ref{tab:mels}.
 
-			The $i\textsuperscript{th}$ filter in filterbank $H_i$ is a triangular filter that has its lower boundary at $b_{i}$ \SI{}{\Hz}, its peak at $b_{i+1}$ \SI{}{\Hz}, and its upper boundary at $b_{i+2}$ \SI{}{\Hz}.\todo{not sure}
+			The $i\textsuperscript{th}$ filter in filterbank $H_i$ is a triangular filter that has its lower boundary at $b_{i}$ \SI{}{\Hz}, its peak at $b_{i+1}$ \SI{}{\Hz}, and its upper boundary at $b_{i+2}$ \SI{}{\Hz}.
 			For other frequencies, they are 0.
 			Therefore, the filterbank can be described by
 			\begin{equation}
@@ -224,16 +224,15 @@
 
 		\paragraph{Mel-frequency cepstral coefficients}
 
-			We observe that the coefficients in the spectrograms are strongly correlated, which would negatively impact the learning performance of the model \todo{why?}.
-
-			Therefore, we apply the DCT again to decorrelate the coefficients and obtain the power cepstrum $C$ of the speech frame:\todo{do we take absolute?}
+			We observe that the coefficients in the spectrograms are strongly correlated, which would negatively impact the learning performance of the model.
+			Therefore, we apply the DCT again to decorrelate the coefficients and obtain the power cepstrum $C$ of the speech frame:
 
 			\begin{equation}\label{eq:magframes}
 				C(n) = \left|\sum_{n=0}^{N-1}S(n)\cdot e^{-\frac{i2\pi}{N}kn}\right|.
 			\end{equation}
 
 			We discard the first coefficient in $C$, because it is the average power of the input signal and therefore carries little meaning.
-			We also discard coefficients higher than 13, because they represent only fast changes in the spectrogram and increase the complexity of the input signal while adding increasingly less meaning to it. \todo{source?}
+			We also discard coefficients higher than 13, because they represent only fast changes in the spectrogram and increase the complexity of the input signal while adding increasingly less meaning to it.
 			An example of the remaining MFCC components is shown in Figure \ref{fig:mfccs}.
 
 			\begin{figure}[ht]
@@ -245,8 +244,6 @@
 
 			Then, we balance the final MFCCs by centering each frame around the value 0.
 			Next, the trailing frames that are labeled as `silent' are trimmed from the end of the input and target sequences.
-			Finally, to reflect\todo{better wording: re-approximate?} the speed of the original waveform signal, the input sequences are stretched by a factor of 5, interpolating linearly between frames.
-			The target sequences are also stretched by this factor, but proximally interpolated to retain its one-hot encoding.
 			An example of the final MFCCs is given in \ref{fig:source_mfcc_target}.
 
 		\paragraph{Target output}
@@ -260,7 +257,7 @@
 
 			Figure \ref{fig:source_mfcc_target} illustrates the waveform data and its frame-wise aligned MFCCs and target output.
 
-			\todo{side-by-side with original text and phonemes, label as fig:source\_mfcc\_target}
+			% \todo{side-by-side with original text and phonemes, label as fig:source\_mfcc\_target}
 
 
 
@@ -268,24 +265,21 @@
 		    \centering
 		    \includegraphics[width=.45\linewidth]{gfx/signal}\\
 		    \includegraphics[width=.45\linewidth]{gfx/mfcc}\\
-		    % \includegraphics[width=.45\linewidth]{gfx/target}
+		    \includegraphics[width=.45\linewidth]{gfx/target}
 		    \label{fig:source_mfcc_target}
 		    \caption{An alignment of a sample signal with its MFCCs and target phones.}
 		\end{figure}
 
 \section{Enhancing e-prop}
 
-	\begin{tcolorbox}[colback=orange]
-	preamble
+	This report examines two types of enhancements to applying the e-prop learning algorithm on the TIMIT dataset.
 
-	\end{tcolorbox}
+	The first type is the effect of the neuron model; particularly, the effect of including STDP behavior is analyzed.
+	The second type is the effect of a multi-layered architecture.
 
 	\subsection{Multi-layer architecture}
-		\begin{tcolorbox}[colback=orange]
 
-		- English, visual and formal descriptions.
-
-		\end{tcolorbox}
+		% todo: architecture illustration
 
 		The multi-layer e-prop architecture can be described in the same formal model as its single-layer counterpart, in which the hidden state is based on temporally (i.e., online) and spatially locally available information at a neuron $j$:
 
@@ -332,30 +326,18 @@
 
 
 	\subsection{Other neuron types}
-		\begin{tcolorbox}[colback=orange]
-		- Argue in favor of different models (refer to brain, simplicity vs. plausibility trade-off). E.g.: built-in refractory
 
-		- Explain that ALIF displays no STDP, which is believed to be crucial for biological learning and forming associations and memory.
-
-		\end{tcolorbox}
 		In this section, the multi-layer STDP-ALIF and Izhikevich neuron models are presented.
 		The advantage of these models over the standard ALIF model is that they naturally elicit STDP.
-		Additionally, the Izhikevich model has an implicit refractory mechanism that is built into its system of equations, as opposed to the (STDP-)ALIF model that requires an explicit timer variable in a neuron's hidden state.
+		Additionally, the Izhikevich model has an implicit refractory mechanism that is built into its system of equations, making it a more biologically plausible model, as opposed to the (STDP-)ALIF model that requires an explicit timer variable in a neuron's hidden state (but it is still local and online).
 
-		The Izhikevich neuron model was first presented by \cite{traub2020learning} only in a single-synapse demonstration of its STDP properties.
+		The Izhikevich e-prop neuron model was first presented by \citet{traub2020learning} only in a single-synapse demonstration of its STDP properties.
 		In this report, the performance of the e-prop Izhikevich model is experimentally validated in a learning task for the first time.
-		\cite{traub2020learning} also described the STDP-LIF, which is a non-adaptive modification of the standard LIF neuron.
+		\citet{traub2020learning} also described the STDP-LIF, which is a non-adaptive modification of the standard LIF neuron.
 		Here, its adaptive counterpart, the STDP-ALIF model, is derived and validated as well.
 		This allows for a direct comparison between the ALIF and STDP-ALIF models, such that the effects of STDP can be more precisely analyzed.
 
 		\subsubsection{STDP-LIF}
-
-			\begin{tcolorbox}[colback=orange]
-			- Also mention and motivate v-fix and psi-fix.
-
-			- Mention Bellec's reset too.
-			\end{tcolorbox}
-
 			The key change between the ALIF and STDP-ALIF neuron is that the latter is reset to zero at a spike event, and when its refractory period of $\delta t_\text{ref}$ time steps ends.
 			Recall that in contrast, the standard ALIF neuron uses a soft reset by including a term $-z^t_{rj}v_\text{thr}$ in its activation update equation (Equation \ref{eq:ml_alifV}).
 
@@ -383,9 +365,9 @@
 	        \end{align}
 	        Note that the observable state of the afferent neuron $z_{ri}^{t-1}$ in Equation \ref{eq:ml_stdpalif_evector} changes to $z_{r-1, i}^t$ if $\epsilon^{t+1}_{rji}$ corresponds to a weight between layer $r-1$ and $r$ and $r > 1$.
 	        If the weight is instead between the network input and the first layer, then it changes to $x^t_i$.
-	        Note also that this corrects an error in the STDP-LIF model described in \cite{traub2020learning}, where the observable state at the current time step $t$ is accessed instead of $t-1$, thereby diverging from the e-prop model in Equation \ref{eq:ml_model}.
+	        Note also that this corrects an error in the STDP-LIF model described in \citet{traub2020learning}, where the observable state at the current time step $t$ is accessed instead of $t-1$, thereby diverging from the e-prop model in Equation \ref{eq:ml_model}.
 
-	        The eligibility trace remains \todo{is this true? Critically review how Traub handles pseudo-derivatives in z, and check if dzdh remains the same}
+	        The eligibility trace remains
 	        \begin{align}
 	        e^{t}_{rji} &= \frac{\partial z^{t}_{rj}}{\partial\mathbf{h}^{t}_{rj}} \cdot \mathbf{\epsilon}^{t}_{rji}\\
 	        &= \psi^t_{rj}\left(\epsilon^t_{rji, v} - \beta\epsilon^t_{rji, a}\right).
@@ -399,13 +381,13 @@
 	        \gamma\max\left(0, 1 - \left|\frac{v^t_{rj}-v_\text{th}}{v_\text{th}}\right|\right)&\mbox{otherwise}
 	        \end{cases}
 	        \end{equation}
-	        The factor of the pseudo-derivative and the eligibility vector can therefore produce both positive or negative eligibility traces and gradients.
+	        The factor of the pseudo-derivative and the eligibility vector can therefore produce both positive or negative eligibility traces and gradients (see Figure \ref{fig:stdpalif}).
 
 	        \begin{figure}[ht]
 	            \centering
 	            \includegraphics[width=\linewidth]{gfx/stdpalif}
 	            \label{fig:stdpalif}
-	            \caption{.}\todo{caption and reference to fig}
+	            \caption{A single-synapse demonstration of the STDP-ALIF.}
 	        \end{figure}
 
 		\subsubsection{Izhikevich neuron}
@@ -416,7 +398,7 @@
 			a' &= 0.004v - 0.02a,
 			\end{align}
 			where $v'$ and $a'$ are the values of the activation value $v$ and recovery variable $a$ at the next time point, and $I$ is the current input to the neuron.
-			Following \cite{traub2020learning}, the activation reset and refractory period are built into this system of equations by replacing $v$ and $a$ by respectively:
+			Following \citet{traub2020learning}, the activation reset and refractory period are built into this system of equations by replacing $v$ and $a$ by respectively:
 			\begin{align}
 			\tilde{v}^t_{rj} &= v^t_{rj} - \left(v^t_{rj} + 65\right)z^t_{rj}\\
 			\tilde{a}^t_{rj} &= a^t_{rj} + 2z^t_{rj},
@@ -434,16 +416,15 @@
 			\frac{\partial v^{t+1}_{rj}}{\partial a^t_{rj}} &= 0.004\left(1-z^t_{rj}\right)\\
 			\frac{\partial a^{t+1}_{rj}}{\partial a^t_{rj}} &= 0.98.
 			\end{align}
-			The eligibility vector is then computed as
+
 			Using these values, we compute the new eligibility trace:
 	        \begin{align}
 	        \mathbf{\epsilon}^{t+1}_{rji} &= \frac{\partial\mathbf{h}^{t+1}_{rj}}{\partial\mathbf{h}^t_{rj}}\cdot\mathbf{\epsilon}^t_{rji} + \frac{\partial\mathbf{h}^{t+1}_{rj}}{\partial W_{rji}}\\
-	        &= \begin{pmatrix}[1.5]
-	        \left(1-z^t_{rj}\right)\left(6+0.08v^t_{rj}\right)\epsilon^t_{rji, v} -\epsilon^t_{rji, a} + z_{ri}^{t-1}\\
+	        &= \begin{pmatrix}[1.5]\left(1-z^t_{rj}\right)\left(6+0.08v^t_{rj}\right)\epsilon^t_{rji, v} -\epsilon^t_{rji, a} + z_{ri}^{t-1}\\
 	        0.004\left(1-z^t_{rj}\right)\epsilon^t_{rji, v} + 0.98\epsilon^t_{rji, a}
 	        \end{pmatrix}\label{eq:ml_izhikevich_evector}
 	        \end{align}
-	        As in \cite{traub2020learning}, the pseudo-derivative is defined as
+	        As in \citet{traub2020learning}, the pseudo-derivative is defined as
 	        \begin{equation}
 	        \psi^t_{rj} = \gamma\ \exp\left(\frac{\min\left(v^t_{rj}, 30\right) - 30}{30}\right),
 	        \end{equation}
@@ -458,13 +439,17 @@
 	        &= \psi^t_{rj}\epsilon^t_{rji, v}.
 	        \end{align}
 
+	    However, when inserting these equations in a single-synapse demo, the eligibility vector assumes extremely high or low values (see Figure \ref{fig:demo_izh}).
+	    This suggests that the Izhikevich neuron does not fit the e-prop framework well.
+	    In this report, this is corrected by clipping the value of $\epsilon^t_{ji,v}$ to $\left[-3, 3\right]$ and $\epsilon^t_{ji,a}$ to $\left[-0.005, 0.005\right]$.
+	    This correction yields the desired STDP behavior (see Figure \ref{fig:demo_izh_corrected}).
+
         \begin{figure}[ht]
             \centering
-            \includegraphics[width=\linewidth]{gfx/demo_izh}
-            \label{fig:demo_izh}
-            \caption{.}\todo{caption and reference to fig}
+            \includegraphics[width=\linewidth]{gfx/demo_izh_corrected}
+            \label{fig:demo_izh_corrected}
+            \caption{A single-synapse demo of the corrected Izhikevich neuron.}
         \end{figure}
-
 
 
 \section{Regularization}
@@ -473,12 +458,10 @@
 	These two regularization methods are motivated by biological plausibility, ease of implementation in the e-prop framework, and improved empirical performance.
 
 	\subsection{Firing rate regularization}
-		\begin{tcolorbox}[colback=orange]
-		- What, why?
+		A firing rate regularization term is added to individually control the spike frequencies of the neurons.
+		Since spikes in a neuromorphic architecture cost energy, the practical motivation for this regularization term is that it increases the energy efficiency of the model.
+		The biological motivation is that the firing rate of biological neurons is also under homeostatic control \citep{erickson2006activity}.
 
-		- Bioplausible? Quote "Activity-dependent regulation of vesicular glutamate and GABA transporters: A means to scale quantal size"
-
-		\end{tcolorbox}
 		Firing rate is implemented by adding a regularization term $E_\text{reg}$ to the loss function that penalizes neurons that have a firing rate that is too low or too high:
 		\begin{equation}
 			E_\text{reg} = \frac{1}{2}\sum_j\left(f^\text{target} - f^{\text{av}, t}_{rj}\right)^2,
@@ -495,8 +478,8 @@
 		\begin{equation}
 		\frac{\partial E_\text{reg}}{\partial z_{rj}^t} = \left(f^\text{target} - f^{\text{av}, t}_{rj}\right).
 		\end{equation}
-		Note that this regularization loss differs from the firing rate regularization in \cite{bellec2020solution}, in which the firing rate is calculated in an offline fashion, by retroactively computing the average firing rate based on all spikes instead of only accumulated spikes.
-		Note also that in \cite{bellec2020solution}, $\frac{\partial E_\text{reg}}{\partial z_{rj}^t}$ is multiplied with the eligibility trace $e^t_{rji}$, as in Equation \ref{eq:eprop_grd} to obtain the weight update, whereas in this report, the eligibility trace is omitted, resulting in a number of benefits:
+		Note that this regularization loss differs from the firing rate regularization in \citet{bellec2020solution}, in which the firing rate is calculated in an offline fashion, by retroactively computing the average firing rate based on all spikes instead of only accumulated spikes.
+		Note also that in \citet{bellec2020solution}, $\frac{\partial E_\text{reg}}{\partial z_{rj}^t}$ is multiplied with the eligibility trace $e^t_{rji}$, as in Equation \ref{eq:eprop_grd} to obtain the weight update, whereas in this report, the eligibility trace is omitted, resulting in a number of benefits:
 		\begin{enumerate}
 			\item It allows silent neurons that have infrequently spiking afferent neurons to more easily increase their firing rate, because their low afferent eligibility traces no longer nullifies the regularization gradient, and thereby results in a better empirical learning performance;
 			\item It is more efficient in emulations on von Neumann machines, because the element-wise multiplication of $\frac{\partial E_\text{reg}}{\partial z_{rj}^t}$ and the eligibility trace is a relatively large computation on the order $\Theta\!\left(n^2\right)$ that no longer needs to be computed.
@@ -511,7 +494,6 @@
 		\Delta W_{rji} = -\eta\ \sum_t\left(c_\text{reg}\left(f^\text{target} - f^{\text{av}, t}_{rj}\right) + L^t_{rj}\cdot\bar{e}^t_{rji}\right).
 		\end{equation}
 
-
 	\subsection{L2 regularization}
 		To regularize weights around 0, a small fraction (parametrized by $c_\text{L2}$) of the value of the weight is added to its gradient value at every weight update:
 		\begin{equation}
@@ -521,10 +503,10 @@
 		\begin{equation}
 		\Delta W_{rji} = -\eta\left(c_\text{L2} \cdot W_{rji} + \sum_t\left(c_\text{reg}\left(f^\text{target} - f^{\text{av}, t}_{rj}\right) + L^t_{rj}\cdot\bar{e}^t_{rji}\right)\right).
 		\end{equation}
-		The statistical motivation for this extra term is that by softly restricting the weights, the network is less likely to overfit on the training data\todo{ref}.
+		The statistical motivation for this extra regularization term is that by softly restricting the weights, the network is less likely to overfit on the training data.
 
 		The biological motivation is that biological synapses are regularized by a multiplicative factor to decrease the strength of individual synapses to the same proportion \citep{turrigiano2000hebb}, likely counteracting the run-away effects that the positive feedback of STDP naturally induces \citep{siddoway2014molecular}.
-		Moreover, there are natural bounds of the strength of a biological synapse, measured by the amplitude of the postsynaptic potential, because the number of neurotransmitter vesicles and release sites is physically limite \citep{del1954quantal}.
+		Moreover, there are natural bounds of the strength of a biological synapse, measured by the amplitude of the postsynaptic potential, because the number of neurotransmitter vesicles and release sites is physically limited \citep{del1954quantal}.
 		These natural limits are approximately \SI{0.4}{\mV} to \SI{20}{\mV} \citep{diaz2006target}.
 
 
@@ -557,10 +539,14 @@
 	Note also that minibatches are used to more accurately estimate the gradient and enable a stabler descent in the error landscape.
 	The value of $G^{(i)}_{rji}$ is computed as the mean over the minibatch.
 
+	Note that the learning rate is linearly ramped up from 0 to $\eta$ during the first epoch, such that the initial minibatches are used to aggregate good initial momentum buffers, as the variance is higher when fewer minibatches are processed.
+	This ``warming up'' of the learning rate is a variation reduction technique that has shown beneficial results in training other models \citep{liu2019variance}.
+	Empirical observations on the resulting learning curves (see Chapter \ref{ch:results}) suggest that this procedure does not obstruct a rapid initial decrease of the loss function.
 
-\section{Hyperparameter optimization}
-	\begin{tcolorbox}[colback=orange]
-	- What, why, how?
 
-	\end{tcolorbox}
+% \section{Hyperparameter optimization}
+% 	\begin{tcolorbox}[colback=orange]
+% 	- What, why, how?
+
+% 	\end{tcolorbox}
 

@@ -10,24 +10,26 @@
 \ttl@tocsep 
 \ttl@tocsep 
 \ttl@tocsep 
-\contentsline {figure}{\numberline {2.1}{\ignorespaces .\relax }}{16}{figure.caption.12}
+\contentsline {figure}{\numberline {2.1}{\ignorespaces A simulated ALIF neuron $j$ receives a sinusoidal input $I$ for 300 time steps $t$. This figure illustrates the adaptive threshold $a$, which increases at every spike $z$, requiring a higher activity $v$ for a next spike. When a spike occurs, $v$ decreases by $v_\text {th}$.\relax }}{11}{figure.caption.10}
 \ttl@tocsep 
-\contentsline {figure}{\numberline {3.1}{\ignorespaces A raw waveform signal from the TIMIT dataset.\relax }}{21}{figure.caption.24}
-\contentsline {figure}{\numberline {3.2}{\ignorespaces Pre-emphasis}}{21}{figure.caption.26}
-\contentsline {figure}{\numberline {3.3}{\ignorespaces The magnitudes of the DFT of a frame.\relax }}{22}{figure.caption.28}
-\contentsline {figure}{\numberline {3.4}{\ignorespaces The magnitudes of the DFT of a frame.\relax }}{23}{figure.caption.32}
-\contentsline {figure}{\numberline {3.5}{\ignorespaces A power spectrum of a frame.\relax }}{23}{figure.caption.33}
-\contentsline {figure}{\numberline {3.6}{\ignorespaces The Mel-spaced filterbanks.\relax }}{24}{figure.caption.36}
-\contentsline {figure}{\numberline {3.7}{\ignorespaces An example of a spectrogram.\relax }}{24}{figure.caption.37}
-\contentsline {figure}{\numberline {3.8}{\ignorespaces An example of Mel-frequency cepstral coefficients that are given as input to the system.\relax }}{25}{figure.caption.42}
-\contentsline {figure}{\numberline {3.9}{\ignorespaces An alignment of a sample signal with its MFCCs and target phones.\relax }}{26}{figure.caption.46}
-\contentsline {figure}{\numberline {3.10}{\ignorespaces .\relax }}{31}{figure.caption.50}
+\contentsline {figure}{\numberline {3.1}{\ignorespaces A raw waveform signal from the TIMIT dataset.\relax }}{19}{figure.caption.19}
+\contentsline {figure}{\numberline {3.2}{\ignorespaces Pre-emphasis}}{19}{figure.caption.21}
+\contentsline {figure}{\numberline {3.3}{\ignorespaces The magnitudes of the DFT of a frame.\relax }}{20}{figure.caption.23}
+\contentsline {figure}{\numberline {3.4}{\ignorespaces The magnitudes of the DFT of a frame.\relax }}{21}{figure.caption.25}
+\contentsline {figure}{\numberline {3.5}{\ignorespaces The power spectrum of a frame.\relax }}{21}{figure.caption.26}
+\contentsline {figure}{\numberline {3.6}{\ignorespaces The Mel-spaced filterbanks.\relax }}{22}{figure.caption.28}
+\contentsline {figure}{\numberline {3.7}{\ignorespaces An example of a spectrogram.\relax }}{22}{figure.caption.29}
+\contentsline {figure}{\numberline {3.8}{\ignorespaces An example of Mel-frequency cepstral coefficients that are given as input to the system.\relax }}{23}{figure.caption.31}
+\contentsline {figure}{\numberline {3.9}{\ignorespaces An alignment of a sample signal with its MFCCs and target phones.\relax }}{24}{figure.caption.33}
+\contentsline {figure}{\numberline {3.10}{\ignorespaces A single-synapse demonstration of the STDP-ALIF.\relax }}{27}{figure.caption.36}
+\contentsline {figure}{\numberline {3.11}{\ignorespaces A single-synapse demo of the corrected Izhikevich neuron.\relax }}{29}{figure.caption.37}
 \ttl@tocsep 
-\contentsline {figure}{\numberline {4.1}{\ignorespaces \relax }}{35}{figure.caption.56}
-\contentsline {figure}{\numberline {4.2}{\ignorespaces \relax }}{36}{figure.caption.58}
-\contentsline {figure}{\numberline {4.3}{\ignorespaces \relax }}{36}{figure.caption.60}
-\contentsline {figure}{\numberline {4.4}{\ignorespaces \relax }}{37}{figure.caption.61}
+\contentsline {figure}{\numberline {4.1}{\ignorespaces \relax }}{33}{figure.caption.39}
+\contentsline {figure}{\numberline {4.2}{\ignorespaces \relax }}{34}{figure.caption.41}
+\contentsline {figure}{\numberline {4.3}{\ignorespaces \relax }}{34}{figure.caption.43}
+\contentsline {figure}{\numberline {4.4}{\ignorespaces \relax }}{35}{figure.caption.44}
 \ttl@tocsep 
 \ttl@tocsep 
 \ttl@tocsep 
+\contentsline {figure}{\numberline {A.1}{\ignorespaces A single-synapse demo of the uncorrected Izhikevich neuron. Note that $\epsilon ^t_{ji, v}$ takes on extreme values and that the eligibility vector flips sign at any pair of spikes.\relax }}{41}{figure.caption.49}
 \ttl@tocsep 

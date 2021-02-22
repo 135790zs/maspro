@@ -2,51 +2,6 @@
 \chapter{Related work}\label{ch:relatedwork}
 %************************************************
 
-\section{Three-factor Hebbian learning}
-    \begin{tcolorbox}[colback=orange]
-    -3F Hebbian learning
-      - STDP is observed
-        - What (math, plot?), how biologically
-      - But how can these synaptic changes lead to long-term behaviorial changes?
-      - STDP requires modulatory signals (bailey2000heterosynaptic)
-
-    \end{tcolorbox}
-
-    \subsection{Spike-timing dependent plasticity}
-        \begin{tcolorbox}[colback=orange]
-        - Clopath rule
-        - R-STDP
-        - (and other variants if they're relevant)
-
-
-        \end{tcolorbox}
-
-
-    \subsection{Learning signal}
-        \begin{tcolorbox}[colback=orange]
-        - Biological plausilibity, (how does it happen in brain?)
-        - Error-related negativity (see Bellec1)
-
-        \end{tcolorbox}
-
-        \subsubsection{Broadcasting}
-
-            \begin{tcolorbox}[colback=orange]
-            - Broadcasting methods
-              - Broadcast alignment (see Bellec1)
-              - In brain
-
-            \end{tcolorbox}
-
-
-    \subsection{Eligibility traces}
-        \begin{tcolorbox}[colback=orange]
-        - Why necessary?
-        - Bioplausibility
-
-
-        \end{tcolorbox}
-
 \section{Eligibility Propagation}
 
     \subsection{Network model}
@@ -66,55 +21,63 @@
     \subsection{Neuron models}\label{sec:alif}
 
         \paragraph{LIF neuron}
-        In \cite{bellec2020solution}, the leaky integrate-and-fire (LIF) neuron model is formulated in the context of e-prop, along with a variant (viz. ALIF) that has an adaptive threshold. \todo{connect to synaptic scaling}
-        The observable state of a LIF model is given by
-        \begin{equation}
-        z^t_j = H\left(v_j^t-v_\text{th}\right),
-        \end{equation}
-        where $H$ is the Heaviside step function\todo{cite}, and $v_\text{th}$ is the threshold constant.
-        Consequently, the observable state $z^t_j \in \{0, 1\}$ is binary, and denotes the spike activity of a neuron.
-        These spikes are the only communication between neurons in the model.
-        The LIF neuron model has a single state $h^t_j$ that contains only an activity value $v^t_j$ and evolves over time according to the equation
-        \begin{equation}\label{eq:alifV}
-        v^{t+1}_j = \alpha v_j^t + \sum_{i\neq j}W^\text{rec}_{ji}z_i^t + \sum_i W^\text{in}_{ji}x_i^{t+1} - z_j^tv_
-        \text{th},
-        \end{equation}
-        where $W^\text{rec}_{ji}$ is a synapse weight from neuron $i$ to neuron $j$, $\alpha$ is a constant decay factor.
-        Whenever $j$ spikes (i.e., $z_j^t = 1$), the activity of the neuron is reduced to a value near 0 by the term $-z^t_jv_\text{th}$.
-        Furthermore, $z^t_j$ is fixed to 0 for $T^\text{refr}$ time steps to model neuronal refractoriness that is also present in biological neurons\todo{cite}.
+            In \citet{bellec2020solution}, the leaky integrate-and-fire (LIF) neuron model is formulated in the context of e-prop, along with a variant (viz. ALIF) that has an adaptive threshold based on the neuron's frequency.
+            The observable state of a LIF model is given by
+            \begin{equation}
+            z^t_j = H\left(v_j^t-v_\text{th}\right),
+            \end{equation}
+            where $H$ is the Heaviside step function, and $v_\text{th}$ is the threshold constant.
+            Consequently, the observable state $z^t_j \in \{0, 1\}$ is binary, and denotes the spike activity of a neuron.
+            These spikes are the only communication between neurons in the model.
+            The LIF neuron model has a single state $h^t_j$ that contains only an activity value $v^t_j$ and evolves over time according to the equation
+            \begin{equation}\label{eq:alifV}
+            v^{t+1}_j = \alpha v_j^t + \sum_{i\neq j}W^\text{rec}_{ji}z_i^t + \sum_i W^\text{in}_{ji}x_i^{t+1} - z_j^tv_
+            \text{th},
+            \end{equation}
+            where $W^\text{rec}_{ji}$ is a synapse weight from neuron $i$ to neuron $j$, $\alpha$ is a constant decay factor.
+            Whenever $j$ spikes (i.e., $z_j^t = 1$), the activity of the neuron is reduced to a value near 0 by the term $-z^t_jv_\text{th}$.
+            Furthermore, $z^t_j$ is fixed to 0 for $T^\text{refr}$ time steps to model neuronal refractoriness.
+            In biological neurons, the refractory period consists of an ``absolute'' phase, during which evoking a new spike is impossible, and a subsequent ``relative'' phase where the threshold is temporarily increased \citep{purves2008neuroscience}.
+            Clamping $z^t_j$ to 0 emulates only this absolute phase.
 
-        \begin{figure}[ht]
-            \centering
-            \includegraphics[width=\linewidth]{gfx/simplealif}
-            \label{fig:simplealif}
-            \caption{.}\todo{caption and reference to fig}
-        \end{figure}
 
         \paragraph{ALIF neuron}
-        The adaptive LIF (ALIF) neuron introduces a threshold adaptation variable $a^t_j$ to the hidden state of the neuron, such that $\mathbf{h}^t_j \eqdef \left[v^t_j, a^t_j\right]$.
-        In an ALIF neuron, the spiking threshold increases after a spike, and otherwise decreases back to a baseline threshold $v_\text{th}$.
-        The observable state of an ALIF neuron is therefore described by
-        \begin{equation}\label{eq:alifZ}
-        z^t_j = H\left(v_j^t - v_\text{th} - \beta a^t_j\right)
-        \end{equation}
-        and
-        \begin{equation}\label{eq:alifA}
-        a^{t+1}_j = \rho a^t_j + z^t_j,
-        \end{equation}
-        where $\rho$ is an adaptation decay constant.
+            The adaptive LIF (ALIF) neuron introduces a threshold adaptation variable $a^t_j$ to the hidden state of the neuron, such that $\mathbf{h}^t_j \eqdef \left[v^t_j, a^t_j\right]$.
+            In an ALIF neuron, the spiking threshold increases after a spike, and otherwise decreases back to a baseline threshold $v_\text{th}$.
 
-        In this paper, the LIF neuron is generalized as an ALIF neuron for which $\beta=0$, effectively cancelling the effect of the threshold adaptation value $a^t_j$ on the observable state $z^t_j$ in Equation \ref{eq:thresholdpotential}.
-        Therefore, only the e-prop derivations for the ALIF neurons will be described in the following sections.
+            This resembles \emph{spike frequency adaptation} (SFA), a common feature of neocortical pyramidal neurons \citep{benda2003universal}.
+            SFA is a homeostatic control mechanism that affects the spiking frequency based on the recent spiking activity.
+            \citet{ahmed1998estimates} found that a single time constant is a good fit to characterize the threshold's exponential decay to a steady state.
 
-        \begin{tcolorbox}[colback=orange]
-        - Mention SFA
-          - Mention GLIF (Bellec2)
 
-        \end{tcolorbox}
-        \begin{tcolorbox}[colback=orange]
-        - DEMO FIGURE
 
-        \end{tcolorbox}
+            The observable state of an ALIF neuron is therefore described by
+            \begin{equation}\label{eq:alifZ}
+            z^t_j = H\left(v_j^t - v_\text{th} - \beta a^t_j\right)
+            \end{equation}
+            and
+            \begin{equation}\label{eq:alifA}
+            a^{t+1}_j = \rho a^t_j + z^t_j,
+            \end{equation}
+            where $\rho$ is an adaptation decay constant.
+            The interaction between the neuron activity, adaptive threshold and spiking behavior is illustrated in Figure \ref{fig:simplealif}.
+
+            \begin{figure}[!ht]
+                \centering
+                \includegraphics[width=\linewidth]{gfx/simplealif}
+                \label{fig:simplealif}
+                \caption{A simulated ALIF neuron $j$ receives a sinusoidal input $I$ for 300 time steps $t$. This figure illustrates the adaptive threshold $a$, which increases at every spike $z$, requiring a higher activity $v$ for a next spike. When a spike occurs, $v$ decreases by $v_\text{th}$.}
+            \end{figure}
+
+            In this paper, the LIF neuron is generalized as an ALIF neuron for which $\beta=0$, effectively cancelling the effect of the threshold adaptation value $a^t_j$ on the observable state $z^t_j$ in Equation \ref{eq:thresholdpotential}.
+            Therefore, only the e-prop derivations for the ALIF neurons will be described in the following sections.
+
+            \begin{tcolorbox}[colback=orange]
+            - Synaptic scaling
+            - Mention SFA
+              - Mention GLIF (Bellec2)
+
+            \end{tcolorbox}
 
     \subsection{Deriving e-prop from RNNs}\label{sec:derivefromBPTT}
         Eligibility propagation is a local and online training method that can be derived from backpropagation through time (BPTT).
@@ -332,9 +295,9 @@
         \end{equation}
         where $B_{jk}$ is a feedback weight from neuron $k$ back to neuron $j$.
         There are multiple strategies for choosing feedback weights.
-        \cite{bellec2020solution} stated that a constantly uniform weight matrix yields poor performance\todo{why?}.
+        \citet{bellec2020solution} noted that a constantly uniform weight matrix yields poor performance, which has been empirically verified in this report.
         However, when the feedback weight matrix is initialized from a zero-centered normal distribution, it can remain constant, $(W^\text{out})^\top$, or update according to $(\Delta W^\text{out})^\top$.
-        These variants are referred to in \cite{bellec2020solution} as \emph{random}, \emph{symmetric}, and \emph{adaptive} e-prop, respectively.
+        These variants are referred to in \citet{bellec2020solution} as \emph{random}, \emph{symmetric}, and \emph{adaptive} e-prop, respectively.
         In this paper, symmetric e-prop is used (i.e., $B_{jk} \eqdef W^\text{out}_{kj}$) unless explicitly stated otherwise.
 
         Note that the term $\kappa^{t'-t}$ in Equation \ref{eq:learningsignal_after_output} is a filter that compensates for the decay factor of output neurons.
@@ -361,19 +324,12 @@
         \Delta b_k = -\eta \sum_t\left(\pi^t_k - \pi^{*,t}_k\right)
         \end{equation}
 
-        \begin{figure}[ht]
+        \begin{figure}[!ht]
             \centering
             \includegraphics[width=\linewidth]{gfx/alif}
             \label{fig:alif}
-            \caption{.}\todo{caption and reference to fig}
+            \caption{An single-synapse demonstration of the evolution of the full hidden state of the ALIF neuron. The blue lines indicate the postsynaptic neuron $j$, and the orange lines indicate the presynaptic neuron $i$. Note that the synapse weight increases regardless of the order of spikes, indicating an absence of STDP in the standard e-prop ALIF neuron.}\todo{legend blue/orange}
         \end{figure}
-
-\section{Synaptic scaling}
-
-    \begin{tcolorbox}[colback=orange]
-    - Synaptic Scaling (in brain, if applicable)
-
-    \end{tcolorbox}
 
 
 \section{Network topology}
