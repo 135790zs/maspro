@@ -2,13 +2,56 @@
 \chapter{Discussion}\label{ch:discussion}
 %************************************************
 
+\paragraph{Interpretation of results}
 
-\begin{tcolorbox}[colback=orange]
-- DISCUSSION PLACEHOLDER
 
-- STDP is not important for good performance in e-prop.
-- A multi-layer architecture slows has a theoretical advantage (src?) but raises sparsity issues
-\end{tcolorbox}
+
+\paragraph{Possible improvements}
+    There are many possible ways of improving the performance or biological plausibility of e-prop that have not yet been considered in this report.
+    For instance, a likely reason that the learning speed of the multi-layer architectures was slower than their single-layer counterparts is that the weights are poorly initialized.
+    Empirical observation of the learning process suggested that spiking activity faded in deeper layers, because the spiking activity from a preceding layer is generally weaker than the input values the first layer receives.
+    Higher weights in-between layers mitigate this fading activity, but require some search to find a good value.
+    In this report, the firing rate regularization term approximated this value, but learning is more efficient with a better initialization, since intitial synaptic weights significantly affect the performance of STDP-based SNNs (Kim2020).
+
+    Also in this report, certain parameters such as firing rate targets ($f^\text{target}$), activity leak ($\alpha$), threshold adaptivity ($\beta$), and feedback signals were constant for all neurons, except the threshold adaptivity, which could also be 0 to emulate non-adaptive LIF neurons.
+    However, future research could examine the effects of sampling some of these parameters from a distribution for each neuron, thereby creating a more diverse population of neurons with different time scales.
+    According to (Bellec2019), e-prop suggests that the experimentally found diverse time constants of the firing activity of populations of neurons in different brain areas (Bellec2019/30) are correlated with their capability to handle corresponding ranges of delays in temporal credit assignment for learning.
+    Setting different values for these parameters per layer might also have a beneficial effect; \citet{ahmed1998estimates} suggested that deeper layers display slower and weaker adaptation rates than shallow layers.
+
+    Random dropout of 80\% of the recurrent network weights led to better training and validation performances.
+    This suggests that the effects of the topology within a layer might positively affect the learning process.
+    In the brain, neurons tend to connect to nearby neurons.
+    A simple lattice topology might better approximate the connectivity of the brain, decrease the computational complexity in both emulations in von Neumann machines, and allow easier on-chip implementations in neuromorphic hardware.
+    Hierarchical clustering of neurons might also have a beneficial effect, as this has been demonstrated to improve R-STDP in SNNs (weidel2020) and address the scalability issue of SNNs (Zhang2020/6).
+    Neuromorphic computation allows complex network operations (Yu2020/5), large-scale conductance-based SNNs (Zhang2020/8,9) and asynchronous communication in VLSIs through address event representation (Zenke2021/31,32).
+
+    The connection topology might also change over time through a dynamic pruning and growing of weights and neurons.
+    Here, the biological motivation is that the human brain prunes synaptic connections during early development (Elbez2020/8).
+    (Elbez2020) demonstrated that 75\% of a SNN can be compressed while preserving its performance, but it is not clear if this can be applied in a biologically plausible way in the e-prop framework.
+    However, integrating stochastic synaptic rewiring (Bellec2019/24) into an ALIF network can improve its short-term memory (Bellec2019).
+
+    Finally, synaptic delay might improve the temporal processing power of an e-prop model.
+    In this report, communication between neurons was transmitted as a spike over a synapse with a delay of 1 ms.
+    This delay could be variable (\eg, beteen 1 and 10 ms), such that potentially informative past inputs are more accurately preserved in synaptic delays, rather than only in eligibility traces and activity loops.
+    This resembles the variable physical length of myelinated biological synapses and number of nodes of Ranvier along them, affecting the conductance of the action potential from one neuron to another (Bean, The action potential in mammalian central neurons, 2007).
+
+\paragraph{Future directions}
+    As neuromorphic computing matures, neuroscience improves, and DL increasingly hits fundamental limitations, there is an exciting future for biologically plausible SNNs.
+    There is much to gain from cross-fertilization between these fields.
+    The popularity of DL was accelerated by accessible platforms to implement and deploy ANNs.
+    Similar high-level simulation platforms are now in active development, which can integrate the typical behavior of memristive device models into crossbar architectures within DL systems (Lammie2020).
+
+    Recent advances in neuromorphic computing indicate this increasing popularity.
+    Neuromorphic architectures have been used for mapless navigation with 75 times lower power and better performance (Tang2020); as low-power solutions for localization and mapping of mobile robots (Tang2020/9), for planning (Tang2020/10), and control (Tang2020/11); and self-repairing SNN for fault detection (Zhang2020/7).
+    While cross-fertilization between neuromorphics and quantum computing is starting to take place (Markovic2020/68,69), as quantum superposition and entanglement may be used to process information in parallel and in a high-dimensional state space (Markovic2020/101-103), more physics and material science is requires to build efficient neuromorphic architectures (Markovic2020).
+    The same holds for the cross-fertilization between neuroscience and learning rules of biologically plausible SNNs.
+    Nanodevices that emulate biological synapses with learning functions can benefit neuromorphics (Wang2020b/7-13), particularly the two-terminal memristor (Wang2020b/14-19). However, the learning principles of biological NNs are not explored enough to design engineering solutions (gorban2019unreasonable, Zhang2020/3).
+    Feedback connections, for which the brain uses neurotransmitters, may become particularly problematic in large-scale neuromorphic systems.
+    Another issue in analog computation is how to match the system's internal temporal processing to that of its inputs.
+    Emulating neural dynamics on a physical substrate is more efficient but requires constraints to match the brain's timescales (Zenke2021/40).
+    Future work on e-prop could explore a combination with attention-based models in order to cover multiple timescales (Bellec2019).
+
+
 
 
 \begin{tcolorbox}[colback=orange]

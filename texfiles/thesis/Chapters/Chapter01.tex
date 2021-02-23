@@ -109,10 +109,14 @@ Acetylcholine is another example of a neuromodulator that gates synaptic plastic
 However, R-STDP by itself does not solve the credit assignment problem, which relates to neuromodulation of synapses after a learning signal is presented with some delay.
 In that case, when the learning signal is presented, the neurons have long spiked, and it is not clear which synapses elicited the behavior that is rewarded or punished.
 Recent research suggests that the brain uses \emph{eligibility traces} \citep{izhikevich2007solving,florian2007reinforcement} to solve the credit assignment problem \citep{stolyarova2018solving,gerstner2018eligibility}.
-An eligibility trace of a synapse is elicited when a neuron spikes, and fades away slowly enough that a delayed learning signal can still modulate the synaptic plasticity through R-STDP \citep{cassenaer2012conditional,yagishita2014critical,gerstner2018eligibility}.
-Synaptic plasticity was demonstrated using synaptic plasticity in deep feedforward SNNs \citep{zenke2018superspike,neftci2017event,kaiser2020synaptic} and could be implemented in feedforward VLSIs, but \citet{zenke2018superspike} notes that these methods are applicable for RSNNs.
+In particular, the synaptic CaMKII protein complex is activated during the induction of long-term potentiation (LTP) of biological synapses if the presynaptic neuron spikes shortly before a postsynaptic neuron \citep{sanhueza2013camkii}.
+This LTP is maintained over behavioral time spans, and gradually fades.
+When followed by a learning signal in the form of a neurotransmitter, synaptic plasticity is induced \citep{yagishita2014critical,cassenaer2012conditional,gerstner2018eligibility}.
+
+Synaptic plasticity was demonstrated using eligibility traces in deep feedforward SNNs \citep{zenke2018superspike,neftci2017event,kaiser2020synaptic} and could be implemented in feedforward VLSIs, but \citet{zenke2018superspike} notes that these methods are applicable for RSNNs.
 Eligibility traces have also been shown to solve difficult credit assignment problems in SNNs using R-STDP \citep{legenstein2008learning, bellec2020solution} and in RNNs \citep{he2015distinct}, and have a predictable learning effect \citep{legenstein2008learning}.
 R-STDP in SNNs has been used to solve a number of tasks, including training a stable lane keeping controller \citep{bing2020indirect}, but can suffer from catastrophic forgetting and lack of policy evaluation in mapless navigation \citep{bing2018end}.
+More recently, \citet{demirag2021pcm} have shown that phase change memory (PCM) devices allow eligibility traces to linger over behavioral timescales in CMOS/memristive architectures.
 
 \paragraph{Eligibility propagation}
 Eligibility propagation (e-prop) \citep{bellec2020solution} is a local and online learning algorithm for RSNNs that can be mathematically derived as an approximation to BPTT (see also Section \ref{sec:derivefromBPTT}).
