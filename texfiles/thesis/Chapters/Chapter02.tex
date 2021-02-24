@@ -10,7 +10,7 @@
         \begin{equation}\label{eq:model}
         \mathbf{h}^t_j = M\left(\mathbf{h}_j^{t-1}, \mathbf{z}^{t-1}, \mathbf{x}^t, \mathbf{W}_j\right)
         \end{equation}
-        that defines the hidden state $\mathbf{h}_j^t$ of a neuron $j$ at a discrete time step $t$, where $\mathbf{z^{t-1}}$ is the observable state of all neurons at the previous time step, $\mathbf{x}^t$ is the model input vector at time $t$, and $\mathbf{W}_j$ is the weight vector of afferent synapses.
+        that defines the hidden state $\mathbf{h}_j^t$ of a neuron $j$ at a discrete time step $t$, where $\mathbf{z}^{t-1}$ is the observable state of all neurons at the previous time step (\ie, the binary spike values), $\mathbf{x}^t$ is the model input vector at time $t$, and $\mathbf{W}_j$ is the weight vector of afferent synapses.
         The update of the observable state of a neuron $j$ at time $t$ is defined by
         \begin{equation}
         z^t_j = f\left(\mathbf{h}_j^t\right).
@@ -21,12 +21,13 @@
     \subsection{Neuron models}\label{sec:alif}
 
         \paragraph{LIF neuron}
-            In \citet{bellec2020solution}, the leaky integrate-and-fire (LIF) neuron model is formulated in the context of e-prop, along with a variant (viz. ALIF) that has an adaptive threshold based on the neuron's frequency.
+            In \citet{bellec2020solution}, the LIF neuron model is formulated in the context of e-prop, along with a variant (viz. ALIF) that has an adaptive threshold based on the neuron's spiking frequency.
             The observable state of a LIF model is given by
             \begin{equation}
             z^t_j = H\left(v_j^t-v_\text{th}\right),
             \end{equation}
             where $H$ is the Heaviside step function, and $v_\text{th}$ is the threshold constant.
+            (Note that this and all other used constant parameters are listed in Table \ref{tab:hparams}.)
             Consequently, the observable state $z^t_j \in \{0, 1\}$ is binary, and denotes the spike activity of a neuron.
             These spikes are the only communication between neurons in the model.
             The LIF neuron model has a single state $h^t_j$ that contains only an activity value $v^t_j$ and evolves over time according to the equation
@@ -42,14 +43,12 @@
 
 
         \paragraph{ALIF neuron}
-            The adaptive LIF (ALIF) neuron introduces a threshold adaptation variable $a^t_j$ to the hidden state of the neuron, such that $\mathbf{h}^t_j \eqdef \left[v^t_j, a^t_j\right]$.
+            The ALIF neuron introduces a threshold adaptation variable $a^t_j$ to the hidden state of the neuron, such that $\mathbf{h}^t_j \eqdef \left[v^t_j, a^t_j\right]$.
             In an ALIF neuron, the spiking threshold increases after a spike, and otherwise decreases back to a baseline threshold $v_\text{th}$.
 
             This resembles \emph{spike frequency adaptation} (SFA), a common feature of neocortical pyramidal neurons \citep{benda2003universal}.
             SFA is a homeostatic control mechanism that affects the spiking frequency based on the recent spiking activity.
             \citet{ahmed1998estimates} found that a single time constant is a good fit to characterize the threshold's exponential decay to a steady state.
-
-
 
             The observable state of an ALIF neuron is therefore described by
             \begin{equation}\label{eq:alifZ}
@@ -65,28 +64,24 @@
             \begin{figure}[!ht]
                 \centering
                 \includegraphics[width=\linewidth]{gfx/simplealif}
-                \label{fig:simplealif}
                 \caption{A simulated ALIF neuron $j$ receives a sinusoidal input $I$ for 300 time steps $t$. This figure illustrates the adaptive threshold $a$, which increases at every spike $z$, requiring a higher activity $v$ for a next spike. When a spike occurs, $v$ decreases by $v_\text{th}$.}
+                \label{fig:simplealif}
             \end{figure}
 
-            In this paper, the LIF neuron is generalized as an ALIF neuron for which $\beta=0$, effectively cancelling the effect of the threshold adaptation value $a^t_j$ on the observable state $z^t_j$ in Equation \ref{eq:thresholdpotential}.
+            In this paper, the LIF neuron is generalized as an ALIF neuron for which $\beta=0$, effectively canceling the effect of the threshold adaptation value $a^t_j$ on the observable state $z^t_j$ in Equation \ref{eq:alifZ}.
             Therefore, only the e-prop derivations for the ALIF neurons will be described in the following sections.
-
-            \begin{tcolorbox}[colback=orange]
-            - Synaptic scaling
-            - Mention SFA
-              - Mention GLIF (Bellec2)
-
-            \end{tcolorbox}
-
 
     \subsection{Network topology}
 
         \begin{tcolorbox}[colback=orange]
           - Insert image, and reference it
         \end{tcolorbox}
+        The neurons receive inputs from the input feature vector and the observable states of the afferent neurons.
+
         Weights are initialized by sampling them from a Gaussian distribution $\mathcal{N}\left(0, \sqrt{N}\right)$ where $N$ is the number of afferent neurons.
-        \todo{explicitly describe this for input 0, and others.}
+        For instance, the weights $\mathbf{W}^\text{in}$ between the input and the first layer are sampled from $\mathcal{N}\left(0, \sqrt{39}\right)$, because there are 39 input features.
+
+        A randomly selected 80\% of synaptic weights is then set to a value of 0, as well as the synapses that connect a neuron to itself, rendering them ineffective.
 
 
     \subsection{Deriving e-prop from RNNs}\label{sec:derivefromBPTT}
@@ -107,18 +102,18 @@
         We now decompose the first term into a series of learning signals $L_j^t = \frac{dE}{dz_j^t}$ and local factors $\frac{\partial\mathbf{h}_j^{t-t'}}{\partial\mathbf{h}_j^t}$ for all $t$ after the event horizon $t'$:
 
         \begin{equation}\label{eq:rec}
-        \frac{dE}{d\mathbf{h}_j^{t'}} = \underbrace{\frac{dE}{dz_j^{t'}}}_{L^{t'}_j} \frac{\partial z_j^{t'}}{\partial\mathbf{h}_j^{t'}} + \frac{dE}{d\mathbf{h}_j^{t'+1}}\frac{\partial\mathbf{h}_j^{t'+1}}{\partial\mathbf{h}_j^{t'}}
+        \frac{dE}{d\mathbf{h}_j^{t'}} = \underbrace{\frac{dE}{dz_j^{t'}}}_{L^{t'}_j} \frac{\partial z_j^{t'}}{\partial\mathbf{h}_j^{t'}} + \frac{dE}{d\mathbf{h}_j^{t'+1}}\frac{\partial\mathbf{h}_j^{t'+1}}{\partial\mathbf{h}_j^{t'}}.
         \end{equation}
         Note that this equation is recursive.
         If we substitute Equation \ref{eq:rec} into the classical factorization (Equation \ref{eq:clafac}), we obtain a recursive expansion that has $\frac{dE}{d\mathbf{h}^{T+1}_j}$ as its terminating case:
         \begin{align}
         \frac{dE}{dW_{ji}} &= \sum_{t'}\left(L_j^{t'}\frac{\partial z_j^{t'}}{\partial\mathbf{h}_j^{t'}} + \frac{dE}{d\mathbf{h}_j^{t'+1}}\frac{\partial\mathbf{h}_j^{t'+1}}{\partial\mathbf{h}_j^{t'}}\right)\cdot\frac{\partial\mathbf{h}_j^{t'}}{\partial W_{ji}}\\
-        &= \sum_{t'}\left(L_j^{t'}\frac{\partial z_j^{t'}}{\partial\mathbf{h}_j^{t'}} + \left( L^{t'+1}_j \frac{\partial z_j^{t'+1}}{\partial\mathbf{h}_j^{t'+1}} + (\cdots)\frac{\partial\mathbf{h}_j^{t'+2}}{\partial\mathbf{h}_j^{t'+1}}  \right) \frac{\partial\mathbf{h}_j^{t'+1}}{\partial\mathbf{h}_j^{t'}}\right)\cdot\frac{\partial\mathbf{h}_j^{t'}}{\partial W_{ji}}
+        &= \sum_{t'}\left(L_j^{t'}\frac{\partial z_j^{t'}}{\partial\mathbf{h}_j^{t'}} + \left( L^{t'+1}_j \frac{\partial z_j^{t'+1}}{\partial\mathbf{h}_j^{t'+1}} + (\cdots)\frac{\partial\mathbf{h}_j^{t'+2}}{\partial\mathbf{h}_j^{t'+1}}  \right) \frac{\partial\mathbf{h}_j^{t'+1}}{\partial\mathbf{h}_j^{t'}}\right)\cdot\frac{\partial\mathbf{h}_j^{t'}}{\partial W_{ji}}.
         \end{align}
 
         We write the term in parentheses into a second term indexed by $t$:
         \begin{equation}
-        \frac{dE}{dW_{ji}} = \sum_{t'}\sum_{t\geq t'}L^t_j\frac{\partial z_j^t}{\partial\mathbf{h}_j^t}\frac{\partial\mathbf{h}^t_j}{\partial\mathbf{h}_j^{t-1}} \cdots \frac{\partial\mathbf{h}_j^{t+1}}{\partial\mathbf{h}_j^{t'}}\cdot\frac{\partial\mathbf{h}_j^{t'}}{\partial W_{ji}}
+        \frac{dE}{dW_{ji}} = \sum_{t'}\sum_{t\geq t'}L^t_j\frac{\partial z_j^t}{\partial\mathbf{h}_j^t}\frac{\partial\mathbf{h}^t_j}{\partial\mathbf{h}_j^{t-1}} \cdots \frac{\partial\mathbf{h}_j^{t+1}}{\partial\mathbf{h}_j^{t'}}\cdot\frac{\partial\mathbf{h}_j^{t'}}{\partial W_{ji}}.
         \end{equation}
 
         We then exchange the summation indices to pull out the learning signal $L_j^t$ from the inner summation.
@@ -127,13 +122,13 @@
         This is crucial for understanding why e-prop is an online training method---local gradients are computed based on traces that are directly accessible at the current time step $t$, and the eligibility vector operates as a recursively updated ``memory'' to track previous local hidden state derivatives:
 
         \begin{equation}
-        \mathbf{\epsilon}^t_{ji} = \frac{\partial\mathbf{h}_j^{t}}{\partial\mathbf{h}_j^{t-1}}\cdot\mathbf{\epsilon}^{t-1}_{ji} + \frac{\partial\mathbf{h}^t_j}{\partial W_{ji}}
+        \mathbf{\epsilon}^t_{ji} = \frac{\partial\mathbf{h}_j^{t}}{\partial\mathbf{h}_j^{t-1}}\cdot\mathbf{\epsilon}^{t-1}_{ji} + \frac{\partial\mathbf{h}^t_j}{\partial W_{ji}}.
         \end{equation}
 
         This is why the $\rho$ and $\alpha$ parameters, which define the decay rate in hidden states and the corresponding eligibility vectors, should be set according to the required working memory in the learning task.
-        The elibibility vector and the hidden state have the same dimension: $\left\{\mathbf{\epsilon}^t_{ji}, \mathbf{h}^t_j\right\} \subset \mathbb{R}^d$, where $d=2$ for all neuron types described in this report.
+        The eligibility vector and the hidden state have the same dimension: $\left\{\mathbf{\epsilon}^t_{ji}, \mathbf{h}^t_j\right\} \subset \mathbb{R}^d$, where $d=2$ for all neuron types described in this report.
 
-        The \emph{eligibility trace} $e^t_{ji}$ is a product of $L^t_j = \frac{dE}{dz_j^t}$ and the eligibility vector, resulting in the gradient that can be immediately applied at every time step $t$, or accumulated and integrated locally on a synapse (see Section \ref{sec:gradient} for details):
+        The \emph{eligibility trace} $e^t_{ji}$ is a product of $L^t_j = \frac{dE}{dz_j^t}$ and the eligibility vector, resulting in the gradient that can be immediately applied at every time step $t$, or accumulated and integrated locally on a synapse (see Section \ref{sec:eprop_grd} for details):
         \begin{equation}
         \frac{dE}{dW_{ji}} = \sum_t\frac{dE}{dz_j^t}\underbrace{\frac{\partial z_j^t}{\partial\mathbf{h}_j^t}\underbrace{\sum_{t\geq t'}\frac{\partial\mathbf{h}^t_j}{\partial\mathbf{h}_j^{t-1}} \cdots \frac{\partial\mathbf{h}_j^{t+1}}{\partial\mathbf{h}_j^{t'}}\cdot\frac{\partial\mathbf{h}_j^{t'}}{\partial W_{ji}}}_{\mathbf{\epsilon}_{ji}^t}}_{e^t_{ji}}.
         \end{equation}
@@ -181,12 +176,12 @@
             The hidden state derivative $\frac{\mathbf{h}^{t+1}_j}{\mathbf{h}^t_j}$ must be computed to derive the eligibility vector.
             This hidden state derivative is expressed by a $2\times2$ matrix of partial hidden state derivatives:
             \begin{equation}
-            \frac{\mathbf{h}^{t+1}_j}{\mathbf{h}^t_j} = \begin{pmatrix}[1.5]
+            \frac{\mathbf{h}^{t+1}_j}{\mathbf{h}^t_j} = \begin{pmatrix}
             \frac{\partial v^{t+1}_j}{\partial v^t_j} & \frac{\partial v^{t+1}_j}{\partial a^t_j}\\
             \frac{\partial a^{t+1}_j}{\partial v^t_j} & \frac{\partial a^{t+1}_j}{\partial a^t_j}
-            \end{pmatrix}
+            \end{pmatrix}.
             \end{equation}
-            The presence of $z^t_j$, and its relation with the Heaviside step function $H(\cdot)$ in the hidden state updates in Equation \ref{eq:alifV} and Equation \ref{eq:alifA} seems problematic for computing these partial derivates, because the derivative $\frac{\partial z^t_j}{\partial v^t_j}$ is nonexistent.
+            The presence of $z^t_j$, and its relation with the Heaviside step function $H(\cdot)$ in the hidden state updates in Equation \ref{eq:alifV} and Equation \ref{eq:alifA} seems problematic for computing these partial derivatives, because the derivative $\frac{\partial z^t_j}{\partial v^t_j}$ is nonexistent.
             This is overcome by replacing it with a simple nonlinear function called a pseudo-derivative.
             Outside of the refractory period of a neuron $j$, this pseudo-derivative has the form
             \begin{equation}
@@ -199,7 +194,7 @@
             \frac{\partial v_j^{t+1}}{\partial v_j^t} &= \alpha\\
             \frac{\partial v_j^{t+1}}{\partial a_j^t} &= 0\\
             \frac{\partial a_j^{t+1}}{\partial v_j^t} &= \psi^t_j\\
-            \frac{\partial a_j^{t+1}}{\partial a_j^t} &= \rho - \psi^t_j\beta
+            \frac{\partial a_j^{t+1}}{\partial a_j^t} &= \rho - \psi^t_j\beta.
             \end{align}
             These partial derivatives can be used to compute the eligibility vector:
             \begin{align}
@@ -238,10 +233,10 @@
             0
             \end{pmatrix}\label{eq:evector_b}\\
             &=
-            \begin{pmatrix}[1.5]
+            \begin{pmatrix}
             \alpha \cdot\epsilon_{ji, v}^t + z_i^{t-1}\\
             \psi^t_j\epsilon^t_{ji, v} + \left(\rho-\psi^t_j\beta\right)\epsilon^t_{ji, a}
-            \end{pmatrix}
+            \end{pmatrix}.
             \end{align}
 
             This eligibility vector can be recursively applied.
@@ -271,13 +266,13 @@
             \psi^t_j\\
             -\beta\psi^t_j
             \end{pmatrix}\\
-            &= \psi^t_j\left(\epsilon_{ji, v}^t - \beta\epsilon_{ji, a}^t\right)
+            &= \psi^t_j\left(\epsilon_{ji, v}^t - \beta\epsilon_{ji, a}^t\right).
             \end{align}
 
-        \subsubsection{Gradients}
+        \subsubsection{Gradients}\label{sec:eprop_grd}
             Gradient descent is used to apply the weight updates, such that weights are updated by a small fraction $\eta$ in the negative direction of the estimated gradient of the loss function with respect to the model weights:
             \begin{equation}\label{eq:eprop_grd}
-            \Delta W = -\eta\widehat{\frac{dE}{dW_{ji}}} \eqdef -\eta\sum_t\frac{\partial E}{\partial z^t_j}e^t_{ji}.
+                \Delta W = -\eta\widehat{\frac{dE}{dW_{ji}}} \eqdef -\eta\sum_t\frac{\partial E}{\partial z^t_j}e^t_{ji}.
             \end{equation}
             Note that for clarity, this section describes e-prop using the stochastic gradient descent.
             In the actual implementation, the Adam optimization algorithm \citep{kingma2014adam} is used (see Section \ref{sec:adam}).
@@ -333,14 +328,14 @@
             \end{equation}
             and
             \begin{equation}
-            \Delta b_k = -\eta \sum_t\left(\pi^t_k - \pi^{*,t}_k\right)
+            \Delta b_k = -\eta \sum_t\left(\pi^t_k - \pi^{*,t}_k\right).
             \end{equation}
 
             \begin{figure}[!ht]
                 \centering
                 \includegraphics[width=\linewidth]{gfx/alif}
                 \label{fig:alif}
-                \caption{An single-synapse demonstration of the evolution of the full hidden state of the ALIF neuron. The blue lines indicate the postsynaptic neuron $j$, and the orange lines indicate the presynaptic neuron $i$. Note that the synapse weight increases regardless of the order of spikes, indicating an absence of STDP in the standard e-prop ALIF neuron.}\todo{legend blue/orange}
+                \caption{An single-synapse demonstration of the evolution of the full hidden state of the ALIF neuron. The blue lines indicate the postsynaptic neuron $j$, and the orange lines indicate the presynaptic neuron $i$. Note that the synapse weight increases regardless of the order of spikes, indicating an absence of STDP in the standard e-prop ALIF neuron.}
             \end{figure}
 
 

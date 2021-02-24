@@ -9,13 +9,12 @@
 \ttl@tocsep 
 \ttl@tocsep 
 \ttl@tocsep 
-\ttl@tocsep 
-\ttl@tocsep 
-\contentsline {table}{\numberline {3.1}{\ignorespaces TIMIT Dialect Regions}}{17}{table.caption.17}
-\contentsline {table}{\numberline {3.2}{\ignorespaces TIMIT Sentence Types}}{18}{table.caption.18}
+\contentsline {table}{\numberline {3.1}{\ignorespaces TIMIT Dialect Regions}}{19}{table.caption.16}
+\contentsline {table}{\numberline {3.2}{\ignorespaces TIMIT Sentence Types}}{20}{table.caption.17}
 \ttl@tocsep 
 \ttl@tocsep 
 \ttl@tocsep 
 \ttl@tocsep 
-\contentsline {table}{\numberline {A.1}{\ignorespaces Filterbanks}}{42}{table.caption.48}
+\contentsline {table}{\numberline {A.1}{\ignorespaces Filterbanks}}{46}{table.caption.47}
+\contentsline {table}{\numberline {A.2}{\ignorespaces Hyperparameters}}{47}{table.caption.49}
 \ttl@tocsep 

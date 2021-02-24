@@ -17,44 +17,43 @@
 \contentsline {subsection}{\numberline {2.1.2}{Neuron models}}{9}{subsection.2.1.2}
 \contentsline {paragraph}{{LIF neuron}}{9}{paragraph*.8}
 \contentsline {paragraph}{{ALIF neuron}}{10}{paragraph*.9}
-\contentsline {subsection}{\numberline {2.1.3}{Deriving e-prop from RNNs}}{10}{subsection.2.1.3}
-\contentsline {subsection}{\numberline {2.1.4}{Learning procedure}}{13}{subsection.2.1.4}
-\contentsline {subsubsection}{\numberline {2.1.4.1}{Eligibility trace}}{13}{subsubsection.2.1.4.1}
-\contentsline {subsubsection}{\numberline {2.1.4.2}{Gradients}}{15}{subsubsection.2.1.4.2}
+\contentsline {subsection}{\numberline {2.1.3}{Network topology}}{10}{subsection.2.1.3}
+\contentsline {subsection}{\numberline {2.1.4}{Deriving e-prop from RNNs}}{11}{subsection.2.1.4}
+\contentsline {subsection}{\numberline {2.1.5}{Learning procedure}}{13}{subsection.2.1.5}
+\contentsline {subsubsection}{\numberline {2.1.5.1}{Eligibility trace}}{13}{subsubsection.2.1.5.1}
+\contentsline {subsubsection}{\numberline {2.1.5.2}{Gradients}}{15}{subsubsection.2.1.5.2}
 \contentsline {paragraph}{{Error metric}}{15}{paragraph*.14}
-\contentsline {section}{\numberline {2.2}{Network topology}}{16}{section.2.2}
-\contentsline {chapter}{\numberline {3}{Method}}{17}{chapter.3}
-\contentsline {section}{\numberline {3.1}{Data Preprocessing}}{17}{section.3.1}
-\contentsline {subsection}{\numberline {3.1.1}{The TIMIT speech corpus}}{17}{subsection.3.1.1}
-\contentsline {subsection}{\numberline {3.1.2}{Data splitting}}{18}{subsection.3.1.2}
-\contentsline {subsection}{\numberline {3.1.3}{Engineering features}}{18}{subsection.3.1.3}
-\contentsline {paragraph}{{Pre-emphasis}}{19}{paragraph*.20}
-\contentsline {paragraph}{{Framing}}{19}{paragraph*.22}
-\contentsline {paragraph}{{Short-term power spectra}}{20}{paragraph*.24}
-\contentsline {paragraph}{{Mel filterbank}}{21}{paragraph*.27}
-\contentsline {paragraph}{{Mel-frequency cepstral coefficients}}{22}{paragraph*.30}
-\contentsline {paragraph}{{Target output}}{23}{paragraph*.32}
-\contentsline {section}{\numberline {3.2}{Enhancing e-prop}}{23}{section.3.2}
-\contentsline {subsection}{\numberline {3.2.1}{Multi-layer architecture}}{24}{subsection.3.2.1}
-\contentsline {paragraph}{{Multi-layer ALIF neurons}}{25}{paragraph*.35}
-\contentsline {subsection}{\numberline {3.2.2}{Other neuron types}}{25}{subsection.3.2.2}
-\contentsline {subsubsection}{\numberline {3.2.2.1}{STDP-LIF}}{25}{subsubsection.3.2.2.1}
-\contentsline {subsubsection}{\numberline {3.2.2.2}{Izhikevich neuron}}{26}{subsubsection.3.2.2.2}
-\contentsline {section}{\numberline {3.3}{Regularization}}{28}{section.3.3}
-\contentsline {subsection}{\numberline {3.3.1}{Firing rate regularization}}{29}{subsection.3.3.1}
-\contentsline {subsection}{\numberline {3.3.2}{L2 regularization}}{30}{subsection.3.3.2}
+\contentsline {chapter}{\numberline {3}{Method}}{19}{chapter.3}
+\contentsline {section}{\numberline {3.1}{Data Preprocessing}}{19}{section.3.1}
+\contentsline {subsection}{\numberline {3.1.1}{The TIMIT speech corpus}}{19}{subsection.3.1.1}
+\contentsline {subsection}{\numberline {3.1.2}{Data splitting}}{20}{subsection.3.1.2}
+\contentsline {subsection}{\numberline {3.1.3}{Engineering features}}{20}{subsection.3.1.3}
+\contentsline {paragraph}{{Pre-emphasis}}{21}{paragraph*.19}
+\contentsline {paragraph}{{Framing}}{21}{paragraph*.21}
+\contentsline {paragraph}{{Short-term power spectra}}{22}{paragraph*.23}
+\contentsline {paragraph}{{Mel filterbank}}{23}{paragraph*.26}
+\contentsline {paragraph}{{Mel-frequency cepstral coefficients}}{25}{paragraph*.29}
+\contentsline {paragraph}{{Target output}}{25}{paragraph*.30}
+\contentsline {section}{\numberline {3.2}{Enhancing e-prop}}{25}{section.3.2}
+\contentsline {subsection}{\numberline {3.2.1}{Multi-layer architecture}}{25}{subsection.3.2.1}
+\contentsline {paragraph}{{Multi-layer ALIF neurons}}{26}{paragraph*.34}
+\contentsline {subsection}{\numberline {3.2.2}{Other neuron types}}{26}{subsection.3.2.2}
+\contentsline {subsubsection}{\numberline {3.2.2.1}{STDP-LIF}}{27}{subsubsection.3.2.2.1}
+\contentsline {subsubsection}{\numberline {3.2.2.2}{Izhikevich neuron}}{28}{subsubsection.3.2.2.2}
+\contentsline {section}{\numberline {3.3}{Regularization}}{29}{section.3.3}
+\contentsline {subsection}{\numberline {3.3.1}{Firing rate regularization}}{30}{subsection.3.3.1}
+\contentsline {subsection}{\numberline {3.3.2}{L2 regularization}}{31}{subsection.3.3.2}
 \contentsline {section}{\numberline {3.4}{Optimizer}}{31}{section.3.4}
-\contentsline {chapter}{\numberline {4}{Results}}{33}{chapter.4}
-\contentsline {section}{\numberline {4.1}{Neuron models}}{33}{section.4.1}
-\contentsline {paragraph}{{Accuracy}}{33}{paragraph*.38}
-\contentsline {paragraph}{{Cross-entropy}}{33}{paragraph*.40}
-\contentsline {paragraph}{{Firing rate}}{33}{paragraph*.42}
-\contentsline {section}{\numberline {4.2}{Network depth}}{33}{section.4.2}
-\contentsline {paragraph}{{1 layer}}{33}{paragraph*.45}
-\contentsline {paragraph}{{2 layers}}{33}{paragraph*.46}
-\contentsline {paragraph}{{3 layers}}{33}{paragraph*.47}
-\contentsline {chapter}{\numberline {5}{Discussion}}{37}{chapter.5}
-\contentsline {chapter}{\numberline {6}{Conclusion}}{39}{chapter.6}
-\contentsline {chapter}{\numberline {A}{Appendix}}{41}{appendix.A}
+\contentsline {chapter}{\numberline {4}{Results}}{37}{chapter.4}
+\contentsline {section}{\numberline {4.1}{Comparing neuron models}}{37}{section.4.1}
+\contentsline {paragraph}{{Accuracy}}{37}{paragraph*.37}
+\contentsline {paragraph}{{Firing rate}}{37}{paragraph*.40}
+\contentsline {section}{\numberline {4.2}{Comparing network depth}}{38}{section.4.2}
+\contentsline {chapter}{\numberline {5}{Discussion}}{39}{chapter.5}
+\contentsline {paragraph}{{Interpretation of results}}{39}{paragraph*.44}
+\contentsline {paragraph}{{Possible improvements}}{39}{paragraph*.45}
+\contentsline {paragraph}{{Future directions}}{40}{paragraph*.46}
+\contentsline {chapter}{\numberline {6}{Conclusion}}{43}{chapter.6}
+\contentsline {chapter}{\numberline {A}{Appendix}}{45}{appendix.A}
 \vspace {\beforebibskip }
-\contentsline {chapter}{\numberline {}{Bibliography}}{43}{section*.50}
+\contentsline {chapter}{\numberline {}{Bibliography}}{49}{section*.50}
