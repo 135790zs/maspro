@@ -1,8 +1,8 @@
 from numpy import exp
 cfg = {
     "eprop_type": "symmetric",  # in {global, random, symmetric, adaptive}
-    "Optimizer": "Adam",
-    "neuron": "ALIF",  # in {ALIF, STDP-ALIF, Izhikevich}
+    "Optimizer": "Adam",  # No effect, always Adam
+    "neuron": "Izhikevich",  # in {ALIF, STDP-ALIF, Izhikevich}
     "v_fix": True,
     "v_fix_psi": True,
     "fraction_ALIF": 0.25,  # def 0.25
@@ -26,22 +26,23 @@ cfg = {
     "IzhA1": 0.004,
     "IzhA2": -0.02,
     "IzhReset": -65,
+    "IzhThr": 30,
 
-    "dropout": 0,
+    "dropout": 0.8,
 
     "eta_W_in": 0.01,
     "eta_W_rec": 0.01,
     "eta_out": 0.01,
     "eta_bias": 0.01,
     "eta_decay": 0,
-    "warmup": False,
+    "warmup": True,
 
     "adam_beta1": 0.9,
     "adam_beta2": 0.999,
     "adam_eps": 1e-5,
 
     "weight_decay": 1e-2,  # Bellec3: 1e-2
-    "L2_reg": 0,  # Bellec3: 1e-5
+    "L2_reg": 1e-5,  # Bellec3: 1e-5
     "FR_target": 0.01,  # BellecCode: 0.01 (10hz)
     "FR_reg": 50,  # Bellec3: 50
 
@@ -50,7 +51,7 @@ cfg = {
     "weightscale": 1,
 
     "N_R": 800,
-    "N_Rec": 2,
+    "N_Rec": 1,
 
     "task": "TIMIT",
     "wavs_fname": "../data/data_wavs",
@@ -66,8 +67,8 @@ cfg = {
     "train_out": True,
     "train_bias": True,
 
-    "Epochs": 5,  # def = 80
-    "Track_neuron": False,
+    "Epochs": 80,  # def = 80
+    "Track_neuron": True,
     "Track_synapse": False,
     "Repeats": 1,  # ms per epoch, def = 5
     "Interpolation": 'linear',  # nearest, linear
@@ -76,14 +77,14 @@ cfg = {
     "batch_size_test": 32,  # def = 32
     "maxlen": 778,
     "TIMIT_derivative": 2,
-    "n_examples": {'train': 200, 'val': 100, 'test': 50},  # Re-process TIMIT!
+    "n_examples": {'train': 30, 'val': 30, 'test': 1},  # Re-process TIMIT!
     # "n_examples": {'train': 3696, 'val': 400, 'test': 192},
     "plot_model_interval": 10,  # Per iter  #  State plot; 0 to disable plots
     "plot_tracker_interval": 10,  # Per it
     "state_save_interval": 10,
     "val_every_B": 10,
     "visualize_val": False,
-    "early_stopping": True,
+    "early_stopping": False,
     "test_on_val": True,
 
     # Max batches per epoch

@@ -8,8 +8,8 @@ rc['font.family'] = 'STIXGeneral'
 np.random.seed(1)
 
 gamma = 0.3
-A = 5
-B = 5
+A = 4
+B = 6
 r = 0
 
 thr = 30
@@ -30,7 +30,7 @@ kappa = 0.9 * dt
 allvars_n = ["I", "V", "Vt", "At", 'dvdv', 'dvdu', 'dudv', 'dudu', "A", "H", "Z"]
 allvars_w = ["VV", "VA", "ET", "ETbar", "DW", 'W']
 allvars_t = ["TZ"]
-plotvars = ["I", "V", "A", "Z", "H", 'VV', "VA", 'ET', 'W']
+plotvars = ["V", "A", "Z", "H", 'VV', "VA", 'ET', 'W']
 
 M = {}
 
@@ -48,28 +48,32 @@ i = 0
 j = 1
 for t in range(nsteps):
     if mode == 'onoff':
-        if t < nsteps * 0.5:
+        if t > nsteps * 0.5:
             # pass
             M["I"][t, j] = A + np.random.random()*r
             if M["TZ"][i] < M["TZ"][j]:
-                M["I"][t, i] = (B + np.random.random()*r) * (t - M["TZ"][j])
+                M["I"][t, i] = (B + np.random.random()*r)# * (t - M["TZ"][j])
         else:
             # pass
             M["I"][t, i] = A + np.random.random()*r
             if M["TZ"][j] < M["TZ"][i]:
-                M["I"][t, j] = (B + np.random.random()*r) * (t - M["TZ"][i])
+                M["I"][t, j] = (B + np.random.random()*r)# * (t - M["TZ"][i])
     elif mode == 'cont':
         M['I'][t, i] = np.random.random() * r
         M['I'][t, j] = np.random.random() * r
 
-    M['VA'][t] = 0.004 * dt * (1 - M['Z'][t-1, j]) * M['VV'][t-1] \
-                 + (1 - 0.02 * dt) * M['VA'][t-1]
-
+    a = 0.02
+    b = 0.2
+    correct = True
     M['VV'][t] = (1 - M['Z'][t-1, j]) \
-                   * (1 + (0.08 * 1.09 * M['V'][t-1, j] + 5) * dt) \
-                   * M['VV'][t-1] \
-                 - dt * M['VA'][t-1] \
-                 + M['Z'][t-1, i]
+                     * (1 + (5 + 0.08 * M['V'][t-1, j]) * dt) * M['VV'][t-1] \
+                 - dt * 1 * M['VA'][t-1] \
+                 + dt * M['Z'][t-1, i]
+    M['VA'][t] = (1 - M['Z'][t-1, j]) * dt * a * b * M['VV'][t-1] \
+                 + (1 - dt * a) * M['VA'][t-1]
+    if correct:
+        M['VA'][t] = np.clip(M['VA'][t], -0.005, 0.005)
+        M['VV'][t] = np.clip(M['VV'][t], -3., 3.)
 
 
     M['Vt'][t] = M['V'][t-1] - (M['V'][t-1] + 65) * M['Z'][t-1]
@@ -95,25 +99,25 @@ gsc = fig.add_gridspec(nrows=len(plotvars),
 axs = []
 
 lookup = {
-    "V":     "$v^t$",
+    "V":     "$v^t_j$",
     "dvdv":  "$dvdv$",
     "dvdu":  "$dvdu$",
     "dudv":  "$dudv$",
     "dudu":  "$dudu$",
-    "A":     "$a^t$",
+    "A":     "$a^t_j$",
     "At":     "$\\tilde{{a}}^t_j$",
     "Vt":     "$\\tilde{{v}}^t_j$",
     "Z":     "$z^t$",
     "I":     "$I^t$",
     "ET":    "$e_{{ji}}^t$",
     "ETbar": "$\\bar{{e}}_{{ji}}^t$",
-    "VV":    "$\\epsilon_{{v, ji}}^t$",
-    "VV1":   "$\\epsilon1_{{v, ji}}^t$",
-    "VV2":   "$\\epsilon2_{{v, ji}}^t$",
-    "VV3":   "$\\epsilon3_{{v, ji}}^t$",
-    "VA":   "$\\epsilon_{{a, ji}}^t$",
-    "VA1":   "$\\epsilon1_{{a, ji}}^t$",
-    "VA2":   "$\\epsilon2_{{a, ji}}^t$",
+    "VV":    "$\\epsilon_{{ji, v}}^t$",
+    "VV1":   "$\\epsilon1_{{ji, v}}^t$",
+    "VV2":   "$\\epsilon2_{{ji, v}}^t$",
+    "VV3":   "$\\epsilon3_{{ji, v}}^t$",
+    "VA":   "$\\epsilon_{{ji, a}}^t$",
+    "VA1":   "$\\epsilon1_{{ji, a}}^t$",
+    "VA2":   "$\\epsilon2_{{ji, a}}^t$",
     "H":     "$\\psi_j^t$",
     "DW":    "$\\Delta W_{{ji}}^t$",
     "W":    "$W_{{ji}}^t$",
@@ -121,9 +125,14 @@ lookup = {
 
 for var in plotvars:
     axs.append(fig.add_subplot(gsc[len(axs), :]))
-    arr = M[var] if var != 'H' else M[var][:, 0]
-    # arr = arr[:, 0] if arr.ndim > 1 else arr
-    axs[-1].plot(arr, linewidth=0.7)
+    arr = M[var] if var not in ['H', 'V', 'A'] else M[var][:, 1]
+    if var in ['Z', 'I']:
+        arr = np.flip(arr, axis=1)
+        axs[-1].plot(arr[:, 0], linewidth=0.7, label='$z^t_j$')
+        axs[-1].plot(arr[:, 1], linewidth=0.7, label='$z^t_i$')
+        plt.legend(fontsize=11, labelspacing=0.2)
+    else:
+        axs[-1].plot(arr, linewidth=0.7)
     axs[-1].grid()
 
     axs[-1].set_ylabel(lookup[var],
@@ -133,7 +142,7 @@ for var in plotvars:
 
     axs[-1].set_xlabel("$t$", fontsize=20)
 
-plt.savefig(f"../vis/demo_izh.pdf",
+plt.savefig(f"../vis/demo_izh{'_corrected' if correct else ''}.pdf",
             bbox_inches='tight')
 
 plt.close()

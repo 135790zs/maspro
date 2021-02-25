@@ -3,21 +3,32 @@ import soundfile as sf
 import numpy as np
 from scipy.fftpack import dct
 import matplotlib.pyplot as plt
+import matplotlib.colors as colors
+from matplotlib import rcParams as rc
 from python_speech_features import delta, mfcc
 from config import cfg
 
+rc['mathtext.fontset'] = 'stix'
+rc['font.family'] = 'STIXGeneral'
+
 def my_mfcc(signal, sample_rate):
     if not os.path.isfile("../vis/signal.pdf"):
+        plt.figure(figsize=(6, 1.5))
         plt.plot(signal)
-        plt.savefig("../vis/signal.pdf")
+        plt.xlabel("Samples")
+        plt.ylabel("Amplitude")
+        plt.savefig("../vis/signal.pdf", bbox_inches='tight')
         plt.clf()
 
     emphasized_signal = np.append(signal[0],
                                   signal[1:] - cfg["pre_emphasis"] * signal[:-1])
 
     if not os.path.isfile("../vis/signalemph.pdf"):
+        plt.figure(figsize=(6, 1.5))
         plt.plot(emphasized_signal)
-        plt.savefig("../vis/signalemph.pdf")
+        plt.xlabel("Samples")
+        plt.ylabel("Amplitude")
+        plt.savefig("../vis/signalemph.pdf", bbox_inches='tight')
         plt.clf()
 
     frame_length = cfg["frame_size"] * sample_rate
@@ -41,19 +52,25 @@ def my_mfcc(signal, sample_rate):
 
     mag_frames = np.absolute(np.fft.rfft(frames, cfg["NFFT"]))  # Magnitude of the FFT
     if not os.path.isfile("../vis/magframes.pdf"):
-        plt.imshow(mag_frames, interpolation='none', cmap='jet')
+        plt.figure(figsize=(3, 3))
+        plt.imshow(mag_frames.T, norm=colors.LogNorm(vmin=mag_frames.min(), vmax=mag_frames.max()),
+                   interpolation='none', cmap='Greys')
         plt.xlabel("Frame")
+        plt.ylabel('$k$')
         plt.colorbar()
-        plt.savefig("../vis/magframes.pdf")
+        plt.savefig("../vis/magframes.pdf", bbox_inches='tight')
         plt.clf()
 
     pow_frames = ((1.0 / cfg["NFFT"]) * ((mag_frames) ** 2))  # Power Spectrum
 
     if not os.path.isfile("../vis/powframes.pdf"):
-        plt.imshow(pow_frames, interpolation='none', cmap='jet')
+        plt.figure(figsize=(3, 3))
+        plt.imshow(pow_frames.T, norm=colors.LogNorm(vmin=pow_frames.min(), vmax=pow_frames.max()),
+                   interpolation='none', cmap='Greys')
         plt.xlabel("Frame")
+        plt.ylabel('$k$')
         plt.colorbar()
-        plt.savefig("../vis/powframes.pdf")
+        plt.savefig("../vis/powframes.pdf", bbox_inches='tight')
         plt.clf()
 
     low_freq_mel = 0
@@ -74,41 +91,50 @@ def my_mfcc(signal, sample_rate):
             fbank[m - 1, k] = (bin[m + 1] - k) / (bin[m + 1] - bin[m])
 
     if not os.path.isfile("../vis/fbanks.pdf"):
+        plt.figure(figsize=(6, 1.5))
         for bank in fbank:
             plt.plot(bank, color='black')
-        plt.savefig("../vis/fbanks.pdf")
+        plt.xlabel("Frequency (Hz)")
+        plt.ylabel("Amplitude")
+        plt.savefig("../vis/fbanks.pdf", bbox_inches='tight')
         plt.clf()
 
     filter_banks = np.dot(pow_frames, fbank.T)
     filter_banks = np.where(filter_banks == 0, np.finfo(float).eps, filter_banks)  # Numerical Stability
     filter_banks = 20 * np.log10(filter_banks)  # dB
     if not os.path.isfile("../vis/spectrogram.pdf"):
-        plt.imshow(filter_banks.T, interpolation='none', cmap='jet', aspect='auto')
-        plt.savefig("../vis/spectrogram.pdf")
+        plt.figure(figsize=(6, 1.5))
+        plt.imshow(filter_banks.T,
+            interpolation='none', cmap='Greys', aspect='auto')
+        plt.xlabel('Frame')
+        plt.colorbar()
+        plt.savefig("../vis/spectrogram.pdf", bbox_inches='tight')
         plt.clf()
 
     mfcc = dct(filter_banks, type=2, axis=1, norm='ortho')[:, 0:(cfg["num_ceps"])] # Keep 2-13. NO: 0-12
-    # (nframes, ncoeff) = mfcc.shape
-    # n = np.arange(ncoeff)
-    # lift = 1 + (cfg["cep_lifter"] / 2) * np.sin(np.pi * n / cfg["cep_lifter"])
-    # mfcc *= lift  #*
 
-    if not os.path.isfile("../vis/mfcc.pdf"):
-        plt.imshow(mfcc.T, interpolation='none', cmap='jet', aspect='auto')
-        plt.savefig("../vis/mfcc.pdf")
-        plt.clf()
     filter_banks -= np.mean(filter_banks, axis=0)
 
     if not os.path.isfile("../vis/norm_fbanks.pdf"):
-        plt.imshow(filter_banks.T, interpolation='none', cmap='jet', aspect='auto')
-        plt.savefig("../vis/norm_fbanks.pdf")
+        plt.figure(figsize=(6, 1.5))
+        plt.imshow(filter_banks.T,
+            interpolation='none', cmap='Greys', aspect='auto')
+        plt.colorbar()
+        plt.xlabel('Frame')
+        plt.ylabel('Feature')
+        plt.savefig("../vis/norm_fbanks.pdf", bbox_inches='tight')
         plt.clf()
 
     mfcc -= np.mean(mfcc, axis=0)
 
     if not os.path.isfile("../vis/norm_mfcc.pdf"):
-        plt.imshow(mfcc.T, interpolation='none', cmap='jet', aspect='auto')
-        plt.savefig("../vis/norm_mfcc.pdf")
+        plt.figure(figsize=(6, 1.5))
+        plt.imshow(mfcc.T,
+            interpolation='none', cmap='Greys', aspect='auto')
+        plt.colorbar()
+        plt.xlabel('Frame')
+        plt.ylabel('Feature')
+        plt.savefig("../vis/norm_mfcc.pdf", bbox_inches='tight')
         plt.clf()
     return mfcc
 
@@ -138,9 +164,7 @@ def align_phones(phones_):
     frame = 0
     for frame in range(maxnframes):
         frametime = int(winlen / 2 + frame * steplen)
-        # print(frametime)
         for phone, phonetime in phones_:
-            # print(phonetime)
             if frametime < phonetime:
                 # A phone discovered after this frametime!
                 ret[frame, :] = phone
@@ -155,8 +179,8 @@ def align_phones(phones_):
 
 def read_sound(fname):
     """Returns as [(start, end, soundarr)] tuple list."""
-    # mfcc_feat = my_mfcc(*sf.read(fname))
-    mfcc_feat = mfcc(*sf.read(fname))
+    mfcc_feat = my_mfcc(*sf.read(fname))
+    # mfcc_feat = mfcc(*sf.read(fname))
     if cfg["TIMIT_derivative"] == 0:
         return mfcc_feat
     delta1 = delta(feat=mfcc_feat, N=2)
@@ -222,6 +246,19 @@ if __name__ == "__main__":
                         break
 
         d_ext = "_small" if cfg["n_examples"]['train'] < 3696 else ""
+        if not os.path.isfile("../vis/target.pdf"):
+            tgt = phonedata[0, :, :].T
+            src = wavdata[0, :, :].T
+            while np.all(src[:, -1] == -1):
+                tgt = tgt[:, :-1]
+                src = src[:, :-1]
+
+            plt.figure(figsize=(6, 3))
+            plt.imshow(tgt, interpolation='none', cmap='gray')
+            plt.xlabel("Frame")
+            plt.ylabel("1-hot label vector")
+            plt.savefig("../vis/target.pdf")
+            plt.clf()
 
         if tvt_type == 'test':
             np.save(f'{cfg["wavs_fname"]}_{tvt_type}_TIMIT{d_ext}.npy', wavdata)

@@ -354,6 +354,8 @@ def eprop(cfg, X, T, betas, W, grad=True):
                     * M['vv'][:, :, prev_syn_t, r]
                     - oldva
                     + M['z_in'][:, :, curr_nrn_t, r, None, :])
+                M['va'][:, :, curr_syn_t, r] = torch.clip(M['vv'][:, :, curr_syn_t, r], -0.005, 0.005)
+                M['vv'][:, :, curr_syn_t, r] = torch.clip(M['va'][:, :, curr_syn_t, r], -3., 3.)
 
 
             if r == 0:
@@ -374,7 +376,7 @@ def eprop(cfg, X, T, betas, W, grad=True):
                 at = M['a'][:, :, prev_nrn_t, r] + 2 * M['z'][:, :, prev_nrn_t, r]
                 M['a'][:, :, curr_nrn_t, r] = (
                     at
-                    + cfg["IzhA1"] * (M['v'][:, :, prev_nrn_t, r] - (M['v'][:, :, prev_nrn_t, r] + cfg["thr"]) * M['z'][:, :, prev_nrn_t, r])
+                    + cfg["IzhA1"] * (M['v'][:, :, prev_nrn_t, r] - (M['v'][:, :, prev_nrn_t, r] + cfg["IzhThr"]) * M['z'][:, :, prev_nrn_t, r])
                     + cfg["IzhA2"] * at)
 
             A = cfg["thr"] + betas[:, None, r] * M['a'][:, :, curr_nrn_t, r]
@@ -414,7 +416,7 @@ def eprop(cfg, X, T, betas, W, grad=True):
                     0)
             elif cfg["neuron"] == "Izhikevich":
                 M['z'][:, :, curr_nrn_t, r] = torch.where(
-                    M['v'][:, :, curr_nrn_t, r] >= cfg["thr"],
+                    M['v'][:, :, curr_nrn_t, r] >= cfg["IzhThr"],
                     1,
                     0)
 
@@ -436,8 +438,8 @@ def eprop(cfg, X, T, betas, W, grad=True):
                         None))
             elif cfg["neuron"] == 'Izhikevich':
                 cfg["gamma"] * torch.exp(
-                    (torch.clip(M['v'][:, :, curr_nrn_t, r], None, cfg["thr"]) - cfg["thr"])
-                    / cfg["thr"])
+                    (torch.clip(M['v'][:, :, curr_nrn_t, r], None, cfg["IzhThr"]) - cfg["IzhThr"])
+                    / cfg["IzhThr"])
 
             if cfg["neuron"] == "ALIF":
                 M['h'][:, :, curr_nrn_t, r] = torch.where(
