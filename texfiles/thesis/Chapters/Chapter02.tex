@@ -1,5 +1,5 @@
 %************************************************
-\chapter{Related work}\label{ch:relatedwork}
+\chapter{Theoretical Framework}\label{ch:relatedwork}
 %************************************************
 
 \section{Eligibility Propagation}
@@ -64,7 +64,7 @@
             \begin{figure}[!ht]
                 \centering
                 \includegraphics[width=\linewidth]{gfx/simplealif}
-                \caption{A simulated ALIF neuron $j$ receives a sinusoidal input $I$ for 300 time steps $t$. This figure illustrates the adaptive threshold $a$, which increases at every spike $z$, requiring a higher activity $v$ for a next spike. When a spike occurs, $v$ decreases by $v_\text{th}$.}
+                \caption[ALIF neuron simulation.]{A simulated ALIF neuron $j$ receives a sinusoidal input $I$ for 300 time steps $t$. This figure illustrates the adaptive threshold $a$, which increases at every spike $z$, requiring a higher activity $v$ for a next spike. When a spike occurs, $v$ decreases by $v_\text{th}$.}
                 \label{fig:simplealif}
             \end{figure}
 
@@ -73,15 +73,20 @@
 
     \subsection{Network topology}
 
-        \begin{tcolorbox}[colback=orange]
-          - Insert image, and reference it
-        \end{tcolorbox}
         The neurons receive inputs from the input feature vector and the observable states of the afferent neurons.
 
         Weights are initialized by sampling them from a Gaussian distribution $\mathcal{N}\left(0, \sqrt{N}\right)$ where $N$ is the number of afferent neurons.
         For instance, the weights $\mathbf{W}^\text{in}$ between the input and the first layer are sampled from $\mathcal{N}\left(0, \sqrt{39}\right)$, because there are 39 input features.
 
         A randomly selected 80\% of synaptic weights is then set to a value of 0, as well as the synapses that connect a neuron to itself, rendering them ineffective.
+
+        Figure \ref{fig:topology-sl} illustrates the basic architecture of a single-layer e-prop model.
+        \begin{figure}[!ht]
+            \myfloatalign
+            \includegraphics[trim=0 25cm 0 0, clip, width=\linewidth]{gfx/Singlelayer}
+            \caption[Multi-layer illustration.]{An illustration of a single-layer network architecture.}
+            \label{fig:topology-sl}
+          \end{figure}
 
 
     \subsection{Deriving e-prop from RNNs}\label{sec:derivefromBPTT}
@@ -298,7 +303,7 @@
 
             Since the learning signal $L^t_j$ is defined as the partial derivative of the error $E$ with respect to the observable state $z_j^t$ of a neuron $j$ afferent to an output neurons $k$, we can derive
             \begin{equation}\label{eq:learningsignal_after_output}
-            L^t_j = \frac{\partial E}{\partial z^t_j} = \sum_kB_{jk}\sum_{t'\geq t}\left(\pi^{t'}_k - \pi^{*,t}_k\right)\kappa^{t'-t},
+            L^t_j = \frac{\partial E}{\partial z^t_j} = \sum_kB_{jk}\sum_{t'\geq t}\left(\pi^{t'}_k - \pi^{*,t'}_k\right)\kappa^{t'-t},
             \end{equation}
             where $B_{jk}$ is a feedback weight from neuron $k$ back to neuron $j$.
             There are multiple strategies for choosing feedback weights.
@@ -317,7 +322,7 @@
             \Delta W_{ji} &= -\eta\sum_{t'}\frac{\partial E}{\partial z^{t'}_j}e^{t'}_{ji}\\
             &= -\eta\sum_{t'}\sum_kB_{jk}\sum_{t'\geq t}\left(\pi^{t'}_k - \pi^{*,t}_k\right)\kappa^{t'-t}e^{t'}_{ji}\\
             &= -\eta\sum_{k, t'}B_{jk}\sum_{t'\geq t}\left(\pi^{t'}_k - \pi^{*,t}_k\right)\kappa^{t'-t}e^{t'}_{ji}\\
-            &= -\eta\sum_t\underbrace{\sum_kB_{jk}\left(\pi^{t'}_k - \pi^{*,t}_k\right)}_{=L^t_j}\underbrace{\sum_{t'\leq t}\kappa^{t'-t}e^{t'}_{ji}}_{\eqdef \bar{e}^t_{ji}}\label{dwlast},
+            &= -\eta\sum_t\underbrace{\sum_kB_{jk}\left(\pi^{t}_k - \pi^{*,t}_k\right)}_{=L^t_j}\underbrace{\sum_{t'\leq t}\kappa^{t'-t}e^{t'}_{ji}}_{\eqdef \bar{e}^t_{ji}}\label{dwlast},
             \end{align}
             where $W_{ji}$ is an input or recurrent weight.
             By implementing $\bar{e}_{ji}$ as a low-pass filter (with factor $\kappa$) of the eligibility trace, the weight update in Equation \ref{dwlast} is implemented as a local and online learning algorithm.
@@ -335,7 +340,7 @@
                 \centering
                 \includegraphics[width=\linewidth]{gfx/alif}
                 \label{fig:alif}
-                \caption{An single-synapse demonstration of the evolution of the full hidden state of the ALIF neuron. The blue lines indicate the postsynaptic neuron $j$, and the orange lines indicate the presynaptic neuron $i$. Note that the synapse weight increases regardless of the order of spikes, indicating an absence of STDP in the standard e-prop ALIF neuron.}
+                \caption[Single-synapse ALIF demo.]{A single-synapse demonstration of the evolution of the full hidden state of the ALIF neuron. The blue lines indicate the postsynaptic neuron $j$, and the orange lines indicate the presynaptic neuron $i$. Note that the synapse weight increases regardless of the order of spikes, indicating an absence of STDP in the standard e-prop ALIF neuron.}
             \end{figure}
 
 

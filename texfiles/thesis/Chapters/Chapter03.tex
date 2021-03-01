@@ -234,7 +234,6 @@
 			Coefficients higher than 13 are also discarded, because they represent only fast changes in the spectrogram and increase the complexity of the input signal while adding increasingly less meaning to it.
 
 			Then, the final MFCCs are balanced by centering each frame around the value 0.
-			Next, the trailing frames that are labeled as `silent' are trimmed from the end of the input and target sequences.
 			An example of the final MFCCs is given in Figure \ref{fig:source_mfcc_target}.
 
 		\paragraph{Target output}
@@ -255,7 +254,7 @@
 			    {\includegraphics[width=\linewidth]{gfx/signal}} \\
 			    \subfloat[MFCCs centered around 0 per channel.]
 			    {\includegraphics[width=\linewidth]{gfx/norm_mfcc}} \\
-			    \subfloat[Target signal.]
+			    \subfloat[Target signal encoded as a one-hot vector changing over time.]
 			    {\includegraphics[width=\linewidth]{gfx/target}}
 			    \caption[Input/features/targets]{An alignment of a sample signal with its MFCCs features and target phones.}\label{fig:source_mfcc_target}
 			\end{figure}
@@ -270,14 +269,20 @@
 
 	\subsection{Multi-layer architecture}
 
-		\begin{figure}[bth]
+		% \begin{figure}[bth]
+		%     \myfloatalign
+		%     \subfloat[A single-layer network. At time step $t$, the feature vector $x^t$ is fed to a mixed network of LIF and ALIF neurons. Then, the output weights $W^\text{out}$ transform the neuron's observable values into an output value $y^t$, such that the softmax function can be applied to obtain the logits $\pi^t$. The trainable e-prop connections (colored red) are updated by applying the broadcast weights $B$ on the learning signal $L^t$.]
+		%     {\includegraphics[trim=0 25cm 0 0, clip, width=\linewidth]{gfx/Singlelayer}} \\
+		%     \subfloat[A multi-layer network with two stacked recurrent layers. ]
+		%     {\includegraphics[trim=0 25cm 0 0, clip, width=\linewidth]{gfx/Multilayer}}
+		%     \caption[Input/features/targets]{An illustration of a single-layer and multi-layer network architecture.}\label{fig:topology}
+		% \end{figure}
+		\begin{figure}[!ht]
 		    \myfloatalign
-		    \subfloat[A single-layer network. At time step $t$, the feature vector $x^t$ is fed to a mixed network of LIF and ALIF neurons. Then, the output weights $W^\text{out}$ transform the neuron's observable values into an output value $y^t$, such that the softmax function can be applied to obtain the logits $\pi^t$. The trainable e-prop connections (colored red) are updated by applying the broadcast weights $B$ on the learning signal $L^t$.]
-		    {\includegraphics[trim=0 25cm 0 0, clip, width=\linewidth]{gfx/Singlelayer}} \\
-		    \subfloat[A multi-layer network with two stacked recurrent layers. Some details shown in Figure (\ref{fig:topology} b) are omitted for clarity]
-		    {\includegraphics[trim=0 25cm 0 0, clip, width=\linewidth]{gfx/Multilayer}}
-		    \caption[Input/features/targets]{An illustration of a single-layer and multi-layer network architecture.}\label{fig:topology}
-		\end{figure}
+		    \includegraphics[trim=0 25cm 0 0, clip, width=\linewidth]{gfx/Multilayer}
+		    \caption[Multi-layer illustration.]{An illustration of a multi-layer network architecture. Some details shown in Figure (\ref{fig:topology-sl} b) are omitted for clarity}
+		    \label{fig:topology-ml}
+		  \end{figure}
 
 		The multi-layer e-prop architecture can be described in the same formal model as its single-layer counterpart, in which the hidden state is based on temporally (i.e., online) and spatially locally available information at a neuron $j$:
 

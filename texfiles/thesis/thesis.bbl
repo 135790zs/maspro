@@ -3192,6 +3192,49 @@
       \field{pages}{2443\bibrangedash 2452}
       \range{pages}{10}
     \endentry
+    \entry{jaeger2021dimensions}{article}{}
+      \name{author}{4}{}{%
+        {{uniquename=0,uniquepart=base,hash=3e23f63902cb824af4a955a17b0b0951}{%
+           family={Jaeger},
+           familyi={J\bibinitperiod},
+           given={Herbert},
+           giveni={H\bibinitperiod},
+           givenun=0}}%
+        {{uniquename=0,uniquepart=base,hash=2b8b2d49ee19c1a684e690d5e08b9beb}{%
+           family={Doorakkers},
+           familyi={D\bibinitperiod},
+           given={Dirk},
+           giveni={D\bibinitperiod},
+           givenun=0}}%
+        {{uniquename=0,uniquepart=base,hash=fe64f7f2dc9beffcb93d73f58c82e4ca}{%
+           family={Lawrence},
+           familyi={L\bibinitperiod},
+           given={Celestine},
+           giveni={C\bibinitperiod},
+           givenun=0}}%
+        {{uniquename=0,uniquepart=base,hash=88c07d20b170b879a80046025f36fdc9}{%
+           family={Indiveri},
+           familyi={I\bibinitperiod},
+           given={Giacomo},
+           giveni={G\bibinitperiod},
+           givenun=0}}%
+      }
+      \strng{namehash}{4cefd6b3ddd501ab08d6f921a6021538}
+      \strng{fullhash}{b089286bbf90b6b8a2067fd02d872fb5}
+      \strng{bibnamehash}{4cefd6b3ddd501ab08d6f921a6021538}
+      \strng{authorbibnamehash}{4cefd6b3ddd501ab08d6f921a6021538}
+      \strng{authornamehash}{4cefd6b3ddd501ab08d6f921a6021538}
+      \strng{authorfullhash}{b089286bbf90b6b8a2067fd02d872fb5}
+      \field{sortinit}{J}
+      \field{sortinithash}{fce5f8d0bd05e8d93f3dbe21c78897ca}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{year}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{arXiv preprint arXiv:2102.10648}
+      \field{title}{Dimensions of Timescales in Neuromorphic Computing Systems}
+      \field{year}{2021}
+    \endentry
     \entry{jo2010nanoscale}{article}{}
       \name{author}{6}{}{%
         {{uniquename=0,uniquepart=base,hash=06ace784763ecbff19c1f9f3b022fde9}{%
@@ -6578,35 +6621,29 @@
       \field{pages}{659\bibrangedash 669}
       \range{pages}{11}
     \endentry
-    \entry{turing2009computing}{incollection}{}
+    \entry{turing1948intelligent}{misc}{}
       \name{author}{1}{}{%
-        {{uniquename=0,uniquepart=base,hash=fca813825e3285622dde9d2d6cbfb71e}{%
+        {{uniquename=0,uniquepart=base,hash=67f34187545b64099d711eecd647423e}{%
            family={Turing},
            familyi={T\bibinitperiod},
-           given={Alan\bibnamedelima M},
+           given={Alan\bibnamedelima Mathison},
            giveni={A\bibinitperiod\bibinitdelim M\bibinitperiod},
            givenun=0}}%
       }
-      \list{publisher}{1}{%
-        {Springer}%
-      }
-      \strng{namehash}{fca813825e3285622dde9d2d6cbfb71e}
-      \strng{fullhash}{fca813825e3285622dde9d2d6cbfb71e}
-      \strng{bibnamehash}{fca813825e3285622dde9d2d6cbfb71e}
-      \strng{authorbibnamehash}{fca813825e3285622dde9d2d6cbfb71e}
-      \strng{authornamehash}{fca813825e3285622dde9d2d6cbfb71e}
-      \strng{authorfullhash}{fca813825e3285622dde9d2d6cbfb71e}
+      \strng{namehash}{67f34187545b64099d711eecd647423e}
+      \strng{fullhash}{67f34187545b64099d711eecd647423e}
+      \strng{bibnamehash}{67f34187545b64099d711eecd647423e}
+      \strng{authorbibnamehash}{67f34187545b64099d711eecd647423e}
+      \strng{authornamehash}{67f34187545b64099d711eecd647423e}
+      \strng{authorfullhash}{67f34187545b64099d711eecd647423e}
       \field{sortinit}{T}
       \field{sortinithash}{6f7aff9db9dcfeb7f95fd5bbd2f78df9}
       \field{extradatescope}{labelyear}
       \field{labeldatesource}{year}
       \field{labelnamesource}{author}
       \field{labeltitlesource}{title}
-      \field{booktitle}{Parsing the turing test}
-      \field{title}{Computing machinery and intelligence}
-      \field{year}{2009}
-      \field{pages}{23\bibrangedash 65}
-      \range{pages}{43}
+      \field{title}{Intelligent machinery}
+      \field{year}{1948}
     \endentry
     \entry{turrigiano2000hebb}{article}{}
       \name{author}{2}{}{%

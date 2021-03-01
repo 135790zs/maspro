@@ -2,7 +2,7 @@ from numpy import exp
 cfg = {
     "eprop_type": "symmetric",  # in {global, random, symmetric, adaptive}
     "Optimizer": "Adam",  # No effect, always Adam
-    "neuron": "Izhikevich",  # in {ALIF, STDP-ALIF, Izhikevich}
+    "neuron": "STDP-ALIF",  # in {ALIF, STDP-ALIF, Izhikevich}
     "v_fix": True,
     "v_fix_psi": True,
     "fraction_ALIF": 0.25,  # def 0.25
@@ -53,7 +53,7 @@ cfg = {
     "N_R": 800,
     "N_Rec": 1,
 
-    "task": "TIMIT",
+    "task": "TIMIT_small",
     "wavs_fname": "../data/data_wavs",
     "phns_fname": "../data/data_phns",
 
@@ -83,13 +83,15 @@ cfg = {
     "plot_tracker_interval": 10,  # Per it
     "state_save_interval": 10,
     "val_every_B": 10,
-    "visualize_val": False,
+    "visualize_val": True,
     "early_stopping": False,
-    "test_on_val": True,
+    "test_on_val": False,
+    "load_weights": "STDP-ALIF 1 layer/BEST 2021-02-26-17:16:34 48in2000",
+    "skip_training": True,
 
     # Max batches per epoch
     "max_train_batches": -1,
-    "max_val_batches": 20,
+    "max_val_batches": -1,
     "max_test_batches": -1,
 
     "frame_size": 0.025,

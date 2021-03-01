@@ -27,16 +27,21 @@ def main(cfg):
 
     # Weights to the network. Keys: W, out, bias, B
     W = ut.initialize_weights(cfg=cfg, inp_size=n_channels, tar_size=n_phones)
+    if cfg["load_weights"]:
+        W = ut.load_checkpoint(log_id=cfg["load_weights"])
+
     adamvars = ut.init_adam(cfg=cfg, tar_size=n_phones)
     betas = ut.initialize_betas(cfg=cfg)
 
     W_log = ut.initialize_W_log(cfg=cfg, W=W)
 
+
+
     best_val_ce = None
     flag_stop = False
 
     for e in range(cfg["Epochs"]):
-        if flag_stop:
+        if flag_stop or cfg["skip_training"]:
             break
         # Train on batched input samples
         batch_idxs_list = ut.sample_mbatches(cfg=cfg, n_samples=n_train, tvtype='train')
@@ -47,7 +52,7 @@ def main(cfg):
 
             # Validate occasionally
             if adamvars['it'] % cfg["val_every_B"] == 0:
-                Mv, avgs_v = feed_batch(
+                Mv, avgs_v, _ = feed_batch(
                     n_samples=n_val,
                     tvt_type='val',
                     cfg=cfg,
@@ -128,10 +133,12 @@ def main(cfg):
 
 
     # TEST
+    if not cfg["skip_training"]:
+        Wopt = ut.load_checkpoint(log_id=log_id)
+    else:
+        Wopt = W
 
-    Wopt = ut.load_checkpoint(log_id=log_id)
-
-    _, avgs = feed_batch(
+    M, avgs, n_steps = feed_batch(
         tvt_type='test',
         n_samples=n_test,
         cfg=cfg,
@@ -143,13 +150,21 @@ def main(cfg):
         log_id=None,
         it=None)
 
+    if cfg["visualize_val"]:
+        vis.plot_M(M=M,
+                   cfg=cfg,
+                   it=adamvars['it'],
+                   log_id=log_id,
+                   n_steps=n_steps,
+                   inp_size=n_channels)
+
     return avgs['ce'], 100-100*avgs['acc']
 
 
 def feed_batch(tvt_type, n_samples, cfg, inps, tars, betas, W, best_val_ce, log_id, it):
 
     batch_idxs_list = ut.sample_mbatches(cfg=cfg, n_samples=n_samples, tvtype=tvt_type)
-
+    total_avgs = {'ce': 0, 'hz': 0, 'regerr': 0, 'acc': 0}
     for b_idx, batch_idxs in enumerate(batch_idxs_list):
 
         if b_idx == cfg[f"max_{tvt_type}_batches"]:
@@ -169,7 +184,10 @@ def feed_batch(tvt_type, n_samples, cfg, inps, tars, betas, W, best_val_ce, log_
         avgs = ut.get_avgs(M=M,
                            n_steps=n_steps)
 
-    return M, avgs
+        for k, v in avgs.items():
+            total_avgs[k] += v/num_batches
+
+    return M, total_avgs, n_steps
 
 if __name__ == "__main__":
 

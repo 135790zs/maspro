@@ -36,24 +36,23 @@ def weights_to_img(arr, is_binary=False):
 
 def plot_M(cfg, M, it, log_id, n_steps, inp_size):
     plotvars = ['x']
-    if cfg["Track_neuron"]:
-        plotvars += ['I', "v", "a", "z", "h", 'loss_pred']
+    # if cfg["Track_neuron"]:
+    #     plotvars += ['I', "v", "a", "z", "h", 'loss_pred']
     if cfg["Track_synapse"]:
         plotvars += ["vv", "va", "etbar", "GW_in", "GW_rec"]
-    if cfg["Track_neuron"]:
-        plotvars += ["y", 'd']
-    plotvars += ['p', 'pm', 't', 'correct']
+    # if cfg["Track_neuron"]:
+    #     plotvars += ["y"]
+    plotvars += ['p', 'pm', 't']
 
-    fig = plt.figure(constrained_layout=False, figsize=(8, len(plotvars)//1.2))
+    fig = plt.figure(constrained_layout=False, figsize=(6, len(plotvars)//1.2))
     gsc = fig.add_gridspec(nrows=len(plotvars),
                            ncols=1,
-                           hspace=0.075,
+                           hspace=0,
                            wspace=0.5)
     axs = []
     labelpad = 30
     fontsize = 13
 
-    fig.suptitle(f"ID {log_id}, Iteration {it}", fontsize=20)
     row_idx = 0
     rng = np.random.default_rng(seed=cfg["seed"])
     b = rng.choice(n_steps.size)
@@ -71,23 +70,24 @@ def plot_M(cfg, M, it, log_id, n_steps, inp_size):
         axs[-1].imshow(weights_to_img(arr,
                                       is_binary=lookup[var]["binary"]),
                        cmap=('RdYlGn' if var == 'correct' else
-                                 'copper' if lookup[var]["binary"]
-                                 else 'coolwarm'),
+                                 'Greys' if lookup[var]["binary"]
+                                 else 'Greys'),
                        vmin=np.min(arr),
                        vmax=np.max(arr),
                        interpolation="none",  # better than nearest here
                        aspect='auto')
 
-        axs[-1].set_ylabel(f"${lookup[var]['label']}$"
-                           f"\n{np.min(arr):.1e}"
-                           f"\n{np.max(arr):.1e}",
+        axs[-1].set_ylabel(f"${lookup[var]['label']}$",
+                           # f"\n{np.min(arr):.1e}"
+                           # f"\n{np.max(arr):.1e}",
                            rotation=0,
                            labelpad=labelpad,
                            fontsize=fontsize)
 
+        axs[-1].xaxis.set_visible(False)
         row_idx += 1
 
-
+    axs[-1].xaxis.set_visible(True)
     axs[-1].set_xlabel("$t$", fontsize=fontsize)
 
     plt.savefig(f"../log/{log_id}/states/state.pdf",

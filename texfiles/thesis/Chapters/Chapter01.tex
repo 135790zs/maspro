@@ -5,7 +5,7 @@
 The human brain is one of the most complex systems in the universe.
 Its approximately 86 billion neurons \citep{azevedo2009equal} and 100--500 trillion synapses \citep{drachman2005we} are capable of abstract reasoning, pattern recognition, memorization, and sensory experience---while consuming only about \SI{20}{\watt} of power \citep{sokoloff1960metabolism,drubach2000brain}.
 
-An early goal of artificial intelligence has been to construct systems that exhibit similar intelligent traits \citep{turing2009computing}.
+An early goal of artificial intelligence has been to construct systems that exhibit similar intelligent traits \citep{turing1948intelligent}.
 One of the proposed methods was to emulate the network of biological neurons in the human brain using simple units called perceptrons \citep{rosenblatt1958perceptron}.
 These perceptrons were inspired by Hebbian learning \citep{hebb1949organization}, which was a new (and later corroborated) theory on biological learning.
 This proved to be more difficult than initially hoped, partly due to ostensibly insurmountable problems such as the inability of perceptrons to learn linearly inseparable tasks \citep{minsky1969introduction}.
@@ -46,7 +46,7 @@ Spiking neural networks (SNNs) \citep{maass1997networks,gerstner2002spiking} are
 The concept dates back to the 1980s \citep{hopfield1982neural}; nevertheless, they are sometimes considered as the third generation of ANNs \citep{maass1997networks}.
 SNNs use neurons that do not relay continuous activation values at every propagation cycle, but spike once when they reach a threshold value.
 SNNs are competitive to ANNs in terms of accuracy and computational power, as well in their ability to display precise spike timings \citep{lobo2020spiking}.
-Their sparse firing regimes also offer improved interpretability of their behavior as compared to traditional ANNs \cite{soltic2010knowledge}, which is desired in areas such as medicine or aviation.
+Their sparse firing regimes also offer improved interpretability of their behavior as compared to traditional ANNs \citep{soltic2010knowledge}, which is desired in areas such as medicine or aviation.
 
 However, SNNs have not been as popular as ANNs.
 One reason for this is that spike-based activation is not differentiable.
@@ -58,12 +58,13 @@ Information locality can be preserved in some of these methods \citep{alemi2018l
 The FORCE training method \citep{nicola2017supervised}, in contrast, can also train RSNNs but is nonlocal and therefore not suited for biologically plausible implementations.
 This body of research led to increased understanding of training SNNs and how to obtain better learning performances.
 For instance, both single- and multi-layer SNNs have shown good performance in visual processing \citep{escobar2009action,kheradpisheh2018stdp,liu2017fast} and speech recognition \citep{tavanaei2017bio,dong2018unsupervised}.
+However, none of these algorithms are biologically plausible.
 While DL was rapidly becoming popular during the 2010s, there was no clear learning algorithm for SNNs that could compete with ANNs.
 A second reason for the relative unpopularity of SNNs is that they are generally emulated in von Neumann architectures, undermining their energy efficiency advantages.
 
 \paragraph{Neuromorphic computing}  % Gives importance to local & online
 SNN learning algorithms are particularly useful in the upcoming field of neuromorphic computing (NC) \citep{mitra2008real}, in which analog very-large-scale integration (VLSI) systems are used to implement neural systems.
-On the surface, it can be understood as running neural networks not abstracted in a digital system, but physically embedded in an dedicated analog medium.
+On the surface, it can be understood as running neural networks not abstracted in a digital system, but physically embedded in a dedicated analog medium.
 A central advantage of NC is energy efficiency \citep{hasler1990vlsi,lee1990parallel,tarassenko1990real}.
 This energy efficiency, combined with NC's massive parallelism \citep{monroe2014neuromorphic}, makes VLSIs particularly relevant for implementing SNNs.
 
@@ -149,7 +150,7 @@ It is unclear if these findings extrapolate to RSNNs.
 In this report, the performance of e-prop in \citet{bellec2020solution} is reproduced.
 Whereas e-prop was implemented using automatic differentiation in that research, in this report it is done explicitly, using the e-prop learning equations.
 Furthermore, the two new STDP neuron models of \citet{traub2020learning} are experimentally verified in the TIMIT phone classification task.
-One of these models, the LIF-STDP, will be modified to an adaptive version called ALIF-STDP.
+One of these models, the STDP-LIF, will be modified to an adaptive version called STDP-ALIF.
 Finally, the effect of stacking multiple RSNN layers in an e-prop with each of the three neuron models is examined.
 
 Chapter \ref{ch:relatedwork} describes the basic version of the e-prop framework.

@@ -45,7 +45,7 @@
 \begin{figure}[ht]
     \centering
     \includegraphics[width=\linewidth]{gfx/demo_izh}
-    \caption{A single-synapse demo of the uncorrected Izhikevich neuron. Note that $\epsilon^t_{ji, v}$ takes on extreme values and that the eligibility vector flips sign at any pair of spikes.}
+    \caption[A single-synapse demo of the uncorrected Izhikevich neuron.]{A single-synapse demo of the uncorrected Izhikevich neuron. Note that $\epsilon^t_{ji, v}$ takes on extreme values and that the eligibility vector flips sign at any pair of spikes.}
     \label{fig:demo_izh}
 \end{figure}
 
@@ -75,3 +75,26 @@
     \caption[Hyperparameters]{The full list of hyperparameter values. \textsuperscript{*}This is the total number of neurons in multi-layer networks.}
     \label{tab:hparams}
 \end{table}
+
+\begin{figure}[bth]
+    \myfloatalign
+    \subfloat[ALIF cross-entropy.]
+    {\includegraphics[height=3.4cm, keepaspectratio]{gfx/ml-crossentropy-ALIF}} \quad
+    \subfloat[STDP-ALIF cross-entropy.]
+    {\includegraphics[height=3.4cm, keepaspectratio]{gfx/ml-crossentropy-STDP-ALIF}} \quad
+    \subfloat[Izhikevich cross-entropy.]
+    {\includegraphics[height=3.4cm, keepaspectratio]{gfx/ml-crossentropy-Izhikevich}} \\
+    \subfloat[ALIF spike rate.]
+    {\includegraphics[height=3.6cm, keepaspectratio]{gfx/ml-hz-ALIF}} \quad
+    \subfloat[STDP-AIF spike rate.]
+    {\includegraphics[height=3.6cm, keepaspectratio]{gfx/ml-hz-STDP-ALIF}} \quad
+    \subfloat[Izhikevich spike rate.]
+    {\includegraphics[height=3.6cm, keepaspectratio]{gfx/ml-hz-Izhikevich}} \\
+    \subfloat[ALIF reg. error.]
+    {\includegraphics[height=3.6cm, keepaspectratio]{gfx/ml-regerr-ALIF}} \quad
+    \subfloat[STDP-ALIF reg. error.]
+    {\includegraphics[height=3.6cm, keepaspectratio]{gfx/ml-regerr-STDP-ALIF}} \quad
+    \subfloat[Izhikevich reg. error.]
+    {\includegraphics[height=3.6cm, keepaspectratio]{gfx/ml-regerr-Izhikevich}}
+    \caption[Cross-entropy rates, mean spiking frequencies, and regularization errors for multi-layer networks.]{Cross-entropy rates, mean spiking frequencies, and regularization errors for multi-layer networks.}\label{fig:ml-otherresults}
+\end{figure}

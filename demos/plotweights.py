@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 for wtype in ["W_in", "W_rec", "out", "bias", "B"]:
-	fname = f"../log/2021-01-19-09:07:57/checkpoints/{wtype}.npy"
+	fname = f"../log/2021-01-29-11:22:43/checkpoints/{wtype}.npy"
 
 	W = np.load(fname)
 	num_subnets = W.shape[0] if wtype != 'bias' else 1

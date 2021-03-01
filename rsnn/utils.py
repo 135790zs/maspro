@@ -813,7 +813,7 @@ def save_checkpoint(W, cfg, log_id):
         np.save(f"../log/{log_id}/checkpoints/{wtype}", w.cpu().numpy())
 
 
-def load_checkpoint(log_id, parent_dir='log'):
+def load_checkpoint(log_id, parent_dir='vault'):
     W = {}
     for subdir, _, files in os.walk(f"../{parent_dir}/{log_id}/checkpoints"):
         for filename in files:

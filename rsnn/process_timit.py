@@ -14,7 +14,7 @@ rc['font.family'] = 'STIXGeneral'
 def my_mfcc(signal, sample_rate):
     if not os.path.isfile("../vis/signal.pdf"):
         plt.figure(figsize=(6, 1.5))
-        plt.plot(signal)
+        plt.plot(signal, color='gray')
         plt.xlabel("Samples")
         plt.ylabel("Amplitude")
         plt.savefig("../vis/signal.pdf", bbox_inches='tight')
@@ -25,7 +25,7 @@ def my_mfcc(signal, sample_rate):
 
     if not os.path.isfile("../vis/signalemph.pdf"):
         plt.figure(figsize=(6, 1.5))
-        plt.plot(emphasized_signal)
+        plt.plot(emphasized_signal, color='gray')
         plt.xlabel("Samples")
         plt.ylabel("Amplitude")
         plt.savefig("../vis/signalemph.pdf", bbox_inches='tight')
@@ -254,7 +254,7 @@ if __name__ == "__main__":
                 src = src[:, :-1]
 
             plt.figure(figsize=(6, 3))
-            plt.imshow(tgt, interpolation='none', cmap='gray')
+            plt.imshow(tgt, interpolation='none', cmap='Greys')
             plt.xlabel("Frame")
             plt.ylabel("1-hot label vector")
             plt.savefig("../vis/target.pdf")
