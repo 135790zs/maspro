@@ -1,8 +1,8 @@
-\BOOKMARK [1][-]{tableofcontents.1}{Contents}{}% 1
-\BOOKMARK [1][-]{lof.1}{List of Figures}{}% 2
-\BOOKMARK [1][-]{lot.1}{List of Tables}{}% 3
-\BOOKMARK [1][-]{lol.1}{Listings}{}% 4
-\BOOKMARK [1][-]{acronyms.1}{Acronyms}{}% 5
+\BOOKMARK [1][-]{Abstract.1}{Abstract}{}% 1
+\BOOKMARK [1][-]{tableofcontents.1}{Contents}{}% 2
+\BOOKMARK [1][-]{lof.1}{List of Figures}{}% 3
+\BOOKMARK [1][-]{lot.1}{List of Tables}{}% 4
+\BOOKMARK [1][-]{lol.1}{Listings}{}% 5
 \BOOKMARK [0][]{chapter.1}{1 Introduction}{}% 6
 \BOOKMARK [0][]{chapter.2}{2 Theoretical Framework}{}% 7
 \BOOKMARK [1][-]{section.2.1}{2.1 Eligibility Propagation}{chapter.2}% 8
@@ -29,4 +29,5 @@
 \BOOKMARK [0][]{chapter.5}{5 Discussion}{}% 29
 \BOOKMARK [0][]{chapter.6}{6 Conclusion}{}% 30
 \BOOKMARK [0][]{appendix.A}{A Appendix}{}% 31
-\BOOKMARK [0][]{section*.50}{ Bibliography}{}% 32
+\BOOKMARK [1][-]{section.A.1}{A.1 Implementation}{appendix.A}% 32
+\BOOKMARK [0][]{section*.50}{ Bibliography}{}% 33

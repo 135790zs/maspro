@@ -1,6 +1,13 @@
 %************************************************
 \chapter{Appendix}\label{ch:appendix}
 %************************************************
+
+\section{Implementation}
+link, no library, dynamic layers and direction, explicit implementation
+The code is available at \texttt{https://github.com/wkvanderveen/maspro}.
+It does not require any machine learning libraries (except basic PyTorch to initialize arrays on the GPU); all computations are explicitly implemented in pure multidimensional NumPy-like arrays.
+The code contains a configuration file to set various options for the MFCC preprocessing and e-prop process, including the number of layers, whether to use an uni- or bidirectional network (a legacy option not treated in this report), and the window size in the MFCCs, for example.
+
 \begin{table}[ht]
     \myfloatalign
     \begin{tabularx}{\textwidth}{rrr} \toprule

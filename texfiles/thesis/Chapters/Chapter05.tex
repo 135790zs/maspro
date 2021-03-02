@@ -5,8 +5,11 @@
 \paragraph{Interpretation of results}
 % Effect of STDP
 % Firing rate tends to decrease slower for non-STDP; refer back to runaway excitation and demo graph.
+The results show that the ALIF and STDP-ALIF neuron perform better than the corrected (and default) Izhikevich e-prop neuron model in classifying phones in the TIMIT dataset.
+The addition of the STDP mechanism in the ALIF neuron results in a slower, but stabler and more accurate learning curve.
+However, the Izhikevich neuron also shows STDP behavior, suggesting that the STDP-ALIF neuron works by virtue of another factor, such as its spike frequency adaptation which the Izhikevich neuron does not have.
 
-
+Rearranging the neurons into a stacked architecture does not improve the classification performance.
 
 \paragraph{Possible improvements}
     There are many hypothetical ways of improving the performance or biological plausibility of e-prop that have not yet been considered in this report.

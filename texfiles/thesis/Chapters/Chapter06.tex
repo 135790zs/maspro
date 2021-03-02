@@ -1,10 +1,13 @@
 %************************************************
 \chapter{Conclusion}\label{ch:conclusion}
 %************************************************
-%************************************************
 
+In this report, the e-prop framework was applied on the TIMIT phone classification task.
+The performance of the ALIF neuron was reproduced using the explicit e-prop equations.
+The STDP-LIF neuron was modified to STDP-ALIF, and experimentally verified to perform competitively with ALIF.
+The Izhikevich neuron, which also shows STDP behavior, is unstable and does not perform well.
+This suggests that STDP does not provide an adequate neuron model by itself, but that \eg spike frequency adaptation also needs to be taken into account.
 
-\begin{tcolorbox}[colback=orange]
-- CONCLUSION PLACEHOLDERS
+The effect of stacking multiple layers was also examined, and did not improve the learning performance in this task.
 
-\end{tcolorbox}
+E-prop remains a framework that offers high potential for biologically plausible learning algorithms for SNNs, which can be particularly well-suited for replicating intelligent behavior in low-power neuromorphic hardware.
