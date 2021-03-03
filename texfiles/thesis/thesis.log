@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017/Debian) (preloaded format=pdflatex 2020.11.2)  2 MAR 2021 09:51
+This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017/Debian) (preloaded format=pdflatex 2020.11.2)  3 MAR 2021 14:57
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -2116,6 +2116,14 @@ Package: trimspaces 2009/09/17 v1.1 Trim spaces around a token list
 \tcb@out=\write6
 \tcb@record@out=\write7
 )
+(/usr/share/texlive/texmf-dist/tex/latex/tools/bm.sty
+Package: bm 2017/01/16 v1.2c Bold Symbol Support (DPC/FMi)
+\symboldoperators=\mathgroup6
+\symboldletters=\mathgroup7
+\symboldsymbols=\mathgroup8
+LaTeX Font Info:    Redeclaring math alphabet \mathbf on input line 141.
+LaTeX Info: Redefining \bm on input line 207.
+)
 Package csquotes Info: Checking for multilingual support...
 Package csquotes Info: ... found 'babel' package.
 Package csquotes Info: Adjusting default style.
@@ -2139,20 +2147,20 @@ File: english.lbx 2017/12/19 v3.10 biblatex localization (PK/JW/AB)
 (./Chapters/Chapter0A.aux) (./FrontBackmatter/Bibliography.aux))
 \openout1 = `thesis.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 20.
-LaTeX Font Info:    ... okay on input line 20.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 20.
-LaTeX Font Info:    ... okay on input line 20.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 20.
-LaTeX Font Info:    ... okay on input line 20.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 20.
-LaTeX Font Info:    ... okay on input line 20.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 20.
-LaTeX Font Info:    ... okay on input line 20.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 20.
-LaTeX Font Info:    ... okay on input line 20.
-LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 20.
-LaTeX Font Info:    ... okay on input line 20.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 21.
+LaTeX Font Info:    ... okay on input line 21.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 21.
+LaTeX Font Info:    ... okay on input line 21.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 21.
+LaTeX Font Info:    ... okay on input line 21.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 21.
+LaTeX Font Info:    ... okay on input line 21.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 21.
+LaTeX Font Info:    ... okay on input line 21.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 21.
+LaTeX Font Info:    ... okay on input line 21.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 21.
+LaTeX Font Info:    ... okay on input line 21.
 Package biblatex Info: Input encoding 'utf8' detected.
 Package biblatex Info: Data encoding 'utf8' specified.
 (biblatex)             No need to reencode data.
@@ -2160,18 +2168,10 @@ Package biblatex Info: Data encoding 'utf8' specified.
 
 Package biblatex Info: Trying to load bibliographic data...
 Package biblatex Info: ... file 'thesis.bbl' found.
- (./thesis.bbl
-
-Package biblatex Warning: The following entry could not be found
-(biblatex)                in the database:
-(biblatex)                knuth:1974
-(biblatex)                Please verify the spelling and rerun
-(biblatex)                LaTeX afterwards.
-
-)
-Package biblatex Info: Reference section=0 on input line 20.
-Package biblatex Info: Reference segment=0 on input line 20.
- (/usr/share/texlive/texmf-dist/tex/context/base/mkii/supp-pdf.mkii
+ (./thesis.bbl)
+Package biblatex Info: Reference section=0 on input line 21.
+Package biblatex Info: Reference segment=0 on input line 21.
+(/usr/share/texlive/texmf-dist/tex/context/base/mkii/supp-pdf.mkii
 [Loading MPS to PDF converter (version 2006.09.02).]
 \scratchcounter=\count474
 \scratchdimen=\dimen304
@@ -2207,8 +2207,8 @@ Package caption Info: hyperref package is loaded.
 Package caption Info: listings package is loaded.
 Package caption Info: End \AtBeginDocument code.
 \c@lstlisting=\count480
-Package scrhack Info: undefining \float@addtolists on input line 20.
-LaTeX Info: Redefining \microtypecontext on input line 20.
+Package scrhack Info: undefining \float@addtolists on input line 21.
+LaTeX Info: Redefining \microtypecontext on input line 21.
 Package microtype Info: Generating PDF output.
 Package microtype Info: Character protrusion enabled (level 2).
 Package microtype Info: Using default protrusion set `alltext'.
@@ -2224,7 +2224,7 @@ File: mt-cmr.cfg 2013/05/19 v2.2 microtype config. file: Computer Modern Roman
 (RS)
 )
 \AtBeginShipoutBox=\box76
-Package hyperref Info: Link coloring OFF on input line 20.
+Package hyperref Info: Link coloring OFF on input line 21.
 
 (/usr/share/texlive/texmf-dist/tex/latex/hyperref/nameref.sty
 Package: nameref 2016/05/21 v2.44 Cross-referencing by name of section
@@ -2234,9 +2234,9 @@ Package: gettitlestring 2016/05/16 v1.5 Cleanup title references (HO)
 )
 \c@section@level=\count481
 )
-LaTeX Info: Redefining \ref on input line 20.
-LaTeX Info: Redefining \pageref on input line 20.
-LaTeX Info: Redefining \nameref on input line 20.
+LaTeX Info: Redefining \ref on input line 21.
+LaTeX Info: Redefining \pageref on input line 21.
+LaTeX Info: Redefining \nameref on input line 21.
 
 (./thesis.out) (./thesis.out)
 \@outlinefile=\write8
@@ -2326,7 +2326,7 @@ Dictionary: translator-basic-dictionary, Language: English
 File: siunitx-abbreviations.cfg 2017/11/26 v2.7k siunitx: Abbreviated units
 )
 \c__siunitx_mathsf_int=\count482
-LaTeX Font Info:    Try loading font information for U+msa on input line 20.
+LaTeX Font Info:    Try loading font information for U+msa on input line 21.
 
 (/usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsa.fd
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
@@ -2334,7 +2334,7 @@ File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 (/usr/share/texlive/texmf-dist/tex/latex/microtype/mt-msa.cfg
 File: mt-msa.cfg 2006/02/04 v1.1 microtype config. file: AMS symbols (a) (RS)
 )
-LaTeX Font Info:    Try loading font information for U+msb on input line 20.
+LaTeX Font Info:    Try loading font information for U+msb on input line 21.
 
 (/usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
@@ -2382,15 +2382,14 @@ LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <10.95> not available
 
 
 
+] [4
+
+
+
 ]
 \openout2 = `FrontBackmatter/Contents.aux'.
 
- (./FrontBackmatter/Contents.tex [4
-
-
-
-
-]
+ (./FrontBackmatter/Contents.tex
 Package tocbasic Info: character protrusion at toc deactivated on input line 11
 .
 
@@ -2403,7 +2402,11 @@ Package tocbasic Info: character protrusion at toc deactivated on input line 11
 1: chapter
 1: chapter
 1: section
-[5]
+[5
+
+
+
+]
 Package tocbasic Info: character protrusion at lof deactivated on input line 29
 .
  (./thesis.lof
@@ -2469,7 +2472,7 @@ Chapter 2.
 
 
 ] [9]
-LaTeX Font Info:    Try loading font information for T1+cmss on input line 46.
+LaTeX Font Info:    Try loading font information for T1+cmss on input line 57.
  (/usr/share/texlive/texmf-dist/tex/latex/base/t1cmss.fd
 File: t1cmss.fd 2014/09/29 v2.5h Standard LaTeX font definitions
 )
@@ -2477,42 +2480,35 @@ Package microtype Info: Loading generic protrusion settings for font family
 (microtype)             `cmss' (encoding: T1).
 (microtype)             For optimal results, create family-specific settings.
 (microtype)             See the microtype manual for details.
-<gfx/simplealif.pdf, id=569, 513.21736pt x 386.50026pt>
+ [10]
+<gfx/simplealif.pdf, id=588, 513.21736pt x 386.50026pt>
 File: gfx/simplealif.pdf Graphic file (type pdf)
 <use gfx/simplealif.pdf>
-Package pdftex.def Info: gfx/simplealif.pdf  used on input line 66.
+Package pdftex.def Info: gfx/simplealif.pdf  used on input line 79.
 (pdftex.def)             Requested size: 336.0pt x 253.05042pt.
-<gfx/Singlelayer.pdf, id=572, 529.01637pt x 846.0408pt>
+ [11 <./gfx/simplealif.pdf>]
+<gfx/Singlelayer.pdf, id=619, 529.01637pt x 846.0408pt>
 File: gfx/Singlelayer.pdf Graphic file (type pdf)
 <use gfx/Singlelayer.pdf>
-Package pdftex.def Info: gfx/Singlelayer.pdf  used on input line 86.
+Package pdftex.def Info: gfx/Singlelayer.pdf  used on input line 99.
 (pdftex.def)             Requested size: 336.0pt x 85.56802pt.
- [10] [11 <./gfx/Singlelayer.pdf> <./gfx/simplealif.pdf
-
-pdfTeX warning: pdflatex (file ./gfx/simplealif.pdf): PDF inclusion: multiple p
-dfs with page group included in a single page
->]
-Overfull \hbox (32.34203pt too wide) detected at line 117
+ [12 <./gfx/Singlelayer.pdf>]
+Overfull \hbox (32.34203pt too wide) detected at line 132
 []
  []
 
-[12] [13] [14] [15] [16]
-<gfx/alif.pdf, id=745, 516.73048pt x 386.4839pt>
+[13] [14] [15] [16] [17]
+<gfx/alif.pdf, id=761, 516.73048pt x 386.4839pt>
 File: gfx/alif.pdf Graphic file (type pdf)
 <use gfx/alif.pdf>
-Package pdftex.def Info: gfx/alif.pdf  used on input line 341.
+Package pdftex.def Info: gfx/alif.pdf  used on input line 356.
 (pdftex.def)             Requested size: 336.0pt x 251.31181pt.
-) [17 <./gfx/alif.pdf>]
+) [18 <./gfx/alif.pdf>]
 \openout2 = `Chapters/Chapter03.aux'.
 
  (./Chapters/Chapter03.tex
 Chapter 3.
-[18
 
-
-
-
-]
 Underfull \hbox (badness 10000) in alignment at lines 28--28
 [][][][] 
  []
@@ -2522,14 +2518,19 @@ Underfull \hbox (badness 10000) in alignment at lines 51--51
 [][][][][]
  []
 
-[19]
-<gfx/signal.pdf, id=805, 390.00081pt x 127.03459pt>
+[19
+
+
+
+
+]
+<gfx/signal.pdf, id=817, 390.00081pt x 127.03459pt>
 File: gfx/signal.pdf Graphic file (type pdf)
 <use gfx/signal.pdf>
 Package pdftex.def Info: gfx/signal.pdf  used on input line 86.
 (pdftex.def)             Requested size: 336.0pt x 109.45308pt.
  [20]
-<gfx/signalemph.pdf, id=819, 383.1314pt x 127.03459pt>
+<gfx/signalemph.pdf, id=831, 383.1314pt x 127.03459pt>
 File: gfx/signalemph.pdf Graphic file (type pdf)
 <use gfx/signalemph.pdf>
 Package pdftex.def Info: gfx/signalemph.pdf  used on input line 102.
@@ -2539,17 +2540,17 @@ Package pdftex.def Info: gfx/signalemph.pdf  used on input line 102.
 pdfTeX warning: pdflatex (file ./gfx/signalemph.pdf): PDF inclusion: multiple p
 dfs with page group included in a single page
 >]
-<gfx/hamming.pdf, id=879, 361.35pt x 361.35pt>
+<gfx/hamming.pdf, id=891, 361.35pt x 361.35pt>
 File: gfx/hamming.pdf Graphic file (type pdf)
 <use gfx/hamming.pdf>
 Package pdftex.def Info: gfx/hamming.pdf  used on input line 129.
 (pdftex.def)             Requested size: 151.19897pt x 151.19804pt.
-<gfx/magframes.pdf, id=882, 226.85352pt x 187.6425pt>
+<gfx/magframes.pdf, id=894, 226.85352pt x 187.6425pt>
 File: gfx/magframes.pdf Graphic file (type pdf)
 <use gfx/magframes.pdf>
 Package pdftex.def Info: gfx/magframes.pdf  used on input line 147.
 (pdftex.def)             Requested size: 151.19897pt x 125.067pt.
-<gfx/powframes.pdf, id=884, 230.86852pt x 187.6425pt>
+<gfx/powframes.pdf, id=896, 230.86852pt x 187.6425pt>
 File: gfx/powframes.pdf Graphic file (type pdf)
 <use gfx/powframes.pdf>
 Package pdftex.def Info: gfx/powframes.pdf  used on input line 160.
@@ -2559,12 +2560,12 @@ Package pdftex.def Info: gfx/powframes.pdf  used on input line 160.
 pdfTeX warning: pdflatex (file ./gfx/powframes.pdf): PDF inclusion: multiple pd
 fs with page group included in a single page
 >]
-<gfx/fbanks.pdf, id=993, 383.1314pt x 127.03459pt>
+<gfx/fbanks.pdf, id=1005, 383.1314pt x 127.03459pt>
 File: gfx/fbanks.pdf Graphic file (type pdf)
 <use gfx/fbanks.pdf>
 Package pdftex.def Info: gfx/fbanks.pdf  used on input line 210.
 (pdftex.def)             Requested size: 336.0pt x 111.40697pt.
-<gfx/spectrogram.pdf, id=995, 350.29044pt x 128.85623pt>
+<gfx/spectrogram.pdf, id=1007, 350.29044pt x 128.85623pt>
 File: gfx/spectrogram.pdf Graphic file (type pdf)
 <use gfx/spectrogram.pdf>
 Package pdftex.def Info: gfx/spectrogram.pdf  used on input line 219.
@@ -2578,17 +2579,17 @@ File: gfx/signal.pdf Graphic file (type pdf)
 <use gfx/signal.pdf>
 Package pdftex.def Info: gfx/signal.pdf  used on input line 254.
 (pdftex.def)             Requested size: 336.0pt x 109.45308pt.
-<gfx/norm_mfcc.pdf, id=1054, 363.33919pt x 127.251pt>
+<gfx/norm_mfcc.pdf, id=1066, 363.33919pt x 127.251pt>
 File: gfx/norm_mfcc.pdf Graphic file (type pdf)
 <use gfx/norm_mfcc.pdf>
 Package pdftex.def Info: gfx/norm_mfcc.pdf  used on input line 256.
 (pdftex.def)             Requested size: 336.0pt x 117.68396pt.
-<gfx/target.pdf, id=1055, 433.62pt x 216.81pt>
+<gfx/target.pdf, id=1067, 433.62pt x 216.81pt>
 File: gfx/target.pdf Graphic file (type pdf)
 <use gfx/target.pdf>
 Package pdftex.def Info: gfx/target.pdf  used on input line 258.
 (pdftex.def)             Requested size: 336.0pt x 168.00946pt.
-<gfx/Multilayer.pdf, id=1056, 529.01637pt x 846.0408pt>
+<gfx/Multilayer.pdf, id=1068, 529.01637pt x 846.0408pt>
 File: gfx/Multilayer.pdf Graphic file (type pdf)
 <use gfx/Multilayer.pdf>
 Package pdftex.def Info: gfx/Multilayer.pdf  used on input line 282.
@@ -2600,13 +2601,13 @@ tion.3.2.10}) has been already used, duplicate ignored
                                                   \fi \fi 
 l.342 
       ] [27]
-<gfx/stdpalif.pdf, id=1101, 522.09428pt x 386.4839pt>
+<gfx/stdpalif.pdf, id=1113, 522.09428pt x 386.4839pt>
 File: gfx/stdpalif.pdf Graphic file (type pdf)
 <use gfx/stdpalif.pdf>
 Package pdftex.def Info: gfx/stdpalif.pdf  used on input line 391.
 (pdftex.def)             Requested size: 336.0pt x 248.7406pt.
  [28]
-<gfx/demo_izh_corrected.pdf, id=1120, 532.13177pt x 388.11209pt>
+<gfx/demo_izh_corrected.pdf, id=1131, 532.13177pt x 388.11209pt>
 File: gfx/demo_izh_corrected.pdf Graphic file (type pdf)
 <use gfx/demo_izh_corrected.pdf>
 Package pdftex.def Info: gfx/demo_izh_corrected.pdf  used on input line 452.
@@ -2628,38 +2629,38 @@ ltiple pdfs with page group included in a single page
 
  (./Chapters/Chapter04.tex
 Chapter 4.
-<gfx/percwrong.pdf, id=1346, 193.28146pt x 198.0242pt>
+<gfx/percwrong.pdf, id=1357, 193.28146pt x 198.0242pt>
 File: gfx/percwrong.pdf Graphic file (type pdf)
 <use gfx/percwrong.pdf>
 Package pdftex.def Info: gfx/percwrong.pdf  used on input line 20.
 (pdftex.def)             Requested size: 138.86172pt x 142.26378pt.
-<gfx/crossentropy.pdf, id=1347, 206.94502pt x 198.0242pt>
+<gfx/crossentropy.pdf, id=1358, 206.94502pt x 198.0242pt>
 File: gfx/crossentropy.pdf Graphic file (type pdf)
 <use gfx/crossentropy.pdf>
 Package pdftex.def Info: gfx/crossentropy.pdf  used on input line 23.
 (pdftex.def)             Requested size: 148.6782pt x 142.26378pt.
-<gfx/hz.pdf, id=1350, 187.6981pt x 198.0242pt>
+<gfx/hz.pdf, id=1361, 187.6981pt x 198.0242pt>
 File: gfx/hz.pdf Graphic file (type pdf)
 <use gfx/hz.pdf>
 Package pdftex.def Info: gfx/hz.pdf  used on input line 43.
 (pdftex.def)             Requested size: 134.85039pt x 142.26378pt.
-<gfx/regerr.pdf, id=1351, 197.9395pt x 197.42822pt>
+<gfx/regerr.pdf, id=1362, 197.9395pt x 197.42822pt>
 File: gfx/regerr.pdf Graphic file (type pdf)
 <use gfx/regerr.pdf>
 Package pdftex.def Info: gfx/regerr.pdf  used on input line 46.
 (pdftex.def)             Requested size: 142.63411pt x 142.26378pt.
-<gfx/ml-percwrong-ALIF.pdf, id=1355, 198.43353pt x 198.0242pt>
+<gfx/ml-percwrong-ALIF.pdf, id=1366, 198.43353pt x 198.0242pt>
 File: gfx/ml-percwrong-ALIF.pdf Graphic file (type pdf)
 <use gfx/ml-percwrong-ALIF.pdf>
 Package pdftex.def Info: gfx/ml-percwrong-ALIF.pdf  used on input line 58.
 (pdftex.def)             Requested size: 142.56317pt x 142.26378pt.
-<gfx/ml-percwrong-STDP-ALIF.pdf, id=1356, 212.5723pt x 198.0242pt>
+<gfx/ml-percwrong-STDP-ALIF.pdf, id=1367, 212.5723pt x 198.0242pt>
 File: gfx/ml-percwrong-STDP-ALIF.pdf Graphic file (type pdf)
 <use gfx/ml-percwrong-STDP-ALIF.pdf>
 Package pdftex.def Info: gfx/ml-percwrong-STDP-ALIF.pdf  used on input line 61.
 
 (pdftex.def)             Requested size: 152.72107pt x 142.26378pt.
-<gfx/ml-percwrong-Izhikevich.pdf, id=1357, 206.51842pt x 198.0242pt>
+<gfx/ml-percwrong-Izhikevich.pdf, id=1368, 206.51842pt x 198.0242pt>
 File: gfx/ml-percwrong-Izhikevich.pdf Graphic file (type pdf)
 <use gfx/ml-percwrong-Izhikevich.pdf>
 Package pdftex.def Info: gfx/ml-percwrong-Izhikevich.pdf  used on input line 63
@@ -2724,7 +2725,7 @@ Underfull \hbox (badness 10000) in alignment at lines 46--46
 [][][] 
  []
 
-<gfx/demo_izh.pdf, id=1763, 527.26987pt x 388.11209pt>
+<gfx/demo_izh.pdf, id=1775, 527.26987pt x 388.11209pt>
 File: gfx/demo_izh.pdf Graphic file (type pdf)
 <use gfx/demo_izh.pdf>
 Package pdftex.def Info: gfx/demo_izh.pdf  used on input line 54.
@@ -2734,12 +2735,12 @@ Underfull \hbox (badness 10000) in alignment at lines 81--81
 [][][] 
  []
 
-<gfx/ml-crossentropy-ALIF.pdf, id=1764, 207.6408pt x 198.0242pt>
+<gfx/ml-crossentropy-ALIF.pdf, id=1776, 207.6408pt x 198.0242pt>
 File: gfx/ml-crossentropy-ALIF.pdf Graphic file (type pdf)
 <use gfx/ml-crossentropy-ALIF.pdf>
 Package pdftex.def Info: gfx/ml-crossentropy-ALIF.pdf  used on input line 89.
 (pdftex.def)             Requested size: 101.43437pt x 96.73918pt.
-<gfx/ml-crossentropy-STDP-ALIF.pdf, id=1765, 213.43019pt x 198.0242pt>
+<gfx/ml-crossentropy-STDP-ALIF.pdf, id=1777, 213.43019pt x 198.0242pt>
 File: gfx/ml-crossentropy-STDP-ALIF.pdf Graphic file (type pdf)
 <use gfx/ml-crossentropy-STDP-ALIF.pdf>
 Package pdftex.def Info: gfx/ml-crossentropy-STDP-ALIF.pdf  used on input line 
@@ -2750,7 +2751,7 @@ Underfull \hbox (badness 10000) in paragraph at lines 91--91
 [][]|\T1/cmr/m/n/9 (+20) STDP-ALIF cross-
  []
 
-<gfx/ml-crossentropy-Izhikevich.pdf, id=1766, 212.95967pt x 198.0242pt>
+<gfx/ml-crossentropy-Izhikevich.pdf, id=1778, 212.95967pt x 198.0242pt>
 File: gfx/ml-crossentropy-Izhikevich.pdf Graphic file (type pdf)
 <use gfx/ml-crossentropy-Izhikevich.pdf>
 Package pdftex.def Info: gfx/ml-crossentropy-Izhikevich.pdf  used on input line
@@ -2761,32 +2762,32 @@ Underfull \hbox (badness 10000) in paragraph at lines 93--93
 [][]|\T1/cmr/m/n/9 (+20) Izhike-vich cross-
  []
 
-<gfx/ml-hz-ALIF.pdf, id=1767, 188.3939pt x 198.0242pt>
+<gfx/ml-hz-ALIF.pdf, id=1779, 188.3939pt x 198.0242pt>
 File: gfx/ml-hz-ALIF.pdf Graphic file (type pdf)
 <use gfx/ml-hz-ALIF.pdf>
 Package pdftex.def Info: gfx/ml-hz-ALIF.pdf  used on input line 95.
 (pdftex.def)             Requested size: 97.44794pt x 102.43008pt.
-<gfx/ml-hz-STDP-ALIF.pdf, id=1768, 197.6964pt x 198.0242pt>
+<gfx/ml-hz-STDP-ALIF.pdf, id=1780, 197.6964pt x 198.0242pt>
 File: gfx/ml-hz-STDP-ALIF.pdf Graphic file (type pdf)
 <use gfx/ml-hz-STDP-ALIF.pdf>
 Package pdftex.def Info: gfx/ml-hz-STDP-ALIF.pdf  used on input line 97.
 (pdftex.def)             Requested size: 102.25972pt x 102.43008pt.
-<gfx/ml-hz-Izhikevich.pdf, id=1769, 197.22589pt x 198.0242pt>
+<gfx/ml-hz-Izhikevich.pdf, id=1781, 197.22589pt x 198.0242pt>
 File: gfx/ml-hz-Izhikevich.pdf Graphic file (type pdf)
 <use gfx/ml-hz-Izhikevich.pdf>
 Package pdftex.def Info: gfx/ml-hz-Izhikevich.pdf  used on input line 99.
 (pdftex.def)             Requested size: 102.01634pt x 102.43008pt.
-<gfx/ml-regerr-ALIF.pdf, id=1770, 198.63528pt x 198.43196pt>
+<gfx/ml-regerr-ALIF.pdf, id=1782, 198.63528pt x 198.43196pt>
 File: gfx/ml-regerr-ALIF.pdf Graphic file (type pdf)
 <use gfx/ml-regerr-ALIF.pdf>
 Package pdftex.def Info: gfx/ml-regerr-ALIF.pdf  used on input line 101.
 (pdftex.def)             Requested size: 102.5332pt x 102.43008pt.
-<gfx/ml-regerr-STDP-ALIF.pdf, id=1771, 197.9395pt x 198.43196pt>
+<gfx/ml-regerr-STDP-ALIF.pdf, id=1783, 197.9395pt x 198.43196pt>
 File: gfx/ml-regerr-STDP-ALIF.pdf Graphic file (type pdf)
 <use gfx/ml-regerr-STDP-ALIF.pdf>
 Package pdftex.def Info: gfx/ml-regerr-STDP-ALIF.pdf  used on input line 103.
 (pdftex.def)             Requested size: 102.17404pt x 102.43008pt.
-<gfx/ml-regerr-Izhikevich.pdf, id=1772, 192.92075pt x 198.43196pt>
+<gfx/ml-regerr-Izhikevich.pdf, id=1784, 192.92075pt x 198.43196pt>
 File: gfx/ml-regerr-Izhikevich.pdf Graphic file (type pdf)
 <use gfx/ml-regerr-Izhikevich.pdf>
 Package pdftex.def Info: gfx/ml-regerr-Izhikevich.pdf  used on input line 105.
@@ -2863,16 +2864,16 @@ Overfull \hbox (5.85368pt too wide) in paragraph at lines 12--12
  []
 
 [56] [57]) [58]
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 78.
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 78.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 79.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 79.
  (./thesis.aux (./FrontBackmatter/Titlepage.aux)
 (./FrontBackmatter/Titleback.aux) (./FrontBackmatter/Abstract.aux)
 (./FrontBackmatter/Contents.aux) (./Chapters/Chapter01.aux)
 (./Chapters/Chapter02.aux) (./Chapters/Chapter03.aux) (./Chapters/Chapter04.aux
 ) (./Chapters/Chapter05.aux) (./Chapters/Chapter06.aux)
 (./Chapters/Chapter0A.aux) (./FrontBackmatter/Bibliography.aux))
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 78.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 78.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 79.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 79.
 Package rerunfilecheck Info: File `thesis.out' has not changed.
 (rerunfilecheck)             Checksum: D31ED7944CEF13192F11ED829E0F4371;2101.
 Package logreq Info: Writing requests to 'thesis.run.xml'.
@@ -2880,11 +2881,11 @@ Package logreq Info: Writing requests to 'thesis.run.xml'.
 
  ) 
 Here is how much of TeX's memory you used:
- 48448 strings out of 492982
- 973121 string characters out of 6134896
- 1556208 words of memory out of 5000000
- 50484 multiletter control sequences out of 15000+600000
- 572933 words of font info for 256 fonts, out of 8000000 for 9000
+ 48568 strings out of 492982
+ 974745 string characters out of 6134896
+ 1558708 words of memory out of 5000000
+ 50588 multiletter control sequences out of 15000+600000
+ 577482 words of font info for 271 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  73i,23n,98p,10509b,3116s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/share/texmf/fonts/enc/dvips/cm-super/cm-super-t1.enc}</usr/share/texliv
@@ -2895,28 +2896,30 @@ type1/public/amsfonts/cm/cmmi10.pfb></usr/share/texlive/texmf-dist/fonts/type1/
 public/amsfonts/cm/cmmi6.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/
 amsfonts/cm/cmmi7.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfont
 s/cm/cmmi8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cm
-r10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr6.pfb>
-</usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/sh
-are/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/te
-xlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy6.pfb></usr/share/texlive/t
-exmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/share/texlive/texmf-di
-st/fonts/type1/public/amsfonts/euler/eurb10.pfb></usr/share/texlive/texmf-dist/
-fonts/type1/public/amsfonts/symbols/msbm10.pfb></usr/share/texmf/fonts/type1/pu
-blic/cm-super/sfcc1000.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfcc10
-95.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfcc1200.pfb></usr/share/t
-exmf/fonts/type1/public/cm-super/sfrm0600.pfb></usr/share/texmf/fonts/type1/pub
-lic/cm-super/sfrm0700.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfrm080
-0.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfrm0900.pfb></usr/share/te
-xmf/fonts/type1/public/cm-super/sfrm1000.pfb></usr/share/texmf/fonts/type1/publ
-ic/cm-super/sfrm1095.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfrm1200
-.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfss0800.pfb></usr/share/tex
-mf/fonts/type1/public/cm-super/sfti1095.pfb></usr/share/texmf/fonts/type1/publi
-c/cm-super/sftt0900.pfb></usr/share/texmf/fonts/type1/public/cm-super/sftt1095.
-pfb>
-Output written on thesis.pdf (64 pages, 1500251 bytes).
+mib10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cmextra/cm
+mib8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pf
+b></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr6.pfb></usr/
+share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/share/te
+xlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texlive/
+texmf-dist/fonts/type1/public/amsfonts/cm/cmsy6.pfb></usr/share/texlive/texmf-d
+ist/fonts/type1/public/amsfonts/cm/cmsy7.pfb></usr/share/texlive/texmf-dist/fon
+ts/type1/public/amsfonts/cm/cmsy8.pfb></usr/share/texlive/texmf-dist/fonts/type
+1/public/amsfonts/euler/eurb10.pfb></usr/share/texlive/texmf-dist/fonts/type1/p
+ublic/amsfonts/symbols/msbm10.pfb></usr/share/texmf/fonts/type1/public/cm-super
+/sfcc1000.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfcc1095.pfb></usr/
+share/texmf/fonts/type1/public/cm-super/sfcc1200.pfb></usr/share/texmf/fonts/ty
+pe1/public/cm-super/sfrm0600.pfb></usr/share/texmf/fonts/type1/public/cm-super/
+sfrm0700.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfrm0800.pfb></usr/s
+hare/texmf/fonts/type1/public/cm-super/sfrm0900.pfb></usr/share/texmf/fonts/typ
+e1/public/cm-super/sfrm1000.pfb></usr/share/texmf/fonts/type1/public/cm-super/s
+frm1095.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfrm1200.pfb></usr/sh
+are/texmf/fonts/type1/public/cm-super/sfss0800.pfb></usr/share/texmf/fonts/type
+1/public/cm-super/sfti1095.pfb></usr/share/texmf/fonts/type1/public/cm-super/sf
+tt0900.pfb></usr/share/texmf/fonts/type1/public/cm-super/sftt1095.pfb>
+Output written on thesis.pdf (64 pages, 1527605 bytes).
 PDF statistics:
- 2400 PDF objects out of 2487 (max. 8388607)
- 1419 compressed objects within 15 object streams
- 432 named destinations out of 1000 (max. 500000)
- 63937 words of extra memory for PDF output out of 74296 (max. 10000000)
+ 2422 PDF objects out of 2487 (max. 8388607)
+ 1439 compressed objects within 15 object streams
+ 433 named destinations out of 1000 (max. 500000)
+ 64449 words of extra memory for PDF output out of 74296 (max. 10000000)
 

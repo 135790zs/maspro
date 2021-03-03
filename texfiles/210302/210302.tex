@@ -375,6 +375,15 @@
 \end{frame}
 
 \end{document}
+
+
+
+
+
+
+
+
+
 INTRODUCTION -- CONTEXT
 
 For some historical context I want to start where the field of AI started; with the early goal of constructing systems that replicate ``intelligent behavior''.
@@ -383,6 +392,8 @@ This was in part inspired by Hebbian learning, which was a relatively new theore
 In artificial neural networks (ANNs), a network of these neurons can learn simple tasks.
 ANNs became more popular when the backpropagation learning method allowed ``deeper'' ANNs, which have multiple stacked layers, to learn more complex tasks.
 In the last decade, deep learning became a dominant field within AI, and can now perform as well as humans at some narrowly defined tasks.
+
+
 
 INTRODUCTION -- RELEVANCE
 
@@ -402,6 +413,8 @@ Every connection weight in the network is moved in the negative direction of the
 In the human brain, there is no such backward pass.
 Instead, synapses get stronger or weaker depending on biological learning signals, such as neurotransmitters.
 
+
+
 INTRODUCTION -- SNNs
 
 Spiking neural networks are a next step in the direction of biological plausibility.
@@ -409,6 +422,8 @@ In an SNN, neurons fire binary spikes instead of propagating floating-point valu
 Since spikes cannot be integrated, the gradient of the error cannot directly be calculated.
 This means that backpropagation is harder to implement.
 There are many other learning algorithms for SNNs, but most do not compete well with human learning or deep learning.
+
+
 
 INTRODUCTION -- NEUROMORPHIC COMPUTING
 
@@ -424,6 +439,8 @@ However, their learning algorithms must be local and online.
 ``Local'' means that a neuron can only access information that is directly communicated to it, or directly available in its own unit.
 ``Online'' means that only information available at the current time step can be accessed.
 The human brain also has these natural constraints, and so it is a logical step to be re-inspired by the human brain.
+
+
 
 INTRODUCTION -- BIOLOGICAL LEARNING
 
@@ -446,6 +463,8 @@ When such a fading eligibility trace is followed by a learning signal, synaptic 
 This has been shown to occur in the human brain.
 Learning algorithms using eligibility traces have also shown some successes in training SNNs using R-STDP.
 
+
+
 INTRODUCTION -- ELIGIBILITY PROPAGATION (1/2)
 
 One of these is called eligibility propagation, or e-prop.
@@ -458,11 +477,14 @@ E-prop is suitable for very-large scale integration systems.
 And finally, it performs competitively with LSTMs on phone classification.
 A phone is a technical word for speech sound.
 
+
+
 INTRODUCTION -- ELIGIBILITY PROPAGATION (2/2)
 
 However, only the ALIF neuron type has been examined in the e-prop framework.
 This ALIF neuron does not show STDP-like behavior.
 New research has suggested that the STDP-LIF and Izhikevich neurons do display STDP
+
 
 INTRODUCTION -- THIS RESEARCH
 
@@ -471,3 +493,11 @@ INTRODUCTION -- THIS RESEARCH
 ===============================================================================
 
 METHODS -- TECHNICAL FRAMEWORK (E-PROP)
+
+
+
+
+SEND THESIS DRAFT?
+
+
+USE REFERENCE?

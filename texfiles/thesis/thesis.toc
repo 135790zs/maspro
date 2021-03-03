@@ -17,12 +17,12 @@
 \contentsline {subsection}{\numberline {2.1.2}{Neuron models}}{9}{subsection.2.1.2}
 \contentsline {paragraph}{{LIF neuron}}{9}{paragraph*.8}
 \contentsline {paragraph}{{ALIF neuron}}{10}{paragraph*.9}
-\contentsline {subsection}{\numberline {2.1.3}{Network topology}}{10}{subsection.2.1.3}
-\contentsline {subsection}{\numberline {2.1.4}{Deriving e-prop from RNNs}}{11}{subsection.2.1.4}
-\contentsline {subsection}{\numberline {2.1.5}{Learning procedure}}{13}{subsection.2.1.5}
-\contentsline {subsubsection}{\numberline {2.1.5.1}{Eligibility trace}}{13}{subsubsection.2.1.5.1}
-\contentsline {subsubsection}{\numberline {2.1.5.2}{Gradients}}{15}{subsubsection.2.1.5.2}
-\contentsline {paragraph}{{Error metric}}{15}{paragraph*.15}
+\contentsline {subsection}{\numberline {2.1.3}{Network topology}}{11}{subsection.2.1.3}
+\contentsline {subsection}{\numberline {2.1.4}{Deriving e-prop from RNNs}}{12}{subsection.2.1.4}
+\contentsline {subsection}{\numberline {2.1.5}{Learning procedure}}{14}{subsection.2.1.5}
+\contentsline {subsubsection}{\numberline {2.1.5.1}{Eligibility trace}}{14}{subsubsection.2.1.5.1}
+\contentsline {subsubsection}{\numberline {2.1.5.2}{Gradients}}{16}{subsubsection.2.1.5.2}
+\contentsline {paragraph}{{Error metric}}{16}{paragraph*.15}
 \contentsline {chapter}{\numberline {3}{Method}}{19}{chapter.3}
 \contentsline {section}{\numberline {3.1}{Data Preprocessing}}{19}{section.3.1}
 \contentsline {subsection}{\numberline {3.1.1}{The TIMIT speech corpus}}{19}{subsection.3.1.1}

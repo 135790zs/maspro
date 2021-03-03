@@ -3018,6 +3018,44 @@
       \field{pages}{7575\bibrangedash 7579}
       \range{pages}{5}
     \endentry
+    \entry{hubel1968receptive}{article}{}
+      \name{author}{2}{}{%
+        {{uniquename=0,uniquepart=base,hash=ef1cf54b3dd47533c335360701d44376}{%
+           family={Hubel},
+           familyi={H\bibinitperiod},
+           given={David\bibnamedelima H},
+           giveni={D\bibinitperiod\bibinitdelim H\bibinitperiod},
+           givenun=0}}%
+        {{uniquename=0,uniquepart=base,hash=6fd186cf41a1dd6feb1964146d18a3c5}{%
+           family={Wiesel},
+           familyi={W\bibinitperiod},
+           given={Torsten\bibnamedelima N},
+           giveni={T\bibinitperiod\bibinitdelim N\bibinitperiod},
+           givenun=0}}%
+      }
+      \list{publisher}{1}{%
+        {Wiley Online Library}%
+      }
+      \strng{namehash}{b61026f392e3b6ea6663b1c55f3d5bb9}
+      \strng{fullhash}{b61026f392e3b6ea6663b1c55f3d5bb9}
+      \strng{bibnamehash}{b61026f392e3b6ea6663b1c55f3d5bb9}
+      \strng{authorbibnamehash}{b61026f392e3b6ea6663b1c55f3d5bb9}
+      \strng{authornamehash}{b61026f392e3b6ea6663b1c55f3d5bb9}
+      \strng{authorfullhash}{b61026f392e3b6ea6663b1c55f3d5bb9}
+      \field{sortinit}{H}
+      \field{sortinithash}{5f15a7bc777ad49ff15aa4d2831b1681}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{year}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{The Journal of physiology}
+      \field{number}{1}
+      \field{title}{Receptive fields and functional architecture of monkey striate cortex}
+      \field{volume}{195}
+      \field{year}{1968}
+      \field{pages}{215\bibrangedash 243}
+      \range{pages}{29}
+    \endentry
     \entry{huh2017gradient}{article}{}
       \name{author}{2}{}{%
         {{uniquename=0,uniquepart=base,hash=117cf3c4acf43997240fff279c27fa96}{%
@@ -7739,7 +7777,6 @@
       \range{pages}{8}
     \endentry
   \enddatalist
-  \missing{knuth:1974}
 \endrefsection
 \endinput
 

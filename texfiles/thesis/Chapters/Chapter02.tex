@@ -10,44 +10,55 @@
         \begin{equation}\label{eq:model}
         \mathbf{h}^t_j = M\left(\mathbf{h}_j^{t-1}, \mathbf{z}^{t-1}, \mathbf{x}^t, \mathbf{W}_j\right)
         \end{equation}
-        that defines the hidden state $\mathbf{h}_j^t$ of a neuron $j$ at a discrete time step $t$, where $\mathbf{z}^{t-1}$ is the observable state of all neurons at the previous time step (\ie, the binary spike values), $\mathbf{x}^t$ is the model input vector at time $t$, and $\mathbf{W}_j$ is the weight vector of afferent synapses.
+        that defines the hidden state $\mathbf{h}_j^t$ of a neuron $j$ at a discrete time step $t$, where $\mathbf{z}^{t-1}$ is the observable state of all neurons at the previous time step (\ie, the binary spike values), $\mathbf{x}^t$ is the model input vector at time $t$, and $\mathbf{W}_j$ is the weight vector of afferent (\ie, ``incoming'') synapses.
+        The hidden state of a neuron contains all variables that are used for a specific neuron type, \eg an activation value, or a variable that models a neuron's refractory period after a spike.
+        In short, Equation \ref{eq:model} indicates that the hidden state is affected primarily by spikes of other neurons $\mathbf{z}^{t-1}$, and the current input to the model $\mathbf{x}^t$, which are both weighted by trainable network weights $\mathbf{W}^\text{rec}_j \subset \mathbf{W}_j$ and $\mathbf{W}^\text{in}_j \subset \mathbf{W}_j$, respectively.
+
         The update of the observable state of a neuron $j$ at time $t$ is defined by
         \begin{equation}
-        z^t_j = f\left(\mathbf{h}_j^t\right).
+        z^t_j = f\left(\mathbf{h}_j^t\right),
         \end{equation}
-        This formalization means that e-prop is a \emph{local} training method, because a neuron's observable state depends only on its own hidden state, and the hidden state depends only on observable signals that are directly connected to it.
-        E-prop is also an \emph{online} training method, because both the hidden and observable state of a neuron depend only on variables in the previous time point.
+        such that the spikes elicited by a neuron only depend on its inner state.
+        For instance, a neuron $j$ may spike at time $t$ (\ie, $z^t_j = 1$) if its activity, which is an inner state, reaches a threshold value.
+
+        This formalization indicates that e-prop is a \emph{local} training method, because a neuron's observable state depends only on its own hidden state, and the hidden state depends only on observable signals that are directly connected to it.
+        E-prop is also an \emph{online} training method, because both the hidden and observable state of a neuron depend only information that is still available; the observable state is updated at the same time step as the hidden state, and the hidden state is updated according to information which is then present in the afferent neurons.
 
     \subsection{Neuron models}\label{sec:alif}
 
         \paragraph{LIF neuron}
             In \citet{bellec2020solution}, the LIF neuron model is formulated in the context of e-prop, along with a variant (viz. ALIF) that has an adaptive threshold based on the neuron's spiking frequency.
             The observable state of a LIF model is given by
-            \begin{equation}
+            \begin{equation}\label{eq:heavisideLIF}
             z^t_j = H\left(v_j^t-v_\text{th}\right),
             \end{equation}
-            where $H$ is the Heaviside step function, and $v_\text{th}$ is the threshold constant.
+            where $H$ is the Heaviside step function, $v^t_j$ is the neuron activity, and $v_\text{th}$ is the threshold constant.
             (Note that this and all other used constant parameters are listed in Table \ref{tab:hparams}.)
-            Consequently, the observable state $z^t_j \in \{0, 1\}$ is binary, and denotes the spike activity of a neuron.
-            These spikes are the only communication between neurons in the model.
-            The LIF neuron model has a single state $h^t_j$ that contains only an activity value $v^t_j$ and evolves over time according to the equation
+            From Equation \ref{eq:heavisideLIF} it follows that a neuron spikes ($z^t_j = 1$) if its activity reaches the activity threshold, and remains silent ($z^t_j = 0$) otherwise.
+            These spikes are the only communication between neurons in the e-prop model.
+
+            The hidden state $h^t_j$ of a LIF neuron model contains only an activity value $v^t_j$ that evolves over time according to the equation
             \begin{equation}\label{eq:alifV}
             v^{t+1}_j = \alpha v_j^t + \sum_{i\neq j}W^\text{rec}_{ji}z_i^t + \sum_i W^\text{in}_{ji}x_i^{t+1} - z_j^tv_
             \text{th},
             \end{equation}
-            where $W^\text{rec}_{ji}$ is a synapse weight from neuron $i$ to neuron $j$, $\alpha$ is a constant decay factor.
-            Whenever $j$ spikes (i.e., $z_j^t = 1$), the activity of the neuron is reduced to a value near 0 by the term $-z^t_jv_\text{th}$.
-            Furthermore, $z^t_j$ is fixed to 0 for $T^\text{refr}$ time steps to model neuronal refractoriness.
+            where $W^\text{rec}_{ji}$ is a synapse weight from neuron $i$ to neuron $j$, and $\alpha$ is a constant decay factor.
+            In equation \ref{eq:alifV}, the first term models the decay of the activity value over time.
+            The second and third term model the input of the neuron from other neurons, or from the input to the network, respectively.
+            The fourth term ($-z^t_jv_\text{th}$) ensures that the activity of the neuron is drops when it spikes.
+            Furthermore, $z^t_j$ is explicitly fixed to 0 for $T^\text{refr}$ time steps after a spike to model neuronal refractoriness.
+
             In biological neurons, the refractory period consists of an ``absolute'' phase, during which evoking a new spike is impossible, and a subsequent ``relative'' phase where the threshold is temporarily increased \citep{purves2008neuroscience}.
-            Clamping $z^t_j$ to 0 emulates only this absolute phase.
+            Clamping $z^t_j$ to 0 emulates only this absolute phase, and is therefore only a crude approximation to model biological refractoriness.
+            The refractory period is built into the equations of the Izhikevich neuron model described in Section \ref{sec:izhikevich}, which is therefore a more biologically plausible neuron model.
 
 
         \paragraph{ALIF neuron}
-            The ALIF neuron introduces a threshold adaptation variable $a^t_j$ to the hidden state of the neuron, such that $\mathbf{h}^t_j \eqdef \left[v^t_j, a^t_j\right]$.
-            In an ALIF neuron, the spiking threshold increases after a spike, and otherwise decreases back to a baseline threshold $v_\text{th}$.
+            The ALIF neuron model introduces a threshold adaptation variable $a^t_j$ to the hidden state of the LIF neuron, such that $\mathbf{h}^t_j \eqdef \left[v^t_j, a^t_j\right]$.
+            In an ALIF neuron, the spiking threshold increases after a spike, and otherwise decreases back to a baseline threshold $v_\text{th}$ in the continued absence of spikes.
 
             This resembles \emph{spike frequency adaptation} (SFA), a common feature of neocortical pyramidal neurons \citep{benda2003universal}.
-            SFA is a homeostatic control mechanism that affects the spiking frequency based on the recent spiking activity.
+            SFA is a homeostatic control mechanism that affects the spiking frequency based on the recent spiking activity, such that neurons that spike relatively infrequently become more sensitive, and vice versa.
             \citet{ahmed1998estimates} found that a single time constant is a good fit to characterize the threshold's exponential decay to a steady state.
 
             The observable state of an ALIF neuron is therefore described by
@@ -59,12 +70,14 @@
             a^{t+1}_j = \rho a^t_j + z^t_j,
             \end{equation}
             where $\rho$ is an adaptation decay constant.
+            Equation \ref{eq:alifA} indicates that the adaptive threshold increases at every spike, and decays back to $v_\text{th}$ in the absence of spikes.
+            The decay factor $\rho$ of the threshold adaptation is higher than the decay factor $\alpha$ of the neuron activity, such that the immediate firing behavior of a neuron is affected on a shorter time scale than the threshold adaptation, which is better suited to reflect the working memory of a neuron and track longer temporal dependencies in the input data.
             The interaction between the neuron activity, adaptive threshold and spiking behavior is illustrated in Figure \ref{fig:simplealif}.
 
             \begin{figure}[!ht]
                 \centering
                 \includegraphics[width=\linewidth]{gfx/simplealif}
-                \caption[ALIF neuron simulation.]{A simulated ALIF neuron $j$ receives a sinusoidal input $I$ for 300 time steps $t$. This figure illustrates the adaptive threshold $a$, which increases at every spike $z$, requiring a higher activity $v$ for a next spike. When a spike occurs, $v$ decreases by $v_\text{th}$.}
+                \caption[ALIF neuron simulation.]{A simulated ALIF neuron $j$ receives a sinusoidal input $I$ for 300 time steps $t$. This figure illustrates the adaptive threshold $a$, which increases at every spike $z$, requiring a higher activity $v$ for a next spike. When a spike occurs, $v$ decreases by $v_\text{th}$. Note that the first wave of the sinusoid elicits a stronger spike train than subsequent waves, demonstrating the homeostatic effect of the adaptive threshold. Note also that on a short time scale, spikes tend to occur primarily in the upward phases of the sinusoid, suggesting that ALIF neurons are well-suited to respond to changes in the input signals.}
                 \label{fig:simplealif}
             \end{figure}
 
@@ -76,7 +89,7 @@
         The neurons receive inputs from the input feature vector and the observable states of the afferent neurons.
 
         Weights are initialized by sampling them from a Gaussian distribution $\mathcal{N}\left(0, \sqrt{N}\right)$ where $N$ is the number of afferent neurons.
-        For instance, the weights $\mathbf{W}^\text{in}$ between the input and the first layer are sampled from $\mathcal{N}\left(0, \sqrt{39}\right)$, because there are 39 input features.
+        For instance, the weights $\mathbf{W}^\text{in}$ between the input and the first layer are sampled from $\mathcal{N}\left(0, \sqrt{39}\right)$ if there are 39 input features.
 
         A randomly selected 80\% of synaptic weights is then set to a value of 0, as well as the synapses that connect a neuron to itself, rendering them ineffective.
 
@@ -84,7 +97,9 @@
         \begin{figure}[!ht]
             \myfloatalign
             \includegraphics[trim=0 25cm 0 0, clip, width=\linewidth]{gfx/Singlelayer}
-            \caption[Multi-layer illustration.]{An illustration of a single-layer network architecture.}
+            \caption[Single-layer illustration.]{A basic illustration of a single-layer network architecture.
+            An input vector $\mathbf{x}^t$ at time step $t$ is fed to a pool of $N$ recurrent neurons with hidden states $\mathbf{h}^t$ and observable states $\mathbf{z}^t$ through input weights $\mathbf{W}^\text{in}$. The recurrent weights $\mathbf{W}^\text{rec}$ connect neurons with each other, but no self-loops exist. 25\% of these neurons is a LIF neuron (\ie, $\beta = 0$) and the others are ALIF neurons. The output weights $\mathbf{W}^\text{out}$ process the observable states of the neurons through a softmax function into a logits layer $\mathbf{\pi}^t$. These logits are compared with the target output $\mathbf{\pi}^{*, t}$ and multiplied with broadcast weights $\mathbf{B}^t$ to obtain a learning signal $L_j^t$ for every neuron $j$ in the pool.
+            Note that weights illustrated in red are e-prop weights, \ie, they track eligibility traces.}
             \label{fig:topology-sl}
           \end{figure}
 
@@ -104,38 +119,38 @@
         \end{equation}
         where summation indicates that weights are shared.
 
-        We now decompose the first term into a series of learning signals $L_j^t = \frac{dE}{dz_j^t}$ and local factors $\frac{\partial\mathbf{h}_j^{t-t'}}{\partial\mathbf{h}_j^t}$ for all $t$ after the event horizon $t'$:
+        By applying the chain rule, the first factor $\frac{dE}{d\mathbf{h}_j^{t'}}$ can be decomposed into a series of learning signals $L_j^t = \frac{dE}{dz_j^t}$ and local factors $\frac{\partial\mathbf{h}_j^{t-t'}}{\partial\mathbf{h}_j^t}$ for all $t$ starting from the event horizon $t'$:
 
         \begin{equation}\label{eq:rec}
         \frac{dE}{d\mathbf{h}_j^{t'}} = \underbrace{\frac{dE}{dz_j^{t'}}}_{L^{t'}_j} \frac{\partial z_j^{t'}}{\partial\mathbf{h}_j^{t'}} + \frac{dE}{d\mathbf{h}_j^{t'+1}}\frac{\partial\mathbf{h}_j^{t'+1}}{\partial\mathbf{h}_j^{t'}}.
         \end{equation}
         Note that this equation is recursive.
-        If we substitute Equation \ref{eq:rec} into the classical factorization (Equation \ref{eq:clafac}), we obtain a recursive expansion that has $\frac{dE}{d\mathbf{h}^{T+1}_j}$ as its terminating case:
+        If Equation \ref{eq:rec} is substituted into the classical factorization (Equation \ref{eq:clafac}), the full history of the synapse $i\rightarrow j$ is integrated, and a recursive expansion is obtained that has $\frac{dE}{d\mathbf{h}^{T+1}_j}$ as its terminating case:
         \begin{align}
         \frac{dE}{dW_{ji}} &= \sum_{t'}\left(L_j^{t'}\frac{\partial z_j^{t'}}{\partial\mathbf{h}_j^{t'}} + \frac{dE}{d\mathbf{h}_j^{t'+1}}\frac{\partial\mathbf{h}_j^{t'+1}}{\partial\mathbf{h}_j^{t'}}\right)\cdot\frac{\partial\mathbf{h}_j^{t'}}{\partial W_{ji}}\\
         &= \sum_{t'}\left(L_j^{t'}\frac{\partial z_j^{t'}}{\partial\mathbf{h}_j^{t'}} + \left( L^{t'+1}_j \frac{\partial z_j^{t'+1}}{\partial\mathbf{h}_j^{t'+1}} + (\cdots)\frac{\partial\mathbf{h}_j^{t'+2}}{\partial\mathbf{h}_j^{t'+1}}  \right) \frac{\partial\mathbf{h}_j^{t'+1}}{\partial\mathbf{h}_j^{t'}}\right)\cdot\frac{\partial\mathbf{h}_j^{t'}}{\partial W_{ji}}.
         \end{align}
 
-        We write the term in parentheses into a second term indexed by $t$:
+        The recursive parenthesized factor can be written into a second factor indexed by $t$:
         \begin{equation}
         \frac{dE}{dW_{ji}} = \sum_{t'}\sum_{t\geq t'}L^t_j\frac{\partial z_j^t}{\partial\mathbf{h}_j^t}\frac{\partial\mathbf{h}^t_j}{\partial\mathbf{h}_j^{t-1}} \cdots \frac{\partial\mathbf{h}_j^{t+1}}{\partial\mathbf{h}_j^{t'}}\cdot\frac{\partial\mathbf{h}_j^{t'}}{\partial W_{ji}}.
         \end{equation}
 
-        We then exchange the summation indices to pull out the learning signal $L_j^t$ from the inner summation.
+        By exchanging the summation indices, the learning signal $L_j^t$ is pulled out from the inner summation.
 
-        Within the inner summation, the terms $\frac{\partial\mathbf{h}_j^{t+1}}{\partial\mathbf{h}_j^t}$ are collected in an \emph{eligibility vector} $\mathbf{\epsilon}^t_{ji}$ and multiplied with the learning signal $L^t_j$ at every time step $t$.
+        Within the inner summation, the terms $\frac{\partial\mathbf{h}_j^{t+1}}{\partial\mathbf{h}_j^t}$ are collected in an \emph{eligibility vector} $\bm{\epsilon}^t_{ji}$ and multiplied with the learning signal $L^t_j$ at every time step $t$.
         This is crucial for understanding why e-prop is an online training method---local gradients are computed based on traces that are directly accessible at the current time step $t$, and the eligibility vector operates as a recursively updated ``memory'' to track previous local hidden state derivatives:
 
         \begin{equation}
-        \mathbf{\epsilon}^t_{ji} = \frac{\partial\mathbf{h}_j^{t}}{\partial\mathbf{h}_j^{t-1}}\cdot\mathbf{\epsilon}^{t-1}_{ji} + \frac{\partial\mathbf{h}^t_j}{\partial W_{ji}}.
+        \bm{\epsilon}^t_{ji} = \frac{\partial\mathbf{h}_j^{t}}{\partial\mathbf{h}_j^{t-1}}\cdot\bm{\epsilon}^{t-1}_{ji} + \frac{\partial\mathbf{h}^t_j}{\partial W_{ji}}.
         \end{equation}
 
         This is why the $\rho$ and $\alpha$ parameters, which define the decay rate in hidden states and the corresponding eligibility vectors, should be set according to the required working memory in the learning task.
-        The eligibility vector and the hidden state have the same dimension: $\left\{\mathbf{\epsilon}^t_{ji}, \mathbf{h}^t_j\right\} \subset \mathbb{R}^d$, where $d=2$ for all neuron types described in this report.
+        The eligibility vector and the hidden state have the same dimension: $\left\{\bm{\epsilon}^t_{ji}, \mathbf{h}^t_j\right\} \subset \mathbb{R}^d$, where $d=2$ for all neuron types described in this report.
 
-        The \emph{eligibility trace} $e^t_{ji}$ is a product of $L^t_j = \frac{dE}{dz_j^t}$ and the eligibility vector, resulting in the gradient that can be immediately applied at every time step $t$, or accumulated and integrated locally on a synapse (see Section \ref{sec:eprop_grd} for details):
+        The \emph{eligibility trace} $e^t_{ji}$ is a product of $\frac{\partial z_j^t}{\partial \mathbf{h}_j^t}$ and the eligibility vector, resulting in the gradient that can be immediately applied at every time step $t$, or accumulated and integrated locally on a synapse (see Section \ref{sec:eprop_grd} for details):
         \begin{equation}
-        \frac{dE}{dW_{ji}} = \sum_t\frac{dE}{dz_j^t}\underbrace{\frac{\partial z_j^t}{\partial\mathbf{h}_j^t}\underbrace{\sum_{t\geq t'}\frac{\partial\mathbf{h}^t_j}{\partial\mathbf{h}_j^{t-1}} \cdots \frac{\partial\mathbf{h}_j^{t+1}}{\partial\mathbf{h}_j^{t'}}\cdot\frac{\partial\mathbf{h}_j^{t'}}{\partial W_{ji}}}_{\mathbf{\epsilon}_{ji}^t}}_{e^t_{ji}}.
+        \frac{dE}{dW_{ji}} = \sum_t\frac{dE}{dz_j^t}\underbrace{\frac{\partial z_j^t}{\partial\mathbf{h}_j^t}\underbrace{\sum_{t\geq t'}\frac{\partial\mathbf{h}^t_j}{\partial\mathbf{h}_j^{t-1}} \cdots \frac{\partial\mathbf{h}_j^{t+1}}{\partial\mathbf{h}_j^{t'}}\cdot\frac{\partial\mathbf{h}_j^{t'}}{\partial W_{ji}}}_{\bm{\epsilon}_{ji}^t}}_{e^t_{ji}}.
         \end{equation}
         This is the main e-prop equation.
 
@@ -143,8 +158,6 @@
 
         The e-prop equation can be applied to any neuron type with any number of hidden states.
         In this section, the derivation for ALIF neurons will be detailed.
-
-
 
         \subsubsection{Eligibility trace}
             Recall the hidden state update equations from Section \ref{sec:alif}:
@@ -171,7 +184,7 @@
             \end{equation}
             associated with a neuron $j$ and a two-dimensional eligibility vector
             \begin{equation}
-            \mathbf{\epsilon}^t_{ji} \eqdef \begin{pmatrix}
+            \bm{\epsilon}^t_{ji} \eqdef \begin{pmatrix}
             \epsilon_{ji, v}^t\\
             \epsilon_{ji, a}^t
             \end{pmatrix}
