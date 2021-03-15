@@ -16,7 +16,7 @@ thr = 30
 
 reset = -65
 
-dt = 1
+dt = 0.25
 
 mode = 'onoff'
 # FloatType a = 0.02,
@@ -64,13 +64,21 @@ for t in range(nsteps):
 
     a = 0.02
     b = 0.2
-    correct = True
+    correct = False
+    # Default: follow voltage and self
+    # If blue spike: pure VA
+    # If orng spike: +1
+                 # * (1 + (5 + 0.08 * M['V'][t-1, j]) * dt) * M['VV'][t-1] \
+                 # * (2.75 + 0.04 * M['V'][t-1, j]) * M['VV'][t-1] \
     M['VV'][t] = (1 - M['Z'][t-1, j]) \
-                     * (1 + (5 + 0.08 * M['V'][t-1, j]) * dt) * M['VV'][t-1] \
-                 - dt * 1 * M['VA'][t-1] \
+                 * (0.7 + 1 * max(0, M['V'][t-1, j])) * M['VV'][t-1] \
+                 - dt * M['VA'][t-1] \
                  + dt * M['Z'][t-1, i]
+    # Default: follow VV
+    # If blue spike: decay
     M['VA'][t] = (1 - M['Z'][t-1, j]) * dt * a * b * M['VV'][t-1] \
                  + (1 - dt * a) * M['VA'][t-1]
+
     if correct:
         M['VA'][t] = np.clip(M['VA'][t], -0.005, 0.005)
         M['VV'][t] = np.clip(M['VV'][t], -3., 3.)
@@ -91,7 +99,7 @@ for t in range(nsteps):
     M['DW'][t] = 0.01 * M['ETbar'][t]
     M['W'][t] = M['W'][t-1] + M['DW'][t]
 
-fig = plt.figure(constrained_layout=False, figsize=(8, 6))
+fig = plt.figure(constrained_layout=False, figsize=(20, 12))
 gsc = fig.add_gridspec(nrows=len(plotvars),
                        ncols=1,
                        hspace=0.15,
@@ -133,6 +141,8 @@ for var in plotvars:
         plt.legend(fontsize=11, labelspacing=0.2)
     else:
         axs[-1].plot(arr, linewidth=0.7)
+    if var in ['VV', 'VA']:
+        axs[-1].set_yscale('symlog')
     axs[-1].grid()
 
     axs[-1].set_ylabel(lookup[var],
