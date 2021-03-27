@@ -1966,6 +1966,94 @@
       \field{pages}{284}
       \range{pages}{1}
     \endentry
+    \entry{esser2016convolutional}{article}{}
+      \true{moreauthor}
+      \true{morelabelname}
+      \name{author}{10}{}{%
+        {{uniquename=0,uniquepart=base,hash=9cafbc18db55ea9d17f13aef44d29322}{%
+           family={Esser},
+           familyi={E\bibinitperiod},
+           given={Steven\bibnamedelima K},
+           giveni={S\bibinitperiod\bibinitdelim K\bibinitperiod},
+           givenun=0}}%
+        {{uniquename=0,uniquepart=base,hash=b7c189ac810850aec8f52adfe0b59ddb}{%
+           family={Merolla},
+           familyi={M\bibinitperiod},
+           given={Paul\bibnamedelima A},
+           giveni={P\bibinitperiod\bibinitdelim A\bibinitperiod},
+           givenun=0}}%
+        {{uniquename=0,uniquepart=base,hash=4f53e63405ffcec3ac6facd01d5ed85b}{%
+           family={Arthur},
+           familyi={A\bibinitperiod},
+           given={John\bibnamedelima V},
+           giveni={J\bibinitperiod\bibinitdelim V\bibinitperiod},
+           givenun=0}}%
+        {{uniquename=0,uniquepart=base,hash=9a052c4df7fe358949fe1cedac791de6}{%
+           family={Cassidy},
+           familyi={C\bibinitperiod},
+           given={Andrew\bibnamedelima S},
+           giveni={A\bibinitperiod\bibinitdelim S\bibinitperiod},
+           givenun=0}}%
+        {{uniquename=0,uniquepart=base,hash=be8bff2fda6f31713e9bcdcb0cb935bb}{%
+           family={Appuswamy},
+           familyi={A\bibinitperiod},
+           given={Rathinakumar},
+           giveni={R\bibinitperiod},
+           givenun=0}}%
+        {{uniquename=0,uniquepart=base,hash=994af093af25f295c1148866665ff537}{%
+           family={Andreopoulos},
+           familyi={A\bibinitperiod},
+           given={Alexander},
+           giveni={A\bibinitperiod},
+           givenun=0}}%
+        {{uniquename=0,uniquepart=base,hash=f907a633670579c4f840ea5d11d8d3e0}{%
+           family={Berg},
+           familyi={B\bibinitperiod},
+           given={David\bibnamedelima J},
+           giveni={D\bibinitperiod\bibinitdelim J\bibinitperiod},
+           givenun=0}}%
+        {{uniquename=0,uniquepart=base,hash=b2a280ff8f3fafb15280c2d786a8b3f7}{%
+           family={McKinstry},
+           familyi={M\bibinitperiod},
+           given={Jeffrey\bibnamedelima L},
+           giveni={J\bibinitperiod\bibinitdelim L\bibinitperiod},
+           givenun=0}}%
+        {{uniquename=0,uniquepart=base,hash=2a10fa792d461a22fa54090314a1a615}{%
+           family={Melano},
+           familyi={M\bibinitperiod},
+           given={Timothy},
+           giveni={T\bibinitperiod},
+           givenun=0}}%
+        {{uniquename=0,uniquepart=base,hash=e3b5bcd5d51b2e4e054488e76bdfc4a4}{%
+           family={Barch},
+           familyi={B\bibinitperiod},
+           given={Davis\bibnamedelima R},
+           giveni={D\bibinitperiod\bibinitdelim R\bibinitperiod},
+           givenun=0}}%
+      }
+      \list{publisher}{1}{%
+        {National Acad Sciences}%
+      }
+      \strng{namehash}{c30cbf84936355ad63d190f7a1ed29c7}
+      \strng{fullhash}{d557c41bbe3ebb022239e413506f7418}
+      \strng{bibnamehash}{c30cbf84936355ad63d190f7a1ed29c7}
+      \strng{authorbibnamehash}{c30cbf84936355ad63d190f7a1ed29c7}
+      \strng{authornamehash}{c30cbf84936355ad63d190f7a1ed29c7}
+      \strng{authorfullhash}{d557c41bbe3ebb022239e413506f7418}
+      \field{sortinit}{E}
+      \field{sortinithash}{f615fb9c6fba11c6f962fb3fd599810e}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{year}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{Proceedings of the national academy of sciences}
+      \field{number}{41}
+      \field{title}{Convolutional networks for fast, energy-efficient neuromorphic computing}
+      \field{volume}{113}
+      \field{year}{2016}
+      \field{pages}{11441\bibrangedash 11446}
+      \range{pages}{6}
+    \endentry
     \entry{fayek2016}{misc}{}
       \name{author}{1}{}{%
         {{uniquename=0,uniquepart=base,hash=02bf21efbaa9133205a5997f384dc5ab}{%

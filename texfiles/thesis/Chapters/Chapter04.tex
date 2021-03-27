@@ -3,10 +3,18 @@
 %************************************************
 In this chapter, the learning performance and regularization behavior of the ALIF, STDP-ALIF, and Izhikevich neurons are compared.
 Then, the effect of stacking multiple recurrent layers on the learning performance and speed is examined.
+Figure \ref{fig:inoutpair} shows a typical classification result of a full validation sentence.
+
+	\begin{figure}[ht]
+	    \myfloatalign
+	    \includegraphics[width=\linewidth]{gfx/InOutPair}
+	    \caption[Input-output-target example.]{An example validation result using a trained ALIF model. The top row shows the standardized MFCC frames of a sentence changing over time. The second row shows the probability distributions of the frame-wise outputs of the model. The third row is the most likely phone. The last layer shows the target phones.}
+	    \label{fig:inoutpair}
+	  \end{figure}
 
 \section{Comparing neuron models}
 	\paragraph{Accuracy}
-		The main outcome of the neuron model comparison is that the Izhikevich neuron type performs poorly compared to the ALIF and STDP-ALIF neuron models, which reach a similar classification performance.
+		The main outcome of the neuron model comparison is that in these results, the Izhikevich neuron type performs poorly compared to the ALIF and STDP-ALIF neuron models, which reach a similar classification performance.
 		In Figure \ref{fig:percwrong} the Izhikevich neuron reaches a misclassification rate of 94.2\% on the test set, which is only slightly better than constantly guessing the most frequent class.
 		The ALIF neuron reaches a test misclassification rate of 50\% in relatively few iterations, and the STDP-ALIF stably reaches 50\%, and likely lower if training was continued for longer.
 		Note that the test performance was obtained on the model with the best validation accuracy.
@@ -48,7 +56,7 @@ Then, the effect of stacking multiple recurrent layers on the learning performan
 		\end{figure}
 
 \section{Comparing network depth}
-From the comparison between the network depth in Figures \ref{fig:ml-pwrong-alif}--\ref{fig:ml-pwrong-izh}, it can be concluded that single-layer networks train considerably more efficiently and accurately than multi-layer networks.
+The comparison between the network depth in Figures \ref{fig:ml-pwrong-alif}--\ref{fig:ml-pwrong-izh} suggests that single-layer e-prop networks train considerably more efficiently and accurately than multi-layer e-prop networks.
 This holds for all tested neuron types.
 The cross-entropy error, spiking frequency, and regularization error are also better for single-layer networks (see Figure \ref{fig:ml-otherresults}).
 

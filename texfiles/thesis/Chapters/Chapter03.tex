@@ -105,11 +105,11 @@
 			\end{figure}
 
 		\paragraph{Framing}
-			The waveforms, which are sampled at a rate $f_s$ of \SI{16}{\kHz}, cannot be directly used as input to the model, because they are too long---a typical sentence waveform contains in the order of tens of thousands of samples.
-			Furthermore, the samples are not very informative, because they represent the sound wave of the uttered sound.
+			The waveforms, which are sampled at a rate $f_s$ of \SI{16}{\kHz}, cannot be directly used as input to the model, because they are too long---a typical sentence waveform contains in the order of tens of thousands of data points.
+			Furthermore, the individual data points are not very informative, because they reflect the sound wave of the uttered sound, not the characteristics of the source of this sound.
 			These sounds are filtered by the shape of the vocal tract, which manifests itself in the envelope of the short time power spectrum of the sound.
 			This power spectrum representation describes the power of the frequency components of the signal over a brief interval.
-			The frequency components are assumed to be stationary over short intervals---in contrast to the full sentence, which carries its meaning because it is non-stationary.
+			The frequency components are assumed to be stationary over short intervals, in contrast to the full sentence, which carries its meaning because it is non-stationary.
 			Therefore, the waveform signals are transformed into series of frequency coefficients of short-term power spectra.
 			To obtain these multiple short-term power spectra over the duration of the waveform, it is sliced into brief overlapping frames.
 
@@ -141,13 +141,7 @@
 				X_k = \left|\sum_{n=0}^{N-1}x_i(n)\cdot e^{-\frac{i2\pi}{N}kn}\right|,
 			\end{equation}
 			where $K=512$.
-			This yields the magnitudes of the DCT of the frames (an example is illustrated in Figure \ref{fig:magframes}).
-			\begin{figure}[ht]
-				\centering
-			    \includegraphics[width=0.45\linewidth]{gfx/magframes}
-			    \caption{The magnitudes of the DFT of a frame.}
-			    \label{fig:magframes}
-			\end{figure}
+			This yields the magnitudes of the DCT of the frames.
 
 			The power spectra are obtained using the equation
 			\begin{equation}\label{eq:powframes}
@@ -166,7 +160,7 @@
 
 			The short-term power spectra are then transformed to Mel-spaced filterbanks.
 			The Mel scale is a scale of pitches that are perceptually equal in distance \citep{stevens1937scale}.
-			This is in contrast to the frequency measurement, in which the human cochlea can better distinguish lower frequencies better than higher ones.
+			This is in contrast to the frequency measurement, in which the human cochlea can distinguish lower frequencies more accurately than higher ones.
 			The aim of converting to the Mel scale is to make every filterbank coefficient feature equally informative, thereby improving the learning performance of the model.
 
 			The Mel-spaced filterbank is a set of 40 triangular filters that we apply to each frame in $P$.
@@ -236,6 +230,17 @@
 			Then, the final MFCCs are balanced by centering each frame around the value 0.
 			An example of the final MFCCs is given in Figure \ref{fig:source_mfcc_target}.
 
+			\begin{figure}[ht]
+			    \myfloatalign
+			    \subfloat[The raw speech input signal.]
+			    {\includegraphics[width=\linewidth]{gfx/signal}} \\
+			    \subfloat[MFCCs centered around 0 per channel. Note that these MFCCs are standardized channel-wise over the full training dataset.]
+			    {\includegraphics[width=\linewidth]{gfx/norm_mfcc}} \\
+			    \subfloat[Target signal encoded as a one-hot vector changing over time.]
+			    {\includegraphics[width=\linewidth]{gfx/target}}
+			    \caption[Input/features/targets]{An alignment of a sample signal with its MFCCs features and target phones.}\label{fig:source_mfcc_target}
+			\end{figure}
+
 		\paragraph{Target output}
 
 			The target output of the model is a frame-wise representation of the phones that are uttered in a sentence.
@@ -246,19 +251,9 @@
 			Since the dataset contains 61 different phones, this is also the length of these vectors.
 
 			Figure \ref{fig:source_mfcc_target} illustrates the waveform data and its frame-wise aligned MFCCs and target output.
-			Note that the full dataset of features is standardized per channel; feature channels are first centered around 0, and then divided by their standard deviations.
-
-			\begin{figure}[bth]
-			    \myfloatalign
-			    \subfloat[Input signal.]
-			    {\includegraphics[width=\linewidth]{gfx/signal}} \\
-			    \subfloat[MFCCs centered around 0 per channel.]
-			    {\includegraphics[width=\linewidth]{gfx/norm_mfcc}} \\
-			    \subfloat[Target signal encoded as a one-hot vector changing over time.]
-			    {\includegraphics[width=\linewidth]{gfx/target}}
-			    \caption[Input/features/targets]{An alignment of a sample signal with its MFCCs features and target phones.}\label{fig:source_mfcc_target}
-			\end{figure}
-
+			Note that the full dataset of features is standardized per training data channel; feature channels are first centered around 0, and then divided by their standard deviations.
+			To prevent data leakage, validation and testing data are standardized according to the means and standard deviations in the training data.
+			An example of a standardized input is shown in Figure \ref{fig:inoutpair}.
 
 \section{Enhancing e-prop}
 
@@ -269,14 +264,6 @@
 
 	\subsection{Multi-layer architecture}
 
-		% \begin{figure}[bth]
-		%     \myfloatalign
-		%     \subfloat[A single-layer network. At time step $t$, the feature vector $x^t$ is fed to a mixed network of LIF and ALIF neurons. Then, the output weights $W^\text{out}$ transform the neuron's observable values into an output value $y^t$, such that the softmax function can be applied to obtain the logits $\pi^t$. The trainable e-prop connections (colored red) are updated by applying the broadcast weights $B$ on the learning signal $L^t$.]
-		%     {\includegraphics[trim=0 25cm 0 0, clip, width=\linewidth]{gfx/Singlelayer}} \\
-		%     \subfloat[A multi-layer network with two stacked recurrent layers. ]
-		%     {\includegraphics[trim=0 25cm 0 0, clip, width=\linewidth]{gfx/Multilayer}}
-		%     \caption[Input/features/targets]{An illustration of a single-layer and multi-layer network architecture.}\label{fig:topology}
-		% \end{figure}
 		\begin{figure}[!ht]
 		    \myfloatalign
 		    \includegraphics[trim=0 25cm 0 0, clip, width=\linewidth]{gfx/Multilayer}
@@ -330,7 +317,7 @@
 
 	\subsection{Other neuron types}
 
-		In this section, the multi-layer STDP-ALIF and Izhikevich neuron models are presented.
+		In this section, the STDP-ALIF and Izhikevich neuron models are presented.
 		The advantage of these models over the standard ALIF model is that they naturally elicit STDP.
 		Additionally, the Izhikevich model has an implicit refractory mechanism that is built into its system of equations, making it a more biologically plausible model, as opposed to the (STDP-)ALIF model that requires an explicit timer variable in a neuron's hidden state (but it is still local and online).
 
@@ -340,9 +327,9 @@
 		Here, its adaptive counterpart, the STDP-ALIF model, is derived and validated as well.
 		This allows for a direct comparison between the ALIF and STDP-ALIF models, such that the effects of STDP can be more precisely analyzed.
 
-		\subsubsection{STDP-LIF}
+		\subsubsection{STDP-ALIF}
 			The key change between the ALIF and STDP-ALIF neuron is that the latter is reset to zero at a spike event, and when its refractory period of $\delta t_\text{ref}$ time steps ends.
-			Recall that in contrast, the standard ALIF neuron uses a soft reset by including a term $-z^t_{rj}v_\text{thr}$ in its activation update equation (Equation \ref{eq:ml_alifV}).
+			Recall that in contrast, the standard ALIF neuron only uses a soft reset by including a term $-z^t_{rj}v_\text{th}$ in its activation update equation (Equation \ref{eq:ml_alifV}).
 
 			The activation update of the STDP-ALIF neuron is therefore:
 			\begin{equation}\label{eq:ml_stdpalifV}
@@ -368,7 +355,7 @@
 	        \end{align}
 	        Note that the observable state of the afferent neuron $z_{ri}^{t-1}$ in Equation \ref{eq:ml_stdpalif_evector} changes to $z_{r-1, i}^t$ if $\epsilon^{t+1}_{rji}$ corresponds to a weight between layer $r-1$ and $r$ and $r > 1$.
 	        If the weight is instead between the network input and the first layer, then it changes to $x^t_i$.
-	        Note also that this corrects an error in the STDP-LIF model described in \citet{traub2020learning}, where the observable state at the current time step $t$ is accessed instead of $t-1$, thereby diverging from the e-prop model in Equation \ref{eq:ml_model}.
+	        Note also that this corrects an inconsistency in the STDP-LIF model described in \citet{traub2020learning}, where the observable state at the current time step $t$ is accessed instead of $t-1$, thereby diverging from the e-prop model in Equation \ref{eq:ml_model}.
 
 	        The eligibility trace remains
 	        \begin{align}
@@ -386,7 +373,7 @@
 	        \end{equation}
 	        The factor of the pseudo-derivative and the eligibility vector can therefore produce both positive or negative eligibility traces and gradients (see Figure \ref{fig:stdpalif}).
 
-	        \begin{figure}[ht]
+	        \begin{figure}[!ht]
 	            \centering
 	            \includegraphics[width=\linewidth]{gfx/stdpalif}
 	            \caption{A single-synapse demonstration of the STDP-ALIF.}
@@ -474,14 +461,14 @@
 		f^{\text{av},t}_{rj} = \frac{1}{t} z^{\text{total},t}_{rj}
 		\end{equation}
 		is the running average spike frequency, where $z^{\text{total},t}$ accumulates spikes emitted by neuron $j$ in layer $r$ up to (and including) time step $t$.
-		Note that $z^{\text{total},0} = 0$, \ie, the accumulation resets at every new training sample.
+		Note that $z^{\text{total},0} = 0$, \ie, the accumulation resets at each new training sample.
 		By implementing this sum as a hidden variable, e-prop remains an online training algorithm when firing rate regularization is implemented.
 
 		To insert the regularization term into the e-prop framework, we compute the weight update that regularizes the firing rate toward $f^\text{target}$ through gradient descent, similarly to the main e-prop weight update (Equation \ref{eq:eprop_grd}):
 		\begin{equation}
 		\frac{\partial E_\text{reg}}{\partial z_{rj}^t} = \left(f^\text{target} - f^{\text{av}, t}_{rj}\right).
 		\end{equation}
-		Note that this regularization loss differs from the firing rate regularization in \citet{bellec2020solution}, in which the firing rate is calculated in an offline fashion, by retroactively computing the average firing rate based on all spikes instead of only accumulated spikes.
+		Note that this regularization loss differs from the firing rate regularization described in \citet{bellec2020solution}, in which the firing rate is calculated in an offline fashion, by retroactively computing the average firing rate based on all spikes instead of only accumulated spikes.
 		Note also that in \citet{bellec2020solution}, $\frac{\partial E_\text{reg}}{\partial z_{rj}^t}$ is multiplied with the eligibility trace $e^t_{rji}$, as in Equation \ref{eq:eprop_grd} to obtain the weight update, whereas in this report, the eligibility trace is omitted, resulting in a number of benefits:
 		\begin{enumerate}
 			\item It allows silent neurons that have infrequently spiking afferent neurons to more easily increase their firing rate, because their low afferent eligibility traces no longer nullifies the regularization gradient, and thereby results in a better empirical learning performance;

@@ -149,14 +149,14 @@
         The eligibility vector and the hidden state have the same dimension: $\left\{\bm{\epsilon}^t_{ji}, \mathbf{h}^t_j\right\} \subset \mathbb{R}^d$, where $d=2$ for all neuron types described in this report.
 
         The \emph{eligibility trace} $e^t_{ji}$ is a product of $\frac{\partial z_j^t}{\partial \mathbf{h}_j^t}$ and the eligibility vector, resulting in the gradient that can be immediately applied at every time step $t$, or accumulated and integrated locally on a synapse (see Section \ref{sec:eprop_grd} for details):
-        \begin{equation}
+        \begin{equation}\label{eq:main_eprop}
         \frac{dE}{dW_{ji}} = \sum_t\frac{dE}{dz_j^t}\underbrace{\frac{\partial z_j^t}{\partial\mathbf{h}_j^t}\underbrace{\sum_{t\geq t'}\frac{\partial\mathbf{h}^t_j}{\partial\mathbf{h}_j^{t-1}} \cdots \frac{\partial\mathbf{h}_j^{t+1}}{\partial\mathbf{h}_j^{t'}}\cdot\frac{\partial\mathbf{h}_j^{t'}}{\partial W_{ji}}}_{\bm{\epsilon}_{ji}^t}}_{e^t_{ji}}.
         \end{equation}
         This is the main e-prop equation.
 
     \subsection{Learning procedure}
 
-        The e-prop equation can be applied to any neuron type with any number of hidden states.
+        The e-prop equation (Equation \ref{eq:main_eprop}) can be applied to any neuron type with any number of hidden states.
         In this section, the derivation for ALIF neurons will be detailed.
 
         \subsubsection{Eligibility trace}
@@ -175,23 +175,27 @@
             z^t_j = H\left(v_j^t - v_\text{th} - \beta a^t_j\right). \tag{\ref{eq:alifZ} revisited}
             \end{equation*}
 
-            The ALIF neuron model has a two-dimensional hidden state
+            The hidden state $\mathbf{h}^t_j$ of an ALIF neuron $j$ is therefore a vector of its activation and threshold adaptation:
             \begin{equation}
             \mathbf{h}^t_j = \begin{pmatrix}
             v^t_j\\
             a^t_j
-            \end{pmatrix}
+            \end{pmatrix}.
             \end{equation}
-            associated with a neuron $j$ and a two-dimensional eligibility vector
+            This hidden state is associated with two-dimensional eligibility vectors
             \begin{equation}
             \bm{\epsilon}^t_{ji} \eqdef \begin{pmatrix}
             \epsilon_{ji, v}^t\\
             \epsilon_{ji, a}^t
             \end{pmatrix}
             \end{equation}
-            associated with a synapse from neuron $i$ to neuron $j$.
+            that relate to with a synapse from any afferent neuron $i$ to neuron $j$.
 
-            The hidden state derivative $\frac{\mathbf{h}^{t+1}_j}{\mathbf{h}^t_j}$ must be computed to derive the eligibility vector.
+            Recall from Chapter \ref{ch:introduction} that the eligibility trace slowly fades after a spike has occurred on a synapse, such that a delayed learning signal can still modify the synaptic strength accordingly, solving the credit assignment problem.
+            Intuitively, the eligibility vector computes the correct contribution of each of the components of the hidden state.
+            For a LIF neuron, the only component is the activation value, and so it is simply a low-pass filter of the spikes of the afferent neuron.
+
+            For the default ALIF neuron, however, the hidden state derivative $\frac{\mathbf{h}^{t+1}_j}{\mathbf{h}^t_j}$ must be computed to derive the eligibility vector.
             This hidden state derivative is expressed by a $2\times2$ matrix of partial hidden state derivatives:
             \begin{equation}
             \frac{\mathbf{h}^{t+1}_j}{\mathbf{h}^t_j} = \begin{pmatrix}
@@ -206,6 +210,8 @@
             \psi_j^t = \gamma \max\left(0, 1 - \left|\frac{v_j^t - v_\text{th} - \beta a^t_j}{v_\text{th}}\right|\right)
             \end{equation}
             where $\gamma$ is a dampening constant, which is set to 0 during the neuron's refractory period.
+            Like in \citet{esser2016convolutional}, this pseudo-derivative is 1 at time steps where the neuron spikes, and linearly decays to zero in the positive and negative direction.
+            Only when the pseudo-derivative is nonzero can the synaptic weight change.
 
             Now, the partial derivatives in the hidden state derivative can be computed:
             \begin{align}
@@ -257,6 +263,14 @@
             \end{pmatrix}.
             \end{align}
 
+            Intuitively, these eligibility vector components can be seen as the contribution of the hidden state component to the increase of the eligibility trace.
+            For instance, the activation eligibility component $\epsilon^t_{ji,v}$ of a synapse $i\rightarrow j$ at time step $t$ is, like in the LIF neuron, a low-pass filter of the afferent spikes $z_i$.
+
+            The threshold adaptation eligibility component $\epsilon^t_{ji,a}$ is less intuitive, but acts as a correction factor for the more slowly decaying threshold adaptation.
+            Its first term $\psi^t_j\epsilon^t_{ji,v}$ causes it to increase when a neuron has recently spiked and when the activation is already increasing again.
+            Therefore, it is higher for synapses that have a higher spike frequency.
+            The second term threshold adaptation eligibility component is a decay corrected for the adaptation strength $\beta$.
+
             This eligibility vector can be recursively applied.
             For eligibility vectors of synapses that are efferent to input neurons, the input value $x^t_i$ is used in place of $z_i^{t-1}$ in Equation \ref{eq:evector_b}.
             Note that the current time index $t$ is used for input neurons to satisfy the online learning principle defined in the model definition in Equation \ref{eq:model}; neurons receive input from the input at time $t$, and from the spikes of other neurons sent at time $t-1$.
@@ -286,6 +300,15 @@
             \end{pmatrix}\\
             &= \psi^t_j\left(\epsilon_{ji, v}^t - \beta\epsilon_{ji, a}^t\right).
             \end{align}
+            This means that the eligibility train can be understood as a low-pass filter of the afferent spikes, with a correction for the efferent neuron's threshold adaptation: a neuron with a higher threshold builds up an eligibility trace more slowly than its more sensitive counterparts.
+            Figure \ref{fig:alif} illustrates the behavior of the synaptic variables in an ALIF neuron described above.
+
+            \begin{figure}[ht]
+                \centering
+                \includegraphics[width=\linewidth]{gfx/alif}
+                \caption[Single-synapse ALIF demo.]{A single-synapse demonstration of the evolution of the full hidden state of the ALIF neuron. The blue lines indicate the postsynaptic neuron $j$, and the orange lines indicate the presynaptic neuron $i$. Note that the synapse weight increases regardless of the order of spikes, indicating an absence of STDP in the standard e-prop ALIF neuron.}
+                \label{fig:alif}
+            \end{figure}
 
         \subsubsection{Gradients}\label{sec:eprop_grd}
             Gradient descent is used to apply the weight updates, such that weights are updated by a small fraction $\eta$ in the negative direction of the estimated gradient of the loss function with respect to the model weights:
@@ -308,7 +331,7 @@
             \begin{equation}
             \pi^t_k = \sigma_k\left(y^t_1,\ldots,y^t_K\right) = \frac{\exp\left(y^t_k\right)}{\sum_{k'}\exp\left(y^t_{k'}\right)}.
             \end{equation}
-            This predicted probability is compared to the one-hot probability vector corresponding to the target class label $\pi^{*,t}_k$ at time $t$ using the cross entropy loss function
+            This predicted probability is compared with the one-hot probability vector corresponding to the target class label $\pi^{*,t}_k$ at time step $t$ using the cross entropy loss function
             \begin{equation}
             E = -\sum_{t,k}\pi^{*,t}_k\log\pi^t_k,
             \end{equation}
@@ -321,8 +344,8 @@
             where $B_{jk}$ is a feedback weight from neuron $k$ back to neuron $j$.
             There are multiple strategies for choosing feedback weights.
             \citet{bellec2020solution} noted that a constantly uniform weight matrix yields poor performance, which has been empirically verified in this report.
-            However, when the feedback weight matrix is initialized from a zero-centered normal distribution, it can remain constant, $(W^\text{out})^\top$, or update according to $(\Delta W^\text{out})^\top$.
-            These variants are referred to in \citet{bellec2020solution} as \emph{random}, \emph{symmetric}, and \emph{adaptive} e-prop, respectively.
+            However, when the feedback weight matrix is initialized from a zero-centered normal distribution, it can remain either constant, mirror $(W^\text{out})^\top$, or update according to $(\Delta W^\text{out})^\top$.
+            These three variants are referred to in \citet{bellec2020solution} as \emph{random}, \emph{symmetric}, and \emph{adaptive} e-prop, respectively.
             In this paper, symmetric e-prop is used (i.e., $B_{jk} \eqdef W^\text{out}_{kj}$) unless explicitly stated otherwise.
 
             Note that the term $\kappa^{t'-t}$ in Equation \ref{eq:learningsignal_after_output} is a filter that compensates for the decay factor of output neurons.
@@ -348,12 +371,5 @@
             \begin{equation}
             \Delta b_k = -\eta \sum_t\left(\pi^t_k - \pi^{*,t}_k\right).
             \end{equation}
-
-            \begin{figure}[!ht]
-                \centering
-                \includegraphics[width=\linewidth]{gfx/alif}
-                \label{fig:alif}
-                \caption[Single-synapse ALIF demo.]{A single-synapse demonstration of the evolution of the full hidden state of the ALIF neuron. The blue lines indicate the postsynaptic neuron $j$, and the orange lines indicate the presynaptic neuron $i$. Note that the synapse weight increases regardless of the order of spikes, indicating an absence of STDP in the standard e-prop ALIF neuron.}
-            \end{figure}
 
 
