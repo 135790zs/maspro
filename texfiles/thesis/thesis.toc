@@ -13,11 +13,11 @@
 \contentsline {paragraph}{{This research}}{7}{paragraph*.7}
 \contentsline {chapter}{\numberline {2}{Theoretical Framework}}{9}{chapter.2}
 \contentsline {section}{\numberline {2.1}{Eligibility Propagation}}{9}{section.2.1}
-\contentsline {subsection}{\numberline {2.1.1}{Network model}}{9}{subsection.2.1.1}
-\contentsline {subsection}{\numberline {2.1.2}{Neuron models}}{9}{subsection.2.1.2}
-\contentsline {paragraph}{{LIF neuron}}{9}{paragraph*.8}
+\contentsline {subsection}{\numberline {2.1.1}{E-prop model}}{9}{subsection.2.1.1}
+\contentsline {subsection}{\numberline {2.1.2}{Neuron models}}{10}{subsection.2.1.2}
+\contentsline {paragraph}{{LIF neuron}}{10}{paragraph*.8}
 \contentsline {paragraph}{{ALIF neuron}}{10}{paragraph*.9}
-\contentsline {subsection}{\numberline {2.1.3}{Network topology}}{11}{subsection.2.1.3}
+\contentsline {subsection}{\numberline {2.1.3}{Network topology}}{12}{subsection.2.1.3}
 \contentsline {subsection}{\numberline {2.1.4}{Deriving e-prop from RNNs}}{12}{subsection.2.1.4}
 \contentsline {subsection}{\numberline {2.1.5}{Learning procedure}}{14}{subsection.2.1.5}
 \contentsline {subsubsection}{\numberline {2.1.5.1}{Eligibility trace}}{14}{subsubsection.2.1.5.1}

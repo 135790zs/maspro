@@ -2,27 +2,34 @@
 \chapter{Theoretical Framework}\label{ch:relatedwork}
 %************************************************
 
+% HERE. START FROM "where are the weight updates?"
 \section{Eligibility Propagation}
 
-    \subsection{Network model}
-        An eligibility propagation model $\mathcal{M}$ is defined by a tuple $\left<M, f\right>$,
+    \subsection{E-prop model}
+        In \citet{bellec2020solution}, an eligibility propagation (e-prop) model $\mathcal{M}$ of a neuron $j$ in a feedforward or recurrent network is defined by a tuple $\left<M, f\right>$,
         where $M$ is a function
         \begin{equation}\label{eq:model}
         \mathbf{h}^t_j = M\left(\mathbf{h}_j^{t-1}, \mathbf{z}^{t-1}, \mathbf{x}^t, \mathbf{W}_j\right)
         \end{equation}
-        that defines the hidden state $\mathbf{h}_j^t$ of a neuron $j$ at a discrete time step $t$, where $\mathbf{z}^{t-1}$ is the observable state of all neurons at the previous time step (\ie, the binary spike values), $\mathbf{x}^t$ is the model input vector at time $t$, and $\mathbf{W}_j$ is the weight vector of afferent (\ie, ``incoming'') synapses.
+        that defines the hidden state $\mathbf{h}_j^t$ at a discrete time step $t$, where $\mathbf{z}^{t-1}$ is the observable state of all neurons at the previous time step (\ie, the binary spike values), $\mathbf{x}^t$ is the model input vector at time $t$, and $\mathbf{W}_j$ is the weight vector of afferent (\ie, ``incoming'') synapses.
         The hidden state of a neuron contains all variables that are used for a specific neuron type, \eg an activation value, or a variable that models a neuron's refractory period after a spike.
         In short, Equation \ref{eq:model} indicates that the hidden state is affected primarily by spikes of other neurons $\mathbf{z}^{t-1}$, and the current input to the model $\mathbf{x}^t$, which are both weighted by trainable network weights $\mathbf{W}^\text{rec}_j \subset \mathbf{W}_j$ and $\mathbf{W}^\text{in}_j \subset \mathbf{W}_j$, respectively.
 
-        The update of the observable state of a neuron $j$ at time $t$ is defined by
-        \begin{equation}
+        The function $f$ in $\mathcal{M}$ describes the update of the observable state of a neuron $j$ at time $t$:
+        \begin{equation}\label{eq:observable}
         z^t_j = f\left(\mathbf{h}_j^t\right),
         \end{equation}
         such that the spikes elicited by a neuron only depend on its inner state.
         For instance, a neuron $j$ may spike at time $t$ (\ie, $z^t_j = 1$) if its activity, which is an inner state, reaches a threshold value.
 
-        This formalization indicates that e-prop is a \emph{local} training method, because a neuron's observable state depends only on its own hidden state, and the hidden state depends only on observable signals that are directly connected to it.
+        The purpose of an e-prop model is that it can be trained to perform a classification task.
+        As described in the remainder of this chapter, the weight matrix $\mathbf{W}$ is trained such that the input vectors $\mathbf{x}^t$ yield a good prediction of the class it belongs to.
+
+        An important property of e-prop is that the weight update depends only on the hidden state of an afferent neuron.
+        The formalizations described in Equations \ref{eq:model} and \ref{eq:observable} therefore indicate that e-prop is a \emph{local} training method, because a neuron's observable state depends only on its own hidden state, which in turn depends only on observable signals that are directly connected to it.
         E-prop is also an \emph{online} training method, because both the hidden and observable state of a neuron depend only information that is still available; the observable state is updated at the same time step as the hidden state, and the hidden state is updated according to information which is then present in the afferent neurons.
+
+        The precise formulation of $M$ and $f$ depend on the neuron models that are used in the e-prop model.
 
     \subsection{Neuron models}\label{sec:alif}
 
@@ -32,7 +39,7 @@
             \begin{equation}\label{eq:heavisideLIF}
             z^t_j = H\left(v_j^t-v_\text{th}\right),
             \end{equation}
-            where $H$ is the Heaviside step function, $v^t_j$ is the neuron activity, and $v_\text{th}$ is the threshold constant.
+            where $H$ is the Heaviside step function, $v^t_j$ is the activity of neuron $j$ at discrete time $t$, and $v_\text{th}$ is the threshold constant.
             (Note that this and all other used constant parameters are listed in Table \ref{tab:hparams}.)
             From Equation \ref{eq:heavisideLIF} it follows that a neuron spikes ($z^t_j = 1$) if its activity reaches the activity threshold, and remains silent ($z^t_j = 0$) otherwise.
             These spikes are the only communication between neurons in the e-prop model.
@@ -43,7 +50,7 @@
             \text{th},
             \end{equation}
             where $W^\text{rec}_{ji}$ is a synapse weight from neuron $i$ to neuron $j$, and $\alpha$ is a constant decay factor.
-            In equation \ref{eq:alifV}, the first term models the decay of the activity value over time.
+            In Equation \ref{eq:alifV}, the first term models the decay of the activity value over time.
             The second and third term model the input of the neuron from other neurons, or from the input to the network, respectively.
             The fourth term ($-z^t_jv_\text{th}$) ensures that the activity of the neuron is drops when it spikes.
             Furthermore, $z^t_j$ is explicitly fixed to 0 for $T^\text{refr}$ time steps after a spike to model neuronal refractoriness.
@@ -69,9 +76,9 @@
             \begin{equation}\label{eq:alifA}
             a^{t+1}_j = \rho a^t_j + z^t_j,
             \end{equation}
-            where $\rho$ is an adaptation decay constant.
+            where $\rho < 1$ is an adaptation decay constant and $\beta \leq 0$ is an adaptation strength constant.
             Equation \ref{eq:alifA} indicates that the adaptive threshold increases at every spike, and decays back to $v_\text{th}$ in the absence of spikes.
-            The decay factor $\rho$ of the threshold adaptation is higher than the decay factor $\alpha$ of the neuron activity, such that the immediate firing behavior of a neuron is affected on a shorter time scale than the threshold adaptation, which is better suited to reflect the working memory of a neuron and track longer temporal dependencies in the input data.
+            The decay factor $\rho$ of the threshold adaptation is higher than the decay factor $\alpha$ of the neuron activity, such that the immediate firing behavior of a neuron is affected on a shorter time scale than the threshold adaptation, which is better suited to reflect the working memory of a neuron and track longer temporal dependencies in the input data then the activation decay.
             The interaction between the neuron activity, adaptive threshold and spiking behavior is illustrated in Figure \ref{fig:simplealif}.
 
             \begin{figure}[!ht]

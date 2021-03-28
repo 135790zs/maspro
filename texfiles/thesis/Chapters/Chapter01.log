@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017/Debian) (preloaded format=pdflatex 2020.11.2)  2 MAR 2021 09:07
+This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017/Debian) (preloaded format=pdflatex 2020.10.27)  28 MAR 2021 10:10
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1383,19 +1383,36 @@ Missing character: There is no s in font nullfont!
 Missing character: There is no k in font nullfont!
 Missing character: There is no s in font nullfont!
 Missing character: There is no , in font nullfont!
-! Undefined control sequence.
-l.13 ... learning linearly inseparable tasks, \acs
-                                                  {ANN}s and the connectioni...
-The control sequence at the end of the top line
-of your error message was never \def'ed. If you have
-misspelled it (e.g., `\hobx'), type `I' and the correct
-spelling (e.g., `I\hbox'). Otherwise just continue,
-and I'll forget about whatever was undefined.
-
+Missing character: There is no a in font nullfont!
+Missing character: There is no r in font nullfont!
+Missing character: There is no t in font nullfont!
+Missing character: There is no i in font nullfont!
+Missing character: There is no f in font nullfont!
+Missing character: There is no i in font nullfont!
+Missing character: There is no c in font nullfont!
+Missing character: There is no i in font nullfont!
+Missing character: There is no a in font nullfont!
+Missing character: There is no l in font nullfont!
+Missing character: There is no n in font nullfont!
+Missing character: There is no e in font nullfont!
+Missing character: There is no u in font nullfont!
+Missing character: There is no r in font nullfont!
+Missing character: There is no a in font nullfont!
+Missing character: There is no l in font nullfont!
+Missing character: There is no n in font nullfont!
+Missing character: There is no e in font nullfont!
+Missing character: There is no t in font nullfont!
+Missing character: There is no w in font nullfont!
+Missing character: There is no o in font nullfont!
+Missing character: There is no r in font nullfont!
+Missing character: There is no k in font nullfont!
+Missing character: There is no s in font nullfont!
+Missing character: There is no ( in font nullfont!
 Missing character: There is no A in font nullfont!
 Missing character: There is no N in font nullfont!
 Missing character: There is no N in font nullfont!
 Missing character: There is no s in font nullfont!
+Missing character: There is no ) in font nullfont!
 Missing character: There is no a in font nullfont!
 Missing character: There is no n in font nullfont!
 Missing character: There is no d in font nullfont!
@@ -2090,13 +2107,32 @@ Missing character: There is no i in font nullfont!
 Missing character: There is no n in font nullfont!
 ! Undefined control sequence.
 l.18 ...the architecture of the human brain \citep
-                                                  {fukushima1982neocognitron...
+                                                  {hubel1968receptive, fukus...
 The control sequence at the end of the top line
 of your error message was never \def'ed. If you have
 misspelled it (e.g., `\hobx'), type `I' and the correct
 spelling (e.g., `I\hbox'). Otherwise just continue,
 and I'll forget about whatever was undefined.
 
+Missing character: There is no h in font nullfont!
+Missing character: There is no u in font nullfont!
+Missing character: There is no b in font nullfont!
+Missing character: There is no e in font nullfont!
+Missing character: There is no l in font nullfont!
+Missing character: There is no 1 in font nullfont!
+Missing character: There is no 9 in font nullfont!
+Missing character: There is no 6 in font nullfont!
+Missing character: There is no 8 in font nullfont!
+Missing character: There is no r in font nullfont!
+Missing character: There is no e in font nullfont!
+Missing character: There is no c in font nullfont!
+Missing character: There is no e in font nullfont!
+Missing character: There is no p in font nullfont!
+Missing character: There is no t in font nullfont!
+Missing character: There is no i in font nullfont!
+Missing character: There is no v in font nullfont!
+Missing character: There is no e in font nullfont!
+Missing character: There is no , in font nullfont!
 Missing character: There is no f in font nullfont!
 Missing character: There is no u in font nullfont!
 Missing character: There is no k in font nullfont!
@@ -4033,7 +4069,7 @@ Type  H <return>  for immediate help.
  ...                                              
                                                   
 l.34 O
-      ne reason for the inefficiency of deep ANNs is that they suffer from t...
+      ne reason for the inefficiency of deep ANNs is that their implementati...
 
 You're in trouble here.  Try typing  <return>  to proceed.
 If that doesn't work, type  X <return>  to quit.
@@ -4084,7 +4120,23 @@ Missing character: There is no t in font nullfont!
 Missing character: There is no t in font nullfont!
 Missing character: There is no h in font nullfont!
 Missing character: There is no e in font nullfont!
-Missing character: There is no y in font nullfont!
+Missing character: There is no i in font nullfont!
+Missing character: There is no r in font nullfont!
+Missing character: There is no i in font nullfont!
+Missing character: There is no m in font nullfont!
+Missing character: There is no p in font nullfont!
+Missing character: There is no l in font nullfont!
+Missing character: There is no e in font nullfont!
+Missing character: There is no m in font nullfont!
+Missing character: There is no e in font nullfont!
+Missing character: There is no n in font nullfont!
+Missing character: There is no t in font nullfont!
+Missing character: There is no a in font nullfont!
+Missing character: There is no t in font nullfont!
+Missing character: There is no i in font nullfont!
+Missing character: There is no o in font nullfont!
+Missing character: There is no n in font nullfont!
+Missing character: There is no s in font nullfont!
 Missing character: There is no s in font nullfont!
 Missing character: There is no u in font nullfont!
 Missing character: There is no f in font nullfont!
@@ -4482,7 +4534,7 @@ Missing character: There is no e in font nullfont!
 Missing character: There is no l in font nullfont!
 ! Undefined control sequence.
 l.35 ...e neurons operate fully in parallel \citep
-                                                  {a2017parallel} using spar...
+                                                  {a2017parallel}, communica...
 The control sequence at the end of the top line
 of your error message was never \def'ed. If you have
 misspelled it (e.g., `\hobx'), type `I' and the correct
@@ -4502,11 +4554,25 @@ Missing character: There is no l in font nullfont!
 Missing character: There is no l in font nullfont!
 Missing character: There is no e in font nullfont!
 Missing character: There is no l in font nullfont!
+Missing character: There is no , in font nullfont!
+Missing character: There is no c in font nullfont!
+Missing character: There is no o in font nullfont!
+Missing character: There is no m in font nullfont!
+Missing character: There is no m in font nullfont!
 Missing character: There is no u in font nullfont!
-Missing character: There is no s in font nullfont!
-Missing character: There is no i in font nullfont!
 Missing character: There is no n in font nullfont!
+Missing character: There is no i in font nullfont!
+Missing character: There is no c in font nullfont!
+Missing character: There is no a in font nullfont!
+Missing character: There is no t in font nullfont!
+Missing character: There is no e in font nullfont!
+Missing character: There is no t in font nullfont!
+Missing character: There is no h in font nullfont!
+Missing character: There is no r in font nullfont!
+Missing character: There is no o in font nullfont!
+Missing character: There is no u in font nullfont!
 Missing character: There is no g in font nullfont!
+Missing character: There is no h in font nullfont!
 Missing character: There is no s in font nullfont!
 Missing character: There is no p in font nullfont!
 Missing character: There is no a in font nullfont!
@@ -4524,34 +4590,8 @@ Missing character: There is no r in font nullfont!
 Missing character: There is no i in font nullfont!
 Missing character: There is no n in font nullfont!
 Missing character: There is no g in font nullfont!
-Missing character: There is no p in font nullfont!
-Missing character: There is no o in font nullfont!
-Missing character: There is no s in font nullfont!
-Missing character: There is no t in font nullfont!
-Missing character: There is no s in font nullfont!
-Missing character: There is no y in font nullfont!
-Missing character: There is no n in font nullfont!
-Missing character: There is no a in font nullfont!
-Missing character: There is no p in font nullfont!
-Missing character: There is no t in font nullfont!
-Missing character: There is no i in font nullfont!
-Missing character: There is no c in font nullfont!
-Missing character: There is no p in font nullfont!
-Missing character: There is no o in font nullfont!
-Missing character: There is no t in font nullfont!
-Missing character: There is no e in font nullfont!
-Missing character: There is no n in font nullfont!
-Missing character: There is no t in font nullfont!
-Missing character: There is no i in font nullfont!
-Missing character: There is no a in font nullfont!
-Missing character: There is no l in font nullfont!
-Missing character: There is no s in font nullfont!
-Missing character: There is no ( in font nullfont!
-Missing character: There is no o in font nullfont!
-Missing character: There is no r in font nullfont!
-Missing character: There is no ) in font nullfont!
 ! Undefined control sequence.
-l.35 ...aptic potentials (or \emph{spikes}) \citep
+l.35 ...gh sparsely occurring \emph{spikes} \citep
                                                   {bear2020neuroscience}, an...
 The control sequence at the end of the top line
 of your error message was never \def'ed. If you have
@@ -8743,6 +8783,19 @@ Missing character: There is no w in font nullfont!
 Missing character: There is no e in font nullfont!
 Missing character: There is no e in font nullfont!
 Missing character: There is no n in font nullfont!
+Missing character: There is no d in font nullfont!
+Missing character: There is no e in font nullfont!
+Missing character: There is no v in font nullfont!
+Missing character: There is no i in font nullfont!
+Missing character: There is no c in font nullfont!
+Missing character: There is no e in font nullfont!
+Missing character: There is no s in font nullfont!
+Missing character: There is no s in font nullfont!
+Missing character: There is no u in font nullfont!
+Missing character: There is no c in font nullfont!
+Missing character: There is no h in font nullfont!
+Missing character: There is no a in font nullfont!
+Missing character: There is no s in font nullfont!
 Missing character: There is no m in font nullfont!
 Missing character: There is no e in font nullfont!
 Missing character: There is no m in font nullfont!
@@ -8754,7 +8807,7 @@ Missing character: There is no o in font nullfont!
 Missing character: There is no r in font nullfont!
 Missing character: There is no s in font nullfont!
 ! Undefined control sequence.
-l.71 ...ed communication between memristors \citep
+l.71 ... between devices such as memristors \citep
                                                   {maan2016survey} and physi...
 The control sequence at the end of the top line
 of your error message was never \def'ed. If you have
@@ -10679,6 +10732,11 @@ Missing character: There is no o in font nullfont!
 Missing character: There is no n in font nullfont!
 Missing character: There is no o in font nullfont!
 Missing character: There is no f in font nullfont!
+Missing character: There is no b in font nullfont!
+Missing character: There is no e in font nullfont!
+Missing character: There is no i in font nullfont!
+Missing character: There is no n in font nullfont!
+Missing character: There is no g in font nullfont!
 Missing character: There is no o in font nullfont!
 Missing character: There is no n in font nullfont!
 Missing character: There is no l in font nullfont!
@@ -10961,10 +11019,21 @@ Missing character: There is no n in font nullfont!
 Missing character: There is no t in font nullfont!
 Missing character: There is no s in font nullfont!
 Missing character: There is no . in font nullfont!
-Missing character: There is no M in font nullfont!
+Missing character: There is no S in font nullfont!
 Missing character: There is no o in font nullfont!
-Missing character: There is no s in font nullfont!
+Missing character: There is no m in font nullfont!
+Missing character: There is no e in font nullfont!
+Missing character: There is no o in font nullfont!
+Missing character: There is no f in font nullfont!
 Missing character: There is no t in font nullfont!
+Missing character: There is no h in font nullfont!
+Missing character: There is no e in font nullfont!
+Missing character: There is no c in font nullfont!
+Missing character: There is no o in font nullfont!
+Missing character: There is no m in font nullfont!
+Missing character: There is no m in font nullfont!
+Missing character: There is no o in font nullfont!
+Missing character: There is no n in font nullfont!
 Missing character: There is no l in font nullfont!
 Missing character: There is no e in font nullfont!
 Missing character: There is no a in font nullfont!
@@ -10973,20 +11042,14 @@ Missing character: There is no n in font nullfont!
 Missing character: There is no i in font nullfont!
 Missing character: There is no n in font nullfont!
 Missing character: There is no g in font nullfont!
-Missing character: There is no a in font nullfont!
+Missing character: There is no r in font nullfont!
+Missing character: There is no u in font nullfont!
 Missing character: There is no l in font nullfont!
-Missing character: There is no g in font nullfont!
-Missing character: There is no o in font nullfont!
-Missing character: There is no r in font nullfont!
-Missing character: There is no i in font nullfont!
-Missing character: There is no t in font nullfont!
-Missing character: There is no h in font nullfont!
-Missing character: There is no m in font nullfont!
+Missing character: There is no e in font nullfont!
 Missing character: There is no s in font nullfont!
-Missing character: There is no f in font nullfont!
-Missing character: There is no o in font nullfont!
-Missing character: There is no r in font nullfont!
-Missing character: There is no S in font nullfont!
+Missing character: There is no i in font nullfont!
+Missing character: There is no n in font nullfont!
+Missing character: There is no A in font nullfont!
 Missing character: There is no N in font nullfont!
 Missing character: There is no N in font nullfont!
 Missing character: There is no s in font nullfont!
@@ -11084,6 +11147,24 @@ Missing character: There is no t in font nullfont!
 Missing character: There is no i in font nullfont!
 Missing character: There is no o in font nullfont!
 Missing character: There is no n in font nullfont!
+Missing character: There is no [ in font nullfont!
+\citation{schuman2017survey}
+! Undefined control sequence.
+<write> ...: Citation `\@citeb ' on page \thepage 
+                                                  \space undefined\on@line .
+l.91 ...ory consolidation \cite{schuman2017survey}
+                                                  .
+The control sequence at the end of the top line
+of your error message was never \def'ed. If you have
+misspelled it (e.g., `\hobx'), type `I' and the correct
+spelling (e.g., `I\hbox'). Otherwise just continue,
+and I'll forget about whatever was undefined.
+
+
+LaTeX Warning: Citation `schuman2017survey' on page  undefined on input line 91
+.
+
+Missing character: There is no ] in font nullfont!
 Missing character: There is no . in font nullfont!
 Missing character: There is no C in font nullfont!
 Missing character: There is no l in font nullfont!
@@ -11479,7 +11560,7 @@ Missing character: There is no h in font nullfont!
 Missing character: There is no e in font nullfont!
 Missing character: There is no r in font nullfont!
 ! Undefined control sequence.
-l.92 ...lihood that they also fire together \citep
+l.93 ...lihood that they also fire together \citep
                                                   {zenke2017temporal}.
 The control sequence at the end of the top line
 of your error message was never \def'ed. If you have
@@ -11576,7 +11657,12 @@ Missing character: There is no e in font nullfont!
 Missing character: There is no n in font nullfont!
 Missing character: There is no . in font nullfont!
 
-Overfull \hbox (20.0pt too wide) in paragraph at lines 89--94
+Overfull \hbox (20.0pt too wide) in paragraph at lines 89--95
+[]
+ []
+
+
+Overfull \hbox (5.43053pt too wide) in paragraph at lines 89--95
 []
  []
 
@@ -11587,7 +11673,7 @@ See the LaTeX manual or LaTeX Companion for explanation.
 Type  H <return>  for immediate help.
  ...                                              
                                                   
-l.95 S
+l.96 S
       pike-timing-dependent plasticity (STDP) \citep{abbott2000synaptic,capo...
 
 You're in trouble here.  Try typing  <return>  to proceed.
@@ -11632,7 +11718,7 @@ Missing character: There is no D in font nullfont!
 Missing character: There is no P in font nullfont!
 Missing character: There is no ) in font nullfont!
 ! Undefined control sequence.
-l.95 ...-timing-dependent plasticity (STDP) \citep
+l.96 ...-timing-dependent plasticity (STDP) \citep
                                                   {abbott2000synaptic,capora...
 The control sequence at the end of the top line
 of your error message was never \def'ed. If you have
@@ -11994,7 +12080,7 @@ Missing character: There is no a in font nullfont!
 Missing character: There is no i in font nullfont!
 Missing character: There is no n in font nullfont!
 ! Undefined control sequence.
-l.97 ...arning principle in the human brain \citep
+l.98 ...arning principle in the human brain \citep
                                                   {kandel2000principles,capo...
 The control sequence at the end of the top line
 of your error message was never \def'ed. If you have
@@ -12086,7 +12172,7 @@ Missing character: There is no t in font nullfont!
 Missing character: There is no e in font nullfont!
 Missing character: There is no x in font nullfont!
 ! Undefined control sequence.
-l.97 ...ptual systems in the sensory cortex \citep
+l.98 ...ptual systems in the sensory cortex \citep
                                                   {huang2014associative}.
 The control sequence at the end of the top line
 of your error message was never \def'ed. If you have
@@ -12216,7 +12302,7 @@ Missing character: There is no i in font nullfont!
 Missing character: There is no n in font nullfont!
 Missing character: There is no g in font nullfont!
 ! Undefined control sequence.
-l.98 ...ociations in classical conditioning \citep
+l.99 ...ociations in classical conditioning \citep
                                                   {diehl2015unsupervised,kim...
 The control sequence at the end of the top line
 of your error message was never \def'ed. If you have
@@ -12385,7 +12471,7 @@ Missing character: There is no i in font nullfont!
 Missing character: There is no o in font nullfont!
 Missing character: There is no n in font nullfont!
 ! Undefined control sequence.
-l.99 ...rucial for cognitive brain function \citep
+l.100 ...ucial for cognitive brain function \citep
                                                   {pokorny2020stdp}.
 The control sequence at the end of the top line
 of your error message was never \def'ed. If you have
@@ -12660,7 +12746,7 @@ Missing character: There is no o in font nullfont!
 Missing character: There is no n in font nullfont!
 Missing character: There is no ) in font nullfont!
 ! Undefined control sequence.
-l.100 ... weakens it (long term depression) \citep
+l.101 ... weakens it (long term depression) \citep
                                                   {lobov2020spatial}.
 The control sequence at the end of the top line
 of your error message was never \def'ed. If you have
@@ -12746,7 +12832,7 @@ Missing character: There is no D in font nullfont!
 Missing character: There is no P in font nullfont!
 Missing character: There is no ) in font nullfont!
 ! Undefined control sequence.
-l.101 ... as reward-modulated STDP (R-STDP) \citep
+l.102 ... as reward-modulated STDP (R-STDP) \citep
                                                   {legenstein2008learning} i...
 The control sequence at the end of the top line
 of your error message was never \def'ed. If you have
@@ -12837,7 +12923,7 @@ Missing character: There is no n in font nullfont!
 Missing character: There is no c in font nullfont!
 Missing character: There is no e in font nullfont!
 ! Undefined control sequence.
-l.101 ...r Hebbian learning in neuroscience \citep
+l.102 ...r Hebbian learning in neuroscience \citep
                                                   {fremaux2016neuromodulated...
 The control sequence at the end of the top line
 of your error message was never \def'ed. If you have
@@ -12918,7 +13004,7 @@ Missing character: There is no a in font nullfont!
 Missing character: There is no r in font nullfont!
 Missing character: There is no t in font nullfont!
 ! Undefined control sequence.
-l.101 ...s classical two-factor counterpart \citep
+l.102 ...s classical two-factor counterpart \citep
                                                   {porr2007learning} because...
 The control sequence at the end of the top line
 of your error message was never \def'ed. If you have
@@ -13004,7 +13090,7 @@ Missing character: There is no o in font nullfont!
 Missing character: There is no r in font nullfont!
 Missing character: There is no y in font nullfont!
 ! Undefined control sequence.
-l.101 ...l for maintaining long-term memory \citep
+l.102 ...l for maintaining long-term memory \citep
                                                   {bailey2000heterosynaptic}...
 The control sequence at the end of the top line
 of your error message was never \def'ed. If you have
@@ -13058,37 +13144,37 @@ Missing character: There is no e in font nullfont!
 Missing character: There is no s in font nullfont!
 Missing character: There is no . in font nullfont!
 
-Overfull \hbox (20.0pt too wide) in paragraph at lines 95--102
+Overfull \hbox (20.0pt too wide) in paragraph at lines 96--103
 []
  []
 
 
-Overfull \hbox (7.50002pt too wide) in paragraph at lines 95--102
+Overfull \hbox (7.50002pt too wide) in paragraph at lines 96--103
 \OML/cmm/m/it/10 A$
  []
 
 
-Overfull \hbox (8.0868pt too wide) in paragraph at lines 95--102
+Overfull \hbox (8.0868pt too wide) in paragraph at lines 96--103
 \OML/cmm/m/it/10 B$
  []
 
 
-Overfull \hbox (8.0868pt too wide) in paragraph at lines 95--102
+Overfull \hbox (8.0868pt too wide) in paragraph at lines 96--103
 \OML/cmm/m/it/10 B$
  []
 
 
-Overfull \hbox (7.50002pt too wide) in paragraph at lines 95--102
+Overfull \hbox (7.50002pt too wide) in paragraph at lines 96--103
 \OML/cmm/m/it/10 A$
  []
 
 
-Overfull \hbox (8.0868pt too wide) in paragraph at lines 95--102
+Overfull \hbox (8.0868pt too wide) in paragraph at lines 96--103
 \OML/cmm/m/it/10 B$
  []
 
 
-Overfull \hbox (7.50002pt too wide) in paragraph at lines 95--102
+Overfull \hbox (7.50002pt too wide) in paragraph at lines 96--103
 \OML/cmm/m/it/10 A$
  []
 
@@ -13099,7 +13185,7 @@ See the LaTeX manual or LaTeX Companion for explanation.
 Type  H <return>  for immediate help.
  ...                                              
                                                   
-l.103 N
+l.104 N
        eurotransmitters are used to modulate the learning signal in the brain.
 You're in trouble here.  Try typing  <return>  to proceed.
 If that doesn't work, type  X <return>  to quit.
@@ -13254,7 +13340,7 @@ Missing character: There is no t in font nullfont!
 Missing character: There is no e in font nullfont!
 Missing character: There is no x in font nullfont!
 ! Undefined control sequence.
-l.104 ...l role in the primary motor cortex \citep
+l.105 ...l role in the primary motor cortex \citep
                                                   {barnes2005activity,dang20...
 The control sequence at the end of the top line
 of your error message was never \def'ed. If you have
@@ -13389,7 +13475,7 @@ Missing character: There is no d in font nullfont!
 Missing character: There is no o in font nullfont!
 Missing character: There is no w in font nullfont!
 ! Undefined control sequence.
-l.104 ...t during a very narrow time window \citep
+l.105 ...t during a very narrow time window \citep
                                                   {dang2006disrupted}.
 The control sequence at the end of the top line
 of your error message was never \def'ed. If you have
@@ -13467,7 +13553,7 @@ Missing character: There is no i in font nullfont!
 Missing character: There is no o in font nullfont!
 Missing character: There is no n in font nullfont!
 ! Undefined control sequence.
-l.105 ...d to novelty and reward prediction \citep
+l.106 ...d to novelty and reward prediction \citep
                                                   {li2003dopamine,schultz200...
 The control sequence at the end of the top line
 of your error message was never \def'ed. If you have
@@ -13552,7 +13638,7 @@ Missing character: There is no t in font nullfont!
 Missing character: There is no a in font nullfont!
 Missing character: There is no l in font nullfont!
 ! Undefined control sequence.
-l.105 ...neuroplasticity of corticostriatal \citep
+l.106 ...neuroplasticity of corticostriatal \citep
                                                   {reynolds2001cellular,reyn...
 The control sequence at the end of the top line
 of your error message was never \def'ed. If you have
@@ -13634,7 +13720,7 @@ Missing character: There is no s in font nullfont!
 Missing character: There is no e in font nullfont!
 Missing character: There is no s in font nullfont!
 ! Undefined control sequence.
-l.105 ...d ventral tegmental (VTA) synapses \citep
+l.106 ...d ventral tegmental (VTA) synapses \citep
                                                   {bao2001cortical}.
 The control sequence at the end of the top line
 of your error message was never \def'ed. If you have
@@ -13777,7 +13863,7 @@ Missing character: There is no o in font nullfont!
 Missing character: There is no n in font nullfont!
 Missing character: There is no s in font nullfont!
 ! Undefined control sequence.
-l.106 ...c for local populations of neurons \citep
+l.107 ...c for local populations of neurons \citep
                                                   {engelhard2019specialized}.
 The control sequence at the end of the top line
 of your error message was never \def'ed. If you have
@@ -13853,7 +13939,7 @@ Missing character: There is no a in font nullfont!
 Missing character: There is no i in font nullfont!
 Missing character: There is no n in font nullfont!
 ! Undefined control sequence.
-l.107 ...ase in other areas of the midbrain \citep
+l.108 ...ase in other areas of the midbrain \citep
                                                   {roeper2013dissecting}.
 The control sequence at the end of the top line
 of your error message was never \def'ed. If you have
@@ -14090,7 +14176,7 @@ Missing character: There is no i in font nullfont!
 Missing character: There is no n in font nullfont!
 Missing character: There is no g in font nullfont!
 ! Undefined control sequence.
-l.108 ...to that during the memory encoding \citep
+l.109 ...to that during the memory encoding \citep
                                                   {shulz2000neuronal}.
 The control sequence at the end of the top line
 of your error message was never \def'ed. If you have
@@ -14117,7 +14203,7 @@ Missing character: There is no a in font nullfont!
 Missing character: There is no l in font nullfont!
 Missing character: There is no . in font nullfont!
 
-Overfull \hbox (20.0pt too wide) in paragraph at lines 103--109
+Overfull \hbox (20.0pt too wide) in paragraph at lines 104--110
 []
  []
 
@@ -14128,7 +14214,7 @@ See the LaTeX manual or LaTeX Companion for explanation.
 Type  H <return>  for immediate help.
  ...                                              
                                                   
-l.110 H
+l.111 H
        owever, R-STDP by itself does not solve the credit assignment problem...
 
 You're in trouble here.  Try typing  <return>  to proceed.
@@ -14459,7 +14545,7 @@ Missing character: There is no s in font nullfont!
 Missing character: There is no e in font nullfont!
 Missing character: There is no s in font nullfont!
 ! Undefined control sequence.
-l.112 ...ain uses \emph{eligibility traces} \citep
+l.113 ...ain uses \emph{eligibility traces} \citep
                                                   {izhikevich2007solving,flo...
 The control sequence at the end of the top line
 of your error message was never \def'ed. If you have
@@ -14547,7 +14633,7 @@ Missing character: There is no l in font nullfont!
 Missing character: There is no e in font nullfont!
 Missing character: There is no m in font nullfont!
 ! Undefined control sequence.
-l.112 ...olve the credit assignment problem \citep
+l.113 ...olve the credit assignment problem \citep
                                                   {stolyarova2018solving,ger...
 The control sequence at the end of the top line
 of your error message was never \def'ed. If you have
@@ -14783,7 +14869,7 @@ Missing character: There is no r in font nullfont!
 Missing character: There is no o in font nullfont!
 Missing character: There is no n in font nullfont!
 ! Undefined control sequence.
-l.113 ...ortly before a postsynaptic neuron \citep
+l.114 ...ortly before a postsynaptic neuron \citep
                                                   {sanhueza2013camkii}.
 The control sequence at the end of the top line
 of your error message was never \def'ed. If you have
@@ -14957,7 +15043,7 @@ Missing character: There is no c in font nullfont!
 Missing character: There is no e in font nullfont!
 Missing character: There is no d in font nullfont!
 ! Undefined control sequence.
-l.115 ...er, synaptic plasticity is induced \citep
+l.116 ...er, synaptic plasticity is induced \citep
                                                   {yagishita2014critical,cas...
 The control sequence at the end of the top line
 of your error message was never \def'ed. If you have
@@ -15037,37 +15123,37 @@ Missing character: There is no t in font nullfont!
 Missing character: There is no y in font nullfont!
 Missing character: There is no . in font nullfont!
 
-Overfull \hbox (20.0pt too wide) in paragraph at lines 110--116
+Overfull \hbox (20.0pt too wide) in paragraph at lines 111--117
 []
  []
 
 
-Overfull \hbox (10.73325pt too wide) in paragraph at lines 110--116
+Overfull \hbox (10.73325pt too wide) in paragraph at lines 111--117
 \OT1/cmr/m/it/10 el-
  []
 
 
-Overfull \hbox (6.6444pt too wide) in paragraph at lines 110--116
+Overfull \hbox (6.6444pt too wide) in paragraph at lines 111--117
 \OT1/cmr/m/it/10 i-
  []
 
 
-Overfull \hbox (11.24435pt too wide) in paragraph at lines 110--116
+Overfull \hbox (11.24435pt too wide) in paragraph at lines 111--117
 \OT1/cmr/m/it/10 gi-
  []
 
 
-Overfull \hbox (13.7999pt too wide) in paragraph at lines 110--116
+Overfull \hbox (13.7999pt too wide) in paragraph at lines 111--117
 \OT1/cmr/m/it/10 bil-
  []
 
 
-Overfull \hbox (11.24435pt too wide) in paragraph at lines 110--116
+Overfull \hbox (11.24435pt too wide) in paragraph at lines 111--117
 \OT1/cmr/m/it/10 ity
  []
 
 
-Overfull \hbox (24.91644pt too wide) in paragraph at lines 110--116
+Overfull \hbox (24.91644pt too wide) in paragraph at lines 111--117
 \OT1/cmr/m/it/10 traces
  []
 
@@ -15078,7 +15164,7 @@ See the LaTeX manual or LaTeX Companion for explanation.
 Type  H <return>  for immediate help.
  ...                                              
                                                   
-l.117 S
+l.118 S
        ynaptic plasticity was demonstrated using eligibility traces in deep ...
 
 You're in trouble here.  Try typing  <return>  to proceed.
@@ -15161,7 +15247,7 @@ Missing character: There is no N in font nullfont!
 Missing character: There is no N in font nullfont!
 Missing character: There is no s in font nullfont!
 ! Undefined control sequence.
-l.117 ...ty traces in deep feedforward SNNs \citep
+l.118 ...ty traces in deep feedforward SNNs \citep
                                                   {zenke2018superspike,neftc...
 The control sequence at the end of the top line
 of your error message was never \def'ed. If you have
@@ -15266,7 +15352,7 @@ Missing character: There is no . in font nullfont!
 Missing character: There is no I in font nullfont!
 Missing character: There is no n in font nullfont!
 ! Undefined control sequence.
-l.117 ...plemented in feedforward VLSIs. In \citet
+l.118 ...plemented in feedforward VLSIs. In \citet
                                                   {zenke2018superspike} it i...
 The control sequence at the end of the top line
 of your error message was never \def'ed. If you have
@@ -15439,7 +15525,7 @@ Missing character: There is no T in font nullfont!
 Missing character: There is no D in font nullfont!
 Missing character: There is no P in font nullfont!
 ! Undefined control sequence.
-l.118 ...ment problems in SNNs using R-STDP \citep
+l.119 ...ment problems in SNNs using R-STDP \citep
                                                   {legenstein2008learning, b...
 The control sequence at the end of the top line
 of your error message was never \def'ed. If you have
@@ -15498,7 +15584,7 @@ Missing character: There is no N in font nullfont!
 Missing character: There is no N in font nullfont!
 Missing character: There is no s in font nullfont!
 ! Undefined control sequence.
-l.118 ...g, bellec2020solution} and in RNNs \citep
+l.119 ...g, bellec2020solution} and in RNNs \citep
                                                   {he2015distinct}, and have...
 The control sequence at the end of the top line
 of your error message was never \def'ed. If you have
@@ -15555,7 +15641,7 @@ Missing character: There is no e in font nullfont!
 Missing character: There is no c in font nullfont!
 Missing character: There is no t in font nullfont!
 ! Undefined control sequence.
-l.118 ...have a predictable learning effect \citep
+l.119 ...have a predictable learning effect \citep
                                                   {legenstein2008learning}.
 The control sequence at the end of the top line
 of your error message was never \def'ed. If you have
@@ -15677,7 +15763,7 @@ Missing character: There is no l in font nullfont!
 Missing character: There is no e in font nullfont!
 Missing character: There is no r in font nullfont!
 ! Undefined control sequence.
-l.119 ...g a stable lane keeping controller \citep
+l.120 ...g a stable lane keeping controller \citep
                                                   {bing2020indirect}, but ca...
 The control sequence at the end of the top line
 of your error message was never \def'ed. If you have
@@ -15785,7 +15871,7 @@ Missing character: There is no i in font nullfont!
 Missing character: There is no o in font nullfont!
 Missing character: There is no n in font nullfont!
 ! Undefined control sequence.
-l.119 ...y evaluation in mapless navigation \citep
+l.120 ...y evaluation in mapless navigation \citep
                                                   {bing2018end}.
 The control sequence at the end of the top line
 of your error message was never \def'ed. If you have
@@ -15819,7 +15905,7 @@ Missing character: There is no l in font nullfont!
 Missing character: There is no y in font nullfont!
 Missing character: There is no , in font nullfont!
 ! Undefined control sequence.
-l.120 More recently, \citet
+l.121 More recently, \citet
                            {demirag2021pcm} have shown that phase change mem...
 The control sequence at the end of the top line
 of your error message was never \def'ed. If you have
@@ -15969,12 +16055,12 @@ Missing character: There is no e in font nullfont!
 Missing character: There is no s in font nullfont!
 Missing character: There is no . in font nullfont!
 
-Overfull \hbox (20.0pt too wide) in paragraph at lines 117--121
+Overfull \hbox (20.0pt too wide) in paragraph at lines 118--122
 []
  []
 
 ! Undefined control sequence.
-l.122 \paragraph
+l.123 \paragraph
                 {Eligibility propagation}
 The control sequence at the end of the top line
 of your error message was never \def'ed. If you have
@@ -15989,7 +16075,7 @@ See the LaTeX manual or LaTeX Companion for explanation.
 Type  H <return>  for immediate help.
  ...                                              
                                                   
-l.122 \paragraph{E
+l.123 \paragraph{E
                   ligibility propagation}
 You're in trouble here.  Try typing  <return>  to proceed.
 If that doesn't work, type  X <return>  to quit.
@@ -16047,7 +16133,7 @@ Missing character: There is no o in font nullfont!
 Missing character: There is no p in font nullfont!
 Missing character: There is no ) in font nullfont!
 ! Undefined control sequence.
-l.123 Eligibility propagation (e-prop) \citep
+l.124 Eligibility propagation (e-prop) \citep
                                              {bellec2020solution} is a local...
 The control sequence at the end of the top line
 of your error message was never \def'ed. If you have
@@ -16186,7 +16272,7 @@ Missing character: There is no n in font nullfont!
 ! Undefined control sequence.
 <write> ... `sec:derivefromBPTT' on page \thepage 
                                                   \space undefined\on@line .
-l.123 ...see also Section \ref{sec:derivefromBPTT}
+l.124 ...see also Section \ref{sec:derivefromBPTT}
                                                   ).
 The control sequence at the end of the top line
 of your error message was never \def'ed. If you have
@@ -16196,7 +16282,7 @@ and I'll forget about whatever was undefined.
 
 
 LaTeX Warning: Reference `sec:derivefromBPTT' on page  undefined on input line 
-123.
+124.
 
 Missing character: There is no ) in font nullfont!
 Missing character: There is no . in font nullfont!
@@ -16538,7 +16624,7 @@ Missing character: There is no u in font nullfont!
 Missing character: There is no t in font nullfont!
 Missing character: There is no s in font nullfont!
 ! Undefined control sequence.
-l.126 ...s for task-relevant network inputs \citep
+l.127 ...s for task-relevant network inputs \citep
                                                   {bellec2020solution}.
 The control sequence at the end of the top line
 of your error message was never \def'ed. If you have
@@ -16652,7 +16738,7 @@ Missing character: There is no N in font nullfont!
 Missing character: There is no N in font nullfont!
 Missing character: There is no s in font nullfont!
 ! Undefined control sequence.
-l.127 ... in some tasks in feedforward ANNs \citep
+l.128 ... in some tasks in feedforward ANNs \citep
                                                   {lillicrap2016random,nokla...
 The control sequence at the end of the top line
 of your error message was never \def'ed. If you have
@@ -16716,7 +16802,7 @@ Missing character: There is no N in font nullfont!
 Missing character: There is no N in font nullfont!
 Missing character: There is no s in font nullfont!
 ! Undefined control sequence.
-l.127 ...nd2016direct} and multi-layer SNNs \citep
+l.128 ...nd2016direct} and multi-layer SNNs \citep
                                                   {samadi2017deep,clopath201...
 The control sequence at the end of the top line
 of your error message was never \def'ed. If you have
@@ -16836,7 +16922,7 @@ Missing character: There is no s in font nullfont!
 Missing character: There is no k in font nullfont!
 Missing character: There is no s in font nullfont!
 ! Undefined control sequence.
-l.127 ...complex image classification tasks \citep
+l.128 ...complex image classification tasks \citep
                                                   {bartunov2018assessing}.
 The control sequence at the end of the top line
 of your error message was never \def'ed. If you have
@@ -16867,12 +16953,12 @@ Missing character: There is no n in font nullfont!
 Missing character: There is no g in font nullfont!
 Missing character: There is no . in font nullfont!
 
-Overfull \hbox (20.0pt too wide) in paragraph at lines 122--128
+Overfull \hbox (20.0pt too wide) in paragraph at lines 123--129
 []
  []
 
 
-Overfull \hbox (10.86105pt too wide) in paragraph at lines 122--128
+Overfull \hbox (10.86105pt too wide) in paragraph at lines 123--129
 []
  []
 
@@ -16883,7 +16969,7 @@ See the LaTeX manual or LaTeX Companion for explanation.
 Type  H <return>  for immediate help.
  ...                                              
                                                   
-l.129 T
+l.130 T
        he local and online properties of e-prop make it a biologically plaus...
 
 You're in trouble here.  Try typing  <return>  to proceed.
@@ -17082,7 +17168,7 @@ Missing character: There is no e in font nullfont!
 Missing character: There is no s in font nullfont!
 Missing character: There is no ( in font nullfont!
 ! Undefined control sequence.
-l.130 ...sks, including on classifying phones (\ie
+l.131 ...sks, including on classifying phones (\ie
                                                   , speech sounds), for whic...
 The control sequence at the end of the top line
 of your error message was never \def'ed. If you have
@@ -17146,7 +17232,7 @@ Missing character: There is no T in font nullfont!
 Missing character: There is no M in font nullfont!
 Missing character: There is no s in font nullfont!
 ! Undefined control sequence.
-l.130 ... performs competitively with LSTMs \citep
+l.131 ... performs competitively with LSTMs \citep
                                                   {graves2013speech}, a popu...
 The control sequence at the end of the top line
 of your error message was never \def'ed. If you have
@@ -17208,7 +17294,7 @@ Missing character: There is no T in font nullfont!
 Missing character: There is no T in font nullfont!
 Missing character: There is no . in font nullfont!
 
-Overfull \hbox (20.0pt too wide) in paragraph at lines 129--131
+Overfull \hbox (20.0pt too wide) in paragraph at lines 130--132
 []
  []
 
@@ -17219,7 +17305,7 @@ See the LaTeX manual or LaTeX Companion for explanation.
 Type  H <return>  for immediate help.
  ...                                              
                                                   
-l.132 S
+l.133 S
        o far, only the LIF and adaptive LIF (ALIF) neuron models have been u...
 
 You're in trouble here.  Try typing  <return>  to proceed.
@@ -17297,7 +17383,7 @@ Missing character: There is no . in font nullfont!
 Missing character: There is no I in font nullfont!
 Missing character: There is no n in font nullfont!
 ! Undefined control sequence.
-l.132 ...odels have been used in e-prop. In \citet
+l.133 ...odels have been used in e-prop. In \citet
                                                   {traub2020learning}, a fun...
 The control sequence at the end of the top line
 of your error message was never \def'ed. If you have
@@ -17571,7 +17657,7 @@ Missing character: There is no R in font nullfont!
 Missing character: There is no N in font nullfont!
 Missing character: There is no ) in font nullfont!
 ! Undefined control sequence.
-l.134 ... of error-related negativity (ERN) \citep
+l.135 ... of error-related negativity (ERN) \citep
                                                   {nieuwenhuis2001error}, wh...
 The control sequence at the end of the top line
 of your error message was never \def'ed. If you have
@@ -17763,7 +17849,7 @@ Missing character: There is no o in font nullfont!
 Missing character: There is no n in font nullfont!
 Missing character: There is no . in font nullfont!
 ! Undefined control sequence.
-l.135 \citet
+l.136 \citet
             {traub2020learning} also showed this effect for the Izhikevich n...
 The control sequence at the end of the top line
 of your error message was never \def'ed. If you have
@@ -17831,7 +17917,7 @@ Missing character: There is no r in font nullfont!
 Missing character: There is no o in font nullfont!
 Missing character: There is no n in font nullfont!
 ! Undefined control sequence.
-l.135 ...s effect for the Izhikevich neuron \citep
+l.136 ...s effect for the Izhikevich neuron \citep
                                                   {izhikevich2003simple}.
 The control sequence at the end of the top line
 of your error message was never \def'ed. If you have
@@ -17981,12 +18067,12 @@ Missing character: There is no s in font nullfont!
 Missing character: There is no k in font nullfont!
 Missing character: There is no . in font nullfont!
 
-Overfull \hbox (20.0pt too wide) in paragraph at lines 132--137
+Overfull \hbox (20.0pt too wide) in paragraph at lines 133--138
 []
  []
 
 ! Undefined control sequence.
-l.138 \paragraph
+l.139 \paragraph
                 {Multi-layer RSNNs}
 The control sequence at the end of the top line
 of your error message was never \def'ed. If you have
@@ -18001,7 +18087,7 @@ See the LaTeX manual or LaTeX Companion for explanation.
 Type  H <return>  for immediate help.
  ...                                              
                                                   
-l.138 \paragraph{M
+l.139 \paragraph{M
                   ulti-layer RSNNs}
 You're in trouble here.  Try typing  <return>  to proceed.
 If that doesn't work, type  X <return>  to quit.
@@ -18023,7 +18109,7 @@ Missing character: There is no N in font nullfont!
 Missing character: There is no N in font nullfont!
 Missing character: There is no s in font nullfont!
 
-Overfull \hbox (20.0pt too wide) in paragraph at lines 138--139
+Overfull \hbox (20.0pt too wide) in paragraph at lines 139--140
 []
  []
 
@@ -18034,7 +18120,7 @@ See the LaTeX manual or LaTeX Companion for explanation.
 Type  H <return>  for immediate help.
  ...                                              
                                                   
-l.140 T
+l.141 T
        he human neocortex, which is responsible for processing sensory infor...
 
 You're in trouble here.  Try typing  <return>  to proceed.
@@ -18224,7 +18310,7 @@ Missing character: There is no o in font nullfont!
 Missing character: There is no n in font nullfont!
 Missing character: There is no s in font nullfont!
 ! Undefined control sequence.
-l.140 ...ecurrent layers of spiking neurons \citep
+l.141 ...ecurrent layers of spiking neurons \citep
                                                   {greig2013molecular}.
 The control sequence at the end of the top line
 of your error message was never \def'ed. If you have
@@ -18252,7 +18338,7 @@ Missing character: There is no a in font nullfont!
 Missing character: There is no r in font nullfont!
 Missing character: There is no . in font nullfont!
 
-Overfull \hbox (20.0pt too wide) in paragraph at lines 140--141
+Overfull \hbox (20.0pt too wide) in paragraph at lines 141--142
 []
  []
 
@@ -18263,7 +18349,7 @@ See the LaTeX manual or LaTeX Companion for explanation.
 Type  H <return>  for immediate help.
  ...                                              
                                                   
-l.142 T
+l.143 T
        he discovery of backpropagation allowed gradient descent--based train...
 
 You're in trouble here.  Try typing  <return>  to proceed.
@@ -18664,7 +18750,7 @@ Missing character: There is no i in font nullfont!
 Missing character: There is no a in font nullfont!
 Missing character: There is no l in font nullfont!
 ! Undefined control sequence.
-l.145 ... it is temporal instead of spatial \citep
+l.146 ... it is temporal instead of spatial \citep
                                                   {hermans2013training,galli...
 The control sequence at the end of the top line
 of your error message was never \def'ed. If you have
@@ -18789,7 +18875,7 @@ Missing character: There is no e in font nullfont!
 Missing character: There is no r in font nullfont!
 Missing character: There is no s in font nullfont!
 ! Undefined control sequence.
-l.146 ...r memory spans than shallow layers \citep
+l.147 ...r memory spans than shallow layers \citep
                                                   {gallicchio2018short}, sug...
 The control sequence at the end of the top line
 of your error message was never \def'ed. If you have
@@ -18953,12 +19039,12 @@ Missing character: There is no N in font nullfont!
 Missing character: There is no s in font nullfont!
 Missing character: There is no . in font nullfont!
 
-Overfull \hbox (20.0pt too wide) in paragraph at lines 142--148
+Overfull \hbox (20.0pt too wide) in paragraph at lines 143--149
 []
  []
 
 ! Undefined control sequence.
-l.149 \paragraph
+l.150 \paragraph
                 {This research}
 The control sequence at the end of the top line
 of your error message was never \def'ed. If you have
@@ -18973,7 +19059,7 @@ See the LaTeX manual or LaTeX Companion for explanation.
 Type  H <return>  for immediate help.
  ...                                              
                                                   
-l.149 \paragraph{T
+l.150 \paragraph{T
                   his research}
 You're in trouble here.  Try typing  <return>  to proceed.
 If that doesn't work, type  X <return>  to quit.
@@ -19028,7 +19114,7 @@ Missing character: There is no p in font nullfont!
 Missing character: There is no i in font nullfont!
 Missing character: There is no n in font nullfont!
 ! Undefined control sequence.
-l.150 ...port, the performance of e-prop in \citet
+l.151 ...port, the performance of e-prop in \citet
                                                   {bellec2020solution} is re...
 The control sequence at the end of the top line
 of your error message was never \def'ed. If you have
@@ -19241,7 +19327,7 @@ Missing character: There is no s in font nullfont!
 Missing character: There is no o in font nullfont!
 Missing character: There is no f in font nullfont!
 ! Undefined control sequence.
-l.152 ... the two new STDP neuron models of \citet
+l.153 ... the two new STDP neuron models of \citet
                                                   {traub2020learning} are ex...
 The control sequence at the end of the top line
 of your error message was never \def'ed. If you have
@@ -19500,7 +19586,7 @@ Missing character: There is no e in font nullfont!
 Missing character: There is no d in font nullfont!
 Missing character: There is no . in font nullfont!
 
-Overfull \hbox (20.0pt too wide) in paragraph at lines 149--155
+Overfull \hbox (20.0pt too wide) in paragraph at lines 150--156
 []
  []
 
@@ -19511,7 +19597,7 @@ See the LaTeX manual or LaTeX Companion for explanation.
 Type  H <return>  for immediate help.
  ...                                              
                                                   
-l.156 C
+l.157 C
        hapter \ref{ch:relatedwork} describes the basic version of the e-prop...
 
 You're in trouble here.  Try typing  <return>  to proceed.
@@ -19527,7 +19613,7 @@ Missing character: There is no r in font nullfont!
 ! Undefined control sequence.
 <write> ...ence `ch:relatedwork' on page \thepage 
                                                   \space undefined\on@line .
-l.156 Chapter \ref{ch:relatedwork}
+l.157 Chapter \ref{ch:relatedwork}
                                    describes the basic version of the e-prop...
 The control sequence at the end of the top line
 of your error message was never \def'ed. If you have
@@ -19536,7 +19622,7 @@ spelling (e.g., `I\hbox'). Otherwise just continue,
 and I'll forget about whatever was undefined.
 
 
-LaTeX Warning: Reference `ch:relatedwork' on page  undefined on input line 156.
+LaTeX Warning: Reference `ch:relatedwork' on page  undefined on input line 157.
 
 
 Missing character: There is no d in font nullfont!
@@ -19594,7 +19680,7 @@ Missing character: There is no r in font nullfont!
 ! Undefined control sequence.
 <write> ...Reference `ch:method' on page \thepage 
                                                   \space undefined\on@line .
-l.157 Chapter \ref{ch:method}
+l.158 Chapter \ref{ch:method}
                               describes the method used to implement the TIM...
 The control sequence at the end of the top line
 of your error message was never \def'ed. If you have
@@ -19603,7 +19689,7 @@ spelling (e.g., `I\hbox'). Otherwise just continue,
 and I'll forget about whatever was undefined.
 
 
-LaTeX Warning: Reference `ch:method' on page  undefined on input line 157.
+LaTeX Warning: Reference `ch:method' on page  undefined on input line 158.
 
 Missing character: There is no d in font nullfont!
 Missing character: There is no e in font nullfont!
@@ -19768,7 +19854,7 @@ Missing character: There is no r in font nullfont!
 ! Undefined control sequence.
 <write> ...eference `ch:results' on page \thepage 
                                                   \space undefined\on@line .
-l.158 ...are presented in Chapter \ref{ch:results}
+l.159 ...are presented in Chapter \ref{ch:results}
                                                    and discussed in Chapter ...
 The control sequence at the end of the top line
 of your error message was never \def'ed. If you have
@@ -19777,7 +19863,7 @@ spelling (e.g., `I\hbox'). Otherwise just continue,
 and I'll forget about whatever was undefined.
 
 
-LaTeX Warning: Reference `ch:results' on page  undefined on input line 158.
+LaTeX Warning: Reference `ch:results' on page  undefined on input line 159.
 
 Missing character: There is no a in font nullfont!
 Missing character: There is no n in font nullfont!
@@ -19803,7 +19889,7 @@ Missing character: There is no r in font nullfont!
 ! Undefined control sequence.
 <write> ...rence `ch:discussion' on page \thepage 
                                                   \space undefined\on@line .
-l.158 ... discussed in Chapter \ref{ch:discussion}
+l.159 ... discussed in Chapter \ref{ch:discussion}
                                                   .
 The control sequence at the end of the top line
 of your error message was never \def'ed. If you have
@@ -19812,7 +19898,7 @@ spelling (e.g., `I\hbox'). Otherwise just continue,
 and I'll forget about whatever was undefined.
 
 
-LaTeX Warning: Reference `ch:discussion' on page  undefined on input line 158.
+LaTeX Warning: Reference `ch:discussion' on page  undefined on input line 159.
 
 Missing character: There is no . in font nullfont!
 Missing character: There is no F in font nullfont!
@@ -19833,7 +19919,7 @@ Missing character: There is no r in font nullfont!
 ! Undefined control sequence.
 <write> ...rence `ch:conclusion' on page \thepage 
                                                   \space undefined\on@line .
-l.159 Finally, Chapter \ref{ch:conclusion}
+l.160 Finally, Chapter \ref{ch:conclusion}
                                            concludes this report.
 The control sequence at the end of the top line
 of your error message was never \def'ed. If you have
@@ -19842,7 +19928,7 @@ spelling (e.g., `I\hbox'). Otherwise just continue,
 and I'll forget about whatever was undefined.
 
 
-LaTeX Warning: Reference `ch:conclusion' on page  undefined on input line 159.
+LaTeX Warning: Reference `ch:conclusion' on page  undefined on input line 160.
 
 Missing character: There is no c in font nullfont!
 Missing character: There is no o in font nullfont!
@@ -19872,11 +19958,11 @@ Missing character: There is no . in font nullfont!
 
  
 Here is how much of TeX's memory you used:
- 21 strings out of 492982
- 337 string characters out of 6134896
- 56916 words of memory out of 5000000
- 3684 multiletter control sequences out of 15000+600000
+ 22 strings out of 492982
+ 356 string characters out of 6134895
+ 56923 words of memory out of 5000000
+ 3685 multiletter control sequences out of 15000+600000
  4462 words of font info for 17 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 24i,5n,14p,552b,142s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 24i,5n,21p,552b,142s stack positions out of 5000i,500n,10000p,200000b,80000s
 !  ==> Fatal error occurred, no output PDF file produced!

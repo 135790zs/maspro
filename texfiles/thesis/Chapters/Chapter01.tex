@@ -31,8 +31,8 @@ The energy consumption of DL contrasts strongly with that of the human brain, wh
 This is because despite the biologically inspired foundation, deep ANNs are fundamentally different from the brain, which is an inherently time-dependent dynamical system \citep{sacramento2018dendritic, wozniak2020deep} that relies on biophysical processes, recurrence, and feedback of its physical substrate for computation \citep{sterling2015principles,bhalla2014molecular}.
 Deep ANNs are implemented on von Neumann architectures \citep{von1993first}, \ie, a system with a central processing unit (CPU) and separate memory, which are significantly different from the working model of the brain \citep{schuman2017survey}.
 
-One reason for the inefficiency of deep ANNs is that they suffer from the von Neumann bottleneck \citep{zenke2021brain}, which involves a limited throughput between the CPU and memory---a data operation cannot physically co-occur with fetching instructions to process that data because they share the same communication system.
-Parallelization on GPUs has alleviated this bottleneck to some extent, but the human brain is more efficient as it is embedded in a physical substrate whose neurons operate fully in parallel \citep{a2017parallel} using sparsely occurring postsynaptic potentials (or \emph{spikes}) \citep{bear2020neuroscience}, and where no explicit data processing instructions exist.
+One reason for the inefficiency of deep ANNs is that their implementations suffer from the von Neumann bottleneck \citep{zenke2021brain}, which involves a limited throughput between the CPU and memory---a data operation cannot physically co-occur with fetching instructions to process that data because they share the same communication system.
+Parallelization on GPUs has alleviated this bottleneck to some extent, but the human brain is more efficient as it is embedded in a physical substrate whose neurons operate fully in parallel \citep{a2017parallel}, communicate through sparsely occurring \emph{spikes} \citep{bear2020neuroscience}, and where no explicit data processing instructions exist.
 A spike can be represented as a binary value which causes the synapse to increase the membrane potential in the efferent neuron to change by a fixed value \citep{bear2020neuroscience}.
 Connections in ANNs are represented abstractly by large weight matrices, which are all multiplied with neuron activation values at every propagation cycle.
 In the brain, a synapse spikes sparsely and thereby saves energy while conveniently including an informative temporal component.
@@ -68,7 +68,7 @@ On the surface, it can be understood as running neural networks not abstracted i
 A central advantage of NC is energy efficiency \citep{hasler1990vlsi,lee1990parallel,tarassenko1990real}.
 This energy efficiency, combined with NC's massive parallelism \citep{monroe2014neuromorphic}, makes VLSIs particularly relevant for implementing SNNs.
 
-Like SNNs, neuromorphic systems typically use sparse, event-based communication between memristors \citep{maan2016survey} and physically colocalized memory and computation \citep{sterling2015principles,neftci2018data}.
+Like SNNs, neuromorphic systems typically use sparse, event-based communication between devices such as memristors \citep{maan2016survey} and physically colocalized memory and computation \citep{sterling2015principles,neftci2018data}.
 Although colocalized memory and computation has also been implemented in von Neumann machines, such as Google's TPU\footnote{See \texttt{https://cloud.google.com/tpu/docs/tpus}. Last accessed January 2021}, Graphcore's IPU\footnote{See \texttt{https://www.graphcore.ai/products/ipu}. Last accessed January 2021}, or Cerebras' CS-1\footnote{See \texttt{https://cerebras.net/product/\#chip}. Last accessed January 2021}, neuromorphic systems are more efficient for running ANNs \citep{merolla2014million,rajendran2019low}.
 The energy consumption of CMOS artificial neurons is several orders of magnitude lower than that of neurons in an ANN, and even 2--3 times lower than the energy consumption of biological neurons \citep{elbez2020progressive}.
 Neuromorphic systems are also more tolerant to device variation \citep{yu2013low}.
@@ -83,22 +83,25 @@ The precondition of locality refers to the idea that a neuron or synapse can onl
 For instance, the inner state of a neuron can only be influenced by itself, or by the spikes it receives from afferent neurons.
 Similarly, a synapse can only spike or change its weight based on signals from the afferent and efferent neuron.
 This is a direct consequence of the colocalization of processing and memory.
-The precondition of online can be regarded as temporal locality---neurons and synapses can only access information that physically exists at the same point in time.
+The precondition of being online can be regarded as temporal locality---neurons and synapses can only access information that physically exists at the same point in time.
 They cannot access future information, nor past information if it was not explicitly retained.
 
 The brain also adheres to these two constraints.
-Most learning algorithms for SNNs are based on a form of Hebbian learning, which is a major factor in biological learning and memory consolidation.
+Some of the more common learning rules in ANNs are based on a form of Hebbian learning, which is a major factor in biological learning and memory consolidation \citep{schuman2017survey}.
 Classical Hebbian learning is often summarized by ``cells that fire together, wire together'', if there is a causal relationship between these cells, such as a postsynaptic potential on a connecting synapse.
 Direct application of Hebbian learning in a spiking neural network will generally lead to a positive feedback loop, because ``wiring cells together'', or increasing the synaptic strength, will in turn increase the likelihood that they also fire together \citep{zenke2017temporal}.
 Furthermore, classical Hebbian learning describes no way for a synapse to weaken.
 
 Spike-timing-dependent plasticity (STDP) \citep{abbott2000synaptic,caporale2008spike} is a type of Hebbian learning that incorporates temporal causality on a synapse from neuron $A$ to neuron $B$: if $B$ spikes right after neuron $A$, then the synapse is strengthened, but if $B$ spikes right before $A$, it is weakened.
-However, this too leads to runaway activity through the same positive feedback loop.
+% However, this too leads to runaway activity through the same positive feedback loop.
 It is widely known that STDP is a fundamental learning principle in the human brain \citep{kandel2000principles,caporale2008spike}, including perceptual systems in the sensory cortex \citep{huang2014associative}.
 STDP by itself can be used as an unsupervised learning algorithm or to forming associations in classical conditioning \citep{diehl2015unsupervised,kim2018demonstration}.
 Furthermore, it has been demonstrated to form associations between memory traces in SNNs, which are crucial for cognitive brain function \citep{pokorny2020stdp}.
 To allow supervised learning, or operant conditioning, a learning signal is required to influence the direction of the synapse weight change: a positive learning signal will reinforce the association (long-term potentiation), and a negative learning signal weakens it (long term depression) \citep{lobov2020spatial}.
-STDP with a learning signal is known as reward-modulated STDP (R-STDP) \citep{legenstein2008learning} in the field of SNNs and three-factor Hebbian learning in neuroscience \citep{fremaux2016neuromodulated}, outperforming its classical two-factor counterpart \citep{porr2007learning} because learning signals are crucial for maintaining long-term memory \citep{bailey2000heterosynaptic} and behavioral changes.
+STDP with a learning signal is known as reward-modulated STDP (R-STDP) \citep{legenstein2008learning} in the field of SNNs and three-factor Hebbian learning in neuroscience \citep{fremaux2016neuromodulated}.
+Three-factor Hebbian learning has been demonstrated outperform its classical two-factor counterpart in a localization-and-retrieval task \citep{porr2007learning}.
+A possible reason for this performance difference is that modulatory signals ``may provide the attentional and motivational significance for long-term storage of a memory in the brain'' and stabilize classical Hebbian learning \citep{bailey2000heterosynaptic}.
+
 
 Neurotransmitters are used to modulate the learning signal in the brain.
 Dopamine, for instance, which has a central behavioral and functional role in the primary motor cortex \citep{barnes2005activity,dang2006disrupted}, has been shown to modulate synapses through dendritic spine enlargement during a very narrow time window \citep{dang2006disrupted}.
@@ -114,33 +117,39 @@ In particular, the synaptic CaMKII protein complex is activated during the induc
 This LTP is maintained over behavioral time spans, and gradually fades.
 When followed by a learning signal in the form of a neurotransmitter, synaptic plasticity is induced \citep{yagishita2014critical,cassenaer2012conditional,gerstner2018eligibility}.
 
-Synaptic plasticity was demonstrated using eligibility traces in deep feedforward SNNs \citep{zenke2018superspike,neftci2017event,kaiser2020synaptic} and could be implemented in feedforward VLSIs. In \citet{zenke2018superspike} it is asserted that these methods are also applicable for RSNNs.
+Synaptic plasticity was demonstrated using eligibility traces in deep feedforward SNNs \citep{zenke2018superspike,neftci2017event,kaiser2020synaptic} and could be implemented in feedforward VLSIs.
+In \citet{zenke2018superspike} it is asserted that these methods are also applicable for RSNNs.
 Eligibility traces have also been shown to solve difficult credit assignment problems in SNNs using R-STDP \citep{legenstein2008learning, bellec2020solution} and in RNNs \citep{he2015distinct}, and have a predictable learning effect \citep{legenstein2008learning}.
 R-STDP in SNNs has been used to solve a number of tasks, including training a stable lane keeping controller \citep{bing2020indirect}, but can suffer from catastrophic forgetting and lack of policy evaluation in mapless navigation \citep{bing2018end}.
 More recently, \citet{demirag2021pcm} have shown that phase change memory (PCM) devices allow eligibility traces to linger over behavioral timescales in CMOS/memristive architectures.
 
 \paragraph{Eligibility propagation}
 Eligibility propagation (e-prop) \citep{bellec2020solution} is a local and online learning algorithm for RSNNs that can be mathematically derived as an approximation to BPTT (see also Section \ref{sec:derivefromBPTT}).
-It uses local learning signals and eligibility traces for any type of neuron.
+It uses local learning signals and eligibility traces for many types of neuron.
 In e-prop, the learning signal is a local variation on random broadcast alignment, which propagates the error directly back onto the neurons with a random weight, resembling the function of a neuromodulator in the brain.
 This has been suggested to provide a diversity of feature detectors for task-relevant network inputs \citep{bellec2020solution}.
 Broadcast alignment can perform as effectively as backpropagation in some tasks in feedforward ANNs \citep{lillicrap2016random,nokland2016direct} and multi-layer SNNs \citep{samadi2017deep,clopath2010connectivity}, but performs poorly in deep feedforward ANNs for complex image classification tasks \citep{bartunov2018assessing}.
 
 The local and online properties of e-prop make it a biologically plausible learning algorithm that can be implemented on VLSIs.
-E-prop has been demonstrated to work for a large variety of tasks, including on classifying phones (\ie, speech sounds), for which it performs competitively with LSTMs \citep{graves2013speech}, a popular RNN architecture that uses BPTT.
+E-prop has been demonstrated to work for a large variety of tasks, including classifying phones (\ie, speech sounds), for which it performs competitively with LSTMs \citep{graves2013speech}, a popular RNN architecture that uses BPTT.
 
-So far, only the LIF and adaptive LIF (ALIF) neuron models have been used in e-prop. In \citet{traub2020learning}, a functional modification was made to the LIF model such that STDP can occur.
+The fading eligibility trace in e-prop is similar to STDP in that the weight change is smaller if there is a longer delay between a presynaptic and postsynaptic spike.
+However, e-prop is essentially different from STDP, because it does not explicitly relate the order of the pre- and postsynaptic spike to the synaptic weight update.
+However, in \citet{bellec2020solution} e-prop is remarked to start showing STDP-like properties if the synaptic delay of a spike is prolonged.
+
+So far, only the LIF and adaptive LIF (ALIF) neuron models have been used in e-prop, which do not show STDP-like properties by default.
+In \citet{traub2020learning}, a functional modification was made to the LIF model such that STDP can occur.
 In particular, STDP occurs when the neuron model provides a negated gradient signal in the case when a presynaptic signal arrives too late.
 This resembles the biological phenomenon of error-related negativity (ERN) \citep{nieuwenhuis2001error}, which is a negative brain response that immediately follows an erroneous behavioral response and peaks after 80--150 ms with an amplitude that depends on the intent and motivation of a person.
 \citet{traub2020learning} also showed this effect for the Izhikevich neuron \citep{izhikevich2003simple}.
 However, these STDP-modified neurons were shown only in a single-synapse demo to illustrate the STDP properties, not in a full learning task.
 
 \paragraph{Multi-layer RSNNs}
-
 The human neocortex, which is responsible for processing sensory information, controlling motor output, and mediating higher-order cognitive functions, is organized into six recurrent layers of spiking neurons \citep{greig2013molecular}.
 
 The discovery of backpropagation allowed gradient descent--based training of multi-layer ANNs, which significantly increased their performance.
-Multi-layer CNNs show higher levels of abstraction in deeper layers of the network.
+Although it is unlikely to use backpropagation, the human brain is hierarchically structured such that early layers process simple information and deep layers process more abstract information.
+Similarly, multi-layer CNNs also show higher levels of abstraction in deeper layers of the network.
 For instance, early convolutional filters identify lines and edges, while deeper filters identify more complex shapes.
 In RNNs, stacking recurrent layers results in a similar abstraction---but it is temporal instead of spatial \citep{hermans2013training,gallicchio2017deep}.
 Deeper RNN layers exhibit slower time dynamics and longer memory spans than shallow layers \citep{gallicchio2018short}, suggesting that they ignore small variations in the input signal and integrate larger temporal patterns.
@@ -148,10 +157,12 @@ It is unclear if these findings extrapolate to RSNNs.
 
 \paragraph{This research}
 In this report, the performance of e-prop in \citet{bellec2020solution} is reproduced.
-Whereas e-prop was implemented using automatic differentiation in that research, in this report it is done explicitly, using the e-prop learning equations.
-Furthermore, the two new STDP neuron models of \citet{traub2020learning} are experimentally verified in the TIMIT phone classification task.
-One of these models, the STDP-LIF, will be modified to an adaptive version called STDP-ALIF.
-Finally, the effect of stacking multiple RSNN layers in an e-prop with each of the three neuron models is examined.
+Whereas e-prop was implemented using automatic differentiation in that research, in this report it is done explicitly, using the e-prop learning equations, thereby verifying that they are derived correctly.
+Furthermore, the two new STDP neuron models that were suggested in \citet{traub2020learning} are experimentally verified in the TIMIT phone classification task.
+One of these models, the STDP-LIF, will be modified to a new adaptive version called STDP-ALIF, thereby linking the ALIF and STDP-LIF neurons models described in \citet{bellec2020solution} and \citet{traub2020learning}, respectively.
+The scientific gain of this research is that the link between STDP and e-prop is more closely examined, and whether the inclusion of STDP in e-prop will lead to faster or more accurate learning.
+If this is the case, the STDP-ALIF neuron model may lead to better learning algorithms in neuromorphic systems.
+Finally, the effect of stacking multiple RSNN layers in an e-prop model with each of the three neuron models is examined for the first time, offering some insight on selecting RSNN architectures in neuromorphic e-prop models.
 
 Chapter \ref{ch:relatedwork} describes the basic version of the e-prop framework.
 Chapter \ref{ch:method} describes the method used to implement the TIMIT learning task and modify the e-prop algorithm to a multi-layer framework with different neuron models.
