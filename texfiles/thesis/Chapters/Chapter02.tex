@@ -112,14 +112,8 @@
         Figure \ref{fig:topology-sl} illustrates the basic architecture of a single-layer e-prop model.
         \begin{figure}[!ht]
             \myfloatalign
-            \includegraphics[trim=0 25cm 0 0, clip, width=\linewidth]{gfx/Singlelayer}
-<<<<<<< HEAD
-            \caption[Single-layer overview.]{A general illustration of a single-layer network architecture.
-=======
-            \caption[Single-layer illustration.]{A basic illustration of a single-layer network architecture.
-            An input vector $\mathbf{x}^t$ at time step $t$ is fed to a pool of $N$ recurrent neurons with hidden states $\mathbf{h}^t$ and observable states $\mathbf{z}^t$ through input weights $\mathbf{W}^\text{in}$. The recurrent weights $\mathbf{W}^\text{rec}$ connect neurons with each other, but no self-loops exist. A randomly selected 25\% of these neurons is a LIF neuron (\ie, $\beta = 0$) and the others are ALIF neurons. The output weights $\mathbf{W}^\text{out}$ process the observable states of the neurons through a softmax function into a logits layer $\mathbf{\pi}^t$. These logits are compared with the target output $\mathbf{\pi}^{*, t}$ and multiplied with broadcast weights $\mathbf{B}^t$ to obtain a learning signal $L_j^t$ for every neuron $j$ in the pool.
->>>>>>> 13b3663032327d70e42a7e5a8248f37ea889bd2b
-            Note that weights illustrated in red are e-prop weights, \ie, they track eligibility traces.}
+            \includegraphics[trim=0 25cm 0 0, clip, width=\linewidth]{gfx/Singlelayer}\caption[Single-layer illustration.]{A basic illustration of a single-layer network architecture.
+            An input vector $\mathbf{x}^t$ at time step $t$ is fed to a pool of $N$ recurrent neurons with hidden states $\mathbf{h}^t$ and observable states $\mathbf{z}^t$ through input weights $\mathbf{W}^\text{in}$. The recurrent weights $\mathbf{W}^\text{rec}$ connect neurons with each other, but no self-loops exist. A randomly selected 25\% of these neurons is a LIF neuron (\ie, $\beta = 0$) and the others are ALIF neurons. The output weights $\mathbf{W}^\text{out}$ process the observable states of the neurons through a softmax function into a logits layer $\mathbf{\pi}^t$. These logits are compared with the target output $\mathbf{\pi}^{*, t}$ and multiplied with broadcast weights $\mathbf{B}^t$ to obtain a learning signal $L_j^t$ for every neuron $j$ in the pool. Note that weights illustrated in red are e-prop weights, \ie, they track eligibility traces.}
             \label{fig:topology-sl}
           \end{figure}
 
@@ -323,12 +317,7 @@
                     \end{pmatrix}.
             \end{align}
 
-<<<<<<< HEAD
-            % WE ARE HERE
-
-=======
             Therefore, the eligibility trace is computed by
->>>>>>> 13b3663032327d70e42a7e5a8248f37ea889bd2b
             \begin{align}
                e^t_{ji} &= \begin{pmatrix}
             \epsilon_{ji, v}^t\\
