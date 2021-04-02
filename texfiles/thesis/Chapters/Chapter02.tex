@@ -92,23 +92,37 @@
             Therefore, only the e-prop derivations for the ALIF neurons will be described in the following sections.
 
     \subsection{Network topology}
+        % First describe network topology, broadly
+        % Say that you're experimenting with different topologies (specificially mention that the NN is recurrent)
+        The e-prop network structure as used in this report consists of the following main components:
+        \begin{enumerate}
+            \item The input layer $\mathbf{x}^t$.
+            \item A recurrent layer containing $N$ neurons that are connected to all other neurons in this layer by weights $\mathbf{W}^\text{rec}$. This layer is also connected to the input layer by weights $\mathbf{W}^\text{in}$.
+            \item An output layer $\mathbf{y}^t$ connected to the recurrent layer by weights $\mathbf{W}^\text{out}$.
+        \end{enumerate}
 
-        The neurons receive inputs from the input feature vector and the observable states of the afferent neurons.
+        Since one of the goals of this report is to evaluate multi-layer topologies, the recurrent layer component is modified in Section \ref{sec:ml_arch} support architectures with a feedforward series of recurrent layers.
 
-        Weights are initialized by sampling them from a Gaussian distribution $\mathcal{N}\left(0, \sqrt{N}\right)$ where $N$ is the number of afferent neurons.
-        For instance, the weights $\mathbf{W}^\text{in}$ between the input and the first layer are sampled from $\mathcal{N}\left(0, \sqrt{39}\right)$ if there are 39 input features.
-
-        A randomly selected 80\% of synaptic weights is then set to a value of 0, as well as the synapses that connect a neuron to itself, rendering them ineffective.
-
+        An input vector $\mathbf{x}^t$ at time step $t$ is fed to a pool of $N$ recurrent neurons with hidden states $\mathbf{h}^t$ and observable states $\mathbf{z}^t$ through input weights $\mathbf{W}^\text{in}$.
+        The recurrent weights $\mathbf{W}^\text{rec}$ connect neurons with each other, but no self-loops exist.
+        Therefore, the recurrent neurons also receive inputs from the observable states of the afferent neurons.
+        25\% of these neurons is a LIF neuron (\ie, $\beta = 0$) and the others are ALIF neurons.
+        The output weights $\mathbf{W}^\text{out}$ process the observable states of the neurons through a softmax function into a logits layer $\mathbf{\pi}^t$.
+        These logits are compared with the target output $\mathbf{\pi}^{*, t}$ and multiplied with broadcast weights $\mathbf{B}^t$ to obtain a learning signal $L_j^t$ for every neuron $j$ in the pool.
         Figure \ref{fig:topology-sl} illustrates the basic architecture of a single-layer e-prop model.
         \begin{figure}[!ht]
             \myfloatalign
             \includegraphics[trim=0 25cm 0 0, clip, width=\linewidth]{gfx/Singlelayer}
-            \caption[Single-layer illustration.]{A basic illustration of a single-layer network architecture.
-            An input vector $\mathbf{x}^t$ at time step $t$ is fed to a pool of $N$ recurrent neurons with hidden states $\mathbf{h}^t$ and observable states $\mathbf{z}^t$ through input weights $\mathbf{W}^\text{in}$. The recurrent weights $\mathbf{W}^\text{rec}$ connect neurons with each other, but no self-loops exist. 25\% of these neurons is a LIF neuron (\ie, $\beta = 0$) and the others are ALIF neurons. The output weights $\mathbf{W}^\text{out}$ process the observable states of the neurons through a softmax function into a logits layer $\mathbf{\pi}^t$. These logits are compared with the target output $\mathbf{\pi}^{*, t}$ and multiplied with broadcast weights $\mathbf{B}^t$ to obtain a learning signal $L_j^t$ for every neuron $j$ in the pool.
+            \caption[Single-layer overview.]{A general illustration of a single-layer network architecture.
             Note that weights illustrated in red are e-prop weights, \ie, they track eligibility traces.}
             \label{fig:topology-sl}
           \end{figure}
+
+        Like in \citet{bellec2020solution}, weights are initialized by sampling them from a Gaussian distribution $\mathcal{N}\left(0, \sqrt{N}\right)$ where $N$ is the number of afferent neurons.
+        For instance, the weights $\mathbf{W}^\text{in}$ between the input and the first layer are sampled from $\mathcal{N}\left(0, \sqrt{39}\right)$ if there are 39 input features.
+        Likewise, each of the neurons has $N-1$ afferent recurrent weights, so the recurrent weights within a layer are sampled from $\mathcal{N}\left(0, \sqrt{N-1}\right)$.
+
+        A randomly selected 80\% of synaptic weights is then set to a value of 0, as well as the synapses that connect a neuron to itself, rendering them ineffective.
 
 
     \subsection{Deriving e-prop from RNNs}\label{sec:derivefromBPTT}
@@ -120,13 +134,15 @@
         \frac{dE}{dW_{ji}} =
         \sum_t\frac{dE}{dz_j^t}\cdot\left[\frac{dz_j^t}{dW_{ji}}\right]_\text{local}
         \end{equation}
-        is derived from the classical factorization of the loss gradients in an unfolded RNN:
+        is derived from the classical factorization of the loss gradients in an unfolded RNN as in \citet{bellec2020solution}:
         \begin{equation}\label{eq:clafac}
-        \frac{dE}{dW_{ji}} = \sum_{t'}\frac{dE}{d\mathbf{h}_j^{t'}}\cdot\frac{\partial \mathbf{h}_j^{t'}}{\partial W_{ji}},
+        \frac{dE}{dW_{ji}} = \sum_{t' \leq T}\frac{dE}{d\mathbf{h}_j^{t'}}\cdot\frac{\partial \mathbf{h}_j^{t'}}{\partial W_{ji}},
         \end{equation}
         where summation indicates that weights are shared.
+        Recall that for ALIF neurons, $\mathbf{h}^t_j \eqdef \left[v^t_j, a^t_j\right]$.
+        This is also the true for ALIF neurons that use $\beta=0$ to disable their threshold adaptability.
 
-        By applying the chain rule, the first factor $\frac{dE}{d\mathbf{h}_j^{t'}}$ can be decomposed into a series of learning signals $L_j^t = \frac{dE}{dz_j^t}$ and local factors $\frac{\partial\mathbf{h}_j^{t-t'}}{\partial\mathbf{h}_j^t}$ for all $t$ starting from the event horizon $t'$:
+        By applying the chain rule, the first factor $\frac{dE}{d\mathbf{h}_j^{t'}}$ can be decomposed into a series of learning signals $L_j^t = \frac{dE}{dz_j^t}$ and local factors $\frac{\partial\mathbf{h}_j^{t-t'}}{\partial\mathbf{h}_j^t}$ for all $t$ starting from the event horizon $t'$, which is the oldest time step that information is used from:
 
         \begin{equation}\label{eq:rec}
         \frac{dE}{d\mathbf{h}_j^{t'}} = \underbrace{\frac{dE}{dz_j^{t'}}}_{L^{t'}_j} \frac{\partial z_j^{t'}}{\partial\mathbf{h}_j^{t'}} + \frac{dE}{d\mathbf{h}_j^{t'+1}}\frac{\partial\mathbf{h}_j^{t'+1}}{\partial\mathbf{h}_j^{t'}}.
@@ -153,7 +169,7 @@
         \end{equation}
 
         This is why the $\rho$ and $\alpha$ parameters, which define the decay rate in hidden states and the corresponding eligibility vectors, should be set according to the required working memory in the learning task.
-        The eligibility vector and the hidden state have the same dimension: $\left\{\bm{\epsilon}^t_{ji}, \mathbf{h}^t_j\right\} \subset \mathbb{R}^d$, where $d=2$ for all neuron types described in this report.
+        The eligibility vector and the hidden state have the same dimension: $\left\{\bm{\epsilon}^t_{ji}, \mathbf{h}^t_j\right\} \subset \mathbb{R}^d$, where $d=2$ for the ALIF and Izhikevich neuron models.
 
         The \emph{eligibility trace} $e^t_{ji}$ is a product of $\frac{\partial z_j^t}{\partial \mathbf{h}_j^t}$ and the eligibility vector, resulting in the gradient that can be immediately applied at every time step $t$, or accumulated and integrated locally on a synapse (see Section \ref{sec:eprop_grd} for details):
         \begin{equation}\label{eq:main_eprop}
@@ -285,6 +301,8 @@
             In later sections, it is demonstrated that this does not necessarily hold for other neuron models, such as the Izhikevich neuron.
 
             Multiplying the eligibility vector with the partial derivative of the observable state with respect to the hidden state results in the eligibility trace:
+
+            % WE ARE HERE
 
             \begin{align}
             e^t_{ji} &= \begin{pmatrix}
