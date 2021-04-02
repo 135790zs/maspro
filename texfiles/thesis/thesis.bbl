@@ -61,13 +61,40 @@
       \field{labeldatesource}{year}
       \field{labelnamesource}{author}
       \field{labeltitlesource}{title}
-      \field{journaltitle}{Current topics in medicinal chemistry}
+      \field{journaltitle}{Current Topics in Medicinal Chemistry}
       \field{number}{14}
       \field{title}{Parallel computing for brain simulation}
       \field{volume}{17}
       \field{year}{2017}
       \field{pages}{1646\bibrangedash 1668}
       \range{pages}{23}
+    \endentry
+    \entry{deiss1999pulse}{incollection}{}
+      \list{publisher}{1}{%
+        {The MIT Press}%
+      }
+      \field{sortinit}{A}
+      \field{sortinithash}{d77c7cdd82ff690d4c3ef13216f92f0b}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{year}
+      \field{labeltitlesource}{title}
+      \field{booktitle}{{Pulsed Neural Networks}}
+      \field{isbn}{9780262278768}
+      \field{month}{11}
+      \field{title}{{A Pulse-Coded Communications Infrastructure for Neuromorphic Systems}}
+      \field{year}{1998}
+      \verb{doi}
+      \verb 10.7551/mitpress/5704.003.0011
+      \endverb
+      \verb{eprint}
+      \verb https://direct.mit.edu/book/chapter-pdf/177002/9780262278768\_caf.pdf
+      \endverb
+      \verb{urlraw}
+      \verb https://doi.org/10.7551/mitpress/5704.003.0011
+      \endverb
+      \verb{url}
+      \verb https://doi.org/10.7551/mitpress/5704.003.0011
+      \endverb
     \endentry
     \entry{abbott2000synaptic}{article}{}
       \name{author}{2}{}{%
@@ -719,7 +746,7 @@
            givenun=0}}%
       }
       \list{publisher}{1}{%
-        {Cold Spring Harbor Laboratory}%
+        {Nature Publishing Group}%
       }
       \strng{namehash}{00ca455a1cf055cf86188b18c0f3409e}
       \strng{fullhash}{abd33dc860fad2834e45fc40cbd7372c}
@@ -733,11 +760,13 @@
       \field{labeldatesource}{year}
       \field{labelnamesource}{author}
       \field{labeltitlesource}{title}
-      \field{journaltitle}{bioRxiv}
+      \field{journaltitle}{Nature Communications}
+      \field{number}{1}
       \field{title}{A solution to the learning dilemma for recurrent networks of spiking neurons}
+      \field{volume}{11}
       \field{year}{2020}
-      \field{pages}{738385}
-      \range{pages}{1}
+      \field{pages}{1\bibrangedash 15}
+      \range{pages}{15}
     \endentry
     \entry{benda2003universal}{article}{}
       \name{author}{2}{}{%
@@ -1217,7 +1246,7 @@
       \field{labeldatesource}{year}
       \field{labelnamesource}{author}
       \field{labeltitlesource}{title}
-      \field{journaltitle}{Nature neuroscience}
+      \field{journaltitle}{Nature Neuroscience}
       \field{number}{3}
       \field{title}{Connectivity reflects coding: a model of voltage-based STDP with homeostasis}
       \field{volume}{13}
@@ -1396,61 +1425,13 @@
       \field{labeldatesource}{year}
       \field{labelnamesource}{author}
       \field{labeltitlesource}{title}
-      \field{journaltitle}{Ieee Micro}
+      \field{journaltitle}{IEEE Micro}
       \field{number}{1}
       \field{title}{Loihi: A neuromorphic manycore processor with on-chip learning}
       \field{volume}{38}
       \field{year}{2018}
       \field{pages}{82\bibrangedash 99}
       \range{pages}{18}
-    \endentry
-    \entry{deiss1999pulse}{article}{}
-      \name{author}{4}{}{%
-        {{uniquename=0,uniquepart=base,hash=d058fca1b58e3697ff8f62ad4295f38d}{%
-           family={Deiss},
-           familyi={D\bibinitperiod},
-           given={Stephen\bibnamedelima R},
-           giveni={S\bibinitperiod\bibinitdelim R\bibinitperiod},
-           givenun=0}}%
-        {{uniquename=0,uniquepart=base,hash=5776c7c38f1a66fa052e9f0217e6be09}{%
-           family={Douglas},
-           familyi={D\bibinitperiod},
-           given={Rodney\bibnamedelima J},
-           giveni={R\bibinitperiod\bibinitdelim J\bibinitperiod},
-           givenun=0}}%
-        {{uniquename=0,uniquepart=base,hash=ddcc8bf02804549213789de6f8e7ae25}{%
-           family={Whatley},
-           familyi={W\bibinitperiod},
-           given={Adrian\bibnamedelima M},
-           giveni={A\bibinitperiod\bibinitdelim M\bibinitperiod},
-           givenun=0}}%
-        {{uniquename=0,uniquepart=base,hash=4f41c643fa88ae04a3d7a3d8f46d0ca0}{%
-           family={Maass},
-           familyi={M\bibinitperiod},
-           given={W},
-           giveni={W\bibinitperiod},
-           givenun=0}}%
-      }
-      \list{publisher}{1}{%
-        {Citeseer}%
-      }
-      \strng{namehash}{44be48289d4bb3b92fdbdcc0f4780bc7}
-      \strng{fullhash}{56aba2381e7b689bff210437919f3602}
-      \strng{bibnamehash}{44be48289d4bb3b92fdbdcc0f4780bc7}
-      \strng{authorbibnamehash}{44be48289d4bb3b92fdbdcc0f4780bc7}
-      \strng{authornamehash}{44be48289d4bb3b92fdbdcc0f4780bc7}
-      \strng{authorfullhash}{56aba2381e7b689bff210437919f3602}
-      \field{sortinit}{D}
-      \field{sortinithash}{2ef1bd9a78cc71eb74d7231c635177b8}
-      \field{extradatescope}{labelyear}
-      \field{labeldatesource}{year}
-      \field{labelnamesource}{author}
-      \field{labeltitlesource}{title}
-      \field{journaltitle}{Pulsed neural networks}
-      \field{title}{A pulse-coded communications infrastructure for neuromorphic systems}
-      \field{year}{1999}
-      \field{pages}{157\bibrangedash 178}
-      \range{pages}{22}
     \endentry
     \entry{del1954quantal}{article}{}
       \name{author}{2}{}{%
@@ -1625,7 +1606,7 @@
       \field{labeldatesource}{year}
       \field{labelnamesource}{author}
       \field{labeltitlesource}{title}
-      \field{journaltitle}{Frontiers in computational neuroscience}
+      \field{journaltitle}{Frontiers in Computational Neuroscience}
       \field{title}{Unsupervised learning of digit recognition using spike-timing-dependent plasticity}
       \field{volume}{9}
       \field{year}{2015}
@@ -1668,7 +1649,7 @@
       \field{labeldatesource}{year}
       \field{labelnamesource}{author}
       \field{labeltitlesource}{title}
-      \field{journaltitle}{PloS one}
+      \field{journaltitle}{PloS One}
       \field{number}{11}
       \field{title}{Unsupervised speech recognition through spike-timing-dependent plasticity in a convolutional spiking neural network}
       \field{volume}{13}
@@ -1676,7 +1657,7 @@
       \field{pages}{e0204596}
       \range{pages}{-1}
     \endentry
-    \entry{drachman2005we}{misc}{}
+    \entry{drachman2005we}{book}{}
       \name{author}{1}{}{%
         {{uniquename=0,uniquepart=base,hash=efd338305c817c157bd80cf6f0434d5a}{%
            family={Drachman},
@@ -1730,7 +1711,7 @@
       \field{title}{The brain explained}
       \field{year}{2000}
     \endentry
-    \entry{elbez2020progressive}{article}{}
+    \entry{elbez2020progressive}{unpublished}{}
       \name{author}{4}{}{%
         {{uniquename=0,uniquepart=base,hash=f787e80f5d8db340a0939e32c24f2934}{%
            family={Elbez},
@@ -1769,8 +1750,19 @@
       \field{labeldatesource}{year}
       \field{labelnamesource}{author}
       \field{labeltitlesource}{title}
-      \field{title}{Progressive Compression and Weight Reinforcement for Spiking Neural Networks}
+      \field{month}{6}
+      \field{note}{working paper or preprint}
+      \field{title}{{Progressive Compression and Weight Reinforcement for Spiking Neural Networks}}
       \field{year}{2020}
+      \verb{file}
+      \verb https://hal.archives-ouvertes.fr/hal-02737057/file/Final_backup.pdf
+      \endverb
+      \verb{urlraw}
+      \verb https://hal.archives-ouvertes.fr/hal-02737057
+      \endverb
+      \verb{url}
+      \verb https://hal.archives-ouvertes.fr/hal-02737057
+      \endverb
     \endentry
     \entry{engelhard2019specialized}{article}{}
       \true{moreauthor}
@@ -1958,7 +1950,7 @@
       \field{labeldatesource}{year}
       \field{labelnamesource}{author}
       \field{labeltitlesource}{title}
-      \field{journaltitle}{International journal of computer vision}
+      \field{journaltitle}{International Journal of Computer Vision}
       \field{number}{3}
       \field{title}{Action recognition using a bio-inspired feedforward spiking network}
       \field{volume}{82}
@@ -2075,7 +2067,7 @@
       \field{labeldatesource}{year}
       \field{labelnamesource}{author}
       \field{labeltitlesource}{title}
-      \field{title}{Speech Processing for Machine Learning: Filter banks, Mel-Frequency Cepstral Coefficients (MFCCs) and What's In-Between}
+      \field{title}{Speech processing for machine learning: filter banks, mel-frequency cepstral coefficients (MFCCs) and what's in-between}
       \field{year}{2016}
       \verb{urlraw}
       \verb https://haythamfayek.com/2016/04/21/speech-processing-for-machine-learning.html
@@ -2275,7 +2267,7 @@
       \field{labeldatesource}{year}
       \field{labelnamesource}{author}
       \field{labeltitlesource}{title}
-      \field{booktitle}{Competition and cooperation in neural nets}
+      \field{booktitle}{Competition and Cooperation in Neural Nets}
       \field{title}{Neocognitron: A self-organizing neural network model for a mechanism of visual pattern recognition}
       \field{year}{1982}
       \field{pages}{267\bibrangedash 285}
@@ -2303,7 +2295,7 @@
       \field{labelnamesource}{author}
       \field{labeltitlesource}{title}
       \field{journaltitle}{arXiv preprint arXiv:1802.00748}
-      \field{title}{Short-term memory of deep rnn}
+      \field{title}{Short-term memory of deep RNN}
       \field{year}{2018}
     \endentry
     \entry{gallicchio2017deep}{article}{}
@@ -2417,7 +2409,7 @@
            givenun=0}}%
       }
       \list{publisher}{1}{%
-        {Cambridge university press}%
+        {Cambridge University Press}%
       }
       \strng{namehash}{a47811b09f4699d71ab7a33b53073260}
       \strng{fullhash}{a47811b09f4699d71ab7a33b53073260}
@@ -2482,7 +2474,7 @@
       \field{labeldatesource}{year}
       \field{labelnamesource}{author}
       \field{labeltitlesource}{title}
-      \field{journaltitle}{Frontiers in neural circuits}
+      \field{journaltitle}{Frontiers in Neural Circuits}
       \field{title}{Eligibility traces and plasticity on behavioral time scales: experimental support of neohebbian three-factor learning rules}
       \field{volume}{12}
       \field{year}{2018}
@@ -2591,7 +2583,7 @@
            givenun=1}}%
       }
       \list{organization}{1}{%
-        {Ieee}%
+        {IEEE}%
       }
       \strng{namehash}{4f389071d4a8c288b23b12fb452cbb6a}
       \strng{fullhash}{4f389071d4a8c288b23b12fb452cbb6a}
@@ -2641,7 +2633,7 @@
       \field{labeldatesource}{year}
       \field{labelnamesource}{author}
       \field{labeltitlesource}{title}
-      \field{journaltitle}{Neural networks}
+      \field{journaltitle}{Neural Networks}
       \field{number}{5-6}
       \field{title}{Framewise phoneme classification with bidirectional LSTM and other neural network architectures}
       \field{volume}{18}
@@ -3018,7 +3010,7 @@
       \field{labeldatesource}{year}
       \field{labelnamesource}{author}
       \field{labeltitlesource}{title}
-      \field{journaltitle}{Proceedings of the national academy of sciences}
+      \field{journaltitle}{Proceedings of the National Academy of Sciences}
       \field{number}{8}
       \field{title}{Neural networks and physical systems with emergent collective computational abilities}
       \field{volume}{79}
@@ -3415,7 +3407,7 @@
       \field{labeldatesource}{year}
       \field{labelnamesource}{author}
       \field{labeltitlesource}{title}
-      \field{journaltitle}{Nano letters}
+      \field{journaltitle}{Nano Letters}
       \field{number}{4}
       \field{title}{Nanoscale memristor device as synapse in neuromorphic systems}
       \field{volume}{10}
@@ -3848,7 +3840,7 @@
            givenun=0}}%
       }
       \list{publisher}{1}{%
-        {Brown university press}%
+        {Brown University Press}%
       }
       \strng{namehash}{2c1c320052caf189a132824c9570395e}
       \strng{fullhash}{2c1c320052caf189a132824c9570395e}
@@ -4032,7 +4024,7 @@
       \field{labeldatesource}{year}
       \field{labelnamesource}{author}
       \field{labeltitlesource}{title}
-      \field{journaltitle}{The handbook of brain theory and neural networks}
+      \field{journaltitle}{The Handbook of Brain Theory and Neural Networks}
       \field{number}{10}
       \field{title}{Convolutional networks for images, speech, and time series}
       \field{volume}{3361}
@@ -4255,7 +4247,7 @@
       \field{labeldatesource}{year}
       \field{labelnamesource}{author}
       \field{labeltitlesource}{title}
-      \field{journaltitle}{Nature communications}
+      \field{journaltitle}{Nature Communications}
       \field{number}{1}
       \field{title}{Random synaptic feedback weights support error backpropagation for deep learning}
       \field{volume}{7}
@@ -4495,7 +4487,7 @@
       \field{labeldatesource}{year}
       \field{labelnamesource}{author}
       \field{labeltitlesource}{title}
-      \field{journaltitle}{Frontiers in neuroscience}
+      \field{journaltitle}{Frontiers in Neuroscience}
       \field{title}{Spatial properties of STDP in a self-learning spiking neural network enable controlling a mobile robot}
       \field{volume}{14}
       \field{year}{2020}
@@ -4786,7 +4778,7 @@
       \field{pages}{668\bibrangedash 673}
       \range{pages}{6}
     \endentry
-    \entry{minsky1969introduction}{article}{}
+    \entry{minsky2017perceptrons}{book}{}
       \name{author}{2}{}{%
         {{uniquename=0,uniquepart=base,hash=2fe335dc52e059141e41e4fada160d64}{%
            family={Minsky},
@@ -4794,28 +4786,30 @@
            given={Marvin},
            giveni={M\bibinitperiod},
            givenun=0}}%
-        {{uniquename=0,uniquepart=base,hash=1c2a469ce4211d0d3369b692b74ee471}{%
+        {{uniquename=0,uniquepart=base,hash=377246726955c2557c997054023fdcd1}{%
            family={Papert},
            familyi={P\bibinitperiod},
-           given={Seymour},
-           giveni={S\bibinitperiod},
+           given={Seymour\bibnamedelima A},
+           giveni={S\bibinitperiod\bibinitdelim A\bibinitperiod},
            givenun=0}}%
       }
-      \strng{namehash}{b50bea5dca97e316780bd758a3cc428e}
-      \strng{fullhash}{b50bea5dca97e316780bd758a3cc428e}
-      \strng{bibnamehash}{b50bea5dca97e316780bd758a3cc428e}
-      \strng{authorbibnamehash}{b50bea5dca97e316780bd758a3cc428e}
-      \strng{authornamehash}{b50bea5dca97e316780bd758a3cc428e}
-      \strng{authorfullhash}{b50bea5dca97e316780bd758a3cc428e}
+      \list{publisher}{1}{%
+        {MIT press}%
+      }
+      \strng{namehash}{e9afa9755133a3fa1c03741bc9994437}
+      \strng{fullhash}{e9afa9755133a3fa1c03741bc9994437}
+      \strng{bibnamehash}{e9afa9755133a3fa1c03741bc9994437}
+      \strng{authorbibnamehash}{e9afa9755133a3fa1c03741bc9994437}
+      \strng{authornamehash}{e9afa9755133a3fa1c03741bc9994437}
+      \strng{authorfullhash}{e9afa9755133a3fa1c03741bc9994437}
       \field{sortinit}{M}
       \field{sortinithash}{cfd219b90152c06204fab207bc6c7cab}
       \field{extradatescope}{labelyear}
       \field{labeldatesource}{year}
       \field{labelnamesource}{author}
       \field{labeltitlesource}{title}
-      \field{journaltitle}{Cambridge tiass., HIT}
-      \field{title}{An introduction to computational geometry}
-      \field{year}{1969}
+      \field{title}{Perceptrons: An introduction to computational geometry}
+      \field{year}{2017}
     \endentry
     \entry{mitra2008real}{article}{}
       \name{author}{3}{}{%
@@ -4853,7 +4847,7 @@
       \field{labeldatesource}{year}
       \field{labelnamesource}{author}
       \field{labeltitlesource}{title}
-      \field{journaltitle}{IEEE transactions on biomedical circuits and systems}
+      \field{journaltitle}{IEEE Transactions on Biomedical Circuits and Systems}
       \field{number}{1}
       \field{title}{Real-time classification of complex patterns using spike-based learning in neuromorphic VLSI}
       \field{volume}{3}
@@ -4861,7 +4855,7 @@
       \field{pages}{32\bibrangedash 42}
       \range{pages}{11}
     \endentry
-    \entry{monroe2014neuromorphic}{misc}{}
+    \entry{monroe2014neuromorphic}{article}{}
       \name{author}{1}{}{%
         {{uniquename=0,uniquepart=base,hash=637a9269ab54df2a4a501333b86a8c2f}{%
            family={Monroe},
@@ -4870,8 +4864,11 @@
            giveni={D\bibinitperiod},
            givenun=0}}%
       }
+      \list{location}{1}{%
+        {New York, NY, USA}%
+      }
       \list{publisher}{1}{%
-        {ACM New York, NY, USA}%
+        {Association for Computing Machinery}%
       }
       \strng{namehash}{637a9269ab54df2a4a501333b86a8c2f}
       \strng{fullhash}{637a9269ab54df2a4a501333b86a8c2f}
@@ -4885,8 +4882,25 @@
       \field{labeldatesource}{year}
       \field{labelnamesource}{author}
       \field{labeltitlesource}{title}
-      \field{title}{Neuromorphic computing gets ready for the (really) big time}
+      \field{abstract}{A technology inspired by biological principles but 'steamrolled for decades' prepares to take off as Moore's Law approaches its long-anticipated end.}
+      \field{issn}{0001-0782}
+      \field{journaltitle}{Commun. ACM}
+      \field{month}{6}
+      \field{number}{6}
+      \field{title}{Neuromorphic Computing Gets Ready for the (Really) Big Time}
+      \field{volume}{57}
       \field{year}{2014}
+      \field{pages}{13\bibrangedash 15}
+      \range{pages}{3}
+      \verb{doi}
+      \verb 10.1145/2601069
+      \endverb
+      \verb{urlraw}
+      \verb https://doi.org/10.1145/2601069
+      \endverb
+      \verb{url}
+      \verb https://doi.org/10.1145/2601069
+      \endverb
     \endentry
     \entry{neftci2018data}{article}{}
       \name{author}{1}{}{%
@@ -4961,7 +4975,7 @@
       \field{labeldatesource}{year}
       \field{labelnamesource}{author}
       \field{labeltitlesource}{title}
-      \field{journaltitle}{Frontiers in neuroscience}
+      \field{journaltitle}{Frontiers in Neuroscience}
       \field{title}{Event-driven random back-propagation: Enabling neuromorphic deep learning machines}
       \field{volume}{11}
       \field{year}{2017}
@@ -4998,7 +5012,7 @@
       \field{labeldatesource}{year}
       \field{labelnamesource}{author}
       \field{labeltitlesource}{title}
-      \field{journaltitle}{Nature communications}
+      \field{journaltitle}{Nature Communications}
       \field{number}{1}
       \field{title}{Supervised learning in spiking neural networks with FORCE training}
       \field{volume}{8}
@@ -5222,69 +5236,67 @@
       \field{pages}{2694\bibrangedash 2719}
       \range{pages}{26}
     \endentry
-    \entry{purves2008neuroscience}{article}{}
-      \name{author}{7}{}{%
+    \entry{purves2008neuroscience}{incollection}{}
+      \name{author}{1}{}{%
         {{uniquename=0,uniquepart=base,hash=930c23fd5b2003cda9e47f0bee1a2090}{%
            family={Purves},
            familyi={P\bibinitperiod},
            given={Dale},
            giveni={D\bibinitperiod},
            givenun=0}}%
-        {{uniquename=0,uniquepart=base,hash=51d6f61fb1cad399ad4c964e3b73d225}{%
+      }
+      \name{editor}{6}{}{%
+        {{hash=51d6f61fb1cad399ad4c964e3b73d225}{%
            family={Augustine},
            familyi={A\bibinitperiod},
            given={George\bibnamedelima J},
-           giveni={G\bibinitperiod\bibinitdelim J\bibinitperiod},
-           givenun=0}}%
-        {{uniquename=0,uniquepart=base,hash=00efc09ca9ae84eca1e409c743b8ab52}{%
+           giveni={G\bibinitperiod\bibinitdelim J\bibinitperiod}}}%
+        {{hash=00efc09ca9ae84eca1e409c743b8ab52}{%
            family={Fitzpatrick},
            familyi={F\bibinitperiod},
            given={David},
-           giveni={D\bibinitperiod},
-           givenun=0}}%
-        {{uniquename=0,uniquepart=base,hash=43a7e03f394bd61987a94ee64867d712}{%
+           giveni={D\bibinitperiod}}}%
+        {{hash=43a7e03f394bd61987a94ee64867d712}{%
            family={Hall},
            familyi={H\bibinitperiod},
            given={William\bibnamedelima C},
-           giveni={W\bibinitperiod\bibinitdelim C\bibinitperiod},
-           givenun=0}}%
-        {{uniquename=0,uniquepart=base,hash=1e58c552667ea10f3c8a00d90000448d}{%
+           giveni={W\bibinitperiod\bibinitdelim C\bibinitperiod}}}%
+        {{hash=1e58c552667ea10f3c8a00d90000448d}{%
            family={LaMantia},
            familyi={L\bibinitperiod},
            given={Anthony-Samuel},
-           giveni={A\bibinithyphendelim S\bibinitperiod},
-           givenun=0}}%
-        {{uniquename=0,uniquepart=base,hash=4900f753e6bdbcc63b7890b4c7cef7ec}{%
+           giveni={A\bibinithyphendelim S\bibinitperiod}}}%
+        {{hash=4900f753e6bdbcc63b7890b4c7cef7ec}{%
            family={McNamara},
            familyi={M\bibinitperiod},
            given={James\bibnamedelima O},
-           giveni={J\bibinitperiod\bibinitdelim O\bibinitperiod},
-           givenun=0}}%
-        {{uniquename=0,uniquepart=base,hash=1eea49f12ae7207944efa47073afe1a2}{%
+           giveni={J\bibinitperiod\bibinitdelim O\bibinitperiod}}}%
+        {{hash=1eea49f12ae7207944efa47073afe1a2}{%
            family={White},
            familyi={W\bibinitperiod},
            given={Leonard\bibnamedelima E},
-           giveni={L\bibinitperiod\bibinitdelim E\bibinitperiod},
-           givenun=0}}%
+           giveni={L\bibinitperiod\bibinitdelim E\bibinitperiod}}}%
       }
-      \strng{namehash}{de740c4aeeab9a23348f133c6d32d2dc}
-      \strng{fullhash}{6ce9ca8dbeb5fcc6860a363fc0bf82b1}
-      \strng{bibnamehash}{de740c4aeeab9a23348f133c6d32d2dc}
-      \strng{authorbibnamehash}{de740c4aeeab9a23348f133c6d32d2dc}
-      \strng{authornamehash}{de740c4aeeab9a23348f133c6d32d2dc}
-      \strng{authorfullhash}{6ce9ca8dbeb5fcc6860a363fc0bf82b1}
+      \list{publisher}{1}{%
+        {Sinauer Associates}%
+      }
+      \strng{namehash}{930c23fd5b2003cda9e47f0bee1a2090}
+      \strng{fullhash}{930c23fd5b2003cda9e47f0bee1a2090}
+      \strng{bibnamehash}{930c23fd5b2003cda9e47f0bee1a2090}
+      \strng{authorbibnamehash}{930c23fd5b2003cda9e47f0bee1a2090}
+      \strng{authornamehash}{930c23fd5b2003cda9e47f0bee1a2090}
+      \strng{authorfullhash}{930c23fd5b2003cda9e47f0bee1a2090}
+      \strng{editorbibnamehash}{a49e2c8c69e6ae40ae5d0aee1c938668}
+      \strng{editornamehash}{a49e2c8c69e6ae40ae5d0aee1c938668}
+      \strng{editorfullhash}{4241634c72f80d2502c042bd49735a7d}
       \field{sortinit}{P}
       \field{sortinithash}{8d51b3d5b78d75b54308d706b9bbe285}
       \field{extradatescope}{labelyear}
       \field{labeldatesource}{year}
       \field{labelnamesource}{author}
       \field{labeltitlesource}{title}
-      \field{journaltitle}{Sunderland, Mass.: Sinauer. xvii}
-      \field{title}{Neuroscience. 4th}
-      \field{volume}{857}
+      \field{title}{Neuroscience (4th ed.)}
       \field{year}{2008}
-      \field{pages}{49}
-      \range{pages}{1}
     \endentry
     \entry{raffel2019exploring}{article}{}
       \name{author}{9}{}{%
@@ -5557,7 +5569,7 @@
       \field{labeldatesource}{year}
       \field{labelnamesource}{author}
       \field{labeltitlesource}{title}
-      \field{journaltitle}{Neural networks}
+      \field{journaltitle}{Neural Networks}
       \field{number}{4-6}
       \field{title}{Dopamine-dependent plasticity of corticostriatal synapses}
       \field{volume}{15}
@@ -5589,7 +5601,7 @@
       \field{labeldatesource}{year}
       \field{labelnamesource}{author}
       \field{labeltitlesource}{title}
-      \field{journaltitle}{Trends in neurosciences}
+      \field{journaltitle}{Trends in Neurosciences}
       \field{number}{6}
       \field{title}{Dissecting the diversity of midbrain dopamine neurons}
       \field{volume}{36}
@@ -5880,7 +5892,7 @@
       \field{labeldatesource}{year}
       \field{labelnamesource}{author}
       \field{labeltitlesource}{title}
-      \field{journaltitle}{Neural computation}
+      \field{journaltitle}{Neural Computation}
       \field{number}{3}
       \field{title}{Deep learning with dynamic spiking neurons and fixed feedback weights}
       \field{volume}{29}
@@ -6381,7 +6393,7 @@
       \field{labeldatesource}{year}
       \field{labelnamesource}{author}
       \field{labeltitlesource}{title}
-      \field{journaltitle}{Frontiers in neuroscience}
+      \field{journaltitle}{Frontiers in Neuroscience}
       \field{title}{Solving the credit assignment problem with the prefrontal cortex}
       \field{volume}{12}
       \field{year}{2018}
@@ -6643,7 +6655,7 @@
       \field{labeldatesource}{year}
       \field{labelnamesource}{author}
       \field{labeltitlesource}{title}
-      \field{booktitle}{International conference on neural information processing}
+      \field{booktitle}{International Conference on Neural Information Processing}
       \field{title}{Bio-inspired multi-layer spiking neural network extracts discriminative features from speech signals}
       \field{year}{2017}
       \field{pages}{899\bibrangedash 908}
@@ -6691,7 +6703,7 @@
       \field{labeldatesource}{year}
       \field{labelnamesource}{author}
       \field{labeltitlesource}{title}
-      \field{journaltitle}{PLoS computational biology}
+      \field{journaltitle}{PLoS Computational Biology}
       \field{number}{6}
       \field{title}{Learning universal computations with spikes}
       \field{volume}{12}
@@ -6907,7 +6919,7 @@
       \field{labeldatesource}{year}
       \field{labelnamesource}{author}
       \field{labeltitlesource}{title}
-      \field{journaltitle}{Advanced materials}
+      \field{journaltitle}{Advanced Materials}
       \field{number}{38}
       \field{title}{Photonic synapses based on inorganic perovskite quantum dots for neuromorphic computing}
       \field{volume}{30}
@@ -6995,7 +7007,7 @@
       \field{labeldatesource}{year}
       \field{labelnamesource}{author}
       \field{labeltitlesource}{title}
-      \field{journaltitle}{Nature materials}
+      \field{journaltitle}{Nature Materials}
       \field{number}{1}
       \field{title}{Memristors with diffusive dynamics as synaptic emulators for neuromorphic computing}
       \field{volume}{16}
@@ -7003,7 +7015,7 @@
       \field{pages}{101\bibrangedash 108}
       \range{pages}{8}
     \endentry
-    \entry{weidel2020unsupervised}{article}{}
+    \entry{weidel2021unsupervised}{article}{}
       \name{author}{3}{}{%
         {{uniquename=0,uniquepart=base,hash=76bba3b62470aa88aa07fdb43eda6cd3}{%
            family={Weidel},
@@ -7025,7 +7037,7 @@
            givenun=0}}%
       }
       \list{publisher}{1}{%
-        {Cold Spring Harbor Laboratory}%
+        {Frontiers}%
       }
       \strng{namehash}{4f828fa1b72b83af63add563d5418921}
       \strng{fullhash}{4f828fa1b72b83af63add563d5418921}
@@ -7039,9 +7051,12 @@
       \field{labeldatesource}{year}
       \field{labelnamesource}{author}
       \field{labeltitlesource}{title}
-      \field{journaltitle}{bioRxiv}
+      \field{journaltitle}{Frontiers in Computational Neuroscience}
       \field{title}{Unsupervised learning and clustered connectivity enhance reinforcement learning in spiking neural networks}
-      \field{year}{2020}
+      \field{volume}{15}
+      \field{year}{2021}
+      \field{pages}{18}
+      \range{pages}{1}
     \endentry
     \entry{whittington2019theories}{article}{}
       \name{author}{2}{}{%
@@ -7073,7 +7088,7 @@
       \field{labeldatesource}{year}
       \field{labelnamesource}{author}
       \field{labeltitlesource}{title}
-      \field{journaltitle}{Trends in cognitive sciences}
+      \field{journaltitle}{Trends in Cognitive Sciences}
       \field{number}{3}
       \field{title}{Theories of error back-propagation in the brain}
       \field{volume}{23}
@@ -7382,7 +7397,7 @@
       \field{labeldatesource}{year}
       \field{labelnamesource}{author}
       \field{labeltitlesource}{title}
-      \field{journaltitle}{IEEE transactions on neural networks and learning systems}
+      \field{journaltitle}{IEEE Transactions on Neural Networks and Learning Systems}
       \field{number}{1}
       \field{title}{Scalable digital neuromorphic architecture for large-scale biophysically meaningful neural network with multi-compartment neurons}
       \field{volume}{31}
@@ -7448,7 +7463,7 @@
       \field{labelnamesource}{author}
       \field{labeltitlesource}{title}
       \field{journaltitle}{IEEE Transactions on Cybernetics}
-      \field{title}{Real-Time Neuromorphic System for Large-Scale Conductance-Based Spiking Neural Networks}
+      \field{title}{Real-time neuromorphic system for large-scale conductance-based spiking neural networks}
       \field{volume}{49}
       \field{year}{2019}
       \field{pages}{2490\bibrangedash 2503}
@@ -7534,7 +7549,7 @@
       \field{labeldatesource}{year}
       \field{labelnamesource}{author}
       \field{labeltitlesource}{title}
-      \field{journaltitle}{Nature communications}
+      \field{journaltitle}{Nature Communications}
       \field{number}{1}
       \field{title}{Face classification using electronic synapses}
       \field{volume}{8}
@@ -7634,7 +7649,7 @@
       \field{labeldatesource}{year}
       \field{labelnamesource}{author}
       \field{labeltitlesource}{title}
-      \field{journaltitle}{Neural computation}
+      \field{journaltitle}{Neural Computation}
       \field{number}{6}
       \field{title}{Superspike: Supervised learning in multilayer spiking neural networks}
       \field{volume}{30}
@@ -7678,7 +7693,7 @@
       \field{labeldatesource}{year}
       \field{labelnamesource}{author}
       \field{labeltitlesource}{title}
-      \field{journaltitle}{Current opinion in neurobiology}
+      \field{journaltitle}{Current Opinion in Neurobiology}
       \field{title}{The temporal paradox of Hebbian learning and homeostatic plasticity}
       \field{volume}{43}
       \field{year}{2017}
@@ -7858,7 +7873,7 @@
       \field{labeldatesource}{year}
       \field{labelnamesource}{author}
       \field{labeltitlesource}{title}
-      \field{booktitle}{2017 IEEE international conference on robotics and automation (ICRA)}
+      \field{booktitle}{2017 IEEE International Conference on Robotics and Automation (ICRA)}
       \field{title}{Target-driven visual navigation in indoor scenes using deep reinforcement learning}
       \field{year}{2017}
       \field{pages}{3357\bibrangedash 3364}

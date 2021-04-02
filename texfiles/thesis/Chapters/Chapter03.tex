@@ -5,7 +5,7 @@
 
 	\subsection{The TIMIT speech corpus}
 		TIMIT is a speech corpus that contains phonemically transcribed speech~\citep{garofolo1993darpa}, comprising 6300 sentences, 10 spoken by each of the 630 speakers.
-		To include a broad range of dialects all speakers lived in 8 different geographical regions in the United States (as categorized in \citet{labov2008atlas}) during their childhood years.
+		To include a broad range of dialects these speakers are sampled from 8 different geographical regions in the United States (as categorized in \citet{labov2008atlas}) in which they lived during their childhood years.
 		Table~\ref{tab:dialects} breaks down the precise composition of the dialect distribution.
 
 		\begin{table}[ht]
@@ -74,7 +74,7 @@
 		Consequently, the test set comprises 192 sentences ($24\times(5+3)$) and was selected such that it contains at least one occurrence of each phoneme.
 		In this report, the TIMIT core test set is used, thereby meeting the criteria listed above.
 
-		The remaining 4096 sentences are randomly partitioned into 3696 training sentences and 400 validation sentences.
+		The remaining 4096 sentences are randomly partitioned into 3696 training sentences and 400 validation sentences in this research (the TIMIT corpus contains no fixed training/validation set partition).
 
 	\subsection{Engineering features}
 
@@ -141,7 +141,7 @@
 				X_k = \left|\sum_{n=0}^{N-1}x_i(n)\cdot e^{-\frac{i2\pi}{N}kn}\right|,
 			\end{equation}
 			where $K=512$.
-			This yields the magnitudes of the DCT of the frames.
+			This yields the magnitudes of the discrete cosine transform (DCT) of the frames.
 
 			The power spectra are obtained using the equation
 			\begin{equation}\label{eq:powframes}
@@ -152,7 +152,7 @@
 			\begin{figure}[ht]
 				\centering
 			    \includegraphics[width=0.45\linewidth]{gfx/powframes}
-			    \caption{The power spectrum of a frame.}
+			    \caption{The power spectra of a sentence.}
 			    \label{fig:powframes}
 			\end{figure}
 
@@ -206,12 +206,12 @@
 			    \label{fig:filterbank}
 			\end{figure}
 
-			After applying the filterbank to the short-term power spectrum, a spectrogram $S$ of the frame (see \eg~Figure \ref{fig:spectrogram}) is obtained.
+			After applying the filterbank to the short-term power spectrum, a spectrogram $S$ of the frame sequence (see \eg~Figure \ref{fig:spectrogram}) is obtained.
 
 			\begin{figure}[ht]
 				\centering
 			    \includegraphics[width=\linewidth]{gfx/spectrogram}
-			    \caption{An example of a frame spectrogram.}
+			    \caption{An example of the spectrogram of a sentence.}
 			    \label{fig:spectrogram}
 			\end{figure}
 
@@ -220,8 +220,19 @@
 			Coefficients in the spectrograms are strongly correlated, which would negatively impact the learning performance of the model.
 			Therefore, the DCT is applied again to decorrelate the coefficients and obtain the power cepstrum $C$ of the speech frame:
 
+			% \begin{equation}
+			% 	C(n) = \left|\sum_{n=0}^{N-1}S(n)\cdot e^{-\frac{i2\pi}{N}kn}\right|.
+			% \end{equation}
+
 			\begin{equation}
-				C(n) = \left|\sum_{n=0}^{N-1}S(n)\cdot e^{-\frac{i2\pi}{N}kn}\right|.
+				C_k = 2c\sum^{N-1}_{n=0}S\left(n\right)\cos\left(\frac{\pi k\left(2n+1\right)}{2N}\right),
+			\end{equation}
+			where $c$ is a scaling factor that makes the matrix of coefficients orthonormal:
+			\begin{equation}
+			c = \begin{cases}
+				\sqrt{\frac{1}{4N}} & \mbox{if } k = 0,\\
+				\sqrt{\frac{1}{2N}} & \mbox{otherwise.}
+			\end{cases}
 			\end{equation}
 
 			The first coefficient in $C$ is discarded, because it indicates the average power of the input signal and therefore carries little meaning.
@@ -236,7 +247,7 @@
 			    {\includegraphics[width=\linewidth]{gfx/signal}} \\
 			    \subfloat[MFCCs centered around 0 per channel. Note that these MFCCs are standardized channel-wise over the full training dataset.]
 			    {\includegraphics[width=\linewidth]{gfx/norm_mfcc}} \\
-			    \subfloat[Target signal encoded as a one-hot vector changing over time.]
+			    \subfloat[Target signal encoded as a one-hot vector changing over time. The order of phones along the one-hot vector corresponds to the order in which they are encountered in processing the dataset. This particular example shows a pattern because it is the first processed sentence in the training set.]
 			    {\includegraphics[width=\linewidth]{gfx/target}}
 			    \caption[Input/features/targets]{An alignment of a sample signal with its MFCCs features and target phones.}\label{fig:source_mfcc_target}
 			\end{figure}
@@ -257,7 +268,7 @@
 
 \section{Enhancing e-prop}
 
-	This report examines two types of enhancements to applying the e-prop learning algorithm on the TIMIT dataset.
+	In this report, two types of enhancements to apply the e-prop learning algorithm on the TIMIT dataset are examined.
 
 	The first type is the effect of the neuron model; particularly, the effect of including STDP behavior is analyzed.
 	The second type is the effect of a multi-layered architecture.
@@ -335,7 +346,9 @@
 			\begin{equation}\label{eq:ml_stdpalifV}
 	        v^{t+1}_{rj} = \alpha v_{rj}^t + \sum_{i\neq j}W^\text{rec}_{rji}z_i^t + \sum_i W^\text{in}_{rji}I -z^t_{rj}\alpha v^t_{rj} - z_{rj}^{t-\delta t_\text{ref}}\alpha v^t_{rj},
 	        \end{equation}
-	        where, again, $I$ is the network input if $r=1$, otherwise it is the observable state of the preceding layer (see Equation \ref{eq:inpVml}).
+	        where, again, $I$ is the network input if $r=1$, otherwise it is the observable state of neuron $i$ in the preceding layer (see Equation \ref{eq:inpVml}).
+	        Recall that a neuron cannot spike for $T^\text{refr}$ time steps after its last spike---therefore, the neuron is still suppressed at time step $t-\delta t_\text{ref}$ and hence the fourth and fifth terms $-z^t_{rj}\alpha v^t_{rj}$ and $- z_{rj}^{t-\delta t_\text{ref}}\alpha v^t_{rj}$ cannot simultaneously be nonzero.
+	        Note also that Equation \ref{eq:ml_stdpalifV} will not necessarily set the activation value precisely to 0 at spike time and after the refractory time, as only the activation that caused the neuron to spike will be subtracted, and the new input values described in its second and third term will be added to the new activation value.
 
 	        The hidden state derivative changes accordingly:
 	        \begin{align}
@@ -384,7 +397,7 @@
 
 			The standard system of equations of the Izhikevich neuron is described by
 			\begin{align}
-			v' &= 0.04v^2 + 5v + 140 - u + I\\
+			v' &= 0.04v^2 + 5v + 140 - a + I\\
 			a' &= 0.004v - 0.02a,
 			\end{align}
 			where $v'$ and $a'$ are the values of the activation value $v$ and recovery variable $a$ at the next time point, and $I$ is the current input to the neuron.
@@ -396,8 +409,8 @@
 			such that when a spike event occurs (\ie, $z^t_{rj} = 1$), the activation value is reset to its baseline value of $-65$, and the recovery variable increases by 2.
 			We describe this ``self-resetting'' Izhikevich neuron in the context of multi-layer e-prop as follows:
 			\begin{align}
-			v^{t+1}_{rj} &= \tilde{v}^t_{rj} + 0.04\left(\tilde{v}^t_{rj}\right)^2 + 5\tilde{v}^t_{rj} + 140 - \tilde{u}^t_{rj} + I^t_{rj}\\
-			u^{t+1}_{rj} &= \tilde{u}^t_{rj} + 0.004\tilde{v}^t_{rj}-0.02\tilde{u}^t_{rj}.
+			v^{t+1}_{rj} &= \tilde{v}^t_{rj} + 0.04\left(\tilde{v}^t_{rj}\right)^2 + 5\tilde{v}^t_{rj} + 140 - \tilde{a}^t_{rj} + I^t_{rj}\\
+			a^{t+1}_{rj} &= \tilde{a}^t_{rj} + 0.004\tilde{v}^t_{rj}-0.02\tilde{a}^t_{rj}.
 			\end{align}
 			The partial derivatives of the hidden state $\mathbf{h}^t_{rj}$ can then be computed:
 			\begin{align}
@@ -430,6 +443,14 @@
 	        \end{align}
 
 	    However, when inserting these equations in a single-synapse demo, the eligibility vector assumes extremely high or low values (see Figure \ref{fig:demo_izh}).
+
+		\begin{figure}[ht]
+		    \centering
+		    \includegraphics[width=\linewidth]{gfx/demo_izh}
+		    \caption[A single-synapse demo of the uncorrected Izhikevich neuron.]{A single-synapse demo of the uncorrected Izhikevich neuron. Note that $\epsilon^t_{ji, v}$ takes on extreme values and that the eligibility vector flips sign at any pair of spikes.}
+		    \label{fig:demo_izh}
+		\end{figure}
+
 	    This suggests that the Izhikevich neuron does not fit the e-prop framework well.
 	    In this report, this is corrected by clipping the value of $\epsilon^t_{ji,v}$ to $\left[-3, 3\right]$ and $\epsilon^t_{ji,a}$ to $\left[-0.005, 0.005\right]$.
 	    This correction yields the desired STDP behavior (see Figure \ref{fig:demo_izh_corrected}).
@@ -462,7 +483,14 @@
 		\end{equation}
 		is the running average spike frequency, where $z^{\text{total},t}$ accumulates spikes emitted by neuron $j$ in layer $r$ up to (and including) time step $t$.
 		Note that $z^{\text{total},0} = 0$, \ie, the accumulation resets at each new training sample.
-		By implementing this sum as a hidden variable, e-prop remains an online training algorithm when firing rate regularization is implemented.
+		By implementing this sum as a hidden variable, e-prop remains an online and local training algorithm when firing rate regularization is implemented.
+		Adhering to these two constraints supports the biological plausibility of the firing rate regularization term.
+		After the training sample, the effect of the firing rate regularization on the weight update is integrated.
+
+		Another possibility to compute the average firing rate would be to track an exponentially decaying firing rate.
+		This was not implemented in this research for the following two reasons. First, the effects of the firing rate regularization are integrated only at the end of a training sample (see Equation \ref{eq:deltareg}), likely causing any fluctuations of the average frequency over time to cancel each other out and result in an effectively similar regularization term as the current, non-decaying frequency calculation.
+		Second, since one of the objectives of this research is to reproduce results obtained \citet{bellec2020solution} and expand on that paper, the regularization term is kept as true to it as possible.
+		However, analyzing the effects of different firing rate regularization terms might be an interesting direction for future research.
 
 		To insert the regularization term into the e-prop framework, we compute the weight update that regularizes the firing rate toward $f^\text{target}$ through gradient descent, similarly to the main e-prop weight update (Equation \ref{eq:eprop_grd}):
 		\begin{equation}
@@ -476,7 +504,7 @@
 			\item It is more intuitive, as only the gradient of the firing rate is used to compute the weight update.
 		\end{enumerate}
 		We apply the weight update $\Delta W_{rji}$ of the regularization gradient using
-		\begin{equation}
+		\begin{equation}\label{eq:deltareg}
 		\Delta_\text{reg} W_{rji} = -\eta\ c_\text{reg}\sum_t\left(f^\text{target} - f^{\text{av}, t}_{rj}\right).
 		\end{equation}
 		Note that the regularization gradients can be combined and accumulated over time on the same synaptic variable as the normal gradients, facilitating practical implementation of the learning procedure in both software emulations and neuromorphic embeddings:

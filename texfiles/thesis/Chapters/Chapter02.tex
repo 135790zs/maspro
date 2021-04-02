@@ -2,7 +2,6 @@
 \chapter{Theoretical Framework}\label{ch:relatedwork}
 %************************************************
 
-% HERE. START FROM "where are the weight updates?"
 \section{Eligibility Propagation}
 
     \subsection{E-prop model}
@@ -88,7 +87,8 @@
                 \label{fig:simplealif}
             \end{figure}
 
-            In this paper, the LIF neuron is generalized as an ALIF neuron for which $\beta=0$, effectively canceling the effect of the threshold adaptation value $a^t_j$ on the observable state $z^t_j$ in Equation \ref{eq:alifZ}.
+            The LIF neuron is a spacial case of an ALIF neuron, for which $\beta=0$, effectively canceling the effect of the threshold adaptation value $a^t_j$ on the observable state $z^t_j$ in Equation \ref{eq:alifZ}.
+            From this point, subsequent references to LIF neurons will refer to this special case.
             Therefore, only the e-prop derivations for the ALIF neurons will be described in the following sections.
 
     \subsection{Network topology}
@@ -105,7 +105,7 @@
             \myfloatalign
             \includegraphics[trim=0 25cm 0 0, clip, width=\linewidth]{gfx/Singlelayer}
             \caption[Single-layer illustration.]{A basic illustration of a single-layer network architecture.
-            An input vector $\mathbf{x}^t$ at time step $t$ is fed to a pool of $N$ recurrent neurons with hidden states $\mathbf{h}^t$ and observable states $\mathbf{z}^t$ through input weights $\mathbf{W}^\text{in}$. The recurrent weights $\mathbf{W}^\text{rec}$ connect neurons with each other, but no self-loops exist. 25\% of these neurons is a LIF neuron (\ie, $\beta = 0$) and the others are ALIF neurons. The output weights $\mathbf{W}^\text{out}$ process the observable states of the neurons through a softmax function into a logits layer $\mathbf{\pi}^t$. These logits are compared with the target output $\mathbf{\pi}^{*, t}$ and multiplied with broadcast weights $\mathbf{B}^t$ to obtain a learning signal $L_j^t$ for every neuron $j$ in the pool.
+            An input vector $\mathbf{x}^t$ at time step $t$ is fed to a pool of $N$ recurrent neurons with hidden states $\mathbf{h}^t$ and observable states $\mathbf{z}^t$ through input weights $\mathbf{W}^\text{in}$. The recurrent weights $\mathbf{W}^\text{rec}$ connect neurons with each other, but no self-loops exist. A randomly selected 25\% of these neurons is a LIF neuron (\ie, $\beta = 0$) and the others are ALIF neurons. The output weights $\mathbf{W}^\text{out}$ process the observable states of the neurons through a softmax function into a logits layer $\mathbf{\pi}^t$. These logits are compared with the target output $\mathbf{\pi}^{*, t}$ and multiplied with broadcast weights $\mathbf{B}^t$ to obtain a learning signal $L_j^t$ for every neuron $j$ in the pool.
             Note that weights illustrated in red are e-prop weights, \ie, they track eligibility traces.}
             \label{fig:topology-sl}
           \end{figure}
@@ -284,36 +284,51 @@
             Furthermore, the absence of $\epsilon_{ji, a}^t$ in the computation of $\epsilon_{ji, v}^{t+1}$ facilitates online training in emulations in non--von Neumann machines, because $\epsilon_{ji, a}^{t+1}$ can be computed before $\epsilon_{ji, v}^{t+1}$, relieving the need to store a temporary copy of its value.
             In later sections, it is demonstrated that this does not necessarily hold for other neuron models, such as the Izhikevich neuron.
 
-            Multiplying the eligibility vector with the partial derivative of the observable state with respect to the hidden state results in the eligibility trace:
+            The eligibility vector needs to be multiplied with the partial derivative of the observable state with respect to the hidden state to obtain the eligibility trace:
+            \begin{equation}
+            e^t_{ji} = \bm{\epsilon}_{ji}^t \cdot \frac{\partial z^t_j}{\partial\mathbf{h}^t_j}.
+            \end{equation}
+
+            This partial derivative can be computed by replacing the Heaviside function Equation \ref{eq:alifZ} by the pseudoderivative $\psi^t_j$:
 
             \begin{align}
-            e^t_{ji} &= \begin{pmatrix}
-            \epsilon_{ji, v}^t\\
-            \epsilon_{ji, a}^t
-            \end{pmatrix}
-            \cdot
-            \begin{pmatrix}
-            \frac{\partial z^t_j}{\partial v^t_j}\\
-            \frac{\partial z^t_j}{\partial a^t_j}
-            \end{pmatrix}\\
-            &= \begin{pmatrix}
-            \epsilon_{ji, v}^t\\
-            \epsilon_{ji, a}^t
-            \end{pmatrix}
-            \cdot
-            \begin{pmatrix}
-            \psi^t_j\\
-            -\beta\psi^t_j
-            \end{pmatrix}\\
-            &= \psi^t_j\left(\epsilon_{ji, v}^t - \beta\epsilon_{ji, a}^t\right).
+                \frac{\partial z^t_j}{\partial\mathbf{h}^t_j} &= \begin{pmatrix}
+                    \frac{\partial z^t_j}{\partial v^t_j}\\
+                    \frac{\partial z^t_j}{\partial a^t_j}
+                    \end{pmatrix}\\
+                &= \begin{pmatrix}
+                    \psi^t_j\\
+                    -\beta\psi^t_j
+                    \end{pmatrix}.
             \end{align}
+
+            Therefore, the eligibility trace is computed by
+            \begin{align}
+               e^t_{ji} &= \begin{pmatrix}
+            \epsilon_{ji, v}^t\\
+            \epsilon_{ji, a}^t
+            \end{pmatrix}\cdot \begin{pmatrix}
+                    \frac{\partial z^t_j}{\partial v^t_j}\\
+                    \frac{\partial z^t_j}{\partial a^t_j}
+                    \end{pmatrix}\\
+                &= \begin{pmatrix}
+            \epsilon_{ji, v}^t\\
+            \epsilon_{ji, a}^t
+            \end{pmatrix}\cdot \begin{pmatrix}
+                    \psi^t_j\\
+                    -\beta\psi^t_j
+                    \end{pmatrix}\\
+                    &= \psi^t_j\left(\epsilon_{ji, v}^t - \beta\epsilon_{ji, a}^t\right).
+            \end{align}
+
+
             This means that the eligibility train can be understood as a low-pass filter of the afferent spikes, with a correction for the efferent neuron's threshold adaptation: a neuron with a higher threshold builds up an eligibility trace more slowly than its more sensitive counterparts.
             Figure \ref{fig:alif} illustrates the behavior of the synaptic variables in an ALIF neuron described above.
 
             \begin{figure}[ht]
                 \centering
                 \includegraphics[width=\linewidth]{gfx/alif}
-                \caption[Single-synapse ALIF demo.]{A single-synapse demonstration of the evolution of the full hidden state of the ALIF neuron. The blue lines indicate the postsynaptic neuron $j$, and the orange lines indicate the presynaptic neuron $i$. Note that the synapse weight increases regardless of the order of spikes, indicating an absence of STDP in the standard e-prop ALIF neuron.}
+                \caption[Single-synapse ALIF demo.]{A single-synapse demonstration of the evolution of the full hidden state of the ALIF neuron. The blue lines indicate the postsynaptic neuron $j$, and the orange lines indicate the presynaptic neuron $i$. The injected current $I^t$ increases the voltage $v^t_j$ and is deliberately controlled to produce the spike pattern $z^t_j$ where the postsynaptic neuron spikes after the presynaptic neuron during the first half, and vice versa during the second half of the plot. The learning signal $L^t_j$ is kept at a constant value and is omitted for clarity, such that the relation between the eligibility trace $e^t_{ji}$ and the accumulated weight change $\Delta W^t_{ji}$ can be clearly observed. Note that the synapse weight increases regardless of the order of spikes, indicating an absence of STDP in the standard e-prop ALIF neuron.}
                 \label{fig:alif}
             \end{figure}
 
@@ -322,8 +337,8 @@
             \begin{equation}\label{eq:eprop_grd}
                 \Delta W = -\eta\widehat{\frac{dE}{dW_{ji}}} \eqdef -\eta\sum_t\frac{\partial E}{\partial z^t_j}e^t_{ji}.
             \end{equation}
-            Note that for clarity, this section describes e-prop using the stochastic gradient descent.
-            In the actual implementation, the Adam optimization algorithm \citep{kingma2014adam} is used (see Section \ref{sec:adam}).
+            Note that for clarity, this section describes e-prop using stochastic gradient descent.
+            In the actual implementations in \citet{bellec2020solution} and this research, the Adam optimization algorithm \citep{kingma2014adam} is used (see Section \ref{sec:adam}).
 
             \paragraph{Error metric}
             In the TIMIT frame-wise phone classification task, there are $K=61$ output neurons $y^t_k$ where $k \in [1\mathrel{{.}\,{.}}\nobreak K]$.
@@ -332,7 +347,7 @@
             y^t_k = \kappa y^{t-1}_k + \sum_jW^\text{out}_{kj}z^t_j + b_k,
             \end{equation}
             where $\kappa \in [0, 1]$ is the decay factor for the output neurons, $W^\text{out}_{kj}$ is the weight between neuron $j$ and output neuron $k$, and $b_k$ is the bias value.
-            The decay factor $\kappa$ acts as a low-pass filter, smoothening the output values over time and implemented based on the observation that output frame classes typically persist for multiple time steps.
+            The decay factor $\kappa$ acts as a low-pass filter, smoothing the output values over time and implemented based on the observation that output frame classes typically persist for multiple time steps.
 
             The softmax function $\sigma(\cdot)$ computes the predicted probability $\pi^t_k$ for class $k$ at time $t$:
             \begin{equation}
@@ -344,7 +359,7 @@
             \end{equation}
             thereby obtaining the accumulated loss $E$ at time step $t$.
 
-            Since the learning signal $L^t_j$ is defined as the partial derivative of the error $E$ with respect to the observable state $z_j^t$ of a neuron $j$ afferent to an output neurons $k$, we can derive
+            Since the learning signal $L^t_j$ is defined as the partial derivative of the error $E$ with respect to the observable state $z_j^t$ of a neuron $j$ afferent to an output neurons $k$, we can use
             \begin{equation}\label{eq:learningsignal_after_output}
             L^t_j = \frac{\partial E}{\partial z^t_j} = \sum_kB_{jk}\sum_{t'\geq t}\left(\pi^{t'}_k - \pi^{*,t'}_k\right)\kappa^{t'-t},
             \end{equation}

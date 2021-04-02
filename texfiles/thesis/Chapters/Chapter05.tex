@@ -6,7 +6,7 @@
 % Effect of STDP
 % Firing rate tends to decrease slower for non-STDP; refer back to runaway excitation and demo graph.
 The results show that the ALIF and STDP-ALIF neuron perform better than the corrected (and default) Izhikevich e-prop neuron model in classifying phones in the TIMIT dataset.
-The addition of the STDP mechanism in the ALIF neuron results in a slower, but stabler and more accurate learning curve.
+The addition of the STDP mechanism in the ALIF neuron results in a learning curve that converges more slowly, but reaches a better accuracy with less validation variance.
 However, the Izhikevich neuron shows STDP behavior too, suggesting that the STDP-ALIF neuron works by virtue of another factor, such as its spike frequency adaptation which the Izhikevich neuron does not have.
 
 Rearranging the neurons into a stacked architecture does not appear to improve the classification performance.
@@ -14,16 +14,16 @@ Rearranging the neurons into a stacked architecture does not appear to improve t
 \paragraph{Possible improvements}
     There are many hypothetical ways of improving the performance or biological plausibility of e-prop that have not yet been considered in this report.
     For instance, a likely reason that the learning speed of the multi-layer architectures was slower than their single-layer counterparts is that the weights are poorly initialized.
-    Empirical observation of the learning process suggested that spiking activity faded in deeper layers, because the spiking activity from a preceding layer is generally weaker than the input values the first layer receives.
+    Empirical observation of the learning process suggested that during early epochs, spiking activity faded in deeper layers, because the spiking activity from a preceding layer is generally weaker than the input values the first layer receives.
     Higher weights in-between layers mitigate this fading activity, but require some search to find a good value.
     In this report, the firing rate regularization term approximated this value, but learning is more efficient with a better initialization, since initial synaptic weights significantly affect the performance of STDP-based SNNs \citep{kim2020initial}.
 
-    Also in this report, certain parameters such as firing rate targets ($f^\text{target}$), activity leak ($\alpha$), threshold adaptivity ($\beta$), and feedback signals were constant for all neurons, except the threshold adaptivity, which was 0 for some neurons to emulate non-adaptive LIF neurons.
+    Also in this report, certain parameters such as firing rate targets ($f^\text{target}$), activity leak ($\alpha$), threshold adaptivity ($\beta$), and feedback signals were constant for all neurons, except the threshold adaptivity, which was 0 for a randomly selected 25\% of the neurons to emulate non-adaptive LIF neurons.
     Future research could examine the effects of sampling some of these parameters from a distribution for each neuron, thereby creating a more diverse population of neurons with different time scales.
     This sampling requires a careful assessment of the time scales related to the learning task; in particular, the network should be able to process the slowest relevant time scale of the task \citep{jaeger2021dimensions}.
     In the TIMIT classification task, for instance, this could span the whole time fragment, because initial words give semantic context to all subsequent words.
     However, a more predictive time scale for the TIMIT dataset is on the scale of approximately 8 MFCC frames, which is now accurately captured by the adaptive threshold component in the ALIF neuron model.
-    Temporal dependencies can also be found when moving in the opposite direction----later words and sounds give informative context to earlier words and sounds.
+    Temporal dependencies can also be found when moving in the opposite direction---later words and sounds give informative context to earlier words and sounds.
     In \citet{bellec2020solution}, this context was captured in a bidirectional network, improving the accuracy by nearly 10\%.
     In this report, this was empirically validated as well, but left undiscussed because a bidirectional network is not biologically plausible, as directly accessing earlier input values violates the ``online'' constraint.
     According to \citet{bellec2020solution}, e-prop suggests that the experimentally found diverse time constants of the firing activity of populations of neurons in different brain areas \citep{runyan2017distinct} are correlated with their capability to handle corresponding ranges of delays in temporal credit assignment for learning.
@@ -33,7 +33,7 @@ Rearranging the neurons into a stacked architecture does not appear to improve t
     This suggests that the effects of the topology within a layer might positively affect the learning process.
     In the brain, neurons tend to connect to nearby neurons.
     A simple lattice topology might better approximate the connectivity of the brain, decrease the computational complexity in both emulations in von Neumann machines, and allow easier on-chip implementations in neuromorphic hardware.
-    Hierarchical clustering of neurons might also have a beneficial effect, as this has been demonstrated to improve R-STDP in SNNs \citep{weidel2020unsupervised} and address the scalability issue of SNNs \citep{carrillo2012scalable}.
+    Hierarchical clustering of neurons might also have a beneficial effect, as this has been demonstrated to improve R-STDP in SNNs \citep{weidel2021unsupervised} and address the scalability issue of SNNs \citep{carrillo2012scalable}.
     Because a neuromorphic system can support complex network operations \citep{hasler1990vlsi}, large-scale conductance-based SNNs \citep{yang2019scalable,Yang2019RealTimeNS} and asynchronous communication in VLSIs through address-event-representation \citep{lazzaro1993silicon,deiss1999pulse} might be suitable to further customize the connectivity graph of an e-prop architecture.
 
     Other exciting research avenues include connectivity graphs that change over time through a dynamic pruning and growing of weights and neurons.

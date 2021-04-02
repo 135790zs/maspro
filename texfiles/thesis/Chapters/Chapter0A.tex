@@ -3,7 +3,6 @@
 %************************************************
 
 \section{Implementation}
-link, no library, dynamic layers and direction, explicit implementation
 The code is available at \texttt{https://github.com/wkvanderveen/maspro}.
 It does not require any machine learning libraries (except basic PyTorch to initialize arrays on the GPU); all computations are explicitly implemented in pure multidimensional NumPy-like arrays.
 The code contains a configuration file to set various options for the MFCC preprocessing and e-prop process, including the number of layers, whether to use an uni- or bidirectional network (a legacy option not treated in this report), and the window size in the MFCCs, for example.
@@ -48,14 +47,6 @@ The code contains a configuration file to set various options for the MFCC prepr
     \label{tab:mels}
 \end{table}
 
-
-\begin{figure}[ht]
-    \centering
-    \includegraphics[width=\linewidth]{gfx/demo_izh}
-    \caption[A single-synapse demo of the uncorrected Izhikevich neuron.]{A single-synapse demo of the uncorrected Izhikevich neuron. Note that $\epsilon^t_{ji, v}$ takes on extreme values and that the eligibility vector flips sign at any pair of spikes.}
-    \label{fig:demo_izh}
-\end{figure}
-
 \begin{table}[ht]
     \myfloatalign
     \begin{tabularx}{\textwidth}{lll} \toprule
@@ -79,7 +70,7 @@ The code contains a configuration file to set various options for the MFCC prepr
 
 		\bottomrule
     \end{tabularx}
-    \caption[Hyperparameters]{The full list of hyperparameter values. \textsuperscript{*}This is the total number of neurons in multi-layer networks.}
+    \caption[Hyperparameters]{The full list of hyperparameter values, used in all networks and neuron model types. \\\textsuperscript{*}This is the total number of neurons in multi-layer networks (400 per layer in 2-layer networks, and 266 in 3-layer networks).}
     \label{tab:hparams}
 \end{table}
 
