@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017/Debian) (preloaded format=pdflatex 2020.11.2)  29 MAR 2021 09:44
+=======
+This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017/Debian) (preloaded format=pdflatex 2020.10.27)  2 APR 2021 11:02
+>>>>>>> 13b3663032327d70e42a7e5a8248f37ea889bd2b
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -2416,12 +2420,18 @@ Overfull \hbox (24.81319pt too wide) in paragraph at lines 16--16
  []
 
 
-Overfull \hbox (11.77083pt too wide) in paragraph at lines 31--31
+Overfull \hbox (11.51653pt too wide) in paragraph at lines 21--21
+ [][] []\T1/cmr/m/n/10.95 (-20) An ex-am-ple of the spec-tro-gram of a sen-tenc
+e. []  
+ []
+
+
+Overfull \hbox (11.77083pt too wide) in paragraph at lines 32--32
  \T1/cmr/m/n/10.95 (-20) neu-ron mod-els in a single-layer e-prop model. []  
  []
 
 
-Overfull \hbox (8.03484pt too wide) in paragraph at lines 37--37
+Overfull \hbox (8.03484pt too wide) in paragraph at lines 38--38
  [][] []\T1/cmr/m/n/10.95 (-20) Single- and multi-layer ac-cu-racy com-par-i-so
 n []  
  []
@@ -2472,7 +2482,7 @@ Chapter 2.
 
 
 ]
-LaTeX Font Info:    Try loading font information for T1+cmss on input line 64.
+LaTeX Font Info:    Try loading font information for T1+cmss on input line 63.
  (/usr/share/texlive/texmf-dist/tex/latex/base/t1cmss.fd
 File: t1cmss.fd 2014/09/29 v2.5h Standard LaTeX font definitions
 )
@@ -2484,8 +2494,13 @@ Package microtype Info: Loading generic protrusion settings for font family
 <gfx/simplealif.pdf, id=593, 513.21736pt x 386.4839pt>
 File: gfx/simplealif.pdf Graphic file (type pdf)
 <use gfx/simplealif.pdf>
+<<<<<<< HEAD
 Package pdftex.def Info: gfx/simplealif.pdf  used on input line 86.
 (pdftex.def)             Requested size: 336.0pt x 253.0397pt.
+=======
+Package pdftex.def Info: gfx/simplealif.pdf  used on input line 85.
+(pdftex.def)             Requested size: 336.0pt x 253.05042pt.
+>>>>>>> 13b3663032327d70e42a7e5a8248f37ea889bd2b
  [11 <./gfx/simplealif.pdf>]
 <gfx/Singlelayer.pdf, id=627, 529.01637pt x 846.0408pt>
 File: gfx/Singlelayer.pdf Graphic file (type pdf)
@@ -2498,22 +2513,22 @@ Overfull \hbox (32.34203pt too wide) detected at line 139
  []
 
 [13] [14] [15] [16]
+<<<<<<< HEAD
 <gfx/alif.pdf, id=750, 516.73048pt x 386.4839pt>
+=======
+<gfx/alif.pdf, id=748, 516.73048pt x 386.4839pt>
+>>>>>>> 13b3663032327d70e42a7e5a8248f37ea889bd2b
 File: gfx/alif.pdf Graphic file (type pdf)
 <use gfx/alif.pdf>
-Package pdftex.def Info: gfx/alif.pdf  used on input line 315.
+Package pdftex.def Info: gfx/alif.pdf  used on input line 330.
 (pdftex.def)             Requested size: 336.0pt x 251.31181pt.
- [17 <./gfx/alif.pdf>] [18]) [19]
+ [17] [18 <./gfx/alif.pdf>] [19]) [20]
 \openout2 = `Chapters/Chapter03.aux'.
 
- (./Chapters/Chapter03.tex
+
+(./Chapters/Chapter03.tex
 Chapter 3.
-[20
 
-
-
-
-]
 Underfull \hbox (badness 10000) in alignment at lines 28--28
 [][][][] 
  []
@@ -2523,14 +2538,28 @@ Underfull \hbox (badness 10000) in alignment at lines 51--51
 [][][][][]
  []
 
+<<<<<<< HEAD
 [21]
 <gfx/signal.pdf, id=838, 390.00081pt x 127.03459pt>
+=======
+[21
+
+
+
+
+]
+<gfx/signal.pdf, id=843, 390.00081pt x 127.03459pt>
+>>>>>>> 13b3663032327d70e42a7e5a8248f37ea889bd2b
 File: gfx/signal.pdf Graphic file (type pdf)
 <use gfx/signal.pdf>
 Package pdftex.def Info: gfx/signal.pdf  used on input line 86.
 (pdftex.def)             Requested size: 336.0pt x 109.45308pt.
  [22]
+<<<<<<< HEAD
 <gfx/signalemph.pdf, id=853, 383.1314pt x 127.03459pt>
+=======
+<gfx/signalemph.pdf, id=857, 383.1314pt x 127.03459pt>
+>>>>>>> 13b3663032327d70e42a7e5a8248f37ea889bd2b
 File: gfx/signalemph.pdf Graphic file (type pdf)
 <use gfx/signalemph.pdf>
 Package pdftex.def Info: gfx/signalemph.pdf  used on input line 102.
@@ -2540,23 +2569,39 @@ Package pdftex.def Info: gfx/signalemph.pdf  used on input line 102.
 pdfTeX warning: pdflatex (file ./gfx/signalemph.pdf): PDF inclusion: multiple p
 dfs with page group included in a single page
 >]
+<<<<<<< HEAD
 <gfx/hamming.pdf, id=912, 361.35pt x 361.35pt>
+=======
+<gfx/hamming.pdf, id=916, 361.35pt x 361.35pt>
+>>>>>>> 13b3663032327d70e42a7e5a8248f37ea889bd2b
 File: gfx/hamming.pdf Graphic file (type pdf)
 <use gfx/hamming.pdf>
 Package pdftex.def Info: gfx/hamming.pdf  used on input line 129.
 (pdftex.def)             Requested size: 151.19897pt x 151.19804pt.
+<<<<<<< HEAD
 <gfx/powframes.pdf, id=915, 230.86852pt x 187.6425pt>
+=======
+<gfx/powframes.pdf, id=919, 230.86852pt x 187.6425pt>
+>>>>>>> 13b3663032327d70e42a7e5a8248f37ea889bd2b
 File: gfx/powframes.pdf Graphic file (type pdf)
 <use gfx/powframes.pdf>
 Package pdftex.def Info: gfx/powframes.pdf  used on input line 154.
 (pdftex.def)             Requested size: 151.19897pt x 122.89384pt.
  [24 <./gfx/hamming.pdf>] [25 <./gfx/powframes.pdf>]
+<<<<<<< HEAD
 <gfx/fbanks.pdf, id=999, 383.1314pt x 127.03459pt>
+=======
+<gfx/fbanks.pdf, id=1003, 383.1314pt x 127.03459pt>
+>>>>>>> 13b3663032327d70e42a7e5a8248f37ea889bd2b
 File: gfx/fbanks.pdf Graphic file (type pdf)
 <use gfx/fbanks.pdf>
 Package pdftex.def Info: gfx/fbanks.pdf  used on input line 204.
 (pdftex.def)             Requested size: 336.0pt x 111.40697pt.
+<<<<<<< HEAD
 <gfx/spectrogram.pdf, id=1001, 350.29044pt x 128.85623pt>
+=======
+<gfx/spectrogram.pdf, id=1005, 350.29044pt x 128.85623pt>
+>>>>>>> 13b3663032327d70e42a7e5a8248f37ea889bd2b
 File: gfx/spectrogram.pdf Graphic file (type pdf)
 <use gfx/spectrogram.pdf>
 Package pdftex.def Info: gfx/spectrogram.pdf  used on input line 213.
@@ -2568,83 +2613,143 @@ pdfs with page group included in a single page
 >]
 File: gfx/signal.pdf Graphic file (type pdf)
 <use gfx/signal.pdf>
-Package pdftex.def Info: gfx/signal.pdf  used on input line 236.
+Package pdftex.def Info: gfx/signal.pdf  used on input line 247.
 (pdftex.def)             Requested size: 336.0pt x 109.45308pt.
+<<<<<<< HEAD
 <gfx/norm_mfcc.pdf, id=1060, 363.33919pt x 127.251pt>
+=======
+<gfx/norm_mfcc.pdf, id=1065, 363.33919pt x 127.251pt>
+>>>>>>> 13b3663032327d70e42a7e5a8248f37ea889bd2b
 File: gfx/norm_mfcc.pdf Graphic file (type pdf)
 <use gfx/norm_mfcc.pdf>
-Package pdftex.def Info: gfx/norm_mfcc.pdf  used on input line 238.
+Package pdftex.def Info: gfx/norm_mfcc.pdf  used on input line 249.
 (pdftex.def)             Requested size: 336.0pt x 117.68396pt.
+<<<<<<< HEAD
 <gfx/target.pdf, id=1061, 433.62pt x 216.81pt>
+=======
+<gfx/target.pdf, id=1066, 433.62pt x 216.81pt>
+>>>>>>> 13b3663032327d70e42a7e5a8248f37ea889bd2b
 File: gfx/target.pdf Graphic file (type pdf)
 <use gfx/target.pdf>
-Package pdftex.def Info: gfx/target.pdf  used on input line 240.
+Package pdftex.def Info: gfx/target.pdf  used on input line 251.
 (pdftex.def)             Requested size: 336.0pt x 168.00946pt.
+<<<<<<< HEAD
  [27 <./gfx/norm_mfcc.pdf> <./gfx/target.pdf
 
 pdfTeX warning: pdflatex (file ./gfx/target.pdf): PDF inclusion: multiple pdfs 
 with page group included in a single page
 >]
 <gfx/Multilayer.pdf, id=1119, 529.01637pt x 846.0408pt>
+=======
+<gfx/Multilayer.pdf, id=1069, 529.01637pt x 846.0408pt>
+>>>>>>> 13b3663032327d70e42a7e5a8248f37ea889bd2b
 File: gfx/Multilayer.pdf Graphic file (type pdf)
 <use gfx/Multilayer.pdf>
-Package pdftex.def Info: gfx/Multilayer.pdf  used on input line 269.
+Package pdftex.def Info: gfx/Multilayer.pdf  used on input line 280.
 (pdftex.def)             Requested size: 336.0pt x 85.56802pt.
- [28 <./gfx/Multilayer.pdf>] [29pdfTeX warning (ext4): destination with the sam
-e identifier (name{equation.3.2.10}) has been already used, duplicate ignored
+ [27] [28pdfTeX warning (ext4): destination with the same identifier (name{equa
+tion.3.2.11}) has been already used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
+<<<<<<< HEAD
 l.329 
       ] [30]
 <gfx/stdpalif.pdf, id=1204, 522.09428pt x 386.4839pt>
+=======
+l.340 
+      ] [29]
+<gfx/stdpalif.pdf, id=1112, 522.09428pt x 386.4839pt>
+>>>>>>> 13b3663032327d70e42a7e5a8248f37ea889bd2b
 File: gfx/stdpalif.pdf Graphic file (type pdf)
 <use gfx/stdpalif.pdf>
-Package pdftex.def Info: gfx/stdpalif.pdf  used on input line 378.
+Package pdftex.def Info: gfx/stdpalif.pdf  used on input line 391.
 (pdftex.def)             Requested size: 336.0pt x 248.7406pt.
+<<<<<<< HEAD
  [31 <./gfx/stdpalif.pdf>]
 <gfx/demo_izh_corrected.pdf, id=1250, 532.13177pt x 388.11209pt>
+=======
+ [30]
+<gfx/demo_izh.pdf, id=1129, 527.26987pt x 388.11209pt>
+File: gfx/demo_izh.pdf Graphic file (type pdf)
+<use gfx/demo_izh.pdf>
+Package pdftex.def Info: gfx/demo_izh.pdf  used on input line 449.
+(pdftex.def)             Requested size: 336.0pt x 247.33083pt.
+<gfx/demo_izh_corrected.pdf, id=1131, 532.13177pt x 388.11209pt>
+>>>>>>> 13b3663032327d70e42a7e5a8248f37ea889bd2b
 File: gfx/demo_izh_corrected.pdf Graphic file (type pdf)
 <use gfx/demo_izh_corrected.pdf>
-Package pdftex.def Info: gfx/demo_izh_corrected.pdf  used on input line 439.
+Package pdftex.def Info: gfx/demo_izh_corrected.pdf  used on input line 460.
 (pdftex.def)             Requested size: 336.0pt x 245.06265pt.
- [32] [33 <./gfx/demo_izh_corrected.pdf>] [34] [35]) [36]
+ [31] [32] [33]) [34] [35] [36 <./gfx/norm_mfcc.pdf> <./gfx/target.pdf
+
+pdfTeX warning: pdflatex (file ./gfx/target.pdf): PDF inclusion: multiple pdfs 
+with page group included in a single page
+>] [37 <./gfx/Multilayer.pdf> <./gfx/stdpalif.pdf
+
+pdfTeX warning: pdflatex (file ./gfx/stdpalif.pdf): PDF inclusion: multiple pdf
+s with page group included in a single page
+>] [38 <./gfx/demo_izh.pdf> <./gfx/demo_izh_corrected.pdf
+
+pdfTeX warning: pdflatex (file ./gfx/demo_izh_corrected.pdf): PDF inclusion: mu
+ltiple pdfs with page group included in a single page
+>]
 \openout2 = `Chapters/Chapter04.aux'.
 
  (./Chapters/Chapter04.tex
 Chapter 4.
+<<<<<<< HEAD
 <gfx/InOutPair.pdf, id=1350, 409.22888pt x 216.1115pt>
+=======
+<gfx/InOutPair.pdf, id=1397, 409.22888pt x 216.1115pt>
+>>>>>>> 13b3663032327d70e42a7e5a8248f37ea889bd2b
 File: gfx/InOutPair.pdf Graphic file (type pdf)
 <use gfx/InOutPair.pdf>
 Package pdftex.def Info: gfx/InOutPair.pdf  used on input line 10.
 (pdftex.def)             Requested size: 336.0pt x 177.44339pt.
+<<<<<<< HEAD
 <gfx/percwrong.pdf, id=1353, 193.28146pt x 198.0242pt>
+=======
+<gfx/percwrong.pdf, id=1401, 193.28146pt x 198.0242pt>
+>>>>>>> 13b3663032327d70e42a7e5a8248f37ea889bd2b
 File: gfx/percwrong.pdf Graphic file (type pdf)
 <use gfx/percwrong.pdf>
 Package pdftex.def Info: gfx/percwrong.pdf  used on input line 28.
 (pdftex.def)             Requested size: 138.86172pt x 142.26378pt.
+<<<<<<< HEAD
 <gfx/crossentropy.pdf, id=1354, 206.94502pt x 198.0242pt>
+=======
+<gfx/crossentropy.pdf, id=1402, 206.94502pt x 198.0242pt>
+>>>>>>> 13b3663032327d70e42a7e5a8248f37ea889bd2b
 File: gfx/crossentropy.pdf Graphic file (type pdf)
 <use gfx/crossentropy.pdf>
 Package pdftex.def Info: gfx/crossentropy.pdf  used on input line 31.
 (pdftex.def)             Requested size: 148.6782pt x 142.26378pt.
-[37
+[39
 
 
 
 
  <./gfx/InOutPair.pdf>]
+<<<<<<< HEAD
 <gfx/hz.pdf, id=1394, 187.6981pt x 198.0242pt>
+=======
+<gfx/hz.pdf, id=1442, 187.6981pt x 198.0242pt>
+>>>>>>> 13b3663032327d70e42a7e5a8248f37ea889bd2b
 File: gfx/hz.pdf Graphic file (type pdf)
 <use gfx/hz.pdf>
 Package pdftex.def Info: gfx/hz.pdf  used on input line 51.
 (pdftex.def)             Requested size: 134.85039pt x 142.26378pt.
+<<<<<<< HEAD
 <gfx/regerr.pdf, id=1395, 197.9395pt x 197.42822pt>
+=======
+<gfx/regerr.pdf, id=1443, 197.9395pt x 197.42822pt>
+>>>>>>> 13b3663032327d70e42a7e5a8248f37ea889bd2b
 File: gfx/regerr.pdf Graphic file (type pdf)
 <use gfx/regerr.pdf>
 Package pdftex.def Info: gfx/regerr.pdf  used on input line 54.
 (pdftex.def)             Requested size: 142.63411pt x 142.26378pt.
- [38 <./gfx/percwrong.pdf> <./gfx/crossentropy.pdf
+ [40 <./gfx/percwrong.pdf> <./gfx/crossentropy.pdf
 
 pdfTeX warning: pdflatex (file ./gfx/crossentropy.pdf): PDF inclusion: multiple
  pdfs with page group included in a single page
@@ -2657,24 +2762,36 @@ pdfTeX warning: pdflatex (file ./gfx/hz.pdf): PDF inclusion: multiple pdfs with
 pdfTeX warning: pdflatex (file ./gfx/regerr.pdf): PDF inclusion: multiple pdfs 
 with page group included in a single page
 >]
+<<<<<<< HEAD
 <gfx/ml-percwrong-ALIF.pdf, id=1569, 198.43353pt x 198.0242pt>
+=======
+<gfx/ml-percwrong-ALIF.pdf, id=1616, 198.43353pt x 198.0242pt>
+>>>>>>> 13b3663032327d70e42a7e5a8248f37ea889bd2b
 File: gfx/ml-percwrong-ALIF.pdf Graphic file (type pdf)
 <use gfx/ml-percwrong-ALIF.pdf>
 Package pdftex.def Info: gfx/ml-percwrong-ALIF.pdf  used on input line 66.
 (pdftex.def)             Requested size: 142.56317pt x 142.26378pt.
+<<<<<<< HEAD
 <gfx/ml-percwrong-STDP-ALIF.pdf, id=1570, 212.5723pt x 198.0242pt>
+=======
+<gfx/ml-percwrong-STDP-ALIF.pdf, id=1617, 212.5723pt x 198.0242pt>
+>>>>>>> 13b3663032327d70e42a7e5a8248f37ea889bd2b
 File: gfx/ml-percwrong-STDP-ALIF.pdf Graphic file (type pdf)
 <use gfx/ml-percwrong-STDP-ALIF.pdf>
 Package pdftex.def Info: gfx/ml-percwrong-STDP-ALIF.pdf  used on input line 69.
 
 (pdftex.def)             Requested size: 152.72107pt x 142.26378pt.
+<<<<<<< HEAD
 <gfx/ml-percwrong-Izhikevich.pdf, id=1571, 206.51842pt x 198.0242pt>
+=======
+<gfx/ml-percwrong-Izhikevich.pdf, id=1618, 206.51842pt x 198.0242pt>
+>>>>>>> 13b3663032327d70e42a7e5a8248f37ea889bd2b
 File: gfx/ml-percwrong-Izhikevich.pdf Graphic file (type pdf)
 <use gfx/ml-percwrong-Izhikevich.pdf>
 Package pdftex.def Info: gfx/ml-percwrong-Izhikevich.pdf  used on input line 71
 .
 (pdftex.def)             Requested size: 148.3717pt x 142.26378pt.
-) [39 <./gfx/ml-percwrong-ALIF.pdf> <./gfx/ml-percwrong-STDP-ALIF.pdf
+) [41 <./gfx/ml-percwrong-ALIF.pdf> <./gfx/ml-percwrong-STDP-ALIF.pdf
 
 pdfTeX warning: pdflatex (file ./gfx/ml-percwrong-STDP-ALIF.pdf): PDF inclusion
 : multiple pdfs with page group included in a single page
@@ -2687,22 +2804,22 @@ n: multiple pdfs with page group included in a single page
 
  (./Chapters/Chapter05.tex
 Chapter 5.
-[40
+[42
 
 
 
 
-] [41] [42]) [43]
+] [43] [44]) [45]
 \openout2 = `Chapters/Chapter06.aux'.
 
  (./Chapters/Chapter06.tex
 Chapter 6.
-[44
+[46
 
 
 
 
-]) [45] [46
+]) [47] [48
 
 
 
@@ -2712,83 +2829,121 @@ Chapter 6.
  (./Chapters/Chapter0A.tex
 Appendix A.
 
-Underfull \hbox (badness 10000) in alignment at lines 46--46
+Underfull \hbox (badness 10000) in alignment at lines 45--45
 [][][] 
  []
 
+<<<<<<< HEAD
 <gfx/demo_izh.pdf, id=1800, 527.26987pt x 388.11209pt>
 File: gfx/demo_izh.pdf Graphic file (type pdf)
 <use gfx/demo_izh.pdf>
 Package pdftex.def Info: gfx/demo_izh.pdf  used on input line 54.
 (pdftex.def)             Requested size: 336.0pt x 247.33083pt.
+=======
+>>>>>>> 13b3663032327d70e42a7e5a8248f37ea889bd2b
 
-Underfull \hbox (badness 10000) in alignment at lines 81--81
+Underfull \hbox (badness 10000) in alignment at lines 72--72
 [][][] 
  []
 
+<<<<<<< HEAD
 <gfx/ml-crossentropy-ALIF.pdf, id=1801, 207.6408pt x 198.0242pt>
+=======
+<gfx/ml-crossentropy-ALIF.pdf, id=1850, 207.6408pt x 198.0242pt>
+>>>>>>> 13b3663032327d70e42a7e5a8248f37ea889bd2b
 File: gfx/ml-crossentropy-ALIF.pdf Graphic file (type pdf)
 <use gfx/ml-crossentropy-ALIF.pdf>
-Package pdftex.def Info: gfx/ml-crossentropy-ALIF.pdf  used on input line 89.
+Package pdftex.def Info: gfx/ml-crossentropy-ALIF.pdf  used on input line 80.
 (pdftex.def)             Requested size: 101.43437pt x 96.73918pt.
+<<<<<<< HEAD
 <gfx/ml-crossentropy-STDP-ALIF.pdf, id=1802, 213.43019pt x 198.0242pt>
+=======
+<gfx/ml-crossentropy-STDP-ALIF.pdf, id=1851, 213.43019pt x 198.0242pt>
+>>>>>>> 13b3663032327d70e42a7e5a8248f37ea889bd2b
 File: gfx/ml-crossentropy-STDP-ALIF.pdf Graphic file (type pdf)
 <use gfx/ml-crossentropy-STDP-ALIF.pdf>
 Package pdftex.def Info: gfx/ml-crossentropy-STDP-ALIF.pdf  used on input line 
-91.
+82.
 (pdftex.def)             Requested size: 104.26254pt x 96.73918pt.
 
-Underfull \hbox (badness 10000) in paragraph at lines 91--91
+Underfull \hbox (badness 10000) in paragraph at lines 82--82
 [][]|\T1/cmr/m/n/9 (+20) STDP-ALIF cross-
  []
 
+<<<<<<< HEAD
 <gfx/ml-crossentropy-Izhikevich.pdf, id=1803, 212.95967pt x 198.0242pt>
+=======
+<gfx/ml-crossentropy-Izhikevich.pdf, id=1852, 212.95967pt x 198.0242pt>
+>>>>>>> 13b3663032327d70e42a7e5a8248f37ea889bd2b
 File: gfx/ml-crossentropy-Izhikevich.pdf Graphic file (type pdf)
 <use gfx/ml-crossentropy-Izhikevich.pdf>
 Package pdftex.def Info: gfx/ml-crossentropy-Izhikevich.pdf  used on input line
- 93.
+ 84.
 (pdftex.def)             Requested size: 104.03268pt x 96.73918pt.
 
-Underfull \hbox (badness 10000) in paragraph at lines 93--93
+Underfull \hbox (badness 10000) in paragraph at lines 84--84
 [][]|\T1/cmr/m/n/9 (+20) Izhike-vich cross-
  []
 
+<<<<<<< HEAD
 <gfx/ml-hz-ALIF.pdf, id=1804, 188.3939pt x 198.0242pt>
+=======
+<gfx/ml-hz-ALIF.pdf, id=1853, 188.3939pt x 198.0242pt>
+>>>>>>> 13b3663032327d70e42a7e5a8248f37ea889bd2b
 File: gfx/ml-hz-ALIF.pdf Graphic file (type pdf)
 <use gfx/ml-hz-ALIF.pdf>
-Package pdftex.def Info: gfx/ml-hz-ALIF.pdf  used on input line 95.
+Package pdftex.def Info: gfx/ml-hz-ALIF.pdf  used on input line 86.
 (pdftex.def)             Requested size: 97.44794pt x 102.43008pt.
+<<<<<<< HEAD
 <gfx/ml-hz-STDP-ALIF.pdf, id=1805, 197.6964pt x 198.0242pt>
+=======
+<gfx/ml-hz-STDP-ALIF.pdf, id=1854, 197.6964pt x 198.0242pt>
+>>>>>>> 13b3663032327d70e42a7e5a8248f37ea889bd2b
 File: gfx/ml-hz-STDP-ALIF.pdf Graphic file (type pdf)
 <use gfx/ml-hz-STDP-ALIF.pdf>
-Package pdftex.def Info: gfx/ml-hz-STDP-ALIF.pdf  used on input line 97.
+Package pdftex.def Info: gfx/ml-hz-STDP-ALIF.pdf  used on input line 88.
 (pdftex.def)             Requested size: 102.25972pt x 102.43008pt.
+<<<<<<< HEAD
 <gfx/ml-hz-Izhikevich.pdf, id=1806, 197.22589pt x 198.0242pt>
+=======
+<gfx/ml-hz-Izhikevich.pdf, id=1855, 197.22589pt x 198.0242pt>
+>>>>>>> 13b3663032327d70e42a7e5a8248f37ea889bd2b
 File: gfx/ml-hz-Izhikevich.pdf Graphic file (type pdf)
 <use gfx/ml-hz-Izhikevich.pdf>
-Package pdftex.def Info: gfx/ml-hz-Izhikevich.pdf  used on input line 99.
+Package pdftex.def Info: gfx/ml-hz-Izhikevich.pdf  used on input line 90.
 (pdftex.def)             Requested size: 102.01634pt x 102.43008pt.
+<<<<<<< HEAD
 <gfx/ml-regerr-ALIF.pdf, id=1807, 198.63528pt x 198.43196pt>
+=======
+<gfx/ml-regerr-ALIF.pdf, id=1856, 198.63528pt x 198.43196pt>
+>>>>>>> 13b3663032327d70e42a7e5a8248f37ea889bd2b
 File: gfx/ml-regerr-ALIF.pdf Graphic file (type pdf)
 <use gfx/ml-regerr-ALIF.pdf>
-Package pdftex.def Info: gfx/ml-regerr-ALIF.pdf  used on input line 101.
+Package pdftex.def Info: gfx/ml-regerr-ALIF.pdf  used on input line 92.
 (pdftex.def)             Requested size: 102.5332pt x 102.43008pt.
+<<<<<<< HEAD
 <gfx/ml-regerr-STDP-ALIF.pdf, id=1808, 197.9395pt x 198.43196pt>
+=======
+<gfx/ml-regerr-STDP-ALIF.pdf, id=1857, 197.9395pt x 198.43196pt>
+>>>>>>> 13b3663032327d70e42a7e5a8248f37ea889bd2b
 File: gfx/ml-regerr-STDP-ALIF.pdf Graphic file (type pdf)
 <use gfx/ml-regerr-STDP-ALIF.pdf>
-Package pdftex.def Info: gfx/ml-regerr-STDP-ALIF.pdf  used on input line 103.
+Package pdftex.def Info: gfx/ml-regerr-STDP-ALIF.pdf  used on input line 94.
 (pdftex.def)             Requested size: 102.17404pt x 102.43008pt.
+<<<<<<< HEAD
 <gfx/ml-regerr-Izhikevich.pdf, id=1809, 192.92075pt x 198.43196pt>
+=======
+<gfx/ml-regerr-Izhikevich.pdf, id=1858, 192.92075pt x 198.43196pt>
+>>>>>>> 13b3663032327d70e42a7e5a8248f37ea889bd2b
 File: gfx/ml-regerr-Izhikevich.pdf Graphic file (type pdf)
 <use gfx/ml-regerr-Izhikevich.pdf>
-Package pdftex.def Info: gfx/ml-regerr-Izhikevich.pdf  used on input line 105.
+Package pdftex.def Info: gfx/ml-regerr-Izhikevich.pdf  used on input line 96.
 (pdftex.def)             Requested size: 99.58342pt x 102.43008pt.
-) [47
+) [49
 
 
 
- <./gfx/demo_izh.pdf>] [48 <./gfx/ml-crossentropy-ALIF.pdf> <./gfx/ml-crossentr
-opy-STDP-ALIF.pdf
+ <./gfx/ml-crossentropy-ALIF.pdf> <./gfx/ml-crossentropy-STDP-ALIF.pdf
 
 pdfTeX warning: pdflatex (file ./gfx/ml-crossentropy-STDP-ALIF.pdf): PDF inclus
 ion: multiple pdfs with page group included in a single page
@@ -2820,23 +2975,24 @@ ultiple pdfs with page group included in a single page
 
 pdfTeX warning: pdflatex (file ./gfx/ml-regerr-Izhikevich.pdf): PDF inclusion: 
 multiple pdfs with page group included in a single page
->] [49] [50]
+>] [50] [51] [52
+
+
+
+]
 \openout2 = `FrontBackmatter/Bibliography.aux'.
 
- (./FrontBackmatter/Bibliography.tex [51
+ (./FrontBackmatter/Bibliography.tex [53
 
 
 
-
-
-
-] [52] [53]
+] [54] [55]
 Overfull \hbox (9.95326pt too wide) in paragraph at lines 12--12
 [][]\T1/cmr/m/n/10.95 (-20) Hermans, Michiel and Ben-jamin Schrauwen (2013). ^^
 P  Train-ing and analysing
  []
 
-[54] [55] [56] [57]
+[56] [57] [58] [59]
 Overfull \hbox (18.14105pt too wide) in paragraph at lines 12--12
 \T1/cmr/m/n/10.95 (-20) mate the back-prop-a-ga-tion al-go-rithm.^^Q In: \T1/cm
 r/m/it/10.95 (-20) arXiv preprint arXiv:1810.11393\T1/cmr/m/n/10.95 (-20) . 
@@ -2854,7 +3010,7 @@ Overfull \hbox (5.85368pt too wide) in paragraph at lines 12--12
 0.95 (-20) arXiv preprint arXiv:2004.08900\T1/cmr/m/n/10.95 (-20) . 
  []
 
-[58] [59]) [60]
+[60] [61]) [62]
 Package atveryend Info: Empty hook `BeforeClearDocument' on input line 79.
 Package atveryend Info: Empty hook `AfterLastShipout' on input line 79.
  (./thesis.aux (./FrontBackmatter/Titlepage.aux)
@@ -2872,11 +3028,19 @@ Package logreq Info: Writing requests to 'thesis.run.xml'.
 
  ) 
 Here is how much of TeX's memory you used:
+<<<<<<< HEAD
  48589 strings out of 492982
  975106 string characters out of 6134896
  1561980 words of memory out of 5000000
  50603 multiletter control sequences out of 15000+600000
  577610 words of font info for 272 fonts, out of 8000000 for 9000
+=======
+ 48612 strings out of 492982
+ 975436 string characters out of 6134895
+ 1561401 words of memory out of 5000000
+ 50614 multiletter control sequences out of 15000+600000
+ 577667 words of font info for 275 fonts, out of 8000000 for 9000
+>>>>>>> 13b3663032327d70e42a7e5a8248f37ea889bd2b
  1141 hyphenation exceptions out of 8191
  73i,23n,98p,10509b,3116s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/share/texmf/fonts/enc/dvips/cm-super/cm-super-t1.enc}</usr/share/texliv
@@ -2907,10 +3071,18 @@ frm1095.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfrm1200.pfb></usr/sh
 are/texmf/fonts/type1/public/cm-super/sfss0800.pfb></usr/share/texmf/fonts/type
 1/public/cm-super/sfti1095.pfb></usr/share/texmf/fonts/type1/public/cm-super/sf
 tt0900.pfb></usr/share/texmf/fonts/type1/public/cm-super/sftt1095.pfb>
+<<<<<<< HEAD
 Output written on thesis.pdf (66 pages, 1470458 bytes).
 PDF statistics:
  2447 PDF objects out of 2487 (max. 8388607)
  1463 compressed objects within 15 object streams
  436 named destinations out of 1000 (max. 500000)
+=======
+Output written on thesis.pdf (68 pages, 1477087 bytes).
+PDF statistics:
+ 2478 PDF objects out of 2487 (max. 8388607)
+ 1492 compressed objects within 15 object streams
+ 442 named destinations out of 1000 (max. 500000)
+>>>>>>> 13b3663032327d70e42a7e5a8248f37ea889bd2b
  64449 words of extra memory for PDF output out of 74296 (max. 10000000)
 

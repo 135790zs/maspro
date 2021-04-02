@@ -8,7 +8,7 @@ Its approximately 86 billion neurons \citep{azevedo2009equal} and 100--500 trill
 An early goal of artificial intelligence has been to construct systems that exhibit similar intelligent traits \citep{turing1948intelligent}.
 One of the proposed methods was to emulate the network of biological neurons in the human brain using simple units called perceptrons \citep{rosenblatt1958perceptron}.
 These perceptrons were inspired by Hebbian learning \citep{hebb1949organization}, which was a new (and later corroborated) theory on biological learning.
-This proved to be more difficult than initially hoped, partly due to ostensibly insurmountable problems such as the inability of perceptrons to learn linearly inseparable tasks \citep{minsky1969introduction}.
+This proved to be more difficult than initially hoped, partly due to ostensibly insurmountable problems such as the inability of perceptrons to learn linearly inseparable tasks \citep{minsky2017perceptrons}.
 As a consequence, excitement waned, funding dried up \citep{crevier1993ai}, and the field began focusing on more practical applications, such as expert systems and symbolic reasoning \citep{haugeland1985artificial}.
 After the popularization in the 1980s of trainable Hopfield networks \citep{hopfield1982neural} and backpropagation \citep{rumelhart1986learning}, which enabled learning linearly inseparable tasks, artificial neural networks (ANNs) and the connectionist approach were embraced with a new appreciation.
 
@@ -158,10 +158,10 @@ It is unclear if these findings extrapolate to RSNNs.
 \paragraph{This research}
 In this report, the performance of e-prop in \citet{bellec2020solution} is reproduced.
 Whereas e-prop was implemented using automatic differentiation in that research, in this report it is done explicitly, using the e-prop learning equations, thereby verifying that they are derived correctly.
-Furthermore, the two new STDP neuron models that were suggested in \citet{traub2020learning} are experimentally verified in the TIMIT phone classification task.
+Furthermore, the two new STDP neuron models that were suggested in \citet{traub2020learning} are experimentally verified for the first time in the TIMIT phone classification task.
 One of these models, the STDP-LIF, will be modified to a new adaptive version called STDP-ALIF, thereby linking the ALIF and STDP-LIF neurons models described in \citet{bellec2020solution} and \citet{traub2020learning}, respectively.
 The scientific gain of this research is that the link between STDP and e-prop is more closely examined, and whether the inclusion of STDP in e-prop will lead to faster or more accurate learning.
-If this is the case, the STDP-ALIF neuron model may lead to better learning algorithms in neuromorphic systems.
+If this is the case, the STDP-ALIF neuron model may lead to better and more biologically plausible learning algorithms in neuromorphic systems.
 Finally, the effect of stacking multiple RSNN layers in an e-prop model with each of the three neuron models is examined for the first time, offering some insight on selecting RSNN architectures in neuromorphic e-prop models.
 
 Chapter \ref{ch:relatedwork} describes the basic version of the e-prop framework.

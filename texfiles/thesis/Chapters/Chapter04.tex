@@ -12,12 +12,12 @@ Figure \ref{fig:inoutpair} shows a typical classification result of a full valid
 	    \label{fig:inoutpair}
 	  \end{figure}
 
-\section{Comparing neuron models}
+\section{Comparing neur{}on models}
 	\paragraph{Accuracy}
 		The main outcome of the neuron model comparison is that in these results, the Izhikevich neuron type performs poorly compared to the ALIF and STDP-ALIF neuron models, which reach a similar classification performance.
 		In Figure \ref{fig:percwrong} the Izhikevich neuron reaches a misclassification rate of 94.2\% on the test set, which is only slightly better than constantly guessing the most frequent class.
 		The ALIF neuron reaches a test misclassification rate of 50\% in relatively few iterations, and the STDP-ALIF stably reaches 50\%, and likely lower if training was continued for longer.
-		Note that the test performance was obtained on the model with the best validation accuracy.
+		Note that the test performance was obtained on the model with the best validation accuracy (the used hyperparameters are listed in Table \ref{tab:hparams}).
 
 		Figure \ref{fig:crossentropy} illustrates the decrease of the cross-entropy score, which for the ALIF and STDP-ALIF neurons is comparable to that of the misclassification rate.
 		The cross-entropy of the Izhikevich neuron continues to decrease while its classification accuracy stalls, suggesting that it trains its bias toward more frequent phone classes rather than learning a relationship between input MFCCs and classes.
