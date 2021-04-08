@@ -54,7 +54,7 @@ for t in range(nsteps):
 fig = plt.figure(constrained_layout=False, figsize=(8, 6))
 gsc = fig.add_gridspec(nrows=len(plotvars),
                        ncols=1,
-                       hspace=0.15,
+                       hspace=0,
                        wspace=0.5)
 axs = []
 

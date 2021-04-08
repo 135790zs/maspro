@@ -2,7 +2,7 @@ from numpy import exp
 cfg = {
     "eprop_type": "symmetric",  # in {global, random, symmetric, adaptive}
     "Optimizer": "Adam",  # No effect, always Adam
-    "neuron": "STDP-ALIF",  # in {ALIF, STDP-ALIF, Izhikevich}
+    "neuron": "ALIF",  # in {ALIF, STDP-ALIF, Izhikevich}
     "v_fix": True,
     "v_fix_psi": True,
     "fraction_ALIF": 0.25,  # def 0.25
@@ -28,7 +28,7 @@ cfg = {
     "IzhReset": -65,
     "IzhThr": 30,
 
-    "dropout": 0.8,
+    "dropout": 0,
 
     "eta_W_in": 0.01,
     "eta_W_rec": 0.01,
@@ -53,7 +53,7 @@ cfg = {
     "N_R": 800,
     "N_Rec": 1,
 
-    "task": "TIMIT_small",
+    "task": "TIMIT",
     "wavs_fname": "../data/data_wavs",
     "phns_fname": "../data/data_phns",
 
@@ -67,7 +67,7 @@ cfg = {
     "train_out": True,
     "train_bias": True,
 
-    "Epochs": 80,  # def = 80
+    "Epochs": 200,  # def = 80
     "Track_neuron": True,
     "Track_synapse": False,
     "Repeats": 1,  # ms per epoch, def = 5
@@ -77,17 +77,17 @@ cfg = {
     "batch_size_test": 32,  # def = 32
     "maxlen": 778,
     "TIMIT_derivative": 2,
-    "n_examples": {'train': 30, 'val': 30, 'test': 1},  # Re-process TIMIT!
-    # "n_examples": {'train': 3696, 'val': 400, 'test': 192},
+    # "n_examples": {'train': 30, 'val': 30, 'test': 1},  # Re-process TIMIT!
+    "n_examples": {'train': 3696, 'val': 400, 'test': 192},
     "plot_model_interval": 10,  # Per iter  #  State plot; 0 to disable plots
     "plot_tracker_interval": 10,  # Per it
     "state_save_interval": 10,
     "val_every_B": 10,
-    "visualize_val": True,
+    "visualize_val": False,
     "early_stopping": False,
-    "test_on_val": False,
-    "load_weights": "STDP-ALIF 1 layer/BEST 2021-02-26-17:16:34 48in2000",
-    "skip_training": True,
+    "test_on_val": True,
+    "load_weights": None,#"Izhikevich 1 layer/BEST 2021-04-05-21:25:02 80in200 max 1600",
+    "skip_training": False,
 
     # Max batches per epoch
     "max_train_batches": -1,

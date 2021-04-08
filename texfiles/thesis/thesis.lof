@@ -9,32 +9,32 @@
 \ttl@tocsep 
 \ttl@tocsep 
 \ttl@tocsep 
-\contentsline {figure}{\numberline {2.1}{\ignorespaces ALIF neuron simulation.}}{11}{figure.caption.10}
-\contentsline {figure}{\numberline {2.2}{\ignorespaces Single-layer illustration.}}{13}{figure.caption.11}
-\contentsline {figure}{\numberline {2.3}{\ignorespaces Single-synapse ALIF demo.}}{18}{figure.caption.15}
+\contentsline {figure}{\numberline {2.1}{\ignorespaces ALIF neuron simulation}}{11}{figure.caption.10}
+\contentsline {figure}{\numberline {2.2}{\ignorespaces Single-layer architecture illustration}}{13}{figure.caption.11}
+\contentsline {figure}{\numberline {2.3}{\ignorespaces Single-synapse ALIF simulation}}{18}{figure.caption.15}
 \ttl@tocsep 
-\contentsline {figure}{\numberline {3.1}{\ignorespaces A raw waveform signal from the TIMIT dataset.\relax }}{23}{figure.caption.19}
-\contentsline {figure}{\numberline {3.2}{\ignorespaces Pre-emphasis}}{23}{figure.caption.21}
-\contentsline {figure}{\numberline {3.3}{\ignorespaces The form of the Hamming window applied on signal frames to reduce spectral leakage.\relax }}{24}{figure.caption.23}
-\contentsline {figure}{\numberline {3.4}{\ignorespaces The power spectra of a sentence.\relax }}{25}{figure.caption.25}
-\contentsline {figure}{\numberline {3.5}{\ignorespaces The Mel-spaced filterbanks.\relax }}{26}{figure.caption.27}
-\contentsline {figure}{\numberline {3.6}{\ignorespaces An example of the spectrogram of a sentence.\relax }}{26}{figure.caption.28}
+\contentsline {figure}{\numberline {3.1}{\ignorespaces Raw TIMIT waveform signal\relax }}{23}{figure.caption.19}
+\contentsline {figure}{\numberline {3.2}{\ignorespaces Pre-emphasis filtered signal}}{23}{figure.caption.21}
+\contentsline {figure}{\numberline {3.3}{\ignorespaces Hamming window}}{24}{figure.caption.23}
+\contentsline {figure}{\numberline {3.4}{\ignorespaces Power spectra}}{25}{figure.caption.25}
+\contentsline {figure}{\numberline {3.5}{\ignorespaces Mel-spaced filterbanks}}{26}{figure.caption.27}
+\contentsline {figure}{\numberline {3.6}{\ignorespaces Spectrogram}}{26}{figure.caption.28}
 \contentsline {figure}{\numberline {3.7}{\ignorespaces Input/features/targets}}{36}{figure.caption.30}
 \contentsline {subfigure}{\numberline {(a)}{\ignorespaces {The raw speech input signal.}}}{36}{subfigure.7.1}
 \contentsline {subfigure}{\numberline {(b)}{\ignorespaces {MFCCs centered around 0 per channel. Note that these MFCCs are standardized channel-wise over the full training dataset.}}}{36}{subfigure.7.2}
 \contentsline {subfigure}{\numberline {(c)}{\ignorespaces {Target signal encoded as a one-hot vector changing over time. The order of phones along the one-hot vector corresponds to the order in which they are encountered in processing the dataset. This particular example shows a pattern because it is the first processed sentence in the training set.}}}{36}{subfigure.7.3}
-\contentsline {figure}{\numberline {3.8}{\ignorespaces Multi-layer illustration.}}{37}{figure.caption.32}
-\contentsline {figure}{\numberline {3.9}{\ignorespaces A single-synapse demonstration of the STDP-ALIF.\relax }}{37}{figure.caption.35}
-\contentsline {figure}{\numberline {3.10}{\ignorespaces A single-synapse demo of the uncorrected Izhikevich neuron.}}{38}{figure.caption.36}
-\contentsline {figure}{\numberline {3.11}{\ignorespaces A single-synapse demo of the corrected Izhikevich neuron.\relax }}{38}{figure.caption.37}
+\contentsline {figure}{\numberline {3.8}{\ignorespaces Multi-layer illustration}}{37}{figure.caption.32}
+\contentsline {figure}{\numberline {3.9}{\ignorespaces Single-synapse STDP-ALIF simulation}}{37}{figure.caption.35}
+\contentsline {figure}{\numberline {3.10}{\ignorespaces Uncorrected Izhikevich neuron simulation}}{38}{figure.caption.36}
+\contentsline {figure}{\numberline {3.11}{\ignorespaces Corrected Izhikevich neuron simulation}}{38}{figure.caption.37}
 \ttl@tocsep 
-\contentsline {figure}{\numberline {4.1}{\ignorespaces Input-output-target example.}}{39}{figure.caption.38}
-\contentsline {figure}{\numberline {4.2}{\ignorespaces Classification performance for each of the three neuron models in a single-layer e-prop model.}}{40}{figure.caption.40}
+\contentsline {figure}{\numberline {4.1}{\ignorespaces Input/output/target example}}{39}{figure.caption.38}
+\contentsline {figure}{\numberline {4.2}{\ignorespaces Single-layer classification performance per neuron model}}{40}{figure.caption.40}
 \contentsline {subfigure}{\numberline {(a)}{\ignorespaces {Percentage of samples wrongly classified.}}}{40}{subfigure.2.1}
 \contentsline {subfigure}{\numberline {(b)}{\ignorespaces {Cross-entropy loss (log-scaled).}}}{40}{subfigure.2.2}
-\contentsline {figure}{\numberline {4.3}{\ignorespaces Effect of firing rate regularization for each of the three neuron models.}}{40}{figure.caption.42}
-\contentsline {subfigure}{\numberline {(a)}{\ignorespaces {Mean spiking frequency.}}}{40}{subfigure.3.1}
-\contentsline {subfigure}{\numberline {(b)}{\ignorespaces {Regularization error.}}}{40}{subfigure.3.2}
+\contentsline {figure}{\numberline {4.3}{\ignorespaces Single-layer firing rate regularization per neuron model}}{41}{figure.caption.42}
+\contentsline {subfigure}{\numberline {(a)}{\ignorespaces {Mean spiking frequency. Note the logarithmic horizontal axis.}}}{41}{subfigure.3.1}
+\contentsline {subfigure}{\numberline {(b)}{\ignorespaces {Regularization error. Note the logarithmic vertical axis.}}}{41}{subfigure.3.2}
 \contentsline {figure}{\numberline {4.4}{\ignorespaces Single- and multi-layer accuracy comparison}}{41}{figure.caption.43}
 \contentsline {subfigure}{\numberline {(a)}{\ignorespaces {ALIF model.}}}{41}{subfigure.4.1}
 \contentsline {subfigure}{\numberline {(b)}{\ignorespaces {STDP-ALIF model.}}}{41}{subfigure.4.2}

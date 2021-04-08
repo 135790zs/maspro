@@ -83,7 +83,7 @@
             \begin{figure}[!ht]
                 \centering
                 \includegraphics[width=\linewidth]{gfx/simplealif}
-                \caption[ALIF neuron simulation.]{A simulated ALIF neuron $j$ receives a sinusoidal input $I$ for 300 time steps $t$. This figure illustrates the adaptive threshold $a$, which increases at every spike $z$, requiring a higher activity $v$ for a next spike. When a spike occurs, $v$ decreases by $v_\text{th}$. Note that the first wave of the sinusoid elicits a stronger spike train than subsequent waves, demonstrating the homeostatic effect of the adaptive threshold. Note also that on a short time scale, spikes tend to occur primarily in the upward phases of the sinusoid, suggesting that ALIF neurons are well-suited to respond to changes in the input signals.}
+                \caption[ALIF neuron simulation]{A simulated ALIF neuron $j$ receives a sinusoidal input $I$ for 300 time steps $t$. This figure illustrates the adaptive threshold $a$, which increases at every spike $z$, requiring a higher activity $v$ for a next spike. When a spike occurs, $v$ decreases by $v_\text{th}$. Note that the first wave of the sinusoid elicits a stronger spike train than subsequent waves, demonstrating the homeostatic effect of the adaptive threshold. Note also that on a short time scale, spikes tend to occur primarily in the upward phases of the sinusoid, suggesting that ALIF neurons are well-suited to respond to changes in the input signals.}
                 \label{fig:simplealif}
             \end{figure}
 
@@ -112,7 +112,7 @@
         Figure \ref{fig:topology-sl} illustrates the basic architecture of a single-layer e-prop model.
         \begin{figure}[!ht]
             \myfloatalign
-            \includegraphics[trim=0 25cm 0 0, clip, width=\linewidth]{gfx/Singlelayer}\caption[Single-layer illustration.]{A basic illustration of a single-layer network architecture.
+            \includegraphics[trim=0 25cm 0 0, clip, width=\linewidth]{gfx/Singlelayer}\caption[Single-layer architecture illustration]{A basic illustration of a single-layer network architecture.
             An input vector $\mathbf{x}^t$ at time step $t$ is fed to a pool of $N$ recurrent neurons with hidden states $\mathbf{h}^t$ and observable states $\mathbf{z}^t$ through input weights $\mathbf{W}^\text{in}$. The recurrent weights $\mathbf{W}^\text{rec}$ connect neurons with each other, but no self-loops exist. A randomly selected 25\% of these neurons is a LIF neuron (\ie, $\beta = 0$) and the others are ALIF neurons. The output weights $\mathbf{W}^\text{out}$ process the observable states of the neurons through a softmax function into a logits layer $\mathbf{\pi}^t$. These logits are compared with the target output $\mathbf{\pi}^{*, t}$ and multiplied with broadcast weights $\mathbf{B}^t$ to obtain a learning signal $L_j^t$ for every neuron $j$ in the pool. Note that weights illustrated in red are e-prop weights, \ie, they track eligibility traces.}
             \label{fig:topology-sl}
           \end{figure}
@@ -131,9 +131,9 @@
         In this subsection, the main equation of e-prop
         \begin{equation}
         \frac{dE}{dW_{ji}} =
-        \sum_t\frac{dE}{dz_j^t}\cdot\left[\frac{dz_j^t}{dW_{ji}}\right]_\text{local}
+        \sum_t\frac{dE}{dz_j^t}\cdot\left[\frac{dz_j^t}{dW_{ji}}\right]_\text{local},
         \end{equation}
-        is derived from the classical factorization of the loss gradients in an unfolded RNN as in \citet{bellec2020solution}:
+        where $\cdot$ denotes the dot product, is derived from the classical factorization of the loss gradients in an unfolded RNN as in \citet{bellec2020solution}:
         \begin{equation}\label{eq:clafac}
         \frac{dE}{dW_{ji}} = \sum_{t' \leq T}\frac{dE}{d\mathbf{h}_j^{t'}}\cdot\frac{\partial \mathbf{h}_j^{t'}}{\partial W_{ji}},
         \end{equation}
@@ -343,7 +343,7 @@
             \begin{figure}[ht]
                 \centering
                 \includegraphics[width=\linewidth]{gfx/alif}
-                \caption[Single-synapse ALIF demo.]{A single-synapse demonstration of the evolution of the full hidden state of the ALIF neuron. The blue lines indicate the postsynaptic neuron $j$, and the orange lines indicate the presynaptic neuron $i$. The injected current $I^t$ increases the voltage $v^t_j$ and is deliberately controlled to produce the spike pattern $z^t_j$ where the postsynaptic neuron spikes after the presynaptic neuron during the first half, and vice versa during the second half of the plot. The learning signal $L^t_j$ is kept at a constant value and is omitted for clarity, such that the relation between the eligibility trace $e^t_{ji}$ and the accumulated weight change $\Delta W^t_{ji}$ can be clearly observed. Note that the synapse weight increases regardless of the order of spikes, indicating an absence of STDP in the standard e-prop ALIF neuron.}
+                \caption[Single-synapse ALIF simulation]{A single-synapse simulation of the evolution of the full hidden state of the ALIF neuron. The blue lines indicate the postsynaptic neuron $j$, and the orange lines indicate the presynaptic neuron $i$. The injected current $I^t$ increases the voltage $v^t_j$ and is deliberately controlled to produce the spike pattern $z^t_j$ where the postsynaptic neuron spikes after the presynaptic neuron during the first half, and vice versa during the second half of the plot. The learning signal $L^t_j$ is kept at a constant value and is omitted for clarity, such that the relation between the eligibility trace $e^t_{ji}$ and the accumulated weight change $\Delta W^t_{ji}$ can be clearly observed. Note that the synapse weight increases regardless of the order of spikes, indicating an absence of STDP in the standard e-prop ALIF neuron.}
                 \label{fig:alif}
             \end{figure}
 

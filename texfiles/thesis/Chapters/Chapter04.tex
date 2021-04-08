@@ -8,16 +8,17 @@ Figure \ref{fig:inoutpair} shows a typical classification result of a full valid
 	\begin{figure}[ht]
 	    \myfloatalign
 	    \includegraphics[width=\linewidth]{gfx/InOutPair}
-	    \caption[Input-output-target example.]{An example validation result using a trained ALIF model. The top row shows the standardized MFCC frames of a sentence changing over time. The second row shows the probability distributions of the frame-wise outputs of the model. The third row is the most likely phone. The last layer shows the target phones.}
+	    \caption[Input/output/target example]{An example validation result using a trained ALIF model. The top row shows the standardized MFCC frames of a sentence changing over time. The second row shows the probability distributions of the frame-wise outputs of the model. The third row is the most likely phone. The last layer shows the target phones.}
 	    \label{fig:inoutpair}
 	  \end{figure}
 
-\section{Comparing neur{}on models}
+\section{Comparing neuron models}
 	\paragraph{Accuracy}
-		The main outcome of the neuron model comparison is that in these results, the Izhikevich neuron type performs poorly compared to the ALIF and STDP-ALIF neuron models, which reach a similar classification performance.
-		In Figure \ref{fig:percwrong} the Izhikevich neuron reaches a misclassification rate of 94.2\% on the test set, which is only slightly better than constantly guessing the most frequent class.
-		The ALIF neuron reaches a test misclassification rate of 50\% in relatively few iterations, and the STDP-ALIF stably reaches 50\%, and likely lower if training was continued for longer.
-		Note that the test performance was obtained on the model with the best validation accuracy (the used hyperparameters are listed in Table \ref{tab:hparams}).
+		The main outcome of the neuron model comparison is that in these results, the Izhikevich neuron type performs poorly compared to the ALIF and STDP-ALIF neuron models.
+		In Figure \ref{fig:percwrong} the Izhikevich neuron reaches a misclassification rate of 93.8\% on the test set, which is only slightly better than constantly guessing the most frequent class.
+		The ALIF neuron model reaches a test misclassification rate of 58.4\% in relatively few iterations, after which validation performance starts to decrease.
+		The STDP-ALIF neuron model scores best, reaching a performance of 48.3\% after approximately 3500 iterations.
+		Note that the test performance was obtained from the model with the best validation accuracy (the used hyperparameters are listed in Table \ref{tab:hparams}).
 
 		Figure \ref{fig:crossentropy} illustrates the decrease of the cross-entropy score, which for the ALIF and STDP-ALIF neurons is comparable to that of the misclassification rate.
 		The cross-entropy of the Izhikevich neuron continues to decrease while its classification accuracy stalls, suggesting that it trains its bias toward more frequent phone classes rather than learning a relationship between input MFCCs and classes.
@@ -29,30 +30,24 @@ Figure \ref{fig:inoutpair} shows a typical classification result of a full valid
 		    \subfloat[Cross-entropy loss (log-scaled).]
 		    {\label{fig:crossentropy}%
 		        \includegraphics[height=5cm, keepaspectratio]{gfx/crossentropy}}
-		    \caption[Classification performance for each of the three neuron models in a single-layer e-prop model.]{Classification performance on the validation data for each of the three neuron models in a single-layer e-prop model. The opaque lines indicate the running average of the real validation scores indicated by the transparent lines. The star symbols indicate the performances on the test set, with a misclassification rate of 92.4\% for the Izhikevich neuron, 50.3\% for the ALIF neuron, and 50\% for the STDP-ALIF neuron type.}\label{fig:sl-acc}
+		    \caption[Single-layer classification performance per neuron model]{Classification performance on the validation data for each of the three neuron models in a single-layer e-prop model. The opaque lines indicate the running average of the real validation scores indicated by the transparent lines. The star symbols indicate the performances on the test set, with a misclassification rate of 93.5\% for the Izhikevich neuron, 58.4\% for the ALIF neuron, and 48.3\% for the STDP-ALIF neuron type.}\label{fig:sl-acc}
 		\end{figure}
-
-% testscores = {
-% 	'ALIF': {1: (50.3, 1.772), 2: (64.5, 2.558), 3: (74.1, 3.345)},
-% 	'STDP-ALIF': {1: (50.0, 1.751), 2: (65.3, 2.643), 3: (88.3, 4.779)},
-% 	'Izhikevich': {1: (94.2, 6.794), 2: (88.2, 4.259), 3: (88.5, 4.161)}
-% }
 
 	\paragraph{Firing rate}
 		Figure \ref{fig:freqs} illustrates the effect of the firing regularization term.
-		It can be observed that the ALIF and STDP-ALIF neuron models are able to quickly change their mean spiking frequencies to the desired target frequency of \SI{10}{\Hz}, but the Izhikevich neuron increases past this rate to a spiking frequency of approximately \SI{18}{\Hz}.
+		It can be observed that the ALIF and STDP-ALIF neuron models are able to quickly modulate their mean spiking frequencies to the desired target frequency of \SI{10}{\Hz}, but the Izhikevich neuron increases past this rate to a spiking frequency of approximately \SI{18}{\Hz}.
 
 		Figure \ref{fig:regerr} illustrates the decrease of the regularization error.
-		The ALIF neuron appears to slightly better adapt to the regularization term.
-		The Izhikevich neuron, again, underperforms significantly.
+		The regularization error of the Izhikevich and ALIF neuron models quickly converges to fluctuate around a constant value, whereas that of the STDP-ALIF neuron model continues to decrease over time, even while the mean spiking frequency and classification performance have both converged to a plateau.
+
 		\begin{figure}[bth]
 		    \myfloatalign
-		    \subfloat[Mean spiking frequency.]
+		    \subfloat[Mean spiking frequency. Note the logarithmic horizontal axis.]
 		    {\label{fig:freqs}\includegraphics[height=5cm, keepaspectratio]{gfx/hz}} \quad
-		    \subfloat[Regularization error.]
+		    \subfloat[Regularization error. Note the logarithmic vertical axis.]
 		    {\label{fig:regerr}%
 		        \includegraphics[height=5cm, keepaspectratio]{gfx/regerr}}
-		    \caption[Effect of firing rate regularization for each of the three neuron models.]{Effect of firing rate regularization on the validation data for each of the three neuron models.}\label{fig:sl-reg}
+		    \caption[Single-layer firing rate regularization per neuron model]{Effect of firing rate regularization on the validation data for each of the three neuron models.}\label{fig:sl-reg}
 		\end{figure}
 
 \section{Comparing network depth}

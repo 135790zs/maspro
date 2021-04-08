@@ -14,9 +14,9 @@ COMPARE_NEURONS = False
 figsize = (2.5, 2.5)
 
 testscores = {
-	'ALIF': {1: (50.3, 1.772), 2: (64.5, 2.558), 3: (74.1, 3.345)},
-	'STDP-ALIF': {1: (50.0, 1.751), 2: (65.3, 2.643), 3: (88.3, 4.779)},
-	'Izhikevich': {1: (94.2, 6.794), 2: (88.2, 4.259), 3: (88.5, 4.161)}
+	'ALIF': {1: (58.4, 2.233), 2: (64.5, 2.558), 3: (74.1, 3.345)},
+	'STDP-ALIF': {1: (48.3, 1.732), 2: (65.3, 2.643), 3: (88.3, 4.779)},
+	'Izhikevich': {1: (93.5, 8.863), 2: (88.2, 4.259), 3: (88.5, 4.161)}
 }
 
 tf_conv = {  # title
@@ -58,8 +58,12 @@ if COMPARE_NEURONS:
 		for k_idx, k in enumerate(types):
 			raw = d[tf][k]['val'][d[tf][k]['val'] != -1]
 			smooth = raw.rolling(window=12).mean()
-			sns.lineplot(ax=ax, data=raw, alpha=0.2, color=colors[k_idx])
-			sns.lineplot(ax=ax, data=smooth, label=k, color=colors[k_idx])
+
+			if tf_conv[tf] in ["Mean frequency (Hz)"]:
+				sns.lineplot(ax=ax, data=raw, alpha=1, label=k, color=colors[k_idx])
+			else:
+				sns.lineplot(ax=ax, data=raw, alpha=0.2, color=colors[k_idx])
+				sns.lineplot(ax=ax, data=smooth, label=k, color=colors[k_idx])
 
 			# Plot test star
 			if tf_conv[tf] == 'Cross-entropy error':
@@ -69,6 +73,8 @@ if COMPARE_NEURONS:
 
 		if tf_conv[tf] in ['Cross-entropy error', '$E_{{reg}}$']:
 			ax.set(yscale='log')
+		if tf_conv[tf] in ["Mean frequency (Hz)"]:
+			ax.set(xscale='log')
 		if tf_conv[tf] == 'Cross-entropy error':
 			ax.set(ylim=(1, None))
 

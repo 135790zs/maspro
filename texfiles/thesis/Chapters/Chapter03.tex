@@ -26,7 +26,7 @@
 		        All  & 438 (70\%) & 192 (30\%) & 630 (100\%) \\
 		        \bottomrule
 		    \end{tabularx}
-		    \caption[TIMIT Dialect Regions]{Distribution of speakers' dialect regions and sexes. Speakers of the innominate dialect region 8 relocated often during their childhood.}  \label{tab:dialects}
+		    \caption[TIMIT dialect regions]{Distribution of speakers' dialect regions and sexes. Speakers of the innominate dialect region 8 relocated often during their childhood.}  \label{tab:dialects}
 		\end{table}
 
 		The sentence text can be categorized into 2 \emph{dialect} sentences, 450 \emph{phonetically compact} sentences, and 1890 \emph{phonetically diverse} sentences.
@@ -49,7 +49,7 @@
 		        Total   & 2342 &     & 6300 \\
 		        \bottomrule
 		    \end{tabularx}
-		    \caption[TIMIT Sentence Types]{Distribution of sentence types.}
+		    \caption[TIMIT sentence types]{Distribution of sentence types.}
 		    \label{tab:types}
 		\end{table}
 
@@ -84,7 +84,7 @@
 			\begin{figure}[ht]
 				\centering
 			    \includegraphics[width=\linewidth]{gfx/signal}
-			    \caption{A raw waveform signal from the TIMIT dataset.}
+			    \caption{Raw TIMIT waveform signal}
 			    \label{fig:signal}
 			\end{figure}
 
@@ -100,7 +100,7 @@
 			\begin{figure}[ht]
 				\centering
 			    \includegraphics[width=\linewidth]{gfx/signalemph}
-			    \caption[Pre-emphasis]{A signal after the pre-emphasis filter of Equation \ref{eq:pre_emphasis} was applied to it.}
+			    \caption[Pre-emphasis filtered signal]{A signal after the pre-emphasis filter of Equation \ref{eq:pre_emphasis} was applied to it.}
 			    \label{fig:signalemph}
 			\end{figure}
 
@@ -127,7 +127,7 @@
 			\begin{figure}[ht]
 				\centering
 			    \includegraphics[width=0.45\linewidth]{gfx/hamming}
-			    \caption{The form of the Hamming window applied on signal frames to reduce spectral leakage.}
+			    \caption[Hamming window]{The form of the Hamming window applied on signal frames to reduce spectral leakage.}
 			    \label{fig:hamming}
 			\end{figure}
 			This window is applied to reduce the spectral leakage, which manifests itself though sidelobes in the power spectra.
@@ -152,7 +152,7 @@
 			\begin{figure}[ht]
 				\centering
 			    \includegraphics[width=0.45\linewidth]{gfx/powframes}
-			    \caption{The power spectra of a sentence.}
+			    \caption[Power spectra]{The power spectra of a sentence.}
 			    \label{fig:powframes}
 			\end{figure}
 
@@ -202,7 +202,7 @@
 			\begin{figure}[ht]
 				\centering
 			    \includegraphics[width=\linewidth]{gfx/fbanks}
-			    \caption{The Mel-spaced filterbanks.}
+			    \caption[Mel-spaced filterbanks]{The Mel-spaced filterbanks.}
 			    \label{fig:filterbank}
 			\end{figure}
 
@@ -211,7 +211,7 @@
 			\begin{figure}[ht]
 				\centering
 			    \includegraphics[width=\linewidth]{gfx/spectrogram}
-			    \caption{An example of the spectrogram of a sentence.}
+			    \caption[Spectrogram]{An example of the spectrogram of a sentence.}
 			    \label{fig:spectrogram}
 			\end{figure}
 
@@ -219,10 +219,6 @@
 
 			Coefficients in the spectrograms are strongly correlated, which would negatively impact the learning performance of the model.
 			Therefore, the DCT is applied again to decorrelate the coefficients and obtain the power cepstrum $C$ of the speech frame:
-
-			% \begin{equation}
-			% 	C(n) = \left|\sum_{n=0}^{N-1}S(n)\cdot e^{-\frac{i2\pi}{N}kn}\right|.
-			% \end{equation}
 
 			\begin{equation}
 				C_k = 2c\sum^{N-1}_{n=0}S\left(n\right)\cos\left(\frac{\pi k\left(2n+1\right)}{2N}\right),
@@ -278,7 +274,7 @@
 		\begin{figure}[!ht]
 		    \myfloatalign
 		    \includegraphics[trim=0 25cm 0 0, clip, width=\linewidth]{gfx/Multilayer}
-		    \caption[Multi-layer illustration.]{An illustration of a multi-layer network architecture. Some details shown in Figure (\ref{fig:topology-sl} b) are omitted for clarity}
+		    \caption[Multi-layer illustration]{An illustration of a multi-layer network architecture. Some details shown in Figure \ref{fig:topology-sl} are omitted for clarity.}
 		    \label{fig:topology-ml}
 		  \end{figure}
 
@@ -389,7 +385,7 @@
 	        \begin{figure}[!ht]
 	            \centering
 	            \includegraphics[width=\linewidth]{gfx/stdpalif}
-	            \caption{A single-synapse demonstration of the STDP-ALIF.}
+	            \caption[Single-synapse STDP-ALIF simulation]{A single-synapse simulation of the STDP-ALIF neuron model.}
 	            \label{fig:stdpalif}
 	        \end{figure}
 
@@ -447,7 +443,7 @@
 		\begin{figure}[ht]
 		    \centering
 		    \includegraphics[width=\linewidth]{gfx/demo_izh}
-		    \caption[A single-synapse demo of the uncorrected Izhikevich neuron.]{A single-synapse demo of the uncorrected Izhikevich neuron. Note that $\epsilon^t_{ji, v}$ takes on extreme values and that the eligibility vector flips sign at any pair of spikes.}
+		    \caption[Uncorrected Izhikevich neuron simulation]{A single-synapse simulation of the uncorrected Izhikevich neuron. Note that $\epsilon^t_{ji, v}$ takes on extreme values and that the eligibility vector flips sign at any pair of spikes.}
 		    \label{fig:demo_izh}
 		\end{figure}
 
@@ -458,7 +454,7 @@
         \begin{figure}[ht]
             \centering
             \includegraphics[width=\linewidth]{gfx/demo_izh_corrected}
-            \caption{A single-synapse demo of the corrected Izhikevich neuron.}
+            \caption[Corrected Izhikevich neuron simulation]{A single-synapse simulation of the corrected Izhikevich neuron.}
             \label{fig:demo_izh_corrected}
         \end{figure}
 

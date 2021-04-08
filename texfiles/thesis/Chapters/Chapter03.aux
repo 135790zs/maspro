@@ -7,36 +7,36 @@
 \newlabel{ch:method}{{3}{21}{Error metric}{chapter.3}{}}
 \@writefile{toc}{\contentsline {section}{\numberline {3.1}{Data Preprocessing}}{21}{section.3.1}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {3.1.1}{The TIMIT speech corpus}}{21}{subsection.3.1.1}}
-\@writefile{lot}{\contentsline {table}{\numberline {3.1}{\ignorespaces TIMIT Dialect Regions}}{21}{table.caption.17}}
-\newlabel{tab:dialects}{{3.1}{21}{TIMIT Dialect Regions}{table.caption.17}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {3.1}{\ignorespaces TIMIT dialect regions}}{21}{table.caption.17}}
+\newlabel{tab:dialects}{{3.1}{21}{TIMIT dialect regions}{table.caption.17}{}}
 \mph@setcol{ii:21}{\mph@nr}
-\@writefile{lot}{\contentsline {table}{\numberline {3.2}{\ignorespaces TIMIT Sentence Types}}{22}{table.caption.18}}
-\newlabel{tab:types}{{3.2}{22}{TIMIT Sentence Types}{table.caption.18}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {3.2}{\ignorespaces TIMIT sentence types}}{22}{table.caption.18}}
+\newlabel{tab:types}{{3.2}{22}{TIMIT sentence types}{table.caption.18}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {3.1.2}{Data splitting}}{22}{subsection.3.1.2}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {3.1.3}{Engineering features}}{22}{subsection.3.1.3}}
 \mph@setcol{ii:22}{\mph@nr}
-\@writefile{lof}{\contentsline {figure}{\numberline {3.1}{\ignorespaces A raw waveform signal from the TIMIT dataset.\relax }}{23}{figure.caption.19}}
-\newlabel{fig:signal}{{3.1}{23}{A raw waveform signal from the TIMIT dataset.\relax }{figure.caption.19}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3.1}{\ignorespaces Raw TIMIT waveform signal\relax }}{23}{figure.caption.19}}
+\newlabel{fig:signal}{{3.1}{23}{Raw TIMIT waveform signal\relax }{figure.caption.19}{}}
 \@writefile{toc}{\contentsline {paragraph}{{Pre-emphasis}}{23}{paragraph*.20}}
 \newlabel{eq:pre_emphasis}{{3.1}{23}{Pre-emphasis}{equation.3.1.1}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {3.2}{\ignorespaces Pre-emphasis}}{23}{figure.caption.21}}
-\newlabel{fig:signalemph}{{3.2}{23}{Pre-emphasis}{figure.caption.21}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3.2}{\ignorespaces Pre-emphasis filtered signal}}{23}{figure.caption.21}}
+\newlabel{fig:signalemph}{{3.2}{23}{Pre-emphasis filtered signal}{figure.caption.21}{}}
 \@writefile{toc}{\contentsline {paragraph}{{Framing}}{23}{paragraph*.22}}
 \mph@setcol{ii:23}{\mph@nr}
 \newlabel{eq:hamming}{{3.2}{24}{Framing}{equation.3.1.2}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {3.3}{\ignorespaces The form of the Hamming window applied on signal frames to reduce spectral leakage.\relax }}{24}{figure.caption.23}}
-\newlabel{fig:hamming}{{3.3}{24}{The form of the Hamming window applied on signal frames to reduce spectral leakage.\relax }{figure.caption.23}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3.3}{\ignorespaces Hamming window}}{24}{figure.caption.23}}
+\newlabel{fig:hamming}{{3.3}{24}{Hamming window}{figure.caption.23}{}}
 \@writefile{toc}{\contentsline {paragraph}{{Short-term power spectra}}{24}{paragraph*.24}}
 \newlabel{eq:powframes}{{3.4}{24}{Short-term power spectra}{equation.3.1.4}{}}
 \mph@setcol{ii:24}{\mph@nr}
-\@writefile{lof}{\contentsline {figure}{\numberline {3.4}{\ignorespaces The power spectra of a sentence.\relax }}{25}{figure.caption.25}}
-\newlabel{fig:powframes}{{3.4}{25}{The power spectra of a sentence.\relax }{figure.caption.25}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3.4}{\ignorespaces Power spectra}}{25}{figure.caption.25}}
+\newlabel{fig:powframes}{{3.4}{25}{Power spectra}{figure.caption.25}{}}
 \@writefile{toc}{\contentsline {paragraph}{{Mel filterbank}}{25}{paragraph*.26}}
 \mph@setcol{ii:25}{\mph@nr}
-\@writefile{lof}{\contentsline {figure}{\numberline {3.5}{\ignorespaces The Mel-spaced filterbanks.\relax }}{26}{figure.caption.27}}
-\newlabel{fig:filterbank}{{3.5}{26}{The Mel-spaced filterbanks.\relax }{figure.caption.27}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {3.6}{\ignorespaces An example of the spectrogram of a sentence.\relax }}{26}{figure.caption.28}}
-\newlabel{fig:spectrogram}{{3.6}{26}{An example of the spectrogram of a sentence.\relax }{figure.caption.28}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3.5}{\ignorespaces Mel-spaced filterbanks}}{26}{figure.caption.27}}
+\newlabel{fig:filterbank}{{3.5}{26}{Mel-spaced filterbanks}{figure.caption.27}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3.6}{\ignorespaces Spectrogram}}{26}{figure.caption.28}}
+\newlabel{fig:spectrogram}{{3.6}{26}{Spectrogram}{figure.caption.28}{}}
 \@writefile{toc}{\contentsline {paragraph}{{Mel-frequency cepstral coefficients}}{26}{paragraph*.29}}
 \mph@setcol{ii:26}{\mph@nr}
 \@writefile{toc}{\contentsline {paragraph}{{Target output}}{27}{paragraph*.31}}
@@ -76,15 +76,15 @@
 \@writefile{lof}{\contentsline {subfigure}{\numberline{(b)}{\ignorespaces {MFCCs centered around 0 per channel. Note that these MFCCs are standardized channel-wise over the full training dataset.}}}{36}{subfigure.7.2}}
 \@writefile{lof}{\contentsline {subfigure}{\numberline{(c)}{\ignorespaces {Target signal encoded as a one-hot vector changing over time. The order of phones along the one-hot vector corresponds to the order in which they are encountered in processing the dataset. This particular example shows a pattern because it is the first processed sentence in the training set.}}}{36}{subfigure.7.3}}
 \mph@setcol{ii:36}{\mph@nr}
-\@writefile{lof}{\contentsline {figure}{\numberline {3.8}{\ignorespaces Multi-layer illustration.}}{37}{figure.caption.32}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3.8}{\ignorespaces Multi-layer illustration}}{37}{figure.caption.32}}
 \newlabel{fig:topology-ml}{{3.8}{37}{Multi-layer illustration}{figure.caption.32}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {3.9}{\ignorespaces A single-synapse demonstration of the STDP-ALIF.\relax }}{37}{figure.caption.35}}
-\newlabel{fig:stdpalif}{{3.9}{37}{A single-synapse demonstration of the STDP-ALIF.\relax }{figure.caption.35}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3.9}{\ignorespaces Single-synapse STDP-ALIF simulation}}{37}{figure.caption.35}}
+\newlabel{fig:stdpalif}{{3.9}{37}{Single-synapse STDP-ALIF simulation}{figure.caption.35}{}}
 \mph@setcol{ii:37}{\mph@nr}
-\@writefile{lof}{\contentsline {figure}{\numberline {3.10}{\ignorespaces A single-synapse demo of the uncorrected Izhikevich neuron.}}{38}{figure.caption.36}}
-\newlabel{fig:demo_izh}{{3.10}{38}{A single-synapse demo of the uncorrected Izhikevich neuron}{figure.caption.36}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {3.11}{\ignorespaces A single-synapse demo of the corrected Izhikevich neuron.\relax }}{38}{figure.caption.37}}
-\newlabel{fig:demo_izh_corrected}{{3.11}{38}{A single-synapse demo of the corrected Izhikevich neuron.\relax }{figure.caption.37}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3.10}{\ignorespaces Uncorrected Izhikevich neuron simulation}}{38}{figure.caption.36}}
+\newlabel{fig:demo_izh}{{3.10}{38}{Uncorrected Izhikevich neuron simulation}{figure.caption.36}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3.11}{\ignorespaces Corrected Izhikevich neuron simulation}}{38}{figure.caption.37}}
+\newlabel{fig:demo_izh_corrected}{{3.11}{38}{Corrected Izhikevich neuron simulation}{figure.caption.37}{}}
 \mph@setcol{ii:38}{\mph@nr}
 \@setckpt{Chapters/Chapter03}{
 \setcounter{page}{39}

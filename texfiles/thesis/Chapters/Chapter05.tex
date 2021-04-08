@@ -3,13 +3,17 @@
 %************************************************
 
 \paragraph{Interpretation of results}
-% Effect of STDP
-% Firing rate tends to decrease slower for non-STDP; refer back to runaway excitation and demo graph.
+
 The results show that the ALIF and STDP-ALIF neuron perform better than the corrected (and default) Izhikevich e-prop neuron model in classifying phones in the TIMIT dataset.
-The addition of the STDP mechanism in the ALIF neuron results in a learning curve that converges more slowly, but reaches a better accuracy with less validation variance.
-However, the Izhikevich neuron shows STDP behavior too, suggesting that the STDP-ALIF neuron works by virtue of another factor, such as its spike frequency adaptation which the Izhikevich neuron does not have.
+The addition of the STDP mechanism to the ALIF neuron results in a better classification performance.
+Furthermore, the STDP-ALIF model does not show signs of overfitting as much as the ALIF neuron, which include a decrease of the validation performance in Figure \ref{fig:percwrong}.
+However, the Izhikevich neuron shows STDP behavior too, suggesting that STDP by itself does not necessarily constitute a well-performing neuron model.
+The STDP-ALIF neuron works by virtue of another factor, such as its better spike frequency adaptation compared to the Izhikevich neuron model.
 
 Rearranging the neurons into a stacked architecture does not appear to improve the classification performance.
+In particular, it diminishes the learning speed to a significant extent, and appears to render multi-layer e-prop architectures more inefficient than single-layer ones.
+However, it is not certain that they multi-layer architectures are necessarily worse---they train more slowly, but in this report the performance was still improving when their training runs were interrupted due to practical concerns.
+Therefore, particularly for the ALIF neuron, the multi-layer networks might outperform the single-layer ALIF networks if computing power and energy are not a concern.
 
 \paragraph{Possible improvements}
     There are many hypothetical ways of improving the performance or biological plausibility of e-prop that have not yet been considered in this report.
@@ -24,7 +28,7 @@ Rearranging the neurons into a stacked architecture does not appear to improve t
     In the TIMIT classification task, for instance, this could span the whole time fragment, because initial words give semantic context to all subsequent words.
     However, a more predictive time scale for the TIMIT dataset is on the scale of approximately 8 MFCC frames, which is now accurately captured by the adaptive threshold component in the ALIF neuron model.
     Temporal dependencies can also be found when moving in the opposite direction---later words and sounds give informative context to earlier words and sounds.
-    In \citet{bellec2020solution}, this context was captured in a bidirectional network, improving the accuracy by nearly 10\%.
+    In \citet{bellec2020solution}, this context was captured in a bidirectional network, improving the accuracy by nearly 15\%.
     In this report, this was empirically validated as well, but left undiscussed because a bidirectional network is not biologically plausible, as directly accessing earlier input values violates the ``online'' constraint.
     According to \citet{bellec2020solution}, e-prop suggests that the experimentally found diverse time constants of the firing activity of populations of neurons in different brain areas \citep{runyan2017distinct} are correlated with their capability to handle corresponding ranges of delays in temporal credit assignment for learning.
     Setting different values for these parameters per layer might also have a beneficial effect; \citet{ahmed1998estimates} suggested that deeper layers display slower and weaker adaptation rates than shallow layers.

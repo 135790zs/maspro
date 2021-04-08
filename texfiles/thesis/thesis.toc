@@ -45,10 +45,10 @@
 \contentsline {subsection}{\numberline {3.3.2}{L2 regularization}}{33}{subsection.3.3.2}
 \contentsline {section}{\numberline {3.4}{Optimizer}}{34}{section.3.4}
 \contentsline {chapter}{\numberline {4}{Results}}{39}{chapter.4}
-\contentsline {section}{\numberline {4.1}{Comparing neur{}on models}}{39}{section.4.1}
+\contentsline {section}{\numberline {4.1}{Comparing neuron models}}{39}{section.4.1}
 \contentsline {paragraph}{{Accuracy}}{39}{paragraph*.39}
 \contentsline {paragraph}{{Firing rate}}{40}{paragraph*.41}
-\contentsline {section}{\numberline {4.2}{Comparing network depth}}{41}{section.4.2}
+\contentsline {section}{\numberline {4.2}{Comparing network depth}}{40}{section.4.2}
 \contentsline {chapter}{\numberline {5}{Discussion}}{43}{chapter.5}
 \contentsline {paragraph}{{Interpretation of results}}{43}{paragraph*.44}
 \contentsline {paragraph}{{Possible improvements}}{43}{paragraph*.45}
