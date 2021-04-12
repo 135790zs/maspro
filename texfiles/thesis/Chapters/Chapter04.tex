@@ -8,7 +8,7 @@ Figure \ref{fig:inoutpair} shows a typical classification result of a full valid
 	\begin{figure}[ht]
 	    \myfloatalign
 	    \includegraphics[width=\linewidth]{gfx/InOutPair}
-	    \caption[Input/output/target example]{An example validation result using a trained ALIF model. The top row shows the standardized MFCC frames of a sentence changing over time. The second row shows the probability distributions of the frame-wise outputs of the model. The third row is the most likely phone. The last layer shows the target phones.}
+	    \caption[Input/output/target example]{An example validation result using a trained ALIF model. The plot in the top row shows the standardized MFCC frames including its first and second derivatives of a sentence changing over time. The plot in the second row shows the probability distributions $\pi$ of the frame-wise outputs of the model. The plot in the third row indicates the predicted phone $\pi_\text{max}$ per frame. The plot in the last row shows the target phones $\pi^*$.}
 	    \label{fig:inoutpair}
 	  \end{figure}
 
@@ -21,7 +21,7 @@ Figure \ref{fig:inoutpair} shows a typical classification result of a full valid
 		Note that the test performance was obtained from the model with the best validation accuracy (the used hyperparameters are listed in Table \ref{tab:hparams}).
 
 		Figure \ref{fig:crossentropy} illustrates the decrease of the cross-entropy score, which for the ALIF and STDP-ALIF neurons is comparable to that of the misclassification rate.
-		The cross-entropy of the Izhikevich neuron continues to decrease while its classification accuracy stalls, suggesting that it trains its bias toward more frequent phone classes rather than learning a relationship between input MFCCs and classes.
+		The cross-entropy and classification performance of the Izhikevich neuron stalls relatively quickly at poor levels, suggesting that it trains its bias toward more frequent phone classes in the training data rather than learning a general relationship between input MFCCs and classes.
 
 		\begin{figure}[bth]
 		    \myfloatalign
@@ -35,10 +35,10 @@ Figure \ref{fig:inoutpair} shows a typical classification result of a full valid
 
 	\paragraph{Firing rate}
 		Figure \ref{fig:freqs} illustrates the effect of the firing regularization term.
-		It can be observed that the ALIF and STDP-ALIF neuron models are able to quickly modulate their mean spiking frequencies to the desired target frequency of \SI{10}{\Hz}, but the Izhikevich neuron increases past this rate to a spiking frequency of approximately \SI{18}{\Hz}.
+		It can be observed that the ALIF and STDP-ALIF neuron models are able to quickly modulate their mean spiking frequencies to the desired target frequency of \SI{10}{\Hz}, but the Izhikevich neuron overshoots to a mean spiking frequency of approximately \SI{18}{\Hz}.
 
 		Figure \ref{fig:regerr} illustrates the decrease of the regularization error.
-		The regularization error of the Izhikevich and ALIF neuron models quickly converges to fluctuate around a constant value, whereas that of the STDP-ALIF neuron model continues to decrease over time, even while the mean spiking frequency and classification performance have both converged to a plateau.
+		The regularization error of the Izhikevich and ALIF neuron models quickly converges to fluctuate around a constant value, whereas that of the STDP-ALIF neuron model continues to decrease over time, even after the mean spiking frequency and classification performance have both converged to a plateau.
 
 		\begin{figure}[bth]
 		    \myfloatalign
@@ -51,7 +51,7 @@ Figure \ref{fig:inoutpair} shows a typical classification result of a full valid
 		\end{figure}
 
 \section{Comparing network depth}
-The comparison between the network depth in Figures \ref{fig:ml-pwrong-alif}--\ref{fig:ml-pwrong-izh} suggests that single-layer e-prop networks train considerably more efficiently and accurately than multi-layer e-prop networks.
+The comparison between the network depth in Figures \ref{fig:ml-pwrong-alif}--\ref{fig:ml-pwrong-izh} suggests that single-layer e-prop networks train considerably more efficiently and accurately than multi-layer e-prop networks and show less variance among validation runs.
 This holds for all tested neuron types.
 The cross-entropy error, spiking frequency, and regularization error are also better for single-layer networks (see Figure \ref{fig:ml-otherresults}).
 

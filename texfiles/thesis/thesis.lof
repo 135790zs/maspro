@@ -19,14 +19,13 @@
 \contentsline {figure}{\numberline {3.4}{\ignorespaces Power spectra}}{25}{figure.caption.25}
 \contentsline {figure}{\numberline {3.5}{\ignorespaces Mel-spaced filterbanks}}{26}{figure.caption.27}
 \contentsline {figure}{\numberline {3.6}{\ignorespaces Spectrogram}}{26}{figure.caption.28}
-\contentsline {figure}{\numberline {3.7}{\ignorespaces Input/features/targets}}{36}{figure.caption.30}
-\contentsline {subfigure}{\numberline {(a)}{\ignorespaces {The raw speech input signal.}}}{36}{subfigure.7.1}
-\contentsline {subfigure}{\numberline {(b)}{\ignorespaces {MFCCs centered around 0 per channel. Note that these MFCCs are standardized channel-wise over the full training dataset.}}}{36}{subfigure.7.2}
-\contentsline {subfigure}{\numberline {(c)}{\ignorespaces {Target signal encoded as a one-hot vector changing over time. The order of phones along the one-hot vector corresponds to the order in which they are encountered in processing the dataset. This particular example shows a pattern because it is the first processed sentence in the training set.}}}{36}{subfigure.7.3}
-\contentsline {figure}{\numberline {3.8}{\ignorespaces Multi-layer illustration}}{37}{figure.caption.32}
-\contentsline {figure}{\numberline {3.9}{\ignorespaces Single-synapse STDP-ALIF simulation}}{37}{figure.caption.35}
-\contentsline {figure}{\numberline {3.10}{\ignorespaces Uncorrected Izhikevich neuron simulation}}{38}{figure.caption.36}
-\contentsline {figure}{\numberline {3.11}{\ignorespaces Corrected Izhikevich neuron simulation}}{38}{figure.caption.37}
+\contentsline {figure}{\numberline {3.7}{\ignorespaces Input/features/targets}}{28}{figure.caption.30}
+\contentsline {subfigure}{\numberline {(a)}{\ignorespaces {MFCCs centered around 0 per channel. Note that these MFCCs are standardized channel-wise over the full training dataset, and that the first and second derivations of the MFCC features are omitted.}}}{28}{subfigure.7.1}
+\contentsline {subfigure}{\numberline {(b)}{\ignorespaces {Target signal encoded as a one-hot vector changing over time. The order of phones along the one-hot vector corresponds to the order in which they are encountered in processing the dataset. This particular example shows a pattern because it is the first processed sentence in the training set.}}}{28}{subfigure.7.2}
+\contentsline {figure}{\numberline {3.8}{\ignorespaces Multi-layer illustration}}{29}{figure.caption.32}
+\contentsline {figure}{\numberline {3.9}{\ignorespaces Single-synapse STDP-ALIF simulation}}{32}{figure.caption.35}
+\contentsline {figure}{\numberline {3.10}{\ignorespaces Uncorrected Izhikevich neuron simulation}}{34}{figure.caption.36}
+\contentsline {figure}{\numberline {3.11}{\ignorespaces Corrected Izhikevich neuron simulation}}{34}{figure.caption.37}
 \ttl@tocsep 
 \contentsline {figure}{\numberline {4.1}{\ignorespaces Input/output/target example}}{39}{figure.caption.38}
 \contentsline {figure}{\numberline {4.2}{\ignorespaces Single-layer classification performance per neuron model}}{40}{figure.caption.40}

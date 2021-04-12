@@ -6,14 +6,14 @@
 
 The results show that the ALIF and STDP-ALIF neuron perform better than the corrected (and default) Izhikevich e-prop neuron model in classifying phones in the TIMIT dataset.
 The addition of the STDP mechanism to the ALIF neuron results in a better classification performance.
-Furthermore, the STDP-ALIF model does not show signs of overfitting as much as the ALIF neuron, which include a decrease of the validation performance in Figure \ref{fig:percwrong}.
-However, the Izhikevich neuron shows STDP behavior too, suggesting that STDP by itself does not necessarily constitute a well-performing neuron model.
-The STDP-ALIF neuron works by virtue of another factor, such as its better spike frequency adaptation compared to the Izhikevich neuron model.
+Furthermore, the STDP-ALIF model does not show signs of overfitting as much as the ALIF neuron such as a decreasing validation performance in Figure \ref{fig:percwrong}.
+However, the Izhikevich neuron shows STDP behavior too but performs poorly, suggesting that STDP by itself does not necessarily constitute a well-performing neuron model.
+The STDP-ALIF neuron may instead work by virtue of another factor, such as its better spike frequency adaptation compared to the Izhikevich neuron model.
 
 Rearranging the neurons into a stacked architecture does not appear to improve the classification performance.
-In particular, it diminishes the learning speed to a significant extent, and appears to render multi-layer e-prop architectures more inefficient than single-layer ones.
-However, it is not certain that they multi-layer architectures are necessarily worse---they train more slowly, but in this report the performance was still improving when their training runs were interrupted due to practical concerns.
-Therefore, particularly for the ALIF neuron, the multi-layer networks might outperform the single-layer ALIF networks if computing power and energy are not a concern.
+In particular, it appears to diminishes the learning speed to a significant extent and render multi-layer e-prop architectures more inefficient than single-layer ones.
+However, it is not certain that multi-layer architectures are necessarily worse---they train more slowly, but in this report the performance was still improving when their training runs were interrupted due to practical limits.
+Therefore, particularly for the ALIF neuron, the multi-layer networks might outperform the single-layer networks if computing power and energy are not a concern.
 
 \paragraph{Possible improvements}
     There are many hypothetical ways of improving the performance or biological plausibility of e-prop that have not yet been considered in this report.
@@ -22,7 +22,7 @@ Therefore, particularly for the ALIF neuron, the multi-layer networks might outp
     Higher weights in-between layers mitigate this fading activity, but require some search to find a good value.
     In this report, the firing rate regularization term approximated this value, but learning is more efficient with a better initialization, since initial synaptic weights significantly affect the performance of STDP-based SNNs \citep{kim2020initial}.
 
-    Also in this report, certain parameters such as firing rate targets ($f^\text{target}$), activity leak ($\alpha$), threshold adaptivity ($\beta$), and feedback signals were constant for all neurons, except the threshold adaptivity, which was 0 for a randomly selected 25\% of the neurons to emulate non-adaptive LIF neurons.
+    Also in this report, certain parameters such as firing rate targets ($f^\text{target}$), activity leak ($\alpha$), and feedback signals were constant for all neurons, except the threshold adaptivity ($\beta$), which was 0 for a randomly selected 25\% of the neurons to emulate non-adaptive LIF neurons.
     Future research could examine the effects of sampling some of these parameters from a distribution for each neuron, thereby creating a more diverse population of neurons with different time scales.
     This sampling requires a careful assessment of the time scales related to the learning task; in particular, the network should be able to process the slowest relevant time scale of the task \citep{jaeger2021dimensions}.
     In the TIMIT classification task, for instance, this could span the whole time fragment, because initial words give semantic context to all subsequent words.
@@ -33,10 +33,9 @@ Therefore, particularly for the ALIF neuron, the multi-layer networks might outp
     According to \citet{bellec2020solution}, e-prop suggests that the experimentally found diverse time constants of the firing activity of populations of neurons in different brain areas \citep{runyan2017distinct} are correlated with their capability to handle corresponding ranges of delays in temporal credit assignment for learning.
     Setting different values for these parameters per layer might also have a beneficial effect; \citet{ahmed1998estimates} suggested that deeper layers display slower and weaker adaptation rates than shallow layers.
 
-    Random dropout of 80\% of the recurrent network weights led to better training and validation performances.
+    In the brain, neurons primarily tend to connect to nearby neurons.
     This suggests that the effects of the topology within a layer might positively affect the learning process.
-    In the brain, neurons tend to connect to nearby neurons.
-    A simple lattice topology might better approximate the connectivity of the brain, decrease the computational complexity in both emulations in von Neumann machines, and allow easier on-chip implementations in neuromorphic hardware.
+    A simple lattice topology might better approximate the connectivity of the brain, decrease the computational complexity in emulations in von Neumann machines, and allow easier on-chip implementations in neuromorphic hardware.
     Hierarchical clustering of neurons might also have a beneficial effect, as this has been demonstrated to improve R-STDP in SNNs \citep{weidel2021unsupervised} and address the scalability issue of SNNs \citep{carrillo2012scalable}.
     Because a neuromorphic system can support complex network operations \citep{hasler1990vlsi}, large-scale conductance-based SNNs \citep{yang2019scalable,Yang2019RealTimeNS} and asynchronous communication in VLSIs through address-event-representation \citep{lazzaro1993silicon,deiss1999pulse} might be suitable to further customize the connectivity graph of an e-prop architecture.
 
@@ -47,9 +46,9 @@ Therefore, particularly for the ALIF neuron, the multi-layer networks might outp
 
     Finally, synaptic delay might improve the temporal processing power of an e-prop model.
     In this report, communication between neurons was transmitted as a spike over a synapse with a delay of 1 ms.
-    This delay could be variable (\eg, between 1 and 10 ms), such that potentially informative past inputs are more accurately preserved in synaptic delays, rather than only in eligibility traces and activity loops.
+    This delay could differ among synapses (\eg, between 1 and 10 ms), such that potentially informative past inputs are more accurately preserved in synaptic delays, rather than only in eligibility traces and activity loops.
     This can help deal with tasks that require processing information on multiple time spans \citep{jaeger2021dimensions}.
-    This resembles the variable physical length of myelinated biological synapses and number of nodes of Ranvier along them, affecting the conductance of the action potential from one neuron to another \citep{bean2007action}.
+    This resembles the variable physical length of myelinated biological synapses and the number of nodes of Ranvier along them, affecting the conductance of the action potential from one neuron to another \citep{bean2007action}.
 
 
 \paragraph{Future directions}
@@ -63,7 +62,7 @@ Therefore, particularly for the ALIF neuron, the multi-layer networks might outp
     While cross-fertilization between neuromorphic computing and quantum computing is starting to take place \citep{russek2016stochastic}, as quantum superposition and entanglement can be used to process information in parallel and in a high-dimensional state space \citep{fujii2017harnessing, yamamoto2017coherent,tacchino2019artificial}, more physics and material science is required to build efficient neuromorphic architectures \citep{markovic2020physics}.
     The same holds for the cross-fertilization between neuroscience and learning rules of biologically plausible SNNs.
     Nanodevices that emulate biological synapses with learning functions can benefit neuromorphic architectures \citep{yao2017face,wang2018photonic,ren2018analytical}, particularly the two-terminal memristor \citep{jo2010nanoscale,wang2017memristors}.
-    However, the learning principles of biological NNs are not explored enough to design engineering solutions \citep{gorban2019unreasonable,taherkhani2018supervised}.
+    However, it has been argued that the learning principles of biological NNs are not explored enough to design engineering solutions \citep{gorban2019unreasonable,taherkhani2018supervised}.
     Feedback connections, for which the brain uses neurotransmitters, may become particularly problematic in large-scale neuromorphic systems.
     Another issue in analog computation is how to match the system's internal temporal processing to that of its inputs.
     Emulating neural dynamics on a physical substrate is more efficient but requires constraints to match the brain's timescales \citep{mead1990neuromorphic,jaeger2021dimensions}.

@@ -10,7 +10,7 @@
 \contentsline {paragraph}{{Biological learning}}{4}{paragraph*.4}
 \contentsline {paragraph}{{Eligibility propagation}}{6}{paragraph*.5}
 \contentsline {paragraph}{{Multi-layer RSNNs}}{7}{paragraph*.6}
-\contentsline {paragraph}{{This research}}{7}{paragraph*.7}
+\contentsline {paragraph}{{This research}}{8}{paragraph*.7}
 \contentsline {chapter}{\numberline {2}{Theoretical Framework}}{9}{chapter.2}
 \contentsline {section}{\numberline {2.1}{Eligibility Propagation}}{9}{section.2.1}
 \contentsline {subsection}{\numberline {2.1.1}{E-prop model}}{9}{subsection.2.1.1}
@@ -34,16 +34,16 @@
 \contentsline {paragraph}{{Mel filterbank}}{25}{paragraph*.26}
 \contentsline {paragraph}{{Mel-frequency cepstral coefficients}}{26}{paragraph*.29}
 \contentsline {paragraph}{{Target output}}{27}{paragraph*.31}
-\contentsline {section}{\numberline {3.2}{Enhancing e-prop}}{27}{section.3.2}
-\contentsline {subsection}{\numberline {3.2.1}{Multi-layer architecture}}{27}{subsection.3.2.1}
-\contentsline {paragraph}{{Multi-layer ALIF neurons}}{28}{paragraph*.34}
-\contentsline {subsection}{\numberline {3.2.2}{Other neuron types}}{28}{subsection.3.2.2}
-\contentsline {subsubsection}{\numberline {3.2.2.1}{STDP-ALIF}}{29}{subsubsection.3.2.2.1}
-\contentsline {subsubsection}{\numberline {3.2.2.2}{Izhikevich neuron}}{30}{subsubsection.3.2.2.2}
-\contentsline {section}{\numberline {3.3}{Regularization}}{31}{section.3.3}
-\contentsline {subsection}{\numberline {3.3.1}{Firing rate regularization}}{32}{subsection.3.3.1}
-\contentsline {subsection}{\numberline {3.3.2}{L2 regularization}}{33}{subsection.3.3.2}
-\contentsline {section}{\numberline {3.4}{Optimizer}}{34}{section.3.4}
+\contentsline {section}{\numberline {3.2}{Enhancing e-prop}}{28}{section.3.2}
+\contentsline {subsection}{\numberline {3.2.1}{Multi-layer architecture}}{28}{subsection.3.2.1}
+\contentsline {paragraph}{{Multi-layer ALIF neurons}}{29}{paragraph*.34}
+\contentsline {subsection}{\numberline {3.2.2}{Other neuron types}}{30}{subsection.3.2.2}
+\contentsline {subsubsection}{\numberline {3.2.2.1}{STDP-ALIF}}{30}{subsubsection.3.2.2.1}
+\contentsline {subsubsection}{\numberline {3.2.2.2}{Izhikevich neuron}}{31}{subsubsection.3.2.2.2}
+\contentsline {section}{\numberline {3.3}{Regularization}}{33}{section.3.3}
+\contentsline {subsection}{\numberline {3.3.1}{Firing rate regularization}}{33}{subsection.3.3.1}
+\contentsline {subsection}{\numberline {3.3.2}{L2 regularization}}{36}{subsection.3.3.2}
+\contentsline {section}{\numberline {3.4}{Optimizer}}{36}{section.3.4}
 \contentsline {chapter}{\numberline {4}{Results}}{39}{chapter.4}
 \contentsline {section}{\numberline {4.1}{Comparing neuron models}}{39}{section.4.1}
 \contentsline {paragraph}{{Accuracy}}{39}{paragraph*.39}

@@ -64,14 +64,14 @@
 		The TIMIT corpus documentation offers a suggested partitioning of the training and testing data, which is based on the following criteria:
 		\begin{enumerate}
 			\item 70\%--80\% of the data is used for training, and the remaining 20\%--30\% for testing.
-			\item No speaker appears in both the training and testing portions.
+			\item No speaker appears in both the training and testing partitions.
 			\item Both subsets include at least 1 male and 1 female speaker from every dialect region.
 			\item There is a minimal overlap of text material in the two subsets.
-			\item The test set should contain all phonemes in as many allophonic contexts as possible.
+			\item The test set should contain all phones in as many allophonic contexts as possible.
 		\end{enumerate}
 		In accordance with these criteria, the TIMIT corpus includes a ``core'' test set that contains 2 male speakers and 1 female speaker from each dialect, summing up to 24 speakers.
 		Each of these speakers read a different set of 5 phonetically compact sentences, and 3 phonetically diverse sentences that were unique for each speaker.
-		Consequently, the test set comprises 192 sentences ($24\times(5+3)$) and was selected such that it contains at least one occurrence of each phoneme.
+		Consequently, the test set comprises 192 sentences ($24\times(5+3)$) and was selected such that it contains at least one occurrence of each phone.
 		In this report, the TIMIT core test set is used, thereby meeting the criteria listed above.
 
 		The remaining 4096 sentences are randomly partitioned into 3696 training sentences and 400 validation sentences in this research (the TIMIT corpus contains no fixed training/validation set partition).
@@ -91,9 +91,9 @@
 		\paragraph{Pre-emphasis}
 
 			In speech signals, high frequencies generally have smaller magnitudes than lower frequencies.
-			To balance the magnitudes over the range of frequencies in the signal, a pre-emphasis filter $y(t)$ is applied on the waveform signal $x(t)$ defined in Equation \ref{eq:pre_emphasis}.
+			To balance the magnitudes over the range of frequencies in the signal, a pre-emphasis filter $y(t)$ is applied on the waveform signal $x(t)$:
 			\begin{equation}\label{eq:pre_emphasis}
-				y(t) = x(t) - 0.97x(t-1)
+				y(t) = x(t) - 0.97x(t-1).
 			\end{equation}
 			This procedure yields the additional benefit of improving the signal-to-noise ratio.
 			An example of a pre-emphasized signal is given in Figure \ref{fig:signalemph}.
@@ -136,7 +136,6 @@
 		\paragraph{Short-term power spectra}
 
 			The power spectra $P_i$ are obtained for each frame by first taking the absolute $K$-point discrete Fourier transform (DFT) of the frame samples $x_i(n)$:
-			% \todo{don't bother with eqn, just call mathbb(F)}
 			\begin{equation}
 				X_k = \left|\sum_{n=0}^{N-1}x_i(n)\cdot e^{-\frac{i2\pi}{N}kn}\right|,
 			\end{equation}
@@ -174,13 +173,13 @@
 
 			The 40 filterbanks are obtained by first spacing 42 points $\mathbf{m}$ linearly between these bounds (inclusive), thereby obtaining 40 points spaced exclusively between the bounds.
 
-			Then, each point $m$ is converted back to \SI{}{\Hz} using
+			Then, the vector of Mel frequencies $\mathbf{m}$ is converted back to \SI{}{\Hz} using
 			\begin{equation}
-				f = 700\left(10^{m/2595}-1\right).
+				\mathbf{f} = 700\left(10^{\mathbf{m}/2595}-1\right).
 			\end{equation}
-			Resulting Mel-spaced frequencies $f$ are rounded to their nearest Fourier transform bin $b$ using
+			The resulting frequencies $\mathbf{f}$ are rounded to their nearest Fourier transform bins $\mathbf{b}$ using
 			\begin{equation}
-				b = \lfloor(K+1)\mathbf{f}/fs\rfloor.
+				\mathbf{b} = \lfloor(K+1)\mathbf{f}/fs\rfloor.
 			\end{equation}
 
 			The resulting 40 filterbanks with their corresponding Mels and frequencies are listed in Table \ref{tab:mels}.
@@ -190,11 +189,11 @@
 			Therefore, the filterbank can be described by
 			\begin{equation}
 				H_i(k) = \begin{cases}
-					0 & k<b_i\\
-					\frac{k-b_i}{b_{i+1}-b_i} & b_i\leq k < b_{i+1} \\
-					1 & k = b_{i+1} \\
-					\frac{b_{i+2} - k}{b_{i+2}-b_{i+1}} & b_{i+1} < k \leq b_{i+2}\\
-					0 & b_{i+2} < k
+					0 & \mbox{if } k<b_i\\
+					\frac{k-b_i}{b_{i+1}-b_i} & \mbox{if } b_i\leq k < b_{i+1} \\
+					1 & \mbox{if } k = b_{i+1} \\
+					\frac{b_{i+2} - k}{b_{i+2}-b_{i+1}} & \mbox{if } b_{i+1} < k \leq b_{i+2}\\
+					0 & \mbox{if } b_{i+2} < k
 				\end{cases},
 			\end{equation}
 			where $0 \leq k \leq \frac{K}{2}$.
@@ -233,19 +232,19 @@
 
 			The first coefficient in $C$ is discarded, because it indicates the average power of the input signal and therefore carries little meaning.
 			Coefficients higher than 13 are also discarded, because they represent only fast changes in the spectrogram and increase the complexity of the input signal while adding increasingly less meaning to it.
+			Next, the first and second derivatives of the MFCCs over time are concatenated to the 13 MFCC features, obtaining an input vector of size 39.
 
-			Then, the final MFCCs are balanced by centering each frame around the value 0.
-			An example of the final MFCCs is given in Figure \ref{fig:source_mfcc_target}.
+			Then, these input vectors are balanced by centering each frame around the value 0.
+			An example of these input vectors is given in Figure \ref{fig:source_mfcc_target}.
+			Note that before training a model, all input vectors (including validation and testing data) are standardized channel-wise according to the full training set (see \ref{fig:inoutpair} for an example input as used by the model).
 
-			\begin{figure}[ht]
+			\begin{figure}[!h]
 			    \myfloatalign
-			    \subfloat[The raw speech input signal.]
-			    {\includegraphics[width=\linewidth]{gfx/signal}} \\
-			    \subfloat[MFCCs centered around 0 per channel. Note that these MFCCs are standardized channel-wise over the full training dataset.]
+			    \subfloat[MFCCs centered around 0 per channel. Note that these MFCCs are standardized channel-wise over the full training dataset, and that the first and second derivations of the MFCC features are omitted.]
 			    {\includegraphics[width=\linewidth]{gfx/norm_mfcc}} \\
 			    \subfloat[Target signal encoded as a one-hot vector changing over time. The order of phones along the one-hot vector corresponds to the order in which they are encountered in processing the dataset. This particular example shows a pattern because it is the first processed sentence in the training set.]
 			    {\includegraphics[width=\linewidth]{gfx/target}}
-			    \caption[Input/features/targets]{An alignment of a sample signal with its MFCCs features and target phones.}\label{fig:source_mfcc_target}
+			    \caption[Input/features/targets]{MFCCs features and corresponding target phones.}\label{fig:source_mfcc_target}
 			\end{figure}
 
 		\paragraph{Target output}
@@ -261,6 +260,10 @@
 			Note that the full dataset of features is standardized per training data channel; feature channels are first centered around 0, and then divided by their standard deviations.
 			To prevent data leakage, validation and testing data are standardized according to the means and standard deviations in the training data.
 			An example of a standardized input is shown in Figure \ref{fig:inoutpair}.
+
+
+\newpage
+
 
 \section{Enhancing e-prop}
 
@@ -291,7 +294,7 @@
         M\left(\mathbf{h}_{rj}^{t-1}, \mathbf{z}_r^{t-1}, \mathbf{z}_{r-1}^t, \mathbf{W}_{rj}\right) & \mbox{otherwise,}
         \end{cases}
         \end{equation}
-        where $\mathbf{h}^t_{rj}$ (resp. $z^t_{rj}$) is the hidden state (resp. observable state) of a neuron $j$ in layer $r$. and $\mathbf{W}_{rj} = \mathbf{W}^\text{in}_{rj} \cup \mathbf{W}^\text{rec}_{rj}$ is the set of afferent weights to neuron $j$ in layer $r$.
+        where $\mathbf{h}^t_{rj}$ (resp. $z^t_{rj}$) is the hidden state (resp. observable state) of a neuron $j$ in layer $r$, and $\mathbf{W}_{rj} = \mathbf{W}^\text{in}_{rj} \cup \mathbf{W}^\text{rec}_{rj}$ is the set of afferent weights to neuron $j$ in layer $r$.
 
         Similarly, the observable state can be modeled by
         \begin{equation}\label{eq:ml_model_obs}
@@ -362,8 +365,8 @@
 	        \psi^t_{rj}\epsilon^t_{rji, v} + \left(\rho - \psi^t_{rj}\beta\right)\epsilon^t_{rji,a}
 	        \end{pmatrix}\label{eq:ml_stdpalif_evector}
 	        \end{align}
-	        Note that the observable state of the afferent neuron $z_{ri}^{t-1}$ in Equation \ref{eq:ml_stdpalif_evector} changes to $z_{r-1, i}^t$ if $\epsilon^{t+1}_{rji}$ corresponds to a weight between layer $r-1$ and $r$ and $r > 1$.
-	        If the weight is instead between the network input and the first layer, then it changes to $x^t_i$.
+	        Note that the observable state of the afferent neuron $z_{ri}^{t-1}$ in Equation \ref{eq:ml_stdpalif_evector} changes to $z_{r-1, i}^t$ if $r > 1$ and $\bm{\epsilon}^{t+1}_{rji}$ corresponds to a weight between layer $r-1$ and $r$.
+	        If the weight is instead between the network input and the first layer, then this $z_{ri}^{t-1}$ changes to $x^t_i$.
 	        Note also that this corrects an inconsistency in the STDP-LIF model described in \citet{traub2020learning}, where the observable state at the current time step $t$ is accessed instead of $t-1$, thereby diverging from the e-prop model in Equation \ref{eq:ml_model}.
 
 	        The eligibility trace remains
@@ -385,7 +388,7 @@
 	        \begin{figure}[!ht]
 	            \centering
 	            \includegraphics[width=\linewidth]{gfx/stdpalif}
-	            \caption[Single-synapse STDP-ALIF simulation]{A single-synapse simulation of the STDP-ALIF neuron model.}
+	            \caption[Single-synapse STDP-ALIF simulation]{A single-synapse simulation of the STDP-ALIF neuron model. Orange and blue lines respectively describe properties of the afferent and efferent neuron.}
 	            \label{fig:stdpalif}
 	        \end{figure}
 
@@ -430,7 +433,7 @@
 	        such that
 	        \begin{equation}
 	        \begin{pmatrix}\frac{\partial z^t_{rj}}{\partial v^t_{rj}}\\\frac{\partial z^t_{rj}}{\partial u^t_{rj}}\end{pmatrix}
-	        = \begin{pmatrix}\psi^t_{rj}\\0\end{pmatrix}
+	        = \begin{pmatrix}\psi^t_{rj}\\0\end{pmatrix},
 	        \end{equation}
 	        and therefore only $\epsilon^t_{rji, v}$ is used in computing the eligibility trace:
 	        \begin{align}
@@ -440,10 +443,10 @@
 
 	    However, when inserting these equations in a single-synapse demo, the eligibility vector assumes extremely high or low values (see Figure \ref{fig:demo_izh}).
 
-		\begin{figure}[ht]
+		\begin{figure}[!ht]
 		    \centering
 		    \includegraphics[width=\linewidth]{gfx/demo_izh}
-		    \caption[Uncorrected Izhikevich neuron simulation]{A single-synapse simulation of the uncorrected Izhikevich neuron. Note that $\epsilon^t_{ji, v}$ takes on extreme values and that the eligibility vector flips sign at any pair of spikes.}
+		    \caption[Uncorrected Izhikevich neuron simulation]{A single-synapse simulation of the uncorrected Izhikevich neuron. Note that $\epsilon^t_{ji, v}$ takes on extreme values and that the eligibility vector flips sign at any pair of spikes. Orange and blue lines respectively describe properties of the afferent and efferent neuron.}
 		    \label{fig:demo_izh}
 		\end{figure}
 
@@ -451,10 +454,10 @@
 	    In this report, this is corrected by clipping the value of $\epsilon^t_{ji,v}$ to $\left[-3, 3\right]$ and $\epsilon^t_{ji,a}$ to $\left[-0.005, 0.005\right]$.
 	    This correction yields the desired STDP behavior (see Figure \ref{fig:demo_izh_corrected}).
 
-        \begin{figure}[ht]
+        \begin{figure}[!ht]
             \centering
             \includegraphics[width=\linewidth]{gfx/demo_izh_corrected}
-            \caption[Corrected Izhikevich neuron simulation]{A single-synapse simulation of the corrected Izhikevich neuron.}
+            \caption[Corrected Izhikevich neuron simulation]{A single-synapse simulation of the corrected Izhikevich neuron. Orange and blue lines respectively describe properties of the afferent and efferent neuron.}
             \label{fig:demo_izh_corrected}
         \end{figure}
 
@@ -465,11 +468,11 @@
 	These two regularization methods are motivated by biological plausibility, ease of implementation in the e-prop framework, and improved empirical performance.
 
 	\subsection{Firing rate regularization}
-		A firing rate regularization term is added to individually control the spike frequencies of the neurons.
+		A firing rate regularization term is added to individually modulate the spike frequencies of the neurons.
 		Since spikes in a neuromorphic architecture cost energy, the practical motivation for this regularization term is that it increases the energy efficiency of the model.
 		The biological motivation is that the firing rate of biological neurons is also under homeostatic control \citep{erickson2006activity}.
 
-		Firing rate is implemented by adding a regularization term $E_\text{reg}$ to the loss function that penalizes neurons that have a firing rate that is too low or too high:
+		Firing rate is implemented by adding a regularization term $E_\text{reg}$ to the loss function that penalizes neurons that have a too low or too high firing rate:
 		\begin{equation}
 			E_\text{reg} = \frac{1}{2}\sum_j\left(f^\text{target} - f^{\text{av}, t}_{rj}\right)^2,
 		\end{equation}
@@ -477,7 +480,7 @@
 		\begin{equation}
 		f^{\text{av},t}_{rj} = \frac{1}{t} z^{\text{total},t}_{rj}
 		\end{equation}
-		is the running average spike frequency, where $z^{\text{total},t}$ accumulates spikes emitted by neuron $j$ in layer $r$ up to (and including) time step $t$.
+		is the running average of the spike frequency, where $z^{\text{total},t}$ accumulates spikes emitted by neuron $j$ in layer $r$ up to (and including) time step $t$.
 		Note that $z^{\text{total},0} = 0$, \ie, the accumulation resets at each new training sample.
 		By implementing this sum as a hidden variable, e-prop remains an online and local training algorithm when firing rate regularization is implemented.
 		Adhering to these two constraints supports the biological plausibility of the firing rate regularization term.
@@ -485,17 +488,17 @@
 
 		Another possibility to compute the average firing rate would be to track an exponentially decaying firing rate.
 		This was not implemented in this research for the following two reasons. First, the effects of the firing rate regularization are integrated only at the end of a training sample (see Equation \ref{eq:deltareg}), likely causing any fluctuations of the average frequency over time to cancel each other out and result in an effectively similar regularization term as the current, non-decaying frequency calculation.
-		Second, since one of the objectives of this research is to reproduce results obtained \citet{bellec2020solution} and expand on that paper, the regularization term is kept as true to it as possible.
+		Second, since one of the objectives of this research is to reproduce results obtained in \citet{bellec2020solution} and expand on that paper, the regularization term is kept as faithful to theirs as possible.
 		However, analyzing the effects of different firing rate regularization terms might be an interesting direction for future research.
 
-		To insert the regularization term into the e-prop framework, we compute the weight update that regularizes the firing rate toward $f^\text{target}$ through gradient descent, similarly to the main e-prop weight update (Equation \ref{eq:eprop_grd}):
+		To insert the regularization term into the e-prop framework, we compute the weight update that regularizes the firing rate toward $f^\text{target}$ through gradient descent, similarly to the main e-prop weight update in Equation \ref{eq:eprop_grd}:
 		\begin{equation}
 		\frac{\partial E_\text{reg}}{\partial z_{rj}^t} = \left(f^\text{target} - f^{\text{av}, t}_{rj}\right).
 		\end{equation}
 		Note that this regularization loss differs from the firing rate regularization described in \citet{bellec2020solution}, in which the firing rate is calculated in an offline fashion, by retroactively computing the average firing rate based on all spikes instead of only accumulated spikes.
 		Note also that in \citet{bellec2020solution}, $\frac{\partial E_\text{reg}}{\partial z_{rj}^t}$ is multiplied with the eligibility trace $e^t_{rji}$, as in Equation \ref{eq:eprop_grd} to obtain the weight update, whereas in this report, the eligibility trace is omitted, resulting in a number of benefits:
 		\begin{enumerate}
-			\item It allows silent neurons that have infrequently spiking afferent neurons to more easily increase their firing rate, because their low afferent eligibility traces no longer nullifies the regularization gradient, and thereby results in a better empirical learning performance;
+			\item It allows silent neurons that have infrequently spiking afferent neurons to more easily increase their firing rate, because their low afferent eligibility traces no longer nullify the regularization gradients, and thereby result in a better empirical learning performance.
 			\item It is more efficient in emulations on von Neumann machines, because the element-wise multiplication of $\frac{\partial E_\text{reg}}{\partial z_{rj}^t}$ and the eligibility trace is a relatively large computation on the order $\Theta\!\left(n^2\right)$ that no longer needs to be computed.
 			\item It is more intuitive, as only the gradient of the firing rate is used to compute the weight update.
 		\end{enumerate}
@@ -555,4 +558,4 @@
 
 	Note that the learning rate is linearly ramped up from 0 to $\eta$ during the first epoch, such that the initial minibatches are used to aggregate good initial momentum buffers, as the variance is higher when fewer minibatches are processed.
 	This ``warming up'' of the learning rate is a variance reduction technique that has shown beneficial results in training other models \citep{liu2019variance}.
-	Empirical observations on the resulting learning curves (see Chapter \ref{ch:results}) suggest that this procedure does not obstruct a rapid initial decrease of the loss function.
+	Empirical observations on the resulting learning curves (see Chapter \ref{ch:results}) suggest that this procedure does not hamper a rapid initial decrease of the loss function.

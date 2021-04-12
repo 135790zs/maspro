@@ -32,7 +32,7 @@ This is because despite the biologically inspired foundation, deep ANNs are fund
 Deep ANNs are implemented on von Neumann architectures \citep{von1993first}, \ie, a system with a central processing unit (CPU) and separate memory, which are significantly different from the working model of the brain \citep{schuman2017survey}.
 
 One reason for the inefficiency of deep ANNs is that their implementations suffer from the von Neumann bottleneck \citep{zenke2021brain}, which involves a limited throughput between the CPU and memory---a data operation cannot physically co-occur with fetching instructions to process that data because they share the same communication system.
-Parallelization on GPUs has alleviated this bottleneck to some extent, but the human brain is more efficient as it is embedded in a physical substrate whose neurons operate fully in parallel \citep{a2017parallel}, communicate through sparsely occurring \emph{spikes} \citep{bear2020neuroscience}, and where no explicit data processing instructions exist.
+Parallelization on GPUs has alleviated this bottleneck to some extent, but the human brain is more efficient as it is embedded in a physical substrate whose neurons operate and communicate fully in parallel \citep{a2017parallel} using sparsely occurring \emph{spikes} \citep{bear2020neuroscience}, and where no explicit data processing instructions exist.
 A spike can be represented as a binary value which causes the synapse to increase the membrane potential in the efferent neuron to change by a fixed value \citep{bear2020neuroscience}.
 Connections in ANNs are represented abstractly by large weight matrices, which are all multiplied with neuron activation values at every propagation cycle.
 In the brain, a synapse spikes sparsely and thereby saves energy while conveniently including an informative temporal component.
@@ -99,7 +99,7 @@ STDP by itself can be used as an unsupervised learning algorithm or to forming a
 Furthermore, it has been demonstrated to form associations between memory traces in SNNs, which are crucial for cognitive brain function \citep{pokorny2020stdp}.
 To allow supervised learning, or operant conditioning, a learning signal is required to influence the direction of the synapse weight change: a positive learning signal will reinforce the association (long-term potentiation), and a negative learning signal weakens it (long term depression) \citep{lobov2020spatial}.
 STDP with a learning signal is known as reward-modulated STDP (R-STDP) \citep{legenstein2008learning} in the field of SNNs and three-factor Hebbian learning in neuroscience \citep{fremaux2016neuromodulated}.
-Three-factor Hebbian learning has been demonstrated outperform its classical two-factor counterpart in a localization-and-retrieval task \citep{porr2007learning}.
+Three-factor Hebbian learning has been demonstrated to outperform its classical two-factor counterpart in a localization-and-retrieval task \citep{porr2007learning}.
 A possible reason for this performance difference is that modulatory signals ``may provide the attentional and motivational significance for long-term storage of a memory in the brain'' and stabilize classical Hebbian learning \citep{bailey2000heterosynaptic}.
 
 
@@ -117,6 +117,7 @@ In particular, the synaptic CaMKII protein complex is activated during the induc
 This LTP is maintained over behavioral time spans, and gradually fades.
 When followed by a learning signal in the form of a neurotransmitter, synaptic plasticity is induced \citep{yagishita2014critical,cassenaer2012conditional,gerstner2018eligibility}.
 
+Over the past decade, eligibility traces have been researched in the context of a wide range of topics, such as biological learning, spiking neural networks, and neuromorphic computing.
 Synaptic plasticity was demonstrated using eligibility traces in deep feedforward SNNs \citep{zenke2018superspike,neftci2017event,kaiser2020synaptic} and could be implemented in feedforward VLSIs.
 In \citet{zenke2018superspike} it is asserted that these methods are also applicable for RSNNs.
 Eligibility traces have also been shown to solve difficult credit assignment problems in SNNs using R-STDP \citep{legenstein2008learning, bellec2020solution} and in RNNs \citep{he2015distinct}, and have a predictable learning effect \citep{legenstein2008learning}.
@@ -125,7 +126,9 @@ More recently, \citet{demirag2021pcm} have shown that phase change memory (PCM) 
 
 \paragraph{Eligibility propagation}
 Eligibility propagation (e-prop) \citep{bellec2020solution} is a local and online learning algorithm for RSNNs that can be mathematically derived as an approximation to BPTT (see also Section \ref{sec:derivefromBPTT}).
-It uses local learning signals and eligibility traces for many types of neuron.
+The main aspect that distinguishes e-prop from other eligibility trace--based algorithms is that the particular computation of the eligibility trace depends on multiple hidden states of a neuron.
+The property that a neuron can have multiple hidden states means that there are many types of neuron models that can be used in e-prop.
+
 In e-prop, the learning signal is a local variation on random broadcast alignment, which propagates the error directly back onto the neurons with a random weight, resembling the function of a neuromodulator in the brain.
 This has been suggested to provide a diversity of feature detectors for task-relevant network inputs \citep{bellec2020solution}.
 Broadcast alignment can perform as effectively as backpropagation in some tasks in feedforward ANNs \citep{lillicrap2016random,nokland2016direct} and multi-layer SNNs \citep{samadi2017deep,clopath2010connectivity}, but performs poorly in deep feedforward ANNs for complex image classification tasks \citep{bartunov2018assessing}.
@@ -134,7 +137,7 @@ The local and online properties of e-prop make it a biologically plausible learn
 E-prop has been demonstrated to work for a large variety of tasks, including classifying phones (\ie, speech sounds), for which it performs competitively with LSTMs \citep{graves2013speech}, a popular RNN architecture that uses BPTT.
 
 The fading eligibility trace in e-prop is similar to STDP in that the weight change is smaller if there is a longer delay between a presynaptic and postsynaptic spike.
-However, e-prop is essentially different from STDP, because it does not explicitly relate the order of the pre- and postsynaptic spike to the synaptic weight update.
+However, e-prop is essentially independent of STDP, because it does not explicitly relate the order of the pre- and postsynaptic spike to the synaptic weight update.
 However, in \citet{bellec2020solution} e-prop is remarked to start showing STDP-like properties if the synaptic delay of a spike is prolonged.
 
 So far, only the LIF and adaptive LIF (ALIF) neuron models have been used in e-prop, which do not show STDP-like properties by default.

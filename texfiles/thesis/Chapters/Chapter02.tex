@@ -11,24 +11,24 @@
         \mathbf{h}^t_j = M\left(\mathbf{h}_j^{t-1}, \mathbf{z}^{t-1}, \mathbf{x}^t, \mathbf{W}_j\right)
         \end{equation}
         that defines the hidden state $\mathbf{h}_j^t$ at a discrete time step $t$, where $\mathbf{z}^{t-1}$ is the observable state of all neurons at the previous time step (\ie, the binary spike values), $\mathbf{x}^t$ is the model input vector at time $t$, and $\mathbf{W}_j$ is the weight vector of afferent (\ie, ``incoming'') synapses.
-        The hidden state of a neuron contains all variables that are used for a specific neuron type, \eg an activation value, or a variable that models a neuron's refractory period after a spike.
+        The hidden state of a neuron contains all variables that are used for a specific neuron type, \eg, an activation value, or a variable that models a neuron's refractory period after a spike.
         In short, Equation \ref{eq:model} indicates that the hidden state is affected primarily by spikes of other neurons $\mathbf{z}^{t-1}$, and the current input to the model $\mathbf{x}^t$, which are both weighted by trainable network weights $\mathbf{W}^\text{rec}_j \subset \mathbf{W}_j$ and $\mathbf{W}^\text{in}_j \subset \mathbf{W}_j$, respectively.
 
         The function $f$ in $\mathcal{M}$ describes the update of the observable state of a neuron $j$ at time $t$:
         \begin{equation}\label{eq:observable}
         z^t_j = f\left(\mathbf{h}_j^t\right),
         \end{equation}
-        such that the spikes elicited by a neuron only depend on its inner state.
-        For instance, a neuron $j$ may spike at time $t$ (\ie, $z^t_j = 1$) if its activity, which is an inner state, reaches a threshold value.
+        such that the spikes elicited by a neuron only depend on its hidden state.
+        For instance, a neuron $j$ may spike at time $t$ (\ie, $z^t_j = 1$) if its activity, which is contained in the hidden state, reaches a threshold value.
 
         The purpose of an e-prop model is that it can be trained to perform a classification task.
         As described in the remainder of this chapter, the weight matrix $\mathbf{W}$ is trained such that the input vectors $\mathbf{x}^t$ yield a good prediction of the class it belongs to.
 
         An important property of e-prop is that the weight update depends only on the hidden state of an afferent neuron.
         The formalizations described in Equations \ref{eq:model} and \ref{eq:observable} therefore indicate that e-prop is a \emph{local} training method, because a neuron's observable state depends only on its own hidden state, which in turn depends only on observable signals that are directly connected to it.
-        E-prop is also an \emph{online} training method, because both the hidden and observable state of a neuron depend only information that is still available; the observable state is updated at the same time step as the hidden state, and the hidden state is updated according to information which is then present in the afferent neurons.
+        E-prop is also an \emph{online} training method, because both the hidden and observable state of a neuron depend only on information that is still available; the observable state is updated at the same time step as the hidden state, and the hidden state is updated according to information which is then present in the afferent neurons.
 
-        The precise formulation of $M$ and $f$ depend on the neuron models that are used in the e-prop model.
+        The precise formulations of $M$ and $f$ depend on the neuron models that are used in the e-prop model.
 
     \subsection{Neuron models}\label{sec:alif}
 
@@ -39,7 +39,7 @@
             z^t_j = H\left(v_j^t-v_\text{th}\right),
             \end{equation}
             where $H$ is the Heaviside step function, $v^t_j$ is the activity of neuron $j$ at discrete time $t$, and $v_\text{th}$ is the threshold constant.
-            (Note that this and all other used constant parameters are listed in Table \ref{tab:hparams}.)
+            (Note that this and all other used hyperparameters are listed in Table \ref{tab:hparams}.)
             From Equation \ref{eq:heavisideLIF} it follows that a neuron spikes ($z^t_j = 1$) if its activity reaches the activity threshold, and remains silent ($z^t_j = 0$) otherwise.
             These spikes are the only communication between neurons in the e-prop model.
 
@@ -51,12 +51,12 @@
             where $W^\text{rec}_{ji}$ is a synapse weight from neuron $i$ to neuron $j$, and $\alpha$ is a constant decay factor.
             In Equation \ref{eq:alifV}, the first term models the decay of the activity value over time.
             The second and third term model the input of the neuron from other neurons, or from the input to the network, respectively.
-            The fourth term ($-z^t_jv_\text{th}$) ensures that the activity of the neuron is drops when it spikes.
+            The fourth term ($-z^t_jv_\text{th}$) ensures that the activity of the neuron drops when it spikes.
             Furthermore, $z^t_j$ is explicitly fixed to 0 for $T^\text{refr}$ time steps after a spike to model neuronal refractoriness.
 
-            In biological neurons, the refractory period consists of an ``absolute'' phase, during which evoking a new spike is impossible, and a subsequent ``relative'' phase where the threshold is temporarily increased \citep{purves2008neuroscience}.
+            In biological neurons, the refractory period consists of an ``absolute'' phase, during which eliciting a new spike is impossible, and a subsequent ``relative'' phase, during which the threshold is temporarily increased \citep{purves2008neuroscience}.
             Clamping $z^t_j$ to 0 emulates only this absolute phase, and is therefore only a crude approximation to model biological refractoriness.
-            The refractory period is built into the equations of the Izhikevich neuron model described in Section \ref{sec:izhikevich}, which is therefore a more biologically plausible neuron model.
+            The refractory period is built into the equations of the Izhikevich neuron model described in Section \ref{sec:izhikevich}, which is therefore arguably a more biologically plausible neuron model.
 
 
         \paragraph{ALIF neuron}
@@ -88,20 +88,20 @@
             \end{figure}
 
             The LIF neuron is a spacial case of an ALIF neuron, for which $\beta=0$, effectively canceling the effect of the threshold adaptation value $a^t_j$ on the observable state $z^t_j$ in Equation \ref{eq:alifZ}.
-            From this point, subsequent references to LIF neurons will refer to this special case.
             Therefore, only the e-prop derivations for the ALIF neurons will be described in the following sections.
+            From this point, references to LIF neurons in this report will refer to this special case.
 
     \subsection{Network topology}
         % First describe network topology, broadly
         % Say that you're experimenting with different topologies (specificially mention that the NN is recurrent)
         The e-prop network structure as used in this report consists of the following main components:
         \begin{enumerate}
-            \item The input layer $\mathbf{x}^t$.
+            \item An input layer $\mathbf{x}^t$.
             \item A recurrent layer containing $N$ neurons that are connected to all other neurons in this layer by weights $\mathbf{W}^\text{rec}$. This layer is also connected to the input layer by weights $\mathbf{W}^\text{in}$.
             \item An output layer $\mathbf{y}^t$ connected to the recurrent layer by weights $\mathbf{W}^\text{out}$.
         \end{enumerate}
 
-        Since one of the goals of this report is to evaluate multi-layer topologies, the recurrent layer component is modified in Section \ref{sec:ml_arch} support architectures with a feedforward series of recurrent layers.
+        Since one of the goals of this report is to evaluate multi-layer topologies, the recurrent layer component is modified in Section \ref{sec:ml_arch} to support architectures with a feedforward series of recurrent layers.
 
         An input vector $\mathbf{x}^t$ at time step $t$ is fed to a pool of $N$ recurrent neurons with hidden states $\mathbf{h}^t$ and observable states $\mathbf{z}^t$ through input weights $\mathbf{W}^\text{in}$.
         The recurrent weights $\mathbf{W}^\text{rec}$ connect neurons with each other, but no self-loops exist.
@@ -197,45 +197,45 @@
             z^t_j = H\left(v_j^t - v_\text{th} - \beta a^t_j\right). \tag{\ref{eq:alifZ} revisited}
             \end{equation*}
 
-            The hidden state $\mathbf{h}^t_j$ of an ALIF neuron $j$ is therefore a vector of its activation and threshold adaptation:
+            The hidden state $\mathbf{h}^t_j$ of an ALIF neuron $j$ is therefore a vector containing its activation and threshold adaptation:
             \begin{equation}
             \mathbf{h}^t_j = \begin{pmatrix}
             v^t_j\\
             a^t_j
             \end{pmatrix}.
             \end{equation}
-            This hidden state is associated with two-dimensional eligibility vectors
+            This hidden state is associated with a two-dimensional eligibility vector
             \begin{equation}
             \bm{\epsilon}^t_{ji} \eqdef \begin{pmatrix}
             \epsilon_{ji, v}^t\\
             \epsilon_{ji, a}^t
             \end{pmatrix}
             \end{equation}
-            that relate to with a synapse from any afferent neuron $i$ to neuron $j$.
+            that relates to a synapse from any afferent neuron $i$ to neuron $j$.
 
             Recall from Chapter \ref{ch:introduction} that the eligibility trace slowly fades after a spike has occurred on a synapse, such that a delayed learning signal can still modify the synaptic strength accordingly, solving the credit assignment problem.
             Intuitively, the eligibility vector computes the correct contribution of each of the components of the hidden state.
             For a LIF neuron, the only component is the activation value, and so it is simply a low-pass filter of the spikes of the afferent neuron.
 
-            For the default ALIF neuron, however, the hidden state derivative $\frac{\mathbf{h}^{t+1}_j}{\mathbf{h}^t_j}$ must be computed to derive the eligibility vector.
+            For the default ALIF neuron, however, the hidden state derivative $\frac{\partial\mathbf{h}^{t+1}_j}{\partial\mathbf{h}^t_j}$ must be computed to derive the eligibility vector.
             This hidden state derivative is expressed by a $2\times2$ matrix of partial hidden state derivatives:
             \begin{equation}
-            \frac{\mathbf{h}^{t+1}_j}{\mathbf{h}^t_j} = \begin{pmatrix}
+            \frac{\partial\mathbf{h}^{t+1}_j}{\partial\mathbf{h}^t_j} = \begin{pmatrix}
             \frac{\partial v^{t+1}_j}{\partial v^t_j} & \frac{\partial v^{t+1}_j}{\partial a^t_j}\\
             \frac{\partial a^{t+1}_j}{\partial v^t_j} & \frac{\partial a^{t+1}_j}{\partial a^t_j}
             \end{pmatrix}.
             \end{equation}
-            The presence of $z^t_j$, and its relation with the Heaviside step function $H(\cdot)$ in the hidden state updates in Equation \ref{eq:alifV} and Equation \ref{eq:alifA} seems problematic for computing these partial derivatives, because the derivative $\frac{\partial z^t_j}{\partial v^t_j}$ is nonexistent.
+            The presence of $z^t_j$, and its relation to the Heaviside step function $H(\cdot)$ in the hidden state updates in Equation \ref{eq:alifV} and Equation \ref{eq:alifA} seems problematic for computing these partial derivatives, because the derivative $\frac{\partial z^t_j}{\partial v^t_j}$ is nonexistent.
             This is overcome by replacing it with a simple nonlinear function called a pseudo-derivative.
             Outside of the refractory period of a neuron $j$, this pseudo-derivative has the form
             \begin{equation}
-            \psi_j^t = \gamma \max\left(0, 1 - \left|\frac{v_j^t - v_\text{th} - \beta a^t_j}{v_\text{th}}\right|\right)
+            \psi_j^t = \gamma \max\left(0, 1 - \left|\frac{v_j^t - v_\text{th} - \beta a^t_j}{v_\text{th}}\right|\right),
             \end{equation}
             where $\gamma$ is a dampening constant, which is set to 0 during the neuron's refractory period.
             Like in \citet{esser2016convolutional}, this pseudo-derivative is 1 at time steps where the neuron spikes, and linearly decays to zero in the positive and negative direction.
-            Only when the pseudo-derivative is nonzero can the synaptic weight change.
+            The synaptic weight can only change when the pseudo-derivative is nonzero.
 
-            Now, the partial derivatives in the hidden state derivative can be computed:
+            Now, the partial derivatives in the hidden state derivative can be computed by replacing the Heaviside function Equation (in \ref{eq:alifZ}) by the pseudo-derivative $\psi^t_j$:
             \begin{align}
             \frac{\partial v_j^{t+1}}{\partial v_j^t} &= \alpha\\
             \frac{\partial v_j^{t+1}}{\partial a_j^t} &= 0\\
@@ -293,9 +293,9 @@
             Therefore, it is higher for synapses that have a higher spike frequency.
             The second term threshold adaptation eligibility component is a decay corrected for the adaptation strength $\beta$.
 
-            This eligibility vector can be recursively applied.
+            This eligibility vector update can be recursively applied.
             For eligibility vectors of synapses that are efferent to input neurons, the input value $x^t_i$ is used in place of $z_i^{t-1}$ in Equation \ref{eq:evector_b}.
-            Note that the current time index $t$ is used for input neurons to satisfy the online learning principle defined in the model definition in Equation \ref{eq:model}; neurons receive input from the input at time $t$, and from the spikes of other neurons sent at time $t-1$.
+            Note that the current time index $t$ is used for input neurons to satisfy the online learning principle defined in the model definition in Equation \ref{eq:model}; neurons receive input from the input at time $t$, and from the spikes of other neurons emitted at time $t-1$.
             Furthermore, the absence of $\epsilon_{ji, a}^t$ in the computation of $\epsilon_{ji, v}^{t+1}$ facilitates online training in emulations in non--von Neumann machines, because $\epsilon_{ji, a}^{t+1}$ can be computed before $\epsilon_{ji, v}^{t+1}$, relieving the need to store a temporary copy of its value.
             In later sections, it is demonstrated that this does not necessarily hold for other neuron models, such as the Izhikevich neuron.
 
@@ -304,8 +304,7 @@
             e^t_{ji} = \bm{\epsilon}_{ji}^t \cdot \frac{\partial z^t_j}{\partial\mathbf{h}^t_j}.
             \end{equation}
 
-            This partial derivative can be computed by replacing the Heaviside function Equation \ref{eq:alifZ} by the pseudoderivative $\psi^t_j$:
-
+            Again, the Heaviside function in Equation \ref{eq:alifZ} is replaced by $\psi^t_j$:
             \begin{align}
                 \frac{\partial z^t_j}{\partial\mathbf{h}^t_j} &= \begin{pmatrix}
                     \frac{\partial z^t_j}{\partial v^t_j}\\
@@ -337,7 +336,7 @@
             \end{align}
 
 
-            This means that the eligibility train can be understood as a low-pass filter of the afferent spikes, with a correction for the efferent neuron's threshold adaptation: a neuron with a higher threshold builds up an eligibility trace more slowly than its more sensitive counterparts.
+            This means that the eligibility trace can be understood as a low-pass filter of the afferent spikes, with a correction for the efferent neuron's threshold adaptation: a neuron with a higher threshold builds up an eligibility trace more slowly than its more sensitive counterparts.
             Figure \ref{fig:alif} illustrates the behavior of the synaptic variables in an ALIF neuron described above.
 
             \begin{figure}[ht]
@@ -368,17 +367,17 @@
             \begin{equation}
             \pi^t_k = \sigma_k\left(y^t_1,\ldots,y^t_K\right) = \frac{\exp\left(y^t_k\right)}{\sum_{k'}\exp\left(y^t_{k'}\right)}.
             \end{equation}
-            This predicted probability is compared with the one-hot probability vector corresponding to the target class label $\pi^{*,t}_k$ at time step $t$ using the cross entropy loss function
+            This predicted probability is compared with the one-hot vector corresponding to the target class label $\pi^{*,t}_k$ at time step $t$ using the cross entropy loss function
             \begin{equation}
             E = -\sum_{t,k}\pi^{*,t}_k\log\pi^t_k,
             \end{equation}
             thereby obtaining the accumulated loss $E$ at time step $t$.
 
-            Since the learning signal $L^t_j$ is defined as the partial derivative of the error $E$ with respect to the observable state $z_j^t$ of a neuron $j$ afferent to an output neurons $k$, we can use
+            Since the learning signal $L^t_j$ is defined as the partial derivative of the error $E$ with respect to the observable state $z_j^t$ of a neuron $j$ afferent to an output neuron $k$, we can use
             \begin{equation}\label{eq:learningsignal_after_output}
             L^t_j = \frac{\partial E}{\partial z^t_j} = \sum_kB_{jk}\sum_{t'\geq t}\left(\pi^{t'}_k - \pi^{*,t'}_k\right)\kappa^{t'-t},
             \end{equation}
-            where $B_{jk}$ is a feedback weight from neuron $k$ back to neuron $j$.
+            where $B_{jk}$ is a feedback weight from neuron $k$ back to output neuron $j$.
             There are multiple strategies for choosing feedback weights.
             \citet{bellec2020solution} noted that a constantly uniform weight matrix yields poor performance, which has been empirically verified in this report.
             However, when the feedback weight matrix is initialized from a zero-centered normal distribution, it can remain either constant, mirror $(W^\text{out})^\top$, or update according to $(\Delta W^\text{out})^\top$.
@@ -389,7 +388,7 @@
             Note also that this equation does not allow online learning, because future time steps $t'$ are accessed.
             However, if a low-pass filter with factor $\kappa$ is applied on the eligibility trace, it will cancel out the effects of the future time steps on the learning signal, and the estimated loss gradient can be approximated.
             This low-pass filter of the eligibility trace can be implemented in an online fashion by including it as a hidden synaptic variable $\bar{e}^t_{ji}$.
-            Recall that the estimated loss gradient $\frac{dE}{dW_{ji}}$ is approximated by $\sum_t \frac{\partial E}{\partial z^t_j}e^t_{ji}$.
+            Recall that the estimated loss gradient $\widehat{\frac{dE}{dW_{ji}}}$ is approximated by $\sum_t \frac{\partial E}{\partial z^t_j}e^t_{ji}$.
             Therefore, after inserting Equation \ref{eq:learningsignal_after_output} in Equation \ref{eq:eprop_grd}, the weight update is computed by
             \begin{align}
             \Delta W_{ji} &= -\eta\sum_{t'}\frac{\partial E}{\partial z^{t'}_j}e^{t'}_{ji}\\
