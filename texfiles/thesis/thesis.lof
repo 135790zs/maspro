@@ -9,7 +9,7 @@
 \ttl@tocsep 
 \ttl@tocsep 
 \ttl@tocsep 
-\contentsline {figure}{\numberline {2.1}{\ignorespaces ALIF neuron simulation}}{11}{figure.caption.10}
+\contentsline {figure}{\numberline {2.1}{\ignorespaces ALIF neuron simulation}}{12}{figure.caption.10}
 \contentsline {figure}{\numberline {2.2}{\ignorespaces Single-layer architecture illustration}}{13}{figure.caption.11}
 \contentsline {figure}{\numberline {2.3}{\ignorespaces Single-synapse ALIF simulation}}{18}{figure.caption.15}
 \ttl@tocsep 
@@ -34,21 +34,20 @@
 \contentsline {figure}{\numberline {4.3}{\ignorespaces Single-layer firing rate regularization per neuron model}}{41}{figure.caption.42}
 \contentsline {subfigure}{\numberline {(a)}{\ignorespaces {Mean spiking frequency. Note the logarithmic horizontal axis.}}}{41}{subfigure.3.1}
 \contentsline {subfigure}{\numberline {(b)}{\ignorespaces {Regularization error. Note the logarithmic vertical axis.}}}{41}{subfigure.3.2}
-\contentsline {figure}{\numberline {4.4}{\ignorespaces Single- and multi-layer accuracy comparison}}{41}{figure.caption.43}
-\contentsline {subfigure}{\numberline {(a)}{\ignorespaces {ALIF model.}}}{41}{subfigure.4.1}
-\contentsline {subfigure}{\numberline {(b)}{\ignorespaces {STDP-ALIF model.}}}{41}{subfigure.4.2}
-\contentsline {subfigure}{\numberline {(c)}{\ignorespaces {Izhikevich model.}}}{41}{subfigure.4.3}
+\contentsline {figure}{\numberline {4.4}{\ignorespaces Single- and multi-layer accuracy comparison}}{42}{figure.caption.43}
+\contentsline {subfigure}{\numberline {(a)}{\ignorespaces {ALIF model.}}}{42}{subfigure.4.1}
+\contentsline {subfigure}{\numberline {(b)}{\ignorespaces {STDP-ALIF model.}}}{42}{subfigure.4.2}
+\contentsline {subfigure}{\numberline {(c)}{\ignorespaces {Izhikevich model.}}}{42}{subfigure.4.3}
 \ttl@tocsep 
 \ttl@tocsep 
-\ttl@tocsep 
-\contentsline {figure}{\numberline {A.1}{\ignorespaces Cross-entropy rates, mean spiking frequencies, and regularization errors for multi-layer networks.}}{49}{figure.caption.49}
-\contentsline {subfigure}{\numberline {(a)}{\ignorespaces {ALIF cross-entropy.}}}{49}{subfigure.1.1}
-\contentsline {subfigure}{\numberline {(b)}{\ignorespaces {STDP-ALIF cross-entropy.}}}{49}{subfigure.1.2}
-\contentsline {subfigure}{\numberline {(c)}{\ignorespaces {Izhikevich cross-entropy.}}}{49}{subfigure.1.3}
-\contentsline {subfigure}{\numberline {(d)}{\ignorespaces {ALIF spike rate.}}}{49}{subfigure.1.4}
-\contentsline {subfigure}{\numberline {(e)}{\ignorespaces {STDP-AIF spike rate.}}}{49}{subfigure.1.5}
-\contentsline {subfigure}{\numberline {(f)}{\ignorespaces {Izhikevich spike rate.}}}{49}{subfigure.1.6}
-\contentsline {subfigure}{\numberline {(g)}{\ignorespaces {ALIF reg. error.}}}{49}{subfigure.1.7}
-\contentsline {subfigure}{\numberline {(h)}{\ignorespaces {STDP-ALIF reg. error.}}}{49}{subfigure.1.8}
-\contentsline {subfigure}{\numberline {(i)}{\ignorespaces {Izhikevich reg. error.}}}{49}{subfigure.1.9}
+\contentsline {figure}{\numberline {A.1}{\ignorespaces Cross-entropy rates, mean spiking frequencies, and regularization errors for multi-layer networks.}}{48}{figure.caption.46}
+\contentsline {subfigure}{\numberline {(a)}{\ignorespaces {ALIF cross-entropy.}}}{48}{subfigure.1.1}
+\contentsline {subfigure}{\numberline {(b)}{\ignorespaces {STDP-ALIF cross-entropy.}}}{48}{subfigure.1.2}
+\contentsline {subfigure}{\numberline {(c)}{\ignorespaces {Izhikevich cross-entropy.}}}{48}{subfigure.1.3}
+\contentsline {subfigure}{\numberline {(d)}{\ignorespaces {ALIF spike rate.}}}{48}{subfigure.1.4}
+\contentsline {subfigure}{\numberline {(e)}{\ignorespaces {STDP-ALIF spike rate.}}}{48}{subfigure.1.5}
+\contentsline {subfigure}{\numberline {(f)}{\ignorespaces {Izhikevich spike rate.}}}{48}{subfigure.1.6}
+\contentsline {subfigure}{\numberline {(g)}{\ignorespaces {ALIF reg. error.}}}{48}{subfigure.1.7}
+\contentsline {subfigure}{\numberline {(h)}{\ignorespaces {STDP-ALIF reg. error.}}}{48}{subfigure.1.8}
+\contentsline {subfigure}{\numberline {(i)}{\ignorespaces {Izhikevich reg. error.}}}{48}{subfigure.1.9}
 \ttl@tocsep 

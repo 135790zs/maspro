@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017/Debian) (preloaded format=pdflatex 2020.11.2)  11 DEC 2020 10:31
+This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017/Debian) (preloaded format=pdflatex 2020.11.2)  13 APR 2021 08:14
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -121,7 +121,55 @@ spelling (e.g., `I\hbox'). Otherwise just continue,
 and I'll forget about whatever was undefined.
 
 ! Undefined control sequence.
-l.28         \myFaculty
+l.24         \myDegree
+                       \\
+The control sequence at the end of the top line
+of your error message was never \def'ed. If you have
+misspelled it (e.g., `\hobx'), type `I' and the correct
+spelling (e.g., `I\hbox'). Otherwise just continue,
+and I'll forget about whatever was undefined.
+
+
+! LaTeX Error: There's no line here to end.
+
+See the LaTeX manual or LaTeX Companion for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.24         \myDegree \\
+                         
+Your command was ignored.
+Type  I <command> <return>  to replace it with another command,
+or  <return>  to continue without it.
+
+! Undefined control sequence.
+<recently read> \myDepartment 
+                              
+l.25         \myDepartment
+                           \\
+The control sequence at the end of the top line
+of your error message was never \def'ed. If you have
+misspelled it (e.g., `\hobx'), type `I' and the correct
+spelling (e.g., `I\hbox'). Otherwise just continue,
+and I'll forget about whatever was undefined.
+
+
+! LaTeX Error: There's no line here to end.
+
+See the LaTeX manual or LaTeX Companion for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.25         \myDepartment \\
+                             
+Your command was ignored.
+Type  I <command> <return>  to replace it with another command,
+or  <return>  to continue without it.
+
+! Undefined control sequence.
+<recently read> \myFaculty 
+                           
+l.26         \myFaculty
                         \\
 The control sequence at the end of the top line
 of your error message was never \def'ed. If you have
@@ -136,7 +184,7 @@ See the LaTeX manual or LaTeX Companion for explanation.
 Type  H <return>  for immediate help.
  ...                                              
                                                   
-l.28         \myFaculty \\
+l.26         \myFaculty \\
                           
 Your command was ignored.
 Type  I <command> <return>  to replace it with another command,
@@ -145,7 +193,7 @@ or  <return>  to continue without it.
 ! Undefined control sequence.
 <recently read> \myUni 
                        
-l.29         \myUni
+l.27         \myUni
                     \\ \bigskip
 The control sequence at the end of the top line
 of your error message was never \def'ed. If you have
@@ -160,26 +208,15 @@ See the LaTeX manual or LaTeX Companion for explanation.
 Type  H <return>  for immediate help.
  ...                                              
                                                   
-l.29         \myUni \\
+l.27         \myUni \\
                        \bigskip
 Your command was ignored.
 Type  I <command> <return>  to replace it with another command,
 or  <return>  to continue without it.
 
 ! Undefined control sequence.
-l.31         \myTime
-                    \ -- \myVersion
-The control sequence at the end of the top line
-of your error message was never \def'ed. If you have
-misspelled it (e.g., `\hobx'), type `I' and the correct
-spelling (e.g., `I\hbox'). Otherwise just continue,
-and I'll forget about whatever was undefined.
-
-Missing character: There is no - in font nullfont!
-Missing character: There is no - in font nullfont!
-! Undefined control sequence.
-l.31         \myTime\ -- \myVersion
-                                   
+l.29         \myTime
+                    
 The control sequence at the end of the top line
 of your error message was never \def'ed. If you have
 misspelled it (e.g., `\hobx'), type `I' and the correct
@@ -193,7 +230,7 @@ See the LaTeX manual or LaTeX Companion for explanation.
 Type  H <return>  for immediate help.
  ...                                              
                                                   
-l.36   \end{addmargin}
+l.34   \end{addmargin}
                       
 Your command was ignored.
 Type  I <command> <return>  to replace it with another command,
@@ -206,7 +243,7 @@ See the LaTeX manual or LaTeX Companion for explanation.
 Type  H <return>  for immediate help.
  ...                                              
                                                   
-l.37 \end{titlepage}
+l.35 \end{titlepage}
                     
 Your command was ignored.
 Type  I <command> <return>  to replace it with another command,
@@ -220,10 +257,10 @@ or  <return>  to continue without it.
 
  
 Here is how much of TeX's memory you used:
- 10 strings out of 492982
- 189 string characters out of 6134896
+ 12 strings out of 492982
+ 210 string characters out of 6134896
  53916 words of memory out of 5000000
- 3676 multiletter control sequences out of 15000+600000
+ 3678 multiletter control sequences out of 15000+600000
  3640 words of font info for 14 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  6i,1n,6p,129b,72s stack positions out of 5000i,500n,10000p,200000b,80000s

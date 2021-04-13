@@ -3,6 +3,8 @@
 %************************************************
 \section{Data Preprocessing}
 
+	In this section, the content of the TIMIT speech corpus is described, as well as the preprocessing method that transforms the speech signals into usable features in the e-prop framework.
+
 	\subsection{The TIMIT speech corpus}
 		TIMIT is a speech corpus that contains phonemically transcribed speech~\citep{garofolo1993darpa}, comprising 6300 sentences, 10 spoken by each of the 630 speakers.
 		To include a broad range of dialects these speakers are sampled from 8 different geographical regions in the United States (as categorized in \citet{labov2008atlas}) in which they lived during their childhood years.
@@ -238,7 +240,7 @@
 			An example of these input vectors is given in Figure \ref{fig:source_mfcc_target}.
 			Note that before training a model, all input vectors (including validation and testing data) are standardized channel-wise according to the full training set (see \ref{fig:inoutpair} for an example input as used by the model).
 
-			\begin{figure}[!h]
+			\begin{figure}[!ht]
 			    \myfloatalign
 			    \subfloat[MFCCs centered around 0 per channel. Note that these MFCCs are standardized channel-wise over the full training dataset, and that the first and second derivations of the MFCC features are omitted.]
 			    {\includegraphics[width=\linewidth]{gfx/norm_mfcc}} \\
@@ -260,7 +262,6 @@
 			Note that the full dataset of features is standardized per training data channel; feature channels are first centered around 0, and then divided by their standard deviations.
 			To prevent data leakage, validation and testing data are standardized according to the means and standard deviations in the training data.
 			An example of a standardized input is shown in Figure \ref{fig:inoutpair}.
-
 
 \newpage
 
@@ -540,7 +541,7 @@
 	\begin{equation}
 		\Delta W_{rji} = -\eta \sum_t L^t_{rj}\cdot\bar{e}^t_{rji}.
 	\end{equation}
-	However, the results described in Chapter \ref{ch:results} are obtained using Adam (or Adaptive Moment Estimation) \citep{kingma2014adam}.
+	However, the results described in Section \ref{sec:results} are obtained using Adam (or Adaptive Moment Estimation) \citep{kingma2014adam}.
 	This optimization method tracks running averages of the gradient and its second moment (resp. $M_{rji}$ and $V_{rji}$), and fits the local and online constraints of e-prop, because the running averages are tracked per individual synapse.
 	The Adam weight update in the context of multi-layer e-prop is given by:
 	\begin{align}
@@ -558,4 +559,4 @@
 
 	Note that the learning rate is linearly ramped up from 0 to $\eta$ during the first epoch, such that the initial minibatches are used to aggregate good initial momentum buffers, as the variance is higher when fewer minibatches are processed.
 	This ``warming up'' of the learning rate is a variance reduction technique that has shown beneficial results in training other models \citep{liu2019variance}.
-	Empirical observations on the resulting learning curves (see Chapter \ref{ch:results}) suggest that this procedure does not hamper a rapid initial decrease of the loss function.
+	Empirical observations on the resulting learning curves (see Section \ref{sec:results}) suggest that this procedure does not hamper a rapid initial decrease of the loss function.

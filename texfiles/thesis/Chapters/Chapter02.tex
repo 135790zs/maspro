@@ -2,9 +2,9 @@
 \chapter{Theoretical Framework}\label{ch:relatedwork}
 %************************************************
 
-\section{Eligibility Propagation}
+    This chapter describes the theoretical framework of eligibility propagation expounded in previous literature, which is then developed further in Chapter \ref{ch:method}.
 
-    \subsection{E-prop model}
+    \section{Eligibility propagation model}
         In \citet{bellec2020solution}, an eligibility propagation (e-prop) model $\mathcal{M}$ of a neuron $j$ in a feedforward or recurrent network is defined by a tuple $\left<M, f\right>$,
         where $M$ is a function
         \begin{equation}\label{eq:model}
@@ -30,7 +30,7 @@
 
         The precise formulations of $M$ and $f$ depend on the neuron models that are used in the e-prop model.
 
-    \subsection{Neuron models}\label{sec:alif}
+    \section{Neuron models}\label{sec:alif}
 
         \paragraph{LIF neuron}
             In \citet{bellec2020solution}, the LIF neuron model is formulated in the context of e-prop, along with a variant (viz. ALIF) that has an adaptive threshold based on the neuron's spiking frequency.
@@ -91,7 +91,7 @@
             Therefore, only the e-prop derivations for the ALIF neurons will be described in the following sections.
             From this point, references to LIF neurons in this report will refer to this special case.
 
-    \subsection{Network topology}
+    \section{Network topology}
         % First describe network topology, broadly
         % Say that you're experimenting with different topologies (specificially mention that the NN is recurrent)
         The e-prop network structure as used in this report consists of the following main components:
@@ -124,11 +124,11 @@
         A randomly selected 80\% of synaptic weights is then set to a value of 0, as well as the synapses that connect a neuron to itself, rendering them ineffective.
 
 
-    \subsection{Deriving e-prop from RNNs}\label{sec:derivefromBPTT}
+    \section{Deriving e-prop from RNNs}\label{sec:derivefromBPTT}
         Eligibility propagation is a local and online training method that can be derived from backpropagation through time (BPTT).
         In BPTT, an RNN is unfolded in time, such that the backpropagation method used in feedforward neural networks can be applied to compute the gradients of the cost with respect to the network weights.
 
-        In this subsection, the main equation of e-prop
+        In this section, the main equation of e-prop
         \begin{equation}
         \frac{dE}{dW_{ji}} =
         \sum_t\frac{dE}{dz_j^t}\cdot\left[\frac{dz_j^t}{dW_{ji}}\right]_\text{local},
@@ -176,12 +176,12 @@
         \end{equation}
         This is the main e-prop equation.
 
-    \subsection{Learning procedure}
+    \section{Learning procedure}
 
         The e-prop equation (Equation \ref{eq:main_eprop}) can be applied to any neuron type with any number of hidden states.
         In this section, the derivation for ALIF neurons will be detailed.
 
-        \subsubsection{Eligibility trace}
+        \subsection{Eligibility trace}
             Recall the hidden state update equations from Section \ref{sec:alif}:
             \begin{equation*}
             v^{t+1}_j = \alpha v_j^t + \sum_{i\neq j}W^\text{rec}_{ji}z_i^t + \sum_i W^\text{in}_{ji}x_i^{t+1} - z_j^tv_
@@ -346,7 +346,7 @@
                 \label{fig:alif}
             \end{figure}
 
-        \subsubsection{Gradients}\label{sec:eprop_grd}
+        \subsection{Gradients}\label{sec:eprop_grd}
             Gradient descent is used to apply the weight updates, such that weights are updated by a small fraction $\eta$ in the negative direction of the estimated gradient of the loss function with respect to the model weights:
             \begin{equation}\label{eq:eprop_grd}
                 \Delta W = -\eta\widehat{\frac{dE}{dW_{ji}}} \eqdef -\eta\sum_t\frac{\partial E}{\partial z^t_j}e^t_{ji}.
