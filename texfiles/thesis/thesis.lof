@@ -9,45 +9,45 @@
 \ttl@tocsep 
 \ttl@tocsep 
 \ttl@tocsep 
-\contentsline {figure}{\numberline {2.1}{\ignorespaces ALIF neuron simulation}}{12}{figure.caption.10}
-\contentsline {figure}{\numberline {2.2}{\ignorespaces Single-layer architecture illustration}}{13}{figure.caption.11}
-\contentsline {figure}{\numberline {2.3}{\ignorespaces Single-synapse ALIF simulation}}{18}{figure.caption.15}
+\contentsline {figure}{\numberline {2.1}{\ignorespaces ALIF neuron simulation}}{12}{figure.caption.11}
+\contentsline {figure}{\numberline {2.2}{\ignorespaces Single-layer architecture illustration}}{13}{figure.caption.12}
+\contentsline {figure}{\numberline {2.3}{\ignorespaces Single-synapse ALIF simulation}}{18}{figure.caption.16}
 \ttl@tocsep 
-\contentsline {figure}{\numberline {3.1}{\ignorespaces Raw TIMIT waveform signal\relax }}{23}{figure.caption.19}
-\contentsline {figure}{\numberline {3.2}{\ignorespaces Pre-emphasis filtered signal segment}}{24}{figure.caption.21}
-\contentsline {figure}{\numberline {3.3}{\ignorespaces Hamming window}}{25}{figure.caption.23}
-\contentsline {figure}{\numberline {3.4}{\ignorespaces Power spectra}}{25}{figure.caption.25}
-\contentsline {figure}{\numberline {3.5}{\ignorespaces Mel-spaced filterbanks}}{26}{figure.caption.27}
-\contentsline {figure}{\numberline {3.6}{\ignorespaces Spectrogram}}{27}{figure.caption.28}
-\contentsline {figure}{\numberline {3.7}{\ignorespaces Input/features/targets}}{28}{figure.caption.30}
+\contentsline {figure}{\numberline {3.1}{\ignorespaces Raw TIMIT waveform signal\relax }}{23}{figure.caption.20}
+\contentsline {figure}{\numberline {3.2}{\ignorespaces Pre-emphasis filtered signal segment}}{24}{figure.caption.22}
+\contentsline {figure}{\numberline {3.3}{\ignorespaces Hamming window}}{25}{figure.caption.24}
+\contentsline {figure}{\numberline {3.4}{\ignorespaces Power spectra}}{25}{figure.caption.26}
+\contentsline {figure}{\numberline {3.5}{\ignorespaces Mel-spaced filterbanks}}{26}{figure.caption.28}
+\contentsline {figure}{\numberline {3.6}{\ignorespaces Spectrogram}}{27}{figure.caption.29}
+\contentsline {figure}{\numberline {3.7}{\ignorespaces Input/features/targets}}{28}{figure.caption.31}
 \contentsline {subfigure}{\numberline {(a)}{\ignorespaces {MFCCs centered around 0 per channel. Note that these MFCCs are standardized channel-wise over the full training dataset, and that the first and second derivations of the MFCC features are omitted.}}}{28}{subfigure.7.1}
 \contentsline {subfigure}{\numberline {(b)}{\ignorespaces {Target signal encoded as a one-hot vector changing over time. The order of phones along the one-hot vector corresponds to the order in which they are encountered in processing the dataset. This particular example shows a pattern because it is the first processed sentence in the training set.}}}{28}{subfigure.7.2}
-\contentsline {figure}{\numberline {3.8}{\ignorespaces Multi-layer illustration}}{29}{figure.caption.32}
-\contentsline {figure}{\numberline {3.9}{\ignorespaces Single-synapse STDP-ALIF simulation}}{32}{figure.caption.35}
-\contentsline {figure}{\numberline {3.10}{\ignorespaces Uncorrected Izhikevich neuron simulation}}{34}{figure.caption.36}
-\contentsline {figure}{\numberline {3.11}{\ignorespaces Corrected Izhikevich neuron simulation}}{34}{figure.caption.37}
+\contentsline {figure}{\numberline {3.8}{\ignorespaces Multi-layer illustration}}{29}{figure.caption.33}
+\contentsline {figure}{\numberline {3.9}{\ignorespaces Single-synapse STDP-ALIF simulation}}{32}{figure.caption.36}
+\contentsline {figure}{\numberline {3.10}{\ignorespaces Uncorrected Izhikevich neuron simulation}}{34}{figure.caption.37}
+\contentsline {figure}{\numberline {3.11}{\ignorespaces Corrected Izhikevich neuron simulation}}{34}{figure.caption.38}
 \ttl@tocsep 
-\contentsline {figure}{\numberline {4.1}{\ignorespaces Input/output/target example}}{39}{figure.caption.38}
-\contentsline {figure}{\numberline {4.2}{\ignorespaces Single-layer classification performance per neuron model}}{40}{figure.caption.40}
+\contentsline {figure}{\numberline {4.1}{\ignorespaces Input/output/target example}}{39}{figure.caption.39}
+\contentsline {figure}{\numberline {4.2}{\ignorespaces Single-layer classification performance per neuron model}}{40}{figure.caption.41}
 \contentsline {subfigure}{\numberline {(a)}{\ignorespaces {Percentage of samples wrongly classified.}}}{40}{subfigure.2.1}
 \contentsline {subfigure}{\numberline {(b)}{\ignorespaces {Cross-entropy loss (log-scaled).}}}{40}{subfigure.2.2}
-\contentsline {figure}{\numberline {4.3}{\ignorespaces Single-layer firing rate regularization per neuron model}}{41}{figure.caption.42}
+\contentsline {figure}{\numberline {4.3}{\ignorespaces Single-layer firing rate regularization per neuron model}}{41}{figure.caption.43}
 \contentsline {subfigure}{\numberline {(a)}{\ignorespaces {Mean spiking frequency. Note the logarithmic horizontal axis.}}}{41}{subfigure.3.1}
 \contentsline {subfigure}{\numberline {(b)}{\ignorespaces {Regularization error. Note the logarithmic vertical axis.}}}{41}{subfigure.3.2}
-\contentsline {figure}{\numberline {4.4}{\ignorespaces Single- and multi-layer accuracy comparison}}{42}{figure.caption.43}
+\contentsline {figure}{\numberline {4.4}{\ignorespaces Single- and multi-layer accuracy comparison}}{42}{figure.caption.44}
 \contentsline {subfigure}{\numberline {(a)}{\ignorespaces {ALIF model.}}}{42}{subfigure.4.1}
 \contentsline {subfigure}{\numberline {(b)}{\ignorespaces {STDP-ALIF model.}}}{42}{subfigure.4.2}
 \contentsline {subfigure}{\numberline {(c)}{\ignorespaces {Izhikevich model.}}}{42}{subfigure.4.3}
 \ttl@tocsep 
 \ttl@tocsep 
-\contentsline {figure}{\numberline {A.1}{\ignorespaces Cross-entropy rates, mean spiking frequencies, and regularization errors for multi-layer networks.}}{48}{figure.caption.46}
-\contentsline {subfigure}{\numberline {(a)}{\ignorespaces {ALIF cross-entropy.}}}{48}{subfigure.1.1}
-\contentsline {subfigure}{\numberline {(b)}{\ignorespaces {STDP-ALIF cross-entropy.}}}{48}{subfigure.1.2}
-\contentsline {subfigure}{\numberline {(c)}{\ignorespaces {Izhikevich cross-entropy.}}}{48}{subfigure.1.3}
-\contentsline {subfigure}{\numberline {(d)}{\ignorespaces {ALIF spike rate.}}}{48}{subfigure.1.4}
-\contentsline {subfigure}{\numberline {(e)}{\ignorespaces {STDP-ALIF spike rate.}}}{48}{subfigure.1.5}
-\contentsline {subfigure}{\numberline {(f)}{\ignorespaces {Izhikevich spike rate.}}}{48}{subfigure.1.6}
-\contentsline {subfigure}{\numberline {(g)}{\ignorespaces {ALIF reg. error.}}}{48}{subfigure.1.7}
-\contentsline {subfigure}{\numberline {(h)}{\ignorespaces {STDP-ALIF reg. error.}}}{48}{subfigure.1.8}
-\contentsline {subfigure}{\numberline {(i)}{\ignorespaces {Izhikevich reg. error.}}}{48}{subfigure.1.9}
+\contentsline {figure}{\numberline {A.1}{\ignorespaces Cross-entropy rates, mean spiking frequencies, and regularization errors for multi-layer networks.}}{50}{figure.caption.47}
+\contentsline {subfigure}{\numberline {(a)}{\ignorespaces {ALIF cross-entropy.}}}{50}{subfigure.1.1}
+\contentsline {subfigure}{\numberline {(b)}{\ignorespaces {STDP-ALIF cross-entropy.}}}{50}{subfigure.1.2}
+\contentsline {subfigure}{\numberline {(c)}{\ignorespaces {Izhikevich cross-entropy.}}}{50}{subfigure.1.3}
+\contentsline {subfigure}{\numberline {(d)}{\ignorespaces {ALIF spike rate.}}}{50}{subfigure.1.4}
+\contentsline {subfigure}{\numberline {(e)}{\ignorespaces {STDP-ALIF spike rate.}}}{50}{subfigure.1.5}
+\contentsline {subfigure}{\numberline {(f)}{\ignorespaces {Izhikevich spike rate.}}}{50}{subfigure.1.6}
+\contentsline {subfigure}{\numberline {(g)}{\ignorespaces {ALIF reg. error.}}}{50}{subfigure.1.7}
+\contentsline {subfigure}{\numberline {(h)}{\ignorespaces {STDP-ALIF reg. error.}}}{50}{subfigure.1.8}
+\contentsline {subfigure}{\numberline {(i)}{\ignorespaces {Izhikevich reg. error.}}}{50}{subfigure.1.9}
 \ttl@tocsep 

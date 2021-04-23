@@ -5,54 +5,55 @@
 \babel@toc {american}{}
 \contentsline {chapter}{\numberline {1}{Introduction}}{1}{chapter.1}
 \contentsline {paragraph}{{Energy limits}}{1}{paragraph*.1}
-\contentsline {paragraph}{{Spiking neural networks}}{3}{paragraph*.2}
+\contentsline {paragraph}{{Spiking neural networks}}{2}{paragraph*.2}
 \contentsline {paragraph}{{Neuromorphic computing}}{3}{paragraph*.3}
 \contentsline {paragraph}{{Biological learning}}{4}{paragraph*.4}
 \contentsline {paragraph}{{Eligibility propagation}}{6}{paragraph*.5}
 \contentsline {paragraph}{{Multi-layer RSNNs}}{7}{paragraph*.6}
-\contentsline {paragraph}{{This research}}{8}{paragraph*.7}
+\contentsline {paragraph}{{Research objectives}}{7}{paragraph*.7}
+\contentsline {paragraph}{{Structure of this report}}{8}{paragraph*.8}
 \contentsline {chapter}{\numberline {2}{Theoretical Framework}}{9}{chapter.2}
 \contentsline {section}{\numberline {2.1}{Eligibility propagation model}}{9}{section.2.1}
 \contentsline {section}{\numberline {2.2}{Neuron models}}{10}{section.2.2}
-\contentsline {paragraph}{{LIF neuron}}{10}{paragraph*.8}
-\contentsline {paragraph}{{ALIF neuron}}{10}{paragraph*.9}
+\contentsline {paragraph}{{LIF neuron}}{10}{paragraph*.9}
+\contentsline {paragraph}{{ALIF neuron}}{10}{paragraph*.10}
 \contentsline {section}{\numberline {2.3}{Network topology}}{11}{section.2.3}
 \contentsline {section}{\numberline {2.4}{Deriving e-prop from RNNs}}{13}{section.2.4}
 \contentsline {section}{\numberline {2.5}{Learning procedure}}{15}{section.2.5}
 \contentsline {subsection}{\numberline {2.5.1}{Eligibility trace}}{15}{subsection.2.5.1}
 \contentsline {subsection}{\numberline {2.5.2}{Gradients}}{19}{subsection.2.5.2}
-\contentsline {paragraph}{{Error metric}}{19}{paragraph*.16}
+\contentsline {paragraph}{{Error metric}}{19}{paragraph*.17}
 \contentsline {chapter}{\numberline {3}{Method}}{21}{chapter.3}
 \contentsline {section}{\numberline {3.1}{Data Preprocessing}}{21}{section.3.1}
 \contentsline {subsection}{\numberline {3.1.1}{The TIMIT speech corpus}}{21}{subsection.3.1.1}
 \contentsline {subsection}{\numberline {3.1.2}{Data splitting}}{22}{subsection.3.1.2}
 \contentsline {subsection}{\numberline {3.1.3}{Engineering features}}{23}{subsection.3.1.3}
-\contentsline {paragraph}{{Pre-emphasis}}{23}{paragraph*.20}
-\contentsline {paragraph}{{Framing}}{23}{paragraph*.22}
-\contentsline {paragraph}{{Short-term power spectra}}{24}{paragraph*.24}
-\contentsline {paragraph}{{Mel filterbank}}{25}{paragraph*.26}
-\contentsline {paragraph}{{Mel-frequency cepstral coefficients}}{26}{paragraph*.29}
-\contentsline {paragraph}{{Target output}}{27}{paragraph*.31}
+\contentsline {paragraph}{{Pre-emphasis}}{23}{paragraph*.21}
+\contentsline {paragraph}{{Framing}}{23}{paragraph*.23}
+\contentsline {paragraph}{{Short-term power spectra}}{24}{paragraph*.25}
+\contentsline {paragraph}{{Mel filterbank}}{25}{paragraph*.27}
+\contentsline {paragraph}{{Mel-frequency cepstral coefficients}}{26}{paragraph*.30}
+\contentsline {paragraph}{{Target output}}{27}{paragraph*.32}
 \contentsline {section}{\numberline {3.2}{Enhancing e-prop}}{28}{section.3.2}
 \contentsline {subsection}{\numberline {3.2.1}{Multi-layer architecture}}{28}{subsection.3.2.1}
-\contentsline {paragraph}{{Multi-layer ALIF neurons}}{29}{paragraph*.34}
+\contentsline {paragraph}{{Multi-layer ALIF neurons}}{29}{paragraph*.35}
 \contentsline {subsection}{\numberline {3.2.2}{Other neuron types}}{30}{subsection.3.2.2}
 \contentsline {subsubsection}{\numberline {3.2.2.1}{STDP-ALIF}}{30}{subsubsection.3.2.2.1}
 \contentsline {subsubsection}{\numberline {3.2.2.2}{Izhikevich neuron}}{31}{subsubsection.3.2.2.2}
-\contentsline {section}{\numberline {3.3}{Regularization}}{33}{section.3.3}
+\contentsline {section}{\numberline {3.3}{Regularization}}{35}{section.3.3}
 \contentsline {subsection}{\numberline {3.3.1}{Firing rate regularization}}{35}{subsection.3.3.1}
 \contentsline {subsection}{\numberline {3.3.2}{L2 regularization}}{36}{subsection.3.3.2}
 \contentsline {section}{\numberline {3.4}{Optimizer}}{37}{section.3.4}
 \contentsline {chapter}{\numberline {4}{Discussion}}{39}{chapter.4}
 \contentsline {section}{\numberline {4.1}{Results}}{39}{section.4.1}
 \contentsline {subsection}{\numberline {4.1.1}{Comparing neuron models}}{39}{subsection.4.1.1}
-\contentsline {paragraph}{{Accuracy}}{39}{paragraph*.39}
-\contentsline {paragraph}{{Firing rate}}{40}{paragraph*.41}
+\contentsline {paragraph}{{Accuracy}}{39}{paragraph*.40}
+\contentsline {paragraph}{{Firing rate}}{40}{paragraph*.42}
 \contentsline {subsection}{\numberline {4.1.2}{Comparing network depth}}{41}{subsection.4.1.2}
-\contentsline {section}{\numberline {4.2}{Possible improvements}}{41}{section.4.2}
+\contentsline {section}{\numberline {4.2}{Possible improvements}}{42}{section.4.2}
 \contentsline {section}{\numberline {4.3}{Future directions}}{44}{section.4.3}
-\contentsline {chapter}{\numberline {5}{Conclusion}}{45}{chapter.5}
-\contentsline {chapter}{\numberline {A}{Appendix}}{47}{appendix.A}
-\contentsline {section}{\numberline {A.1}{Implementation}}{47}{section.A.1}
+\contentsline {chapter}{\numberline {5}{Conclusion}}{47}{chapter.5}
+\contentsline {chapter}{\numberline {A}{Appendix}}{49}{appendix.A}
+\contentsline {section}{\numberline {A.1}{Implementation}}{49}{section.A.1}
 \vspace {\beforebibskip }
-\contentsline {chapter}{\numberline {}{Bibliography}}{51}{section*.47}
+\contentsline {chapter}{\numberline {}{Bibliography}}{53}{section*.48}

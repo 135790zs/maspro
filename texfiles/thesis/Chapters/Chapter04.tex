@@ -17,7 +17,9 @@ Next, possible future research avenues are discussed.
 	\subsection{Comparing neuron models}
 
 		\paragraph{Accuracy}
-			The main outcome of the neuron model comparison is that in these results, the ALIF and STDP-ALIF neuron perform better than the corrected (and default) Izhikevich e-prop neuron model in classifying phones in the TIMIT dataset.
+			The main outcome of the neuron model comparison is that in these results, the STDP-ALIF neuron outperforms the ALIF and corrected Izhikevich neuron models in classifying phones in the TIMIT dataset.
+			This suggests that including STDP-like behavior to the ALIF neuron results in a better learning performance, answering the primary research objective posed in Chapter \ref{ch:introduction}.
+			Furthermore, the ALIF and STDP-ALIF neuron perform better than the Izhikevich e-prop neuron model.
 			In Figure \ref{fig:percwrong} the Izhikevich neuron reaches a misclassification rate of 93.8\% on the test set, which is only slightly better than constantly predicting the most frequent class.
 			The ALIF neuron model reaches a test misclassification rate of 58.4\% in relatively few iterations, after which validation performance starts to decrease.
 			The STDP-ALIF neuron model scores best, reaching a performance of 48.3\% after approximately 3500 iterations, suggesting that the addition of the STDP mechanism to the ALIF neuron improves the classification performance.
@@ -25,6 +27,7 @@ Next, possible future research avenues are discussed.
 			However, the Izhikevich neuron shows STDP behavior too but performs poorly, suggesting that STDP by itself does not necessarily constitute a well-performing neuron model.
 			The STDP-ALIF neuron may instead work by virtue of another factor, such as its better spike frequency adaptation compared to the Izhikevich neuron model.
 			Note that the test performance was obtained from the model with the best validation accuracy (the used hyperparameters are listed in Table \ref{tab:hparams}).
+
 
 			Figure \ref{fig:crossentropy} illustrates the decrease of the cross-entropy score, which for the ALIF and STDP-ALIF neurons is comparable to that of the misclassification rate.
 			The cross-entropy and classification performance of the Izhikevich neuron stalls relatively quickly at poor levels, suggesting that it trains its bias toward more frequent phone classes in the training data rather than learning a general relationship between input MFCCs and classes.
@@ -61,7 +64,7 @@ Next, possible future research avenues are discussed.
 		This holds for all tested neuron types.
 		The cross-entropy error, spiking frequency, and regularization error are also better for single-layer networks (see Figure \ref{fig:ml-otherresults}).
 
-		Therefore, rearranging the neurons into a stacked architecture does not appear to improve the classification performance.
+		Therefore, rearranging the neurons into a stacked architecture does not appear to improve the classification performance, answering the secondary research objective posed in Chapter \ref{ch:introduction}.
 		In particular, it appears to diminishes the learning speed to a significant extent and render multi-layer e-prop architectures more inefficient than single-layer ones.
 		However, it is not certain that multi-layer architectures are necessarily worse---they train more slowly, but in this report the performance was still improving when their training runs were interrupted due to practical limits.
 		Therefore, particularly for the ALIF neuron, the multi-layer networks might outperform the single-layer networks if future work where low computing power and energy costs are not a priority.

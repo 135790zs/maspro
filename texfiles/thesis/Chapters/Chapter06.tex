@@ -11,11 +11,12 @@ First, the performance of the ALIF neuron was reproduced using the explicit e-pr
 Next, the STDP-LIF neuron was modified to the STDP-ALIF model that was experimentally verified to outperform the ALIF neuron on the TIMIT learning task.
 Also, the Izhikevich neuron, which also shows STDP behavior, was shown to be unstable and performing worse than the ALIF and STDP-ALIF neurons.
 This suggests that STDP does not provide an adequate neuron model by itself, but that e.g. spike frequency adaptation also needs to be taken into account.
+However, enhancing an already well-performing neuron model to display STDP-like properties can improve the performance.
 
 Finally, the effect of stacking multiple layers was also examined in combination with the ALIF, STDP-ALIF, and Izhikevich neuron model, and did not appear to improve the learning performance in this task.
 
 Possible future work on this topic includes research on the effects of more elaborate weight initialization methods, variable hyperparameters for individual neurons, different static or dynamic connectivity graphs, and synaptic delays.
 
 The scientific gain of this research is that the link between STDP and e-prop was more closely examined than in previous literature, and that the inclusion of STDP in e-prop can lead to a more accurate or efficient learning performance.
-E-prop, particularly paired with the STDP-ALIF neuron model, remains a framework that offers high potential for biologically plausible learning algorithms for SNNs, which can be particularly well-suited for replicating intelligent behavior in low-power neuromorphic hardware.
+E-prop combined with the STDP-ALIF neuron model remains a framework that offers high potential for biologically plausible learning algorithms for SNNs, which can be particularly well-suited for replicating intelligent behavior in low-power neuromorphic hardware.
 
