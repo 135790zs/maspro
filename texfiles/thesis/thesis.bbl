@@ -953,7 +953,7 @@
       \field{labelnamesource}{author}
       \field{labeltitlesource}{title}
       \field{booktitle}{2018 IEEE International Conference on Robotics and Automation (ICRA)}
-      \field{title}{End to end learning of spiking neural network based on r-stdp for a lane keeping vehicle}
+      \field{title}{End to end learning of spiking neural network based on {R-STDP} for a lane keeping vehicle}
       \field{year}{2018}
       \field{pages}{4725\bibrangedash 4732}
       \range{pages}{8}
@@ -2640,62 +2640,6 @@
       \field{year}{2005}
       \field{pages}{602\bibrangedash 610}
       \range{pages}{9}
-    \endentry
-    \entry{greig2013molecular}{article}{}
-      \name{author}{5}{}{%
-        {{uniquename=0,uniquepart=base,hash=2d129f03ec2b68bbb9b3289eb1bb5c6b}{%
-           family={Greig},
-           familyi={G\bibinitperiod},
-           given={Luciano\bibnamedelima Custo},
-           giveni={L\bibinitperiod\bibinitdelim C\bibinitperiod},
-           givenun=0}}%
-        {{uniquename=0,uniquepart=base,hash=0a046cf109045c6ff1c6362501cb6751}{%
-           family={Woodworth},
-           familyi={W\bibinitperiod},
-           given={Mollie\bibnamedelima B},
-           giveni={M\bibinitperiod\bibinitdelim B\bibinitperiod},
-           givenun=0}}%
-        {{uniquename=0,uniquepart=base,hash=267b61c7282ab1ffba7a804bc5b2eee9}{%
-           family={Galazo},
-           familyi={G\bibinitperiod},
-           given={Maria\bibnamedelima J},
-           giveni={M\bibinitperiod\bibinitdelim J\bibinitperiod},
-           givenun=0}}%
-        {{uniquename=0,uniquepart=base,hash=2c2e88a1e525ebb57de606e30e3f90fb}{%
-           family={Padmanabhan},
-           familyi={P\bibinitperiod},
-           given={Hari},
-           giveni={H\bibinitperiod},
-           givenun=0}}%
-        {{uniquename=0,uniquepart=base,hash=2b2b54c4282f63f0e36394f28ae53b35}{%
-           family={Macklis},
-           familyi={M\bibinitperiod},
-           given={Jeffrey\bibnamedelima D},
-           giveni={J\bibinitperiod\bibinitdelim D\bibinitperiod},
-           givenun=0}}%
-      }
-      \list{publisher}{1}{%
-        {Nature Publishing Group}%
-      }
-      \strng{namehash}{e3f0ae710a58f3f60f457c0b6603b67c}
-      \strng{fullhash}{477a98b2515ba2d3bd3887fa1a4f6256}
-      \strng{bibnamehash}{e3f0ae710a58f3f60f457c0b6603b67c}
-      \strng{authorbibnamehash}{e3f0ae710a58f3f60f457c0b6603b67c}
-      \strng{authornamehash}{e3f0ae710a58f3f60f457c0b6603b67c}
-      \strng{authorfullhash}{477a98b2515ba2d3bd3887fa1a4f6256}
-      \field{sortinit}{G}
-      \field{sortinithash}{5e8d2bf9d38de41b1528bd307546008f}
-      \field{extradatescope}{labelyear}
-      \field{labeldatesource}{year}
-      \field{labelnamesource}{author}
-      \field{labeltitlesource}{title}
-      \field{journaltitle}{Nature Reviews Neuroscience}
-      \field{number}{11}
-      \field{title}{Molecular logic of neocortical projection neuron specification, development and diversity}
-      \field{volume}{14}
-      \field{year}{2013}
-      \field{pages}{755\bibrangedash 769}
-      \range{pages}{15}
     \endentry
     \entry{hasler1990vlsi}{inproceedings}{}
       \name{author}{2}{}{%
@@ -4531,50 +4475,6 @@
       \field{year}{2009}
       \field{pages}{127\bibrangedash 149}
       \range{pages}{23}
-    \endentry
-    \entry{maan2016survey}{article}{}
-      \name{author}{3}{}{%
-        {{uniquename=0,uniquepart=base,hash=13029220d235a26bcb305aef010ac003}{%
-           family={Maan},
-           familyi={M\bibinitperiod},
-           given={Akshay\bibnamedelima Kumar},
-           giveni={A\bibinitperiod\bibinitdelim K\bibinitperiod},
-           givenun=0}}%
-        {{uniquename=0,uniquepart=base,hash=3a80a8289b0d66148d8c2883616192e1}{%
-           family={Jayadevi},
-           familyi={J\bibinitperiod},
-           given={Deepthi\bibnamedelima Anirudhan},
-           giveni={D\bibinitperiod\bibinitdelim A\bibinitperiod},
-           givenun=0}}%
-        {{uniquename=0,uniquepart=base,hash=fe2920398fbf9fd32c7f7a4b95d845fc}{%
-           family={James},
-           familyi={J\bibinitperiod},
-           given={Alex\bibnamedelima Pappachen},
-           giveni={A\bibinitperiod\bibinitdelim P\bibinitperiod},
-           givenun=0}}%
-      }
-      \list{publisher}{1}{%
-        {IEEE}%
-      }
-      \strng{namehash}{e93264df2b20020e788666df48d17a95}
-      \strng{fullhash}{e93264df2b20020e788666df48d17a95}
-      \strng{bibnamehash}{e93264df2b20020e788666df48d17a95}
-      \strng{authorbibnamehash}{e93264df2b20020e788666df48d17a95}
-      \strng{authornamehash}{e93264df2b20020e788666df48d17a95}
-      \strng{authorfullhash}{e93264df2b20020e788666df48d17a95}
-      \field{sortinit}{M}
-      \field{sortinithash}{cfd219b90152c06204fab207bc6c7cab}
-      \field{extradatescope}{labelyear}
-      \field{labeldatesource}{year}
-      \field{labelnamesource}{author}
-      \field{labeltitlesource}{title}
-      \field{journaltitle}{IEEE transactions on neural networks and learning systems}
-      \field{number}{8}
-      \field{title}{A survey of memristive threshold logic circuits}
-      \field{volume}{28}
-      \field{year}{2016}
-      \field{pages}{1734\bibrangedash 1746}
-      \range{pages}{13}
     \endentry
     \entry{maass1997networks}{article}{}
       \name{author}{1}{}{%

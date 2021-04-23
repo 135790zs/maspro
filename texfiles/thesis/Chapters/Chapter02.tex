@@ -21,11 +21,10 @@
         such that the spikes elicited by a neuron only depend on its hidden state.
         For instance, a neuron $j$ may spike at time $t$ (\ie, $z^t_j = 1$) if its activity, which is contained in the hidden state, reaches a threshold value.
 
-        The purpose of an e-prop model is that it can be trained to perform a classification task.
-        As described in the remainder of this chapter, the weight matrix $\mathbf{W}$ is trained such that the input vectors $\mathbf{x}^t$ yield a good prediction of the class it belongs to.
+        The purpose of an e-prop model is that it can be trained to perform a learning task, such as classification.
+        As described in the remainder of this chapter, the weight matrix $\mathbf{W}$, which comprises the weight values of all synapses in the model, is trained such that the input vectors $\mathbf{x}^t$ yield a good prediction of the classes they belongs to.
 
-        An important property of e-prop is that the weight update depends only on the hidden state of an afferent neuron.
-        The formalizations described in Equations \ref{eq:model} and \ref{eq:observable} therefore indicate that e-prop is a \emph{local} training method, because a neuron's observable state depends only on its own hidden state, which in turn depends only on observable signals that are directly connected to it.
+        The formalizations described in Equations \ref{eq:model} and \ref{eq:observable} indicate that e-prop is a \emph{local} training method, because a neuron's observable state depends only on its own hidden state, which in turn depends only on observable signals that are directly connected to it.
         E-prop is also an \emph{online} training method, because both the hidden and observable state of a neuron depend only on information that is still available; the observable state is updated at the same time step as the hidden state, and the hidden state is updated according to information which is then present in the afferent neurons.
 
         The precise formulations of $M$ and $f$ depend on the neuron models that are used in the e-prop model.
@@ -77,7 +76,7 @@
             \end{equation}
             where $\rho < 1$ is an adaptation decay constant and $\beta \leq 0$ is an adaptation strength constant.
             Equation \ref{eq:alifA} indicates that the adaptive threshold increases at every spike, and decays back to $v_\text{th}$ in the absence of spikes.
-            The decay factor $\rho$ of the threshold adaptation is higher than the decay factor $\alpha$ of the neuron activity, such that the immediate firing behavior of a neuron is affected on a shorter time scale than the threshold adaptation, which is better suited to reflect the working memory of a neuron and track longer temporal dependencies in the input data then the activation decay.
+            The decay factor $\rho$ of the threshold adaptation is higher than the decay factor $\alpha$ of the neuron activity, such that the immediate firing behavior of a neuron is affected on a shorter time scale than the threshold adaptation, which is better suited to reflect the working memory of a neuron and track longer temporal dependencies in the input data than the activation decay.
             The interaction between the neuron activity, adaptive threshold and spiking behavior is illustrated in Figure \ref{fig:simplealif}.
 
             \begin{figure}[!ht]
@@ -106,7 +105,7 @@
         An input vector $\mathbf{x}^t$ at time step $t$ is fed to a pool of $N$ recurrent neurons with hidden states $\mathbf{h}^t$ and observable states $\mathbf{z}^t$ through input weights $\mathbf{W}^\text{in}$.
         The recurrent weights $\mathbf{W}^\text{rec}$ connect neurons with each other, but no self-loops exist.
         Therefore, the recurrent neurons also receive inputs from the observable states of the afferent neurons.
-        25\% of these neurons is a LIF neuron (\ie, $\beta = 0$) and the others are ALIF neurons.
+        25\% of these neurons are LIF neurons (\ie, $\beta = 0$) and the others are ALIF neurons.
         The output weights $\mathbf{W}^\text{out}$ process the observable states of the neurons through a softmax function into a logits layer $\mathbf{\pi}^t$.
         These logits are compared with the target output $\mathbf{\pi}^{*, t}$ and multiplied with broadcast weights $\mathbf{B}^t$ to obtain a learning signal $L_j^t$ for every neuron $j$ in the pool.
         Figure \ref{fig:topology-sl} illustrates the basic architecture of a single-layer e-prop model.
@@ -379,7 +378,7 @@
             \end{equation}
             where $B_{jk}$ is a feedback weight from neuron $k$ back to output neuron $j$.
             There are multiple strategies for choosing feedback weights.
-            \citet{bellec2020solution} noted that a constantly uniform weight matrix yields poor performance, which has been empirically verified in this report.
+            \citet{bellec2020solution} noted that a constantly uniform weight matrix yields poor performance, which has been empirically verified in my project.
             However, when the feedback weight matrix is initialized from a zero-centered normal distribution, it can remain either constant, mirror $(W^\text{out})^\top$, or update according to $(\Delta W^\text{out})^\top$.
             These three variants are referred to in \citet{bellec2020solution} as \emph{random}, \emph{symmetric}, and \emph{adaptive} e-prop, respectively.
             In this paper, symmetric e-prop is used (i.e., $B_{jk} \eqdef W^\text{out}_{kj}$) unless explicitly stated otherwise.

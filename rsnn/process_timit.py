@@ -12,6 +12,7 @@ rc['mathtext.fontset'] = 'stix'
 rc['font.family'] = 'STIXGeneral'
 
 def my_mfcc(signal, sample_rate):
+
     if not os.path.isfile("../vis/signal.pdf"):
         plt.figure(figsize=(6, 1.5))
         plt.plot(signal, color='gray')
@@ -23,12 +24,29 @@ def my_mfcc(signal, sample_rate):
     emphasized_signal = np.append(signal[0],
                                   signal[1:] - cfg["pre_emphasis"] * signal[:-1])
 
-    if not os.path.isfile("../vis/signalemph.pdf"):
-        plt.figure(figsize=(6, 1.5))
-        plt.plot(emphasized_signal, color='gray')
-        plt.xlabel("Samples")
-        plt.ylabel("Amplitude")
-        plt.savefig("../vis/signalemph.pdf", bbox_inches='tight')
+    if not os.path.isfile("../vis/signalemphpanels.pdf"):
+
+        fig = plt.figure(constrained_layout=False, figsize=(6, 3))
+        gsc = fig.add_gridspec(nrows=2,
+                               ncols=1,
+                               hspace=0.3,
+                               wspace=0.5)
+        axs = []
+
+        axs.append(fig.add_subplot(gsc[0]))
+        axs[-1].plot(signal[29800:30000], color='gray')
+        axs[-1].set_ylabel("Amplitude")
+        axs[-1].set_title("Raw signal segment")
+        axs[-1].get_xaxis().set_ticklabels([])
+
+        axs.append(fig.add_subplot(gsc[1]))
+        axs[-1].plot(emphasized_signal[29800:30000], color='gray')
+        axs[-1].set_xlabel("Samples")
+        axs[-1].set_ylabel("Amplitude")
+        axs[-1].set_title("Emphasized signal segment")
+        axs[-1].get_xaxis().set_ticklabels(np.arange(29775, 30025, 25))
+
+        plt.savefig("../vis/signalemphpanels.pdf", bbox_inches='tight')
         plt.clf()
 
     frame_length = cfg["frame_size"] * sample_rate

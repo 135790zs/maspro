@@ -1,0 +1,94 @@
+INTRODUCTION -- CONTEXT
+
+For some historical context I want to start where the field of AI started. Already in 1948, Alan Turing wrote about constructing artificial machines that replicate ``intelligent behavior''.
+In 1958, a proposed method was to use Perceptrons, which are simple units meant to emulate the function of biological neurons.
+Ever since, biological learning has been an important source of inspiration for AI research.
+Perceptrons, for instance, were inspired by Hebbian learning, which was a relatively new theoretical framework of biological learning.
+
+In artificial neural networks (ANNs), a network of these units can learn simple tasks.
+ANNs became more popular when in 1986 the backpropagation learning method allowed ``deeper'' ANNs, which have multiple stacked layers, to learn more complex tasks.
+In the last decade, this deep learning became a dominant field within AI, and can now perform as well as humans at some narrowly defined tasks.
+
+However, a major drawback of deep learning is that it consumes a lot of data and energy, which is increasingly bottlenecking its progress.
+This is a clear indication that AI has gone astray in its initial motivation to draw inspiration from human cognition.
+The human brain consumes approximately 20W, while some deep learning models cost millions of USD in energy to train.
+This is caused by fundamental differences between deep learning and the human brain.
+
+In the human brain, communication between neurons is binary in the form of action potentials propagating along an axon.
+Information is contained in the temporal pattern of this so-called spike train.
+In deep learning, communication occurs at every propagation cycle, and the information is contained in the floating-point values.
+This essentially means that in DL, all neurons fire all the time.
+
+INTRODUCTION -- SNNs
+
+Spiking neural networks are a next step in the direction of biological plausibility.
+In an SNN, neurons fire binary spikes instead of propagating floating-point values.
+Since spikes cannot be integrated, the gradient of the error cannot directly be calculated.
+This means that backpropagation is harder to implement.
+There are many other learning algorithms for SNNs, but most do not compete well with human learning or deep learning.
+
+In an SNN, a commonly used neuron model is the leaky integrate-and-fire neuron.
+This neuron has a certain electrical potential, which leaks away by a small fraction over time, but it increased by spike input from other neurons that connect to it.
+When this potential crosses a certain threshold, it is decreased and the neuron sends a spike to other neurons.
+
+This figure illustrates this behavior.
+'I' is the simulated input to the neuron over 200 discrete time steps.
+'V' is the voltage potential that increases faster when the input is higher.
+When the input is too low, the voltage leakage is too high to increase to larger values.
+When the voltage reaches a threshold, in this case at V=1, then the neuron spikes with a binary value 'Z'.
+
+
+INTRODUCTION -- NEUROMORPHIC COMPUTING
+
+SNNs are particularly useful in the upcoming field of neuromorphic computing, in which very-large-scale integration systems are used to implement neural systems.
+A key difference with ANNs is that neuromorphic systems are physical embeddings in an analog medium, rather than an emulation in a digital system.
+
+This means that neuromorphic systems are not based on Von Neumann architectures, in which central processing and memory is separated, but instead have colocalized memory and computation.
+The lack of a separate memory also precludes the use of backpropagation, but other SNN learning algorithms may still be used.
+
+SNNs embedded in neuromorphic systems are extremely fast and energy efficient compared to emulated SNNs.
+
+However, their learning algorithms must be local and online.
+``Local'' means that a neuron can only access information that is directly communicated to it, or directly contained in its own state.
+``Online'' means that only information available at the current time step can be accessed.
+The human brain also has these natural constraints, and so it is a logical step to be re-inspired by the human brain to find a good learning algorithm for spiking networks.
+
+
+INTRODUCTION -- BIOLOGICAL LEARNING
+
+I have already alluded to Hebbian learning, which is a simple biological learning theory best described as ``cells that fire together, wire together''.
+However, this inevitably leads to runaway excitation, because this is a positive feedback loop.
+Spike-timing-dependent plasticity is a refined version of Hebbian learning, in which a connection gets stronger if a postsynaptic neuron fires right after a presynaptic neuron, because this suggests that the presynaptic neuron had a causal contribution to the postsynaptic spike.
+And if it is the other way around, there was no causal contribution and the synapse weakens.
+
+However, to allow a neural network to learn tasks, there needs to be a learning signal that indicates a desired response to an input.
+In psychology, classical conditioning is a clear example.
+The inclusion of this learning signal to Hebbian learning is called three-factor Hebbian learning, and to STDP it is called reward-modulated STDP.
+Neurotransmitters such as dopamine and acetylcholine are examples of learning signals in biological learning.
+
+However, if a learning signal arrives with some delay after the behavior, it should still work.
+And when a learning signal occurs, how can one know which synapses had fired at the time of the behavior, and contributed to it?
+This problem of assigning credit to spikes in the past can be solved by using eligibility traces.
+
+Eligibility traces leave an explicit afterimage after a spike, which persists for much longer time spans than the chemical traces that elicited the spike itself.
+When such a fading eligibility trace is followed by a learning signal, synaptic plasticity is still induced.
+This has been shown to occur in the human brain.
+Learning algorithms using eligibility traces have also shown some successes in training SNNs using R-STDP.
+
+
+
+INTRODUCTION -- ELIGIBILITY PROPAGATION
+
+One of these is called eligibility propagation, or e-prop.
+There is a mathematical connection to backpropagation, but the algorithm itself is biologically plausible, because it adheres to the local and online constraints.
+
+It is applicable to any connectivity topology, and multiple neuron models can be used.
+Different neuron models produce spikes using different equations.
+
+E-prop is suitable for very-large scale integration systems.
+And finally, it performs competitively with LSTMs on phone classification.
+A phone is a technical word for speech sound.
+
+However, only the ALIF neuron type has been examined in the e-prop framework.
+This ALIF neuron does not show STDP-like behavior.
+New research has suggested that the STDP-LIF and Izhikevich neurons do display STDP

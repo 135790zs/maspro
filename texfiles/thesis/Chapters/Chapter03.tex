@@ -101,8 +101,8 @@
 			An example of a pre-emphasized signal is given in Figure \ref{fig:signalemph}.
 			\begin{figure}[ht]
 				\centering
-			    \includegraphics[width=\linewidth]{gfx/signalemph}
-			    \caption[Pre-emphasis filtered signal]{A signal after the pre-emphasis filter of Equation \ref{eq:pre_emphasis} was applied to it.}
+			    \includegraphics[width=\linewidth]{gfx/signalemphpanels}
+			    \caption[Pre-emphasis filtered signal segment]{A segment of a signal after the pre-emphasis filter of Equation \ref{eq:pre_emphasis} was applied to it. The upper panel contains samples 28000--30000 of the signal in Figure \ref{fig:signal}, while the lower panel contains its pre-emphasis filtered counterpart. Note that the filtered signal is less symmetric around the horizontal axis, because the filtered signal is similar to a first derivative---the original signal has sharper increases than decreases, so the filtered signal has stronger extrema towards the positive direction.}
 			    \label{fig:signalemph}
 			\end{figure}
 
@@ -267,11 +267,12 @@
 
 
 \section{Enhancing e-prop}
-
-	In this report, two types of enhancements to apply the e-prop learning algorithm on the TIMIT dataset are examined.
+	In my project I examined two types of enhancements to apply the e-prop learning algorithm on the TIMIT dataset.
 
 	The first type is the effect of the neuron model; particularly, the effect of including STDP behavior is analyzed.
 	The second type is the effect of a multi-layered architecture.
+
+	The results of these enhancements will answer the research questions posed in Chapter \ref{ch:introduction}, i.e., whether multi-layered architectures or inclusion of STDP in neuron models improves the performance of e-prop.
 
 	\subsection{Multi-layer architecture}\label{sec:ml_arch}
 

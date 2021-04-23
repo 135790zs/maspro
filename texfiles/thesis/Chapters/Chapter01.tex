@@ -68,8 +68,10 @@ On the surface, it can be understood as running neural networks not abstracted i
 A central advantage of NC is energy efficiency \citep{hasler1990vlsi,lee1990parallel,tarassenko1990real}.
 This energy efficiency, combined with NC's massive parallelism \citep{monroe2014neuromorphic}, makes VLSIs particularly relevant for implementing SNNs.
 
-Like SNNs, neuromorphic systems typically use sparse, event-based communication between devices such as memristors \citep{maan2016survey} and physically colocalized memory and computation \citep{sterling2015principles,neftci2018data}.
-Although colocalized memory and computation has also been implemented in von Neumann machines, such as Google's TPU\footnote{See \texttt{https://cloud.google.com/tpu/docs/tpus}. Last accessed January 2021}, Graphcore's IPU\footnote{See \texttt{https://www.graphcore.ai/products/ipu}. Last accessed January 2021}, or Cerebras' CS-1\footnote{See \texttt{https://cerebras.net/product/\#chip}. Last accessed January 2021}, neuromorphic systems are more efficient for running ANNs \citep{merolla2014million,rajendran2019low}.
+Like SNNs, neuromorphic systems typically use sparse, event-based communication between devices
+% such as memristors \citep{maan2016survey}
+and physically colocalized memory and computation \citep{sterling2015principles,neftci2018data}.
+Although colocalized memory and computation has also been implemented in digital machines, such as Google's TPU\footnote{See \texttt{https://cloud.google.com/tpu/docs/tpus}. Last accessed January 2021}, Graphcore's IPU\footnote{See \texttt{https://www.graphcore.ai/products/ipu}. Last accessed January 2021}, or Cerebras' CS-1\footnote{See \texttt{https://cerebras.net/product/\#chip}. Last accessed January 2021}, neuromorphic systems are more efficient for running ANNs \citep{merolla2014million,rajendran2019low}.
 The energy consumption of CMOS artificial neurons is several orders of magnitude lower than that of neurons in an ANN, and even 2--3 times lower than the energy consumption of biological neurons \citep{elbez2020progressive}.
 Neuromorphic systems are also more tolerant to device variation \citep{yu2013low}.
 
@@ -84,7 +86,8 @@ For instance, the inner state of a neuron can only be influenced by itself, or b
 Similarly, a synapse can only spike or change its weight based on signals from the afferent and efferent neuron.
 This is a direct consequence of the colocalization of processing and memory.
 The precondition of being online can be regarded as temporal locality---neurons and synapses can only access information that physically exists at the same point in time.
-They cannot access future information, nor past information if it was not explicitly retained.
+They cannot access information about past or future events, except if explicit memory traces of a past event are retained over time.
+In that case, past events can affect the neuron's current behavior.
 
 The brain also adheres to these two constraints.
 Some of the more common learning rules in ANNs are based on a form of Hebbian learning, which is a major factor in biological learning and memory consolidation \citep{schuman2017survey}.
@@ -131,10 +134,10 @@ The property that a neuron can have multiple hidden states means that there are 
 
 In e-prop, the learning signal is a local variation on random broadcast alignment, which propagates the error directly back onto the neurons with a random weight, resembling the function of a neuromodulator in the brain.
 This has been suggested to provide a diversity of feature detectors for task-relevant network inputs \citep{bellec2020solution}.
-Broadcast alignment can perform as effectively as backpropagation in some tasks in feedforward ANNs \citep{lillicrap2016random,nokland2016direct} and multi-layer SNNs \citep{samadi2017deep,clopath2010connectivity}, but performs poorly in deep feedforward ANNs for complex image classification tasks \citep{bartunov2018assessing}.
+This form of broadcast alignment can perform as effectively as backpropagation in some tasks in feedforward ANNs \citep{lillicrap2016random,nokland2016direct} and multi-layer SNNs \citep{samadi2017deep,clopath2010connectivity}, but performs poorly in deep feedforward ANNs for complex image classification tasks \citep{bartunov2018assessing}.
 
 The local and online properties of e-prop make it a biologically plausible learning algorithm that can be implemented on VLSIs.
-E-prop has been demonstrated to work for a large variety of tasks, including classifying phones (\ie, speech sounds), for which it performs competitively with LSTMs \citep{graves2013speech}, a popular RNN architecture that uses BPTT.
+E-prop has been demonstrated to work for a large variety of tasks, including classifying phones (\ie, speech sounds), for which it performs competitively with RNNs that use BPTT and the popular LSTM neuron model \citep{graves2013speech}.
 
 The fading eligibility trace in e-prop is similar to STDP in that the weight change is smaller if there is a longer delay between a presynaptic and postsynaptic spike.
 However, e-prop is essentially independent of STDP, because it does not explicitly relate the order of the pre- and postsynaptic spike to the synaptic weight update.
@@ -148,7 +151,7 @@ This resembles the biological phenomenon of error-related negativity (ERN) \cite
 However, these STDP-modified neurons were shown only in a single-synapse demo to illustrate the STDP properties, not in a full learning task.
 
 \paragraph{Multi-layer RSNNs}
-The human neocortex, which is responsible for processing sensory information, controlling motor output, and mediating higher-order cognitive functions, is organized into six recurrent layers of spiking neurons \citep{greig2013molecular}.
+% The human neocortex, which is responsible for processing sensory information, controlling motor output, and mediating higher-order cognitive functions, is organized into six recurrent layers of spiking neurons \citep{greig2013molecular}.
 
 The discovery of backpropagation allowed gradient descent--based training of multi-layer ANNs, which significantly increased their performance.
 Although it is unlikely to use backpropagation, the human brain is hierarchically structured such that early layers process simple information and deep layers process more abstract information.
