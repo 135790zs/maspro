@@ -129,9 +129,9 @@
   \center{Research question:\\\textit{Does including STDP-like behavior in e-prop lead to faster and more accurate phone classification?}}
 
     \begin{itemize}[label=--]
-      \item Reproduce results of original e-prop paper\\$\rightarrow$ explicitly instead of automatic differentiation
+      \item Reproduce results of original e-prop paper
       \item Extend STDP-LIF to STDP-ALIF
-      \item Experimentally verify the STDP-ALIF and Izhikevich neuron on phone classification task
+      \item Experimentally verify the STDP-ALIF and Izhikevich neurons on phone classification task
       \item Examine effects of e-prop in multi-layer recurrent SNN
     \end{itemize}
   \end{frame}
@@ -230,7 +230,8 @@
   \begin{equation}
     \Delta W_{ji} = -\eta\sum_t\underbrace{\sum_kB_{jk}\left(\pi^{t}_k - \pi^{*,t}_k\right)}_{=L^t_j}\underbrace{\sum_{t'\leq t}\kappa^{t'-t}e^{t'}_{ji}}_{\eqdef \bar{e}^t_{ji}}
     \end{equation}
-    where $y^t_k = \kappa y^{t-1}_k + \sum_j W^\text{out}_{kj}z^t_j+b_k$\\
+    where $\hat{y}^t_k = \kappa \hat{y}^{t-1}_k + \sum_j W^\text{out}_{kj}z^t_j$,\\
+    $y^t_k = \hat{y}^t_k+b_k$\\
     and $\pi^t_k = \sigma_k\left(y^t_1,\ldots,y^t_K\right)$.
     % Mention that output y has a low-pass filter with factor kappa.
     \begin{equation}
@@ -249,11 +250,27 @@
 \end{frame}
 
 \begin{frame}{Methods -- STDP-ALIF}
+  \begin{itemize}[label=--]
+    \item New neuron model:
+    \begin{align}\label{eq:ml_stdpalifV}
+          v^{t+1}_{j} &= \alpha v_{j}^t + \sum_{i\neq j}W^\text{rec}_{ji}z_i^t + \sum_i W^\text{in}_{ji}I -z^t_{j}\alpha v^t_{j} - z_{j}^{t-\delta t_\text{ref}}\alpha v^t_{j}\\
+          \psi^t_{j} &= \begin{cases}
+          -\gamma&\mbox{if } t - t_{z_{j}} < \delta t_\text{ref}\\
+          \gamma\max\left(0, 1 - \left|\frac{v^t_{j}-v_\text{th}}{v_\text{th}}\right|\right)&\mbox{otherwise}
+          \end{cases}
+    \end{align}
+    \item Decreases $v^t_j$ after refractory period, and clamps $\psi^t_j$ to $-\gamma$ instead of to 0.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Methods -- STDP-ALIF}
   \begin{figure}[!ht]
     \centering
     \includegraphics[width=.8\linewidth]{stdpalif}
   \end{figure}
 \end{frame}
+
+
 \begin{frame}{Methods -- Izhikevich}
   \begin{figure}[!ht]
     \centering
@@ -349,11 +366,10 @@
 \section{Discussion}
 \begin{frame}{Discussion}
   \begin{itemize}[label=--]
-    \item Izhikevich neuron unsuitable
     \item More layers = less efficient
     \item Including STDP-like behavior:
     \begin{itemize}[label=--]
-      \item improves the classification performance of the e-prop model
+      \item improves the classification performance of the e-prop model (but not always!)
       \item more closely resembles biological learning.
     \end{itemize}
   \end{itemize}
@@ -379,7 +395,52 @@
   \end{itemize}
 \end{frame}
 
+\section{The end}
+\begin{frame}{}
+  \center{\textit{Thank you!}}
+\end{frame}
+
+\section{Hidden slides}
+\begin{frame}{}
+  \footnotesize
+  \begin{align}
+  \frac{dE}{dW_{ji}} &= \sum_{t' \leq T}\frac{dE}{d\mathbf{h}_j^{t'}}\cdot\frac{\partial \mathbf{h}_j^{t'}}{\partial W_{ji}} =
+  \sum_t\frac{dE}{dz_j^t}\cdot\left[\frac{dz_j^t}{dW_{ji}}\right]_\text{local}\\
+  \frac{dE}{d\mathbf{h}_j^{t'}} &= \underbrace{\frac{dE}{dz_j^{t'}}}_{L^{t'}_j} \frac{\partial z_j^{t'}}{\partial\mathbf{h}_j^{t'}} + \frac{dE}{d\mathbf{h}_j^{t'+1}}\frac{\partial\mathbf{h}_j^{t'+1}}{\partial\mathbf{h}_j^{t'}}\\
+  \frac{dE}{dW_{ji}} &= \sum_{t'}\left(L_j^{t'}\frac{\partial z_j^{t'}}{\partial\mathbf{h}_j^{t'}} + \left( L^{t'+1}_j \frac{\partial z_j^{t'+1}}{\partial\mathbf{h}_j^{t'+1}} + (\cdots)\frac{\partial\mathbf{h}_j^{t'+2}}{\partial\mathbf{h}_j^{t'+1}}  \right) \frac{\partial\mathbf{h}_j^{t'+1}}{\partial\mathbf{h}_j^{t'}}\right)\cdot\frac{\partial\mathbf{h}_j^{t'}}{\partial W_{ji}}\\
+  \frac{dE}{dW_{ji}} &= \sum_{t'}\sum_{t\geq t'}L^t_j\frac{\partial z_j^t}{\partial\mathbf{h}_j^t}\frac{\partial\mathbf{h}^t_j}{\partial\mathbf{h}_j^{t-1}} \cdots \frac{\partial\mathbf{h}_j^{t+1}}{\partial\mathbf{h}_j^{t'}}\cdot\frac{\partial\mathbf{h}_j^{t'}}{\partial W_{ji}}\\
+  \frac{dE}{dW_{ji}} &= \sum_t\frac{dE}{dz_j^t}\underbrace{\frac{\partial z_j^t}{\partial\mathbf{h}_j^t}\underbrace{\sum_{t\geq t'}\frac{\partial\mathbf{h}^t_j}{\partial\mathbf{h}_j^{t-1}} \cdots \frac{\partial\mathbf{h}_j^{t+1}}{\partial\mathbf{h}_j^{t'}}\cdot\frac{\partial\mathbf{h}_j^{t'}}{\partial W_{ji}}}_{\bm{\epsilon}_{ji}^t}}_{e^t_{ji}}
+  \end{align}
+\end{frame}
+
+\begin{frame}
+\begin{align}
+v^{t+1}_j &= \alpha v_j^t + \sum_{i\neq j}W^\text{rec}_{ji}z_i^t + \sum_i W^\text{in}_{ji}x_i^{t+1} - z_j^tv_
+            \text{th}\\
+a^{t+1}_j &= \rho a^t_j + z^t_j\\
+z^t_j &= H\left(v_j^t - v_\text{th} - \beta a^t_j\right)\\
+\frac{\partial v_j^{t+1}}{\partial v_j^t} &= \alpha\\
+\frac{\partial v_j^{t+1}}{\partial a_j^t} &= 0\\
+\frac{\partial a_j^{t+1}}{\partial v_j^t} &= \psi^t_j\\
+\frac{\partial a_j^{t+1}}{\partial a_j^t} &= \rho - \psi^t_j\beta\\
+\frac{\partial z^t_j}{\partial\mathbf{h}^t_j} &= \begin{pmatrix}
+                    \frac{\partial z^t_j}{\partial v^t_j}\\
+                    \frac{\partial z^t_j}{\partial a^t_j}
+                    \end{pmatrix}
+                = \begin{pmatrix}
+                    \psi^t_j\\
+                    -\beta\psi^t_j
+                    \end{pmatrix}
+\end{align}
+\end{frame}
+
 \end{document}
 
 
+TODO:
 
+Include proof of e-prop on hidden slides.
+
+Re-read own paper to refresh memory.
+
+Write out sample text of remainder of slides, in order to streamline and focus.

@@ -1,6 +1,7 @@
 INTRODUCTION -- CONTEXT
 
-For some historical context I want to start where the field of AI started. Already in 1948, Alan Turing wrote about constructing artificial machines that replicate ``intelligent behavior''.
+For some historical context I want to start where the field of AI started.
+Already in 1948, Alan Turing wrote about constructing artificial machines that replicate ``intelligent behavior''.
 In 1958, a proposed method was to use Perceptrons, which are simple units meant to emulate the function of biological neurons.
 Ever since, biological learning has been an important source of inspiration for AI research.
 Perceptrons, for instance, were inspired by Hebbian learning, which was a relatively new theoretical framework of biological learning.
@@ -16,19 +17,19 @@ This is caused by fundamental differences between deep learning and the human br
 
 In the human brain, communication between neurons is binary in the form of action potentials propagating along an axon.
 Information is contained in the temporal pattern of this so-called spike train.
-In deep learning, communication occurs at every propagation cycle, and the information is contained in the floating-point values.
+In deep learning however, communication occurs at every propagation cycle.
 This essentially means that in DL, all neurons fire all the time.
 
 INTRODUCTION -- SNNs
 
 Spiking neural networks are a next step in the direction of biological plausibility.
-In an SNN, neurons fire binary spikes instead of propagating floating-point values.
+In an SNN, neurons fire binary spikes instead of propagating continuous values.
 Since spikes cannot be integrated, the gradient of the error cannot directly be calculated.
 This means that backpropagation is harder to implement.
 There are many other learning algorithms for SNNs, but most do not compete well with human learning or deep learning.
 
 In an SNN, a commonly used neuron model is the leaky integrate-and-fire neuron.
-This neuron has a certain electrical potential, which leaks away by a small fraction over time, but it increased by spike input from other neurons that connect to it.
+This neuron has a certain electrical potential, which leaks away by a small fraction over time, but it increases by spike input from other neurons that connect to it.
 When this potential crosses a certain threshold, it is decreased and the neuron sends a spike to other neurons.
 
 This figure illustrates this behavior.
@@ -64,7 +65,7 @@ And if it is the other way around, there was no causal contribution and the syna
 However, to allow a neural network to learn tasks, there needs to be a learning signal that indicates a desired response to an input.
 In psychology, classical conditioning is a clear example.
 The inclusion of this learning signal to Hebbian learning is called three-factor Hebbian learning, and to STDP it is called reward-modulated STDP.
-Neurotransmitters such as dopamine and acetylcholine are examples of learning signals in biological learning.
+In biological learning, examples of learning signals are neurotransmitters such as acetylcholine and dopamine.
 
 However, if a learning signal arrives with some delay after the behavior, it should still work.
 And when a learning signal occurs, how can one know which synapses had fired at the time of the behavior, and contributed to it?
@@ -86,9 +87,9 @@ It is applicable to any connectivity topology, and multiple neuron models can be
 Different neuron models produce spikes using different equations.
 
 E-prop is suitable for very-large scale integration systems.
-And finally, it performs competitively with LSTMs on phone classification.
-A phone is a technical word for speech sound.
+And finally, it performs competitively with LSTM-based networks on phone classification.
+A phone is a technical word for a speech sound.
 
-However, only the ALIF neuron type has been examined in the e-prop framework.
+However, only the ALIF neuron type has been examined so far in the e-prop framework.
 This ALIF neuron does not show STDP-like behavior.
-New research has suggested that the STDP-LIF and Izhikevich neurons do display STDP
+New research has suggested that the STDP-LIF and Izhikevich neurons do display STDP, but they had not been tested in an actual task before.
