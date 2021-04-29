@@ -36,7 +36,7 @@ This figure illustrates this behavior.
 'I' is the simulated input to the neuron over 200 discrete time steps.
 'V' is the voltage potential that increases faster when the input is higher.
 When the input is too low, the voltage leakage is too high to increase to larger values.
-When the voltage reaches a threshold, in this case at V=1, then the neuron spikes with a binary value 'Z'.
+When the voltage reaches a threshold, in this case at V=1, then the neuron spikes with a binary value 'Z'. After a spike, the neuron is temporarily suppressed.
 
 
 INTRODUCTION -- NEUROMORPHIC COMPUTING
@@ -93,3 +93,221 @@ A phone is a technical word for a speech sound.
 However, only the ALIF neuron type has been examined so far in the e-prop framework.
 This ALIF neuron does not show STDP-like behavior.
 New research has suggested that the STDP-LIF and Izhikevich neurons do display STDP, but they had not been tested in an actual task before.
+
+
+INTRODUCTION -- THIS RESEARCH
+
+So given that STDP seems to play a major role in biological learning, and e-prop is an efficient and biologically plausible learning algorithm, my research question is: "Does including STDP-like behavior in e-prop lead to faster and more accurate phone classification?"
+
+In the process of answering this question, I first reproduce the results of a previous e-prop paper that does not use STDP.
+
+Then, I create the STDP-ALIF neuron, and finally I implement an e-prop model and test it on a phone classification task using the ALIF-STDP and Izhikevich neuron models.
+
+The Izhikevich neuron model is a slightly more complex neuron model that does not explicitly track its refractory time after a spike, and with a bit of tweaking, naturally shows STDP behavior.
+
+====================================================================================================
+
+METHODS -- TECHNICAL FRAMEWORK (E-PROP)
+
+This illustration shows the main elements of an e-prop model.
+The input x^t is a segment of the input sentence x at time t.
+Through input weights it is fed to a pool of e-prop neurons.
+In this case, there are 25% LIF neurons and 75% ALIF neurons.
+All of these neurons are connected to all other neurons.
+The output weights of the network process the spikes to an output layer.
+This output layer produces a probability vector of all phones that is compared to the real class of the input.
+This class is the true phone.
+This results in a cross-entropy error metric and a loss.
+This loss is propagated back into the network and weighted through so-called broadcast weights, which are specific for each synapse and mirror the output weights.
+
+A more technical way to describe this model is by using a tuple of functions M and F.
+
+M describes how the hidden states of the neurons evolve over time.
+Such a hidden state contains, for instance, the voltage or dynamic threshold of a neuron.
+The hidden state H at time T of a neuron J is defined only by its previous hidden state, the previous spikes Z of other neurons, the current input vector, and the weights that connect to it.
+
+F is the update of the observable state, and it depends only on the hidden state.
+
+
+METHODS -- THE ALIF NEURON MODEL
+
+The ALIF neuron is a variant of the LIF neuron I showed before.
+
+The difference is that when a neuron spikes, the threshold increases a little bit.
+And when the neuron doesn't fire for a long time, the threshold decreases to its resting value.
+
+This illustration shows what this looks like when an ALIF neuron is given a sinusoidal input.
+In the first wave of the input, the neuron is sensitive and it produces a strong spike pattern.
+
+The hidden state component A is the threshold adaptivity. It increases at a spike and slowly decreases otherwise.
+
+Mathematically, the spikes Z are modeled by a Heaviside function, which is 1 if it argument is larger than 0.
+We see that the voltage should therefore exceed the resting threshold plus the weighted adaptivity.
+
+In an e-prop model, the voltage is modeled by a leakage term, a term that receives weighted spikes from other neurons, a term that receives the weighted input signal, and a term that decreases the voltage after a spike.
+
+The adaptivity component decays to zero over time, but increases after a spike.
+
+
+METHODS -- E-PROP
+
+A key equation for e-prop is that the update of a synapse depends on the eligibility trace, and a learning signal, which in our case is the difference between the prediction and the target.
+The weights can be updated at every time step, but also at different intervals.
+In my implementation, I aggregate the weight changes and update after every batch of sentences.
+
+I will skip over the proof of this equation because of time constraints, but I have it in additional hidden slides so I'm open to explaining it after the presentation.
+
+What's important to remember is that the eligibility trace is computed from a so-called eligibility vector.
+This vector computes the contributions for each of the hidden state components to the observable state.
+
+
+METHODS -- E-PROP FOR ALIF
+
+This slide explains how to compute the eligibility trace for the ALIF neuron.
+
+The hidden state of an ALIF neuron contains the voltage and threshold adaptivity.
+
+Since spikes are not differentiable, we use a pseudo-derivative PSI.
+
+When we then compute the eligibility vector as defined on the previous slide, we find that its components are recursive and influenced by the observable state and pseudo-derivative.
+
+We can then also compute the eligibility trace according to its definition.
+
+
+METHODS -- E-PROP WEIGHT UPDATE
+
+We can use this eligibility trace along with the learning signal to update the synaptic weights.
+
+The weight updates with a small step towards the negative gradient.
+The first summation aggregates the weight over time.
+The second summation combines the feedback from all K output neurons, which is the number of phone classes.
+The learning signal is here defined as the weighted difference between the prediction pi^t_k and pi^*_k.
+The third summation is a low-pass filter of the eligibility trace with factor kappa, that makes it smoother over time.
+
+An output neuron Y at time T also depends on a decayed previous output, and the weighted observable states of the neurons.
+Then, a bias is added and the probability vector is computed using the softmax function.
+
+The weight updates for the output weights and bias do not depend on the broadcast weights or eligibility trace.
+But the output weights do use a low-pass filter over the observable states to compensate for the decay in the output neurons Y.
+
+METHODS -- VISUALIZING THE ALIF NEURON
+
+This was all pretty abstract, so let's see what this looks like in practice.
+
+This is another demonstration of the evolution of a synapse and its hidden state over time.
+
+I set the input such that the neurons produce a particular spike pair, which switches in the second half of this plot.
+
+What's interesting to note in this plot is that the pseudo-derivative is always positive, and therefore the eligibility trace is always positive as well.
+
+This means that the weight update is always positive.
+
+However, what we would like to see is STDP behavior, which means that the weight update flips when the order of the spike pairs is reversed.
+
+
+METHODS -- STDP-ALIF
+
+So we modify the ALIF neuron to include STDP behavior.
+
+We need to change the pseudo-derivative such that it is clamped to a negative value for the duration of the refractory period. This will also negate the eligibility trace and weight update.
+
+We also need to add a fifth term to the voltage update, such that it also decreases its weight after the refractory period. This will ensure that the negative weight update will be similar in strength to the positive weight update.
+
+
+METHODS -- STDP-ALIF
+
+When we use these two modifications, we can see that the pseudo-derivative become negative during a refractory period, leading to a negative eligibility trace and a weight that can also decrease over time.
+
+
+METHODS -- IZHIKEVICH
+
+I also derived the equations for the Izhikevich neuron, which I omit here. However, this led to a strong positive feedback loop between the two eligibility vector components.
+To fix this, I set limits to the values of these components.
+Then, the Izhikevich neuron does show STDP-like behavior, but only when the hyperparameters are carefully tuned.
+
+
+METHODS -- TASK
+
+The task in my research is to classify frame-wise phones from speech signals.
+I used a dataset that contains approximately 4000 speech sentences that I split in 25 millisecond frames.
+Each of these frames corresponds to one out of 61 phone classes.
+I preprocessed the frames into Mel-frequency cepstral components, and concatenate their first and second derivatives.
+Then, I standardize every individual channel with respect to the training data.
+
+
+METHODS -- OTHER SETTINGS
+
+Next to the e-prop model I describe in this presentation, I implemented the Adam optimizer for the weight update.
+I also include two regularization methods. The first is a firing rate regularization, which nudges the weights such that neurons tend to spike with a frequency of approximately 10 Hertz.
+The second regularization is L2 regularization, which prevents weights from going too far from zero in the positive or negative direction.
+
+
+RESULTS -- EXAMPLE
+
+This is an example of a result, and a way to illustrate how the phones change over time.
+This example was taken randomly from a trained STDP-ALIF model using the validation set.
+
+On the top you see the 39 frequency components of an input sentence.
+The second row of this figure shows the probability vector Pi per frame.
+PI-MAX on the third row indicates the most likely phone on this probability vector.
+And the last row indicates the true class label.
+
+In this figure we can see that there is a pretty good overlap between the predicted phones and the target phones.
+The order of the phones seems to match for the most part.
+The misclassifications can be grouped in either noisy predictions, when the probability vector doesn't strongly favor one class, boundaries between phones that are slightly different, and normally misclassified phones.
+But for the most part, it seems to perform pretty well.
+The time scales of the predicted phones seem to resemble those of the target phones.
+
+
+RESULTS -- ACCURACY PER NEURON TYPE
+
+This plot shows the results for each of the three neuron models.
+The line is a moving average of the validation runs, and the star is the test score at the model that had the lowest validation accuracy.
+
+We see that the Izhikevich neuron performs relatively poorly, and quickly converges to a validation accuracy of 80%.
+
+However, the STDP-ALIF neuron performs considerably better than the normal ALIF neuron, with a validation and testing accuracy that is roughly 10 percentage points better.
+
+The STDP-ALIF has a misclassification rate of 48.3% on the test set.
+Considering that phones are quite difficult to classify, and that there are 61 of them, this seems to be a pretty good score for a biologically plausible recurrent spiking neural network.
+
+
+RESULTS -- CROSS-ENTROPY PER NEURON TYPE
+
+We see the same pattern of results if we look at the cross-entropy scores, which compare the target class to the probability vector, instead of to the predicted class. The Izhikevich neuron performs worst, and the STDP-ALIF neuron performs best.
+
+DISCUSSION
+
+In the results, we see that the STDP-ALIF neuron performs significantly better than the ALIF neuron, while the only difference between these neuron models is the STDP enhancement.
+
+We can therefore conclude that including STDP-like behavior to the ALIF neuron improves the classification performance of the e-prop model.
+However, the Izhikevich model also shows some tentative STDP, but doesn't perform as well.
+That suggests that STDP can improve performance, but also requires a stable and suitable model to begin with.
+
+To my knowledge, the STDP-ALIF neuron model in e-prop is one of the best performing biologically plausible learning algorithms for recurrent spiking neural networks at the moment.
+
+As it is an efficient learning algorithm, especially in neuromorphic hardware, e-prop offers a good trade-off between running cost and performance.
+
+Including STDP to e-prop networks also leads to a more natural way of controlling the synaptic strength.
+Previously, the weights could only decrease through regularization methods.
+With STDP, they can also decrease according to the order of spike pairs.
+
+There are some directions left to explore that may improve the general framework of e-prop even more.
+
+
+
+DISCUSSION -- FUTURE RESEARCH
+
+In the results we saw that some predicted phones lasted only a few frames, while target phones generally lasted much longer.
+This suggests that the smoothing factor of the output signal could be slightly better tuned to obtain more accurate results.
+Most other hyperparameters have not been extensively tuned either, so there are possibly some percentage points in accuracy to gain.
+
+Another aspect that was left unexplored is that neurons in the model could have different parameters.
+In my research, the only difference between neurons was that 25% was a LIF neuron and 75% was an ALIF neuron.
+However, when parameters such as threshold, adaptivity, and firing rate are sampled from a distribution, we might get a model that is better able to handle different tasks.
+
+In my model, the number of neurons was kept static, at 800 neurons.
+An interesting research direction would be to find ways to prune and grow neurons and synapses while training.
+
+Finally, the transfer time of the observable state over a synapse was 1 time step in my research.
+But if some synapses would have a different delay, the model might be better able to handle different time scales, because past information can be stored in the synaptic delay, rather than only in eligibility traces.

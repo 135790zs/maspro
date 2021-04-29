@@ -132,13 +132,8 @@
       \item Reproduce results of original e-prop paper
       \item Extend STDP-LIF to STDP-ALIF
       \item Experimentally verify the STDP-ALIF and Izhikevich neurons on phone classification task
-      \item Examine effects of e-prop in multi-layer recurrent SNN
     \end{itemize}
   \end{frame}
-
-
-
-
 
 
 \section{Methods}
@@ -158,18 +153,22 @@
   % Local and online!
 \end{frame}
 
-\begin{frame}{Methods -- the ALIF neuron model}
-  \begin{figure}[!ht]
-    \centering
-    \includegraphics[width=\linewidth]{Neuron}
-  \end{figure}
-  \begin{figure}[!ht]
-    \centering
-    \includegraphics[width=\linewidth]{simplealif}
-  \end{figure}
-\end{frame}
+% \begin{frame}{Methods -- the ALIF neuron model}
+%   \begin{figure}[!ht]
+%     \centering
+%     \includegraphics[width=\linewidth]{Neuron}
+%   \end{figure}
+%   \begin{figure}[!ht]
+%     \centering
+%     \includegraphics[width=\linewidth]{simplealif}
+%   \end{figure}
+% \end{frame}
 
 \begin{frame}{Methods -- the ALIF neuron model}
+  \begin{figure}[!ht]
+    \centering
+    \includegraphics[width=0.9\linewidth]{simplealif}
+  \end{figure}
   \footnotesize
   \begin{equation}
   z^t_j = H\left(v_j^t - v_\text{th} - \beta a^t_j\right)
@@ -181,10 +180,6 @@
   \begin{equation}\label{eq:alifA}
   a^{t+1}_j = \rho a^t_j + z^t_j
   \end{equation}
-  \begin{figure}[!ht]
-    \centering
-    \includegraphics[width=0.9\linewidth]{simplealif}
-  \end{figure}
   % 25% is LIF, so effectively beta = 0
 \end{frame}
 
@@ -285,20 +280,20 @@
   \end{figure}
 \end{frame}
 
-\begin{frame}{Methods -- Multilayer}
-  \begin{equation}\label{eq:ml_model}
-        \mathbf{h}^t_{rj} = \begin{cases}
-        M\left(\mathbf{h}_{rj}^{t-1}, \mathbf{z}_r^{t-1}, \mathbf{x}^t, \mathbf{W}_{rj}\right)       & \mbox{if } r = 1\\
-        M\left(\mathbf{h}_{rj}^{t-1}, \mathbf{z}_r^{t-1}, \mathbf{z}_{r-1}^t, \mathbf{W}_{rj}\right) & \mbox{otherwise,}
-        \end{cases}
-        \end{equation}
-        where $r \in [1\mathrel{{.}\,{.}}\nobreak R]$.
+% \begin{frame}{Methods -- Multilayer}
+%   \begin{equation}\label{eq:ml_model}
+%         \mathbf{h}^t_{rj} = \begin{cases}
+%         M\left(\mathbf{h}_{rj}^{t-1}, \mathbf{z}_r^{t-1}, \mathbf{x}^t, \mathbf{W}_{rj}\right)       & \mbox{if } r = 1\\
+%         M\left(\mathbf{h}_{rj}^{t-1}, \mathbf{z}_r^{t-1}, \mathbf{z}_{r-1}^t, \mathbf{W}_{rj}\right) & \mbox{otherwise,}
+%         \end{cases}
+%         \end{equation}
+%         where $r \in [1\mathrel{{.}\,{.}}\nobreak R]$.
 
-  \begin{figure}[!ht]
-    \centering
-    \includegraphics[trim=0 25cm 0 0, clip, width=\linewidth]{Multilayer}
-  \end{figure}
-\end{frame}
+%   \begin{figure}[!ht]
+%     \centering
+%     \includegraphics[trim=0 25cm 0 0, clip, width=\linewidth]{Multilayer}
+%   \end{figure}
+% \end{frame}
 
 \begin{frame}{Methods -- Task}
   \begin{itemize}[label=--]
@@ -348,31 +343,30 @@
   \end{figure}
 \end{frame}
 
-\begin{frame}{Results -- Multi-layer effects}
-  \begin{figure}[!ht]
-    \centering
-    \includegraphics[width=0.6\linewidth]{ml-percwrong-ALIF}
-  \end{figure}
-\end{frame}
+% \begin{frame}{Results -- Multi-layer effects}
+%   \begin{figure}[!ht]
+%     \centering
+%     \includegraphics[width=0.6\linewidth]{ml-percwrong-ALIF}
+%   \end{figure}
+% \end{frame}
 
-\begin{frame}{Results -- Multi-layer effects}
-  \begin{figure}[!ht]
-    \centering
-    \includegraphics[width=0.6\linewidth]{ml-crossentropy-STDP-ALIF}
-  \end{figure}
-\end{frame}
+% \begin{frame}{Results -- Multi-layer effects}
+%   \begin{figure}[!ht]
+%     \centering
+%     \includegraphics[width=0.6\linewidth]{ml-crossentropy-STDP-ALIF}
+%   \end{figure}
+% \end{frame}
 
 
 \section{Discussion}
 \begin{frame}{Discussion}
   \begin{itemize}[label=--]
-    \item More layers = less efficient
-    \item Including STDP-like behavior:
-    \begin{itemize}[label=--]
-      \item improves the classification performance of the e-prop model (but not always!)
-      \item more closely resembles biological learning.
+    \item Including STDP in e-prop improves classification performance and efficiency (but not always!).\\
+    $\rightarrow$ one of the best biologically plausible learning algorithms for RSNNs.
+    \item Good trade-off between running cost and performance.
+    \item More bioplausibility \\$\rightarrow$ easier in neuromorphic hardware but not always better performance.
+    \item More research is needed on applying e-prop in other types of learning tasks, and many ideas exist that may improve performance even more.
     \end{itemize}
-  \end{itemize}
 \end{frame}
 
 \begin{frame}{Discussion -- future research}
@@ -385,19 +379,9 @@
   \end{itemize}
 \end{frame}
 
-\begin{frame}{Conclusion}
-  \begin{itemize}[label=--]
-    \item Including STDP in e-prop improves classification performance and efficiency.\\
-    $\rightarrow$ one of the best biologically plausible learning algorithms for SNNs.
-    \item Good trade-off between running cost and performance
-    \item More bioplausibility $\rightarrow$ easier in NC but not always better performance
-    \item More research is needed on applying e-prop in other types of learning tasks, and many ideas exist that may improve performance even more.
-  \end{itemize}
-\end{frame}
-
 \section{The end}
 \begin{frame}{}
-  \center{\textit{Thank you!}}
+  \center{\textit{Thank you for listening!}}
 \end{frame}
 
 \section{Hidden slides}
