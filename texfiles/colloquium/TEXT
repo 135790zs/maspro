@@ -105,6 +105,8 @@ Then, I create the STDP-ALIF neuron, and finally I implement an e-prop model and
 
 The Izhikevich neuron model is a slightly more complex neuron model that does not explicitly track its refractory time after a spike, and with a bit of tweaking, naturally shows STDP behavior.
 
+A secondary research question in my paper was about exploring the effects of multi-layered recurrent e-prop models, but because of time constraints, I will not discuss that in this presentation.
+
 ====================================================================================================
 
 METHODS -- TECHNICAL FRAMEWORK (E-PROP)
@@ -152,6 +154,9 @@ The adaptivity component decays to zero over time, but increases after a spike.
 METHODS -- E-PROP
 
 A key equation for e-prop is that the update of a synapse depends on the eligibility trace, and a learning signal, which in our case is the difference between the prediction and the target.
+
+The eligibility trace essentially determines how much the learning signal should change the weight of a synapse. If the synapse had fired recently, then the learning signal has a stronger effect than if the neuron was silent.
+
 The weights can be updated at every time step, but also at different intervals.
 In my implementation, I aggregate the weight changes and update after every batch of sentences.
 
@@ -170,8 +175,9 @@ The hidden state of an ALIF neuron contains the voltage and threshold adaptivity
 Since spikes are not differentiable, we use a pseudo-derivative PSI.
 
 When we then compute the eligibility vector as defined on the previous slide, we find that its components are recursive and influenced by the observable state and pseudo-derivative.
+The eligibility vector components slowly evolve over time.
 
-We can then also compute the eligibility trace according to its definition.
+We can then also compute the eligibility trace according to its definition, from the eligibility vector components.
 
 
 METHODS -- E-PROP WEIGHT UPDATE
@@ -196,7 +202,11 @@ This was all pretty abstract, so let's see what this looks like in practice.
 
 This is another demonstration of the evolution of a synapse and its hidden state over time.
 
+The orange lines are the properties of the presynaptic neuron, and the blue lines those of the postsynaptic neuron, or the synapse in-between them.
+
 I set the input such that the neurons produce a particular spike pair, which switches in the second half of this plot.
+
+In this particular case, the learning rate is set to a constant value, such that the effect of the eligibility trace on the weight update is more visible.
 
 What's interesting to note in this plot is that the pseudo-derivative is always positive, and therefore the eligibility trace is always positive as well.
 
@@ -254,7 +264,11 @@ And the last row indicates the true class label.
 
 In this figure we can see that there is a pretty good overlap between the predicted phones and the target phones.
 The order of the phones seems to match for the most part.
-The misclassifications can be grouped in either noisy predictions, when the probability vector doesn't strongly favor one class, boundaries between phones that are slightly different, and normally misclassified phones.
+
+There appear to be three types of misclassifications.
+The first type is that when the probability vector doesn't strongly favor one class, there are noisy predictions.
+The second is that boundaries between phones slightly deviate from the target.
+And the third type is a phone that is misclassified altogether in the wrong class.
 But for the most part, it seems to perform pretty well.
 The time scales of the predicted phones seem to resemble those of the target phones.
 
@@ -262,7 +276,7 @@ The time scales of the predicted phones seem to resemble those of the target pho
 RESULTS -- ACCURACY PER NEURON TYPE
 
 This plot shows the results for each of the three neuron models.
-The line is a moving average of the validation runs, and the star is the test score at the model that had the lowest validation accuracy.
+The line is a moving average of the validation runs, and the star is the test score at the model that had the best validation accuracy.
 
 We see that the Izhikevich neuron performs relatively poorly, and quickly converges to a validation accuracy of 80%.
 
@@ -304,7 +318,7 @@ Most other hyperparameters have not been extensively tuned either, so there are 
 
 Another aspect that was left unexplored is that neurons in the model could have different parameters.
 In my research, the only difference between neurons was that 25% was a LIF neuron and 75% was an ALIF neuron.
-However, when parameters such as threshold, adaptivity, and firing rate are sampled from a distribution, we might get a model that is better able to handle different tasks.
+However, when parameters such as threshold, adaptivity, decay, and firing rate are sampled from a distribution, we might get a model that is better able to handle different tasks.
 
 In my model, the number of neurons was kept static, at 800 neurons.
 An interesting research direction would be to find ways to prune and grow neurons and synapses while training.

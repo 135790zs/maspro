@@ -385,6 +385,44 @@
 \end{frame}
 
 \section{Hidden slides}
+
+\begin{frame}
+\begin{equation}
+            e^t_{ji} = \bm{\epsilon}_{ji}^t \cdot \frac{\partial z^t_j}{\partial\mathbf{h}^t_j}
+            \end{equation}
+            \begin{align}
+            \begin{pmatrix}
+            \epsilon_{ji, v}^{t+1}\\
+            \epsilon_{ji, a}^{t+1}
+            \end{pmatrix}
+            =
+            \begin{pmatrix}
+            \frac{\partial v^{t+1}_j}{\partial v^t_j} & \frac{\partial v^{t+1}_j}{\partial a^t_j}\\
+            \frac{\partial a^{t+1}_j}{\partial v^t_j} & \frac{\partial a^{t+1}_j}{\partial a^t_j}
+            \end{pmatrix}
+            \cdot
+            \begin{pmatrix}
+            \epsilon_{ji, v}^t\\
+            \epsilon_{ji, a}^t
+            \end{pmatrix}
+            +
+            \begin{pmatrix}
+            \frac{\partial v^{t+1}_j}{\partial W_{ji}}\\
+            \frac{\partial a^{t+1}_j}{\partial W_{ji}}
+            \end{pmatrix}
+            \end{align}
+            \begin{equation}
+            \pi^t_k = \sigma_k\left(y^t_1,\ldots,y^t_K\right) = \frac{\exp\left(y^t_k\right)}{\sum_{k'}\exp\left(y^t_{k'}\right)}
+            \end{equation}
+            \begin{equation}
+            E = -\sum_{t,k}\pi^{*,t}_k\log\pi^t_k
+            \end{equation}
+            \begin{equation}\label{eq:learningsignal_after_output}
+            L^t_j = \frac{\partial E}{\partial z^t_j} = \sum_kB_{jk}\sum_{t'\geq t}\left(\pi^{t'}_k - \pi^{*,t'}_k\right)\kappa^{t'-t}
+            \end{equation}
+            Initialize weights from $\mathcal{N}\left(0, \sqrt{N_\text{afferent}}\right)$
+\end{frame}
+
 \begin{frame}{}
   \footnotesize
   \begin{align}
@@ -416,6 +454,47 @@ z^t_j &= H\left(v_j^t - v_\text{th} - \beta a^t_j\right)\\
                     -\beta\psi^t_j
                     \end{pmatrix}
 \end{align}
+\end{frame}
+
+\begin{frame}
+STDP-ALIF:
+\begin{align}
+          \frac{\partial v_{rj}^{t+1}}{\partial v^t_{rj}} &= \alpha - z^t_{rj}\alpha - \alpha z_{rj}^{t-\delta t_\text{ref}}\\
+          &= \alpha\left(1 - z^t_{rj} - z_{rj}^{t-\delta t_\text{ref}}\right)
+          \end{align}
+\begin{align}
+          \bm{\epsilon}^{t+1}_{rji} &= \frac{\partial\mathbf{h}^{t+1}_{rj}}{\partial\mathbf{h}^t_{rj}}\cdot\bm{\epsilon}^t_{rji} + \frac{\partial\mathbf{h}^{t+1}_{rj}}{\partial W_{rji}}\\
+          &= \begin{pmatrix}
+          \alpha\left(1 - z^t_{rj} - z_{rj}^{t-\delta t_\text{ref}}\right)\epsilon_{rji, v}^t + z_{ri}^{t-1}\\
+          \psi^t_{rj}\epsilon^t_{rji, v} + \left(\rho - \psi^t_{rj}\beta\right)\epsilon^t_{rji,a}
+          \end{pmatrix}\label{eq:ml_stdpalif_evector}
+          \end{align}
+
+
+\end{frame}
+
+\begin{frame}
+Izhikevich:
+  \begin{align}
+      v' &= 0.04v^2 + 5v + 140 - a + I\\
+      a' &= 0.004v - 0.02a
+      \end{align}
+      \begin{align}
+      \tilde{v}^t_{rj} &= v^t_{rj} - \left(v^t_{rj} + 65\right)z^t_{rj}\\
+      \tilde{a}^t_{rj} &= a^t_{rj} + 2z^t_{rj}
+      \end{align}
+      \begin{align}
+      v^{t+1}_{rj} &= \tilde{v}^t_{rj} + 0.04\left(\tilde{v}^t_{rj}\right)^2 + 5\tilde{v}^t_{rj} + 140 - \tilde{a}^t_{rj} + I^t_{rj}\\
+      a^{t+1}_{rj} &= \tilde{a}^t_{rj} + 0.004\tilde{v}^t_{rj}-0.02\tilde{a}^t_{rj}
+      \end{align}
+      \begin{align}
+          \bm{\epsilon}^{t+1}_{rji} = \begin{pmatrix}\left(1-z^t_{rj}\right)\left(6+0.08v^t_{rj}\right)\epsilon^t_{rji, v} -\epsilon^t_{rji, a} + z_{ri}^{t-1}\\
+          0.004\left(1-z^t_{rj}\right)\epsilon^t_{rji, v} + 0.98\epsilon^t_{rji, a}
+          \end{pmatrix}\label{eq:ml_izhikevich_evector}
+          \end{align}
+          \begin{align}
+          e^t_{rji} = \psi^t_{rj}\epsilon^t_{rji, v}
+          \end{align}
 \end{frame}
 
 \end{document}
